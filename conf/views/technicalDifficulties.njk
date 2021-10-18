@@ -1,0 +1,31 @@
+{% extends "includes/layout.njk" %}
+
+{% from "macros/title.njk"                         import title %}
+
+{% block pageTitle %}
+  {{ title(messages("technicalDifficulties.title")) }}
+{% endblock %}
+
+{% block mainContent %}
+
+  <div class="govuk-main-wrapper">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+
+        <h1 class="govuk-heading-xl">
+          {{ messages("technicalDifficulties.heading") }}
+        </h1>
+
+        <p class="govuk-body">
+          {{ messages("technicalDifficulties.tryAgain") }}
+        </p>
+
+        <p class="govuk-body">{{ messages("technicalDifficulties.contact") }}
+          <a class="govuk-link" href={{ contactUrl }} target="_blank" rel="noopener noreferrer">{{ messages("technicalDifficulties.contact.link") }}</a>.
+        </p>
+
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

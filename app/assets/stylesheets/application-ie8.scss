@@ -1,0 +1,8 @@
+$govuk-assets-path: "/manage-transit-movements-unloading-remarks/assets/lib/govuk-frontend/govuk/assets/";
+$hmrc-assets-path: "/manage-transit-movements-unloading-remarks/assets/lib/hmrc-frontend/hmrc/assets/";
+
+@import "lib/govuk-frontend/govuk/all-ie8.scss";
+@import "partials/page-heading";
+@import "partials/header";
+@import "partials/shame";
+@import "partials/timeout-dialog";

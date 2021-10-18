@@ -1,0 +1,29 @@
+{% from "govuk/components/footer/macro.njk" import govukFooter %}
+
+{{ govukFooter({
+  meta: {
+    visuallyHiddenTitle: messages("footer.links.support_links"),
+    items: [
+      {
+        href: "/help/cookies",
+        text: messages("footer.links.cookies")
+      },
+      {
+        href: "/accessibility-statement/manage-transit-movements",
+        text: messages("footer.links.accessibility")
+      },
+      {
+        href: "/help/privacy",
+        text: messages("footer.links.privacy")
+      },
+      {
+        href: "/help/terms-and-conditions",
+        text: messages("footer.links.terms")
+      },
+       {
+         href: "https://www.gov.uk/help",
+         text: messages("footer.links.help")
+       }
+    ]
+  }
+}) }}

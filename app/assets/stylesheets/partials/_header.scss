@@ -1,0 +1,54 @@
+.hmrc-header.hmrc-header--with-additional-navigation {
+    .govuk-header__link--service-name {
+      float: left;
+    }
+
+    .hmrc-sign-out-nav {
+      float: right;
+    }
+
+    .hmrc-sign-out-nav__link {
+      color: govuk-colour("white");
+      font-weight: bold;
+      line-height: 1.8em;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+
+      &:focus {
+        color: #0B0C0C;
+      }
+    }
+
+    .hmrc-language-select {
+      padding-right: govuk-spacing(3);
+      float: right;
+
+      .govuk-list {
+        margin-bottom: 0;
+
+        a {
+          color: govuk-colour("white");
+
+          &:not(.govuk-header__link) {
+            color: govuk-colour("mid-grey");
+            text-decoration: none;
+          }
+        }
+      }
+
+      .govuk-header__navigation-item {
+        display: inline-block;
+        margin-right: 0;
+        border-bottom: 0;
+      }
+
+      .govuk-header__navigation-item + .govuk-header__navigation-item:before {
+        content: "|";
+        padding-right: 2px;
+        color: govuk-colour("dark-grey");
+      }
+    }
+  }

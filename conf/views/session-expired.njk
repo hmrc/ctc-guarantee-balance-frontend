@@ -1,0 +1,36 @@
+{% extends "includes/layout.njk" %}
+
+{% from "macros/title.njk"                         import title %}
+{% from "govuk/components/button/macro.njk"        import govukButton %}
+
+
+{% block pageTitle %}
+  {{ title(messages("session_expired.title")) }}
+{% endblock %}
+
+{% block mainContent %}
+
+  <div class="govuk-main-wrapper">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+
+        <h1 class="govuk-heading-xl">
+          {{ messages("session_expired.heading") }}
+        </h1>
+
+        <p class="govuk-body">
+          {{ messages("session_expired.guidance") }}
+        </p>
+
+       {{ govukButton({
+          text: messages("session_expired.button"),
+          preventDoubleClick: true,
+          href: signInUrl,
+          attributes: {id:"submit"}
+        }) }}
+
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

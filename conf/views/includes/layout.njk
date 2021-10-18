@@ -1,0 +1,64 @@
+{% extends "govuk/template.njk" %}
+{% from "macros/headingCaption.njk"               import headingCaption %}
+{% from "macros/hmrc-header/macro.njk"            import hmrcHeader %}
+{% from "hmrc/components/timeout-dialog/macro.njk"     import hmrcTimeoutDialog %}
+{% from "hmrc/components/report-technical-issue/macro.njk"  import hmrcReportTechnicalIssue %}
+{%- set assetPath = "/assets/lib/govuk-frontend/govuk/assets" -%}
+{%- set htmlLang = request.language -%}
+
+{% block head %}
+  {% block pageHead %}{% endblock %}
+   {{ hmrcTimeoutDialog({
+       timeout: config.timeoutSeconds,
+       countdown: config.countdownSeconds,
+       keepAliveUrl: routes.controllers.KeepAliveController.keepAlive(arrivalId).url,
+       signOutUrl:  config.signOutUrl
+     }) }}
+  {% include "includes/head.njk" %}
+{% endblock %}
+
+{% block header %}
+  {% macro phaseBanner() %}
+      {{ messages("phaseBanner.1") }} <a class="govuk-link" href="{{ config.betaFeedbackUnauthenticatedUrl }}">{{ messages("phaseBanner.2") }}</a> {{ messages("phaseBanner.3") }}
+  {% endmacro %}
+
+  {{ hmrcHeader({
+    homepageUrl: "/common-transit-convention-unloading-arrival",
+    serviceName: messages("site.service_name"),
+    serviceUrl: config.serviceUrl,
+    containerClasses: "govuk-width-container",
+    assetsPath: "/assets",
+    phaseBanner: {
+      show: true,
+      text: 'beta',
+      html: phaseBanner()
+    },
+    signOutHref: config.signOutUrl,
+    signInUrl: signInUrl
+  }) }}
+
+{% endblock %}
+
+{% block beforeContent %}
+{% endblock %}
+
+{% block content %}
+  {% block mainContent %}{% endblock %}
+
+ {{ hmrcReportTechnicalIssue({
+      serviceCode: config.serviceIdentifier,
+      baseUrl: config.contactHost
+    }) }}
+
+{% endblock %}
+
+{% block bodyEnd %}
+  {% block scripts %}
+    {% block pageScripts %}{% endblock %}
+    {% include "includes/scripts.njk" %}
+  {% endblock %}
+{% endblock %}
+
+{% block footer %}
+  {% include "includes/footer.njk" %}
+{% endblock %}

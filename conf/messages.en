@@ -1,0 +1,40 @@
+site.day.capitalized = Day
+site.month.capitalized = Month
+site.year.capitalized = Year
+
+site.back = Back
+site.delete = Remove
+site.edit = Change
+site.delete.hidden = Change {0}
+site.edit.hidden = Change {0}
+site.no = No
+site.yes = Yes
+site.continue = Continue
+site.confirmAndSend = Confirm and send
+site.service_name = Manage your transit movements
+site.textarea.char_limit = (Limit is {0} characters)
+site.title.suffix = - Manage your transit movements - GOV.UK
+site.youMust = You must
+
+error.title.prefix = Error:
+error.summary.title = There is a problem
+
+footer.links.support_links = Support links
+footer.links.help = Help using GOV.UK
+footer.links.cookies = Cookies
+footer.links.accessibility = Accessibility statement
+footer.links.privacy = Privacy policy
+footer.links.terms = Terms and conditions
+
+language.cymraeg = Cymraeg
+language.change.cymraeg = Newid yr iaith i'r Gymraeg
+language.english = English
+language.change.english = Change the language to English
+language.switcher = Language switcher
+
+unauthorised.title = You cannot use this service
+unauthorised.heading = You cannot use this service
+unauthorised.paragraph1 = You must have an account with an activated EORI number.
+unauthorised.paragraph2 = If you are waiting for an EORI number to be activated, you can try to
+unauthorised.signIn = sign in to HMRC services
+unauthorised.again.later = again later.
