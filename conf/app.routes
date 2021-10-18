@@ -3,6 +3,7 @@
 GET        /assets/*file                                           controllers.Assets.versioned(path="/public", file: Asset)
 
 GET        /error/cannot-use-service-no-eori                       controllers.UnauthorisedController.onPageLoad()
+GET        /keep-alive                                             controllers.KeepAliveController.keepAlive()
 
 GET        /what-do-you-want-to-do                                 controllers.WhatDoYouWantToDoController.onPageLoad()
 

@@ -11,13 +11,17 @@ site.no = No
 site.yes = Yes
 site.continue = Continue
 site.confirmAndSend = Confirm and send
-site.service_name = Manage your transit movements
+site.service_name = Guarantee Balance
 site.textarea.char_limit = (Limit is {0} characters)
-site.title.suffix = - Manage your transit movements - GOV.UK
+site.title.suffix = - Guarantee Balance - GOV.UK
 site.youMust = You must
 
 error.title.prefix = Error:
 error.summary.title = There is a problem
+
+phaseBanner.1 = This is a new service – your
+phaseBanner.2 = feedback
+phaseBanner.3 = will help us to improve it.
 
 footer.links.support_links = Support links
 footer.links.help = Help using GOV.UK

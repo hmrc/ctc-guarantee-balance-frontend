@@ -40,5 +40,16 @@ class Renderer @Inject() (appConfig: FrontendAppConfig, renderer: NunjucksRender
     renderer.render(template, ctx ++ Json.obj("config" -> config))
 
   private lazy val config: JsObject = Json.obj(
+    "betaFeedbackUnauthenticatedUrl" -> appConfig.betaFeedbackUnauthenticatedUrl,
+    "serviceIdentifier"              -> appConfig.contactFormServiceIdentifier,
+    "contactHost"                    -> appConfig.contactHost,
+    "signOutUrl"                     -> appConfig.signOutUrl,
+    "timeout"                        -> appConfig.timeoutSeconds,
+    "countdown"                      -> appConfig.countdownSeconds,
+    "trackingConsentUrl"             -> appConfig.trackingConsentUrl,
+    "gtmContainer"                   -> appConfig.gtmContainer,
+    "userResearchUrl"                -> appConfig.userResearchUrl,
+    "showPhaseBanner"                -> appConfig.showPhaseBanner,
+    "showUserResearchBanner"         -> appConfig.showUserResearchBanner
   )
 }
