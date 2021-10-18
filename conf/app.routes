@@ -4,4 +4,5 @@ GET        /assets/*file                                           controllers.A
 
 GET        /error/cannot-use-service-no-eori                       controllers.UnauthorisedController.onPageLoad()
 
+GET        /what-do-you-want-to-do                                 controllers.WhatDoYouWantToDoController.onPageLoad()
 
