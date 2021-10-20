@@ -24,13 +24,14 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import play.api.i18n.Messages
-import play.api.inject.bind
+import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.inject.{bind, Injector}
+import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
-import play.api.test.Helpers.baseApplicationBuilder.injector
-import play.api.test.{FakeRequest, Helpers}
+import play.api.test.FakeRequest
 import uk.gov.hmrc.nunjucks.NunjucksRenderer
 
 trait SpecBase
@@ -41,17 +42,26 @@ trait SpecBase
     with TryValues
     with ScalaFutures
     with IntegrationPatience
-    with MockitoSugar {
+    with MockitoSugar
+    with GuiceOneAppPerSuite {
 
   val configKey = "config"
 
-  def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")
+  val userAnswersId = "id"
 
-  implicit def messages: Messages = Helpers.stubMessages()
+  def emptyUserAnswers = UserAnswers(userAnswersId, Json.obj())
+
+  def injector: Injector = app.injector
+
+  def frontendAppConfig: FrontendAppConfig = injector.instanceOf[FrontendAppConfig]
+
+  def messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
+
+  def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")
 
   val mockRenderer: NunjucksRenderer = mock[NunjucksRenderer]
 
-  def frontendAppConfig: FrontendAppConfig = injector.instanceOf[FrontendAppConfig]
+  implicit def messages: Messages = messagesApi.preferred(fakeRequest)
 
   protected def applicationBuilder(userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()

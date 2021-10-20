@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-package controllers.actions
-
-import models.requests.IdentifierRequest
-import play.api.mvc._
+package controllers
 
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
+import play.api.i18n.I18nSupport
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import renderer.Renderer
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
-class FakeIdentifierAction @Inject() (bodyParsers: PlayBodyParsers) extends IdentifierAction {
+import scala.concurrent.ExecutionContext
 
-  override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] =
-    block(IdentifierRequest(request, "id"))
+class SessionExpiredController @Inject() (
+  val controllerComponents: MessagesControllerComponents,
+  renderer: Renderer
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport {
 
-  override def parser: BodyParser[AnyContent] =
-    bodyParsers.default
-
-  override protected def executionContext: ExecutionContext =
-    scala.concurrent.ExecutionContext.Implicits.global
+  def onPageLoad(): Action[AnyContent] = Action.async {
+    implicit request =>
+      renderer.render("session-expired.njk").map(Ok(_))
+  }
 }

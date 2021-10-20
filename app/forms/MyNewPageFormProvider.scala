@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-package controllers.actions
-
-import models.requests.IdentifierRequest
-import play.api.mvc._
+package forms
 
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
 
-class FakeIdentifierAction @Inject() (bodyParsers: PlayBodyParsers) extends IdentifierAction {
+import forms.mappings.Mappings
+import play.api.data.Form
 
-  override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] =
-    block(IdentifierRequest(request, "id"))
+class MyNewPageFormProvider @Inject() extends Mappings {
 
-  override def parser: BodyParser[AnyContent] =
-    bodyParsers.default
-
-  override protected def executionContext: ExecutionContext =
-    scala.concurrent.ExecutionContext.Implicits.global
+  def apply(): Form[String] =
+    Form(
+      "value" -> text("myNewPage.error.required")
+        .verifying(maxLength(100, "myNewPage.error.length"))
+    )
 }

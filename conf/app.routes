@@ -9,3 +9,9 @@ GET        /                                                       controllers.R
 GET        /index                                                  controllers.IndexController.onPageLoad()
 GET        /what-do-you-want-to-do                                 controllers.WhatDoYouWantToDoController.onPageLoad()
 
+GET        /this-service-has-been-reset                            controllers.SessionExpiredController.onPageLoad
+
+GET        /myNewPage                        controllers.MyNewPageController.onPageLoad(mode: Mode = NormalMode)
+POST       /myNewPage                        controllers.MyNewPageController.onSubmit(mode: Mode = NormalMode)
+GET        /changeMyNewPage                  controllers.MyNewPageController.onPageLoad(mode: Mode = CheckMode)
+POST       /changeMyNewPage                  controllers.MyNewPageController.onSubmit(mode: Mode = CheckMode)
