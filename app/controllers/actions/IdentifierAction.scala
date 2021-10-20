@@ -23,6 +23,7 @@ import models.requests.IdentifierRequest
 import play.api.mvc.Results._
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
@@ -41,9 +42,10 @@ class AuthenticatedIdentifierAction @Inject() (
 
   override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
 
-    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter
+      .fromRequestAndSession(request, request.session)
 
-    authorised().retrieve(Retrievals.internalId) {
+    authorised(EmptyPredicate).retrieve(Retrievals.internalId) {
       _.map {
         internalId => block(IdentifierRequest(request, internalId))
       }.getOrElse(throw new UnauthorizedException("Unable to retrieve internal Id"))
@@ -57,7 +59,6 @@ class AuthenticatedIdentifierAction @Inject() (
 }
 
 class SessionIdentifierAction @Inject() (
-  config: FrontendAppConfig,
   val parser: BodyParsers.Default
 )(implicit val executionContext: ExecutionContext)
     extends IdentifierAction {
@@ -70,7 +71,7 @@ class SessionIdentifierAction @Inject() (
       case Some(session) =>
         block(IdentifierRequest(request, session.value))
       case None =>
-        Future.successful(Redirect(routes.IndexController.onPageLoad())) // TODO replace with session expired
+        Future.successful(Redirect(routes.UnauthorisedController.onPageLoad())) // TODO replace with session expired
     }
   }
 }

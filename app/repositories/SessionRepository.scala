@@ -18,16 +18,14 @@ package repositories
 
 import models.UserAnswers
 import play.api.libs.json._
-
 import reactivemongo.api.WriteConcern
 import reactivemongo.play.json.collection.Helpers.idWrites
 
 import java.time.LocalDateTime
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-@Singleton
-private[repositories] class DefaultSessionRepository @Inject() (
+class DefaultSessionRepository @Inject() (
   sessionCollection: SessionCollection
 )(implicit ec: ExecutionContext)
     extends SessionRepository {
