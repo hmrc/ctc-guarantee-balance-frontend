@@ -21,18 +21,18 @@ object AppDependencies {
   )
 
   val test: Seq[ModuleID] = Seq(
-    "com.vladsch.flexmark"      %  "flexmark-all"           % "0.35.10",
-    "org.scalatest"             %% "scalatest"              % "3.2.9",
-    "org.scalatestplus.play"    %% "scalatestplus-play"     % "5.1.0",
-    "org.scalatestplus"         %% "scalatestplus-mockito"  % "1.0.0-M2",
-    "org.scalatestplus"         %% "scalacheck-1-15"        % "3.2.9.0",
-    "org.pegdown"               % "pegdown"                 % "1.6.0",
-    "org.jsoup"                 % "jsoup"                   % "1.14.2",
-    "com.typesafe.play"         %% "play-test"              % PlayVersion.current,
-    "org.mockito"               % "mockito-all"             % "1.10.19",
-    "org.scalacheck"            %% "scalacheck"             % "1.15.0",
-    "com.github.tomakehurst"    %  "wiremock-standalone"    % "2.27.2",
-    "wolfendale"                %% "scalacheck-gen-regexp"  % "0.1.2"
+    "com.vladsch.flexmark"      %  "flexmark-all"             % "0.35.10",
+    "org.scalatest"             %% "scalatest"                % "3.2.9",
+    "org.scalatestplus"         %% "mockito-3-2"              % "3.1.2.0",
+    "org.scalatestplus.play"    %% "scalatestplus-play"       % "5.1.0",
+    "org.scalatestplus"         %% "scalatestplus-scalacheck" % "3.1.0.0-RC2",
+    "org.pegdown"               % "pegdown"                   % "1.6.0",
+    "org.jsoup"                 % "jsoup"                     % "1.14.2",
+    "com.typesafe.play"         %% "play-test"                % PlayVersion.current,
+    "org.mockito"               % "mockito-all"               % "1.10.19",
+    "org.scalacheck"            %% "scalacheck"               % "1.15.0",
+    "com.github.tomakehurst"    %  "wiremock-standalone"      % "2.27.2",
+    "wolfendale"                %% "scalacheck-gen-regexp"    % "0.1.2"
 
   ).map(_ % "test, it")
 

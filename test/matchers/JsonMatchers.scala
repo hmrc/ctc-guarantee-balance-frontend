@@ -13,8 +13,8 @@ trait JsonMatchers {
 
       MatchResult(
         mismatches.isEmpty,
-        s"""\$left did not match for key(s) \${mismatches.mkString(", ")}""",
-        s"""\$left matched for key(s) \${json.keys.mkString(", ")}"""
+        s"""$left did not match for key(s) ${mismatches.mkString(", ")}""",
+        s"""$left matched for key(s) ${json.keys.mkString(", ")}"""
       )
     }
   }
