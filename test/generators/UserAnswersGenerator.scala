@@ -39,7 +39,7 @@ trait UserAnswersGenerator extends TryValues {
         id <- nonEmptyString
         data <- generators match {
           case Nil => Gen.const(Map[QuestionPage[_], JsValue]())
-          case _ => Gen.mapOf(oneOf(generators))
+          case _   => Gen.mapOf(oneOf(generators))
         }
       } yield UserAnswers(
         id = id,
