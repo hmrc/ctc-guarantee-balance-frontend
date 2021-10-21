@@ -22,7 +22,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import play.api.data.validation.{Invalid, Valid}
+import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
 
 import java.time.LocalDate
 
@@ -48,6 +48,37 @@ class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyC
     "must return Invalid for the first error when both constraints fail" in {
       val result = firstError(maxLength(-1, "error.length"), regexp("""^\w+$""", "error.regexp"))("")
       result mustEqual Invalid("error.length", -1)
+    }
+  }
+
+  "inRange" - {
+
+    "must return Valid when value is in range" in {
+      val result: ValidationResult = inRange(1, 10, "error.range").apply(5)
+
+      result mustEqual Valid
+    }
+
+    "must return Invalid when value is not in range" in {
+      val result: ValidationResult = inRange(1, 10, "error.range").apply(11)
+
+      result mustEqual Invalid("error.range", 1, 10)
+    }
+
+  }
+
+  "nonEmptySet" - {
+
+    "must return Valid if set is non empty" in {
+      val result: ValidationResult = nonEmptySet("error.nonEmptySet").apply(Set("value1", "value2"))
+
+      result mustEqual Valid
+    }
+
+    "must return InValid if set is empty" in {
+      val result: ValidationResult = nonEmptySet("error.nonEmptySet").apply(Set.empty[String])
+
+      result mustEqual Invalid("error.nonEmptySet")
     }
   }
 

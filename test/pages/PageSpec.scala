@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-package utils
+package pages
 
-import java.time.format.DateTimeFormatter
+import base.SpecBase
 
-import controllers.routes
-import models.{CheckMode, UserAnswers}
-import pages._
-import play.api.i18n.Messages
-import uk.gov.hmrc.viewmodels._
-import uk.gov.hmrc.viewmodels.SummaryList._
-import uk.gov.hmrc.viewmodels.Text.Literal
+class PageSpec extends SpecBase {
 
-class CheckYourAnswersHelper(userAnswers: UserAnswers)(implicit messages: Messages) {}
+  "Pages" - {
+
+    "toString" - {
+
+      "must return page as string" in {
+
+        case object TestPage extends Page
+
+        Page.toString(TestPage) mustBe "TestPage"
+      }
+    }
+  }
+}

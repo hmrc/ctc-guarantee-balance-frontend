@@ -18,18 +18,23 @@ package controllers.actions
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import com.google.inject.Inject
+import config.FrontendAppConfig
 import controllers.routes
+import org.mockito.Matchers.any
+import org.mockito.Mockito.when
 import play.api.mvc.{BodyParsers, Results}
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
+
+  val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
   class Harness(authAction: IdentifierAction) {
 
@@ -39,6 +44,44 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
   }
 
   "Auth Action" - {
+
+    "when the user has logged in" - {
+
+      "must return OK when internal id is available" in {
+
+        when(mockAuthConnector.authorise[Option[String]](any(), any())(any(), any()))
+          .thenReturn(Future.successful(Some("internalId")))
+
+        val bodyParsers       = app.injector.instanceOf[BodyParsers.Default]
+        val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
+
+        val authAction = new AuthenticatedIdentifierAction(mockAuthConnector, frontendAppConfig, bodyParsers)
+
+        val controller = new Harness(authAction)
+        val result     = controller.onPageLoad()(fakeRequest)
+
+        status(result) mustBe OK
+      }
+
+      "must return exception when internalId is unavailable " in {
+
+        when(mockAuthConnector.authorise[Option[String]](any(), any())(any(), any()))
+          .thenReturn(Future.successful(None))
+
+        val bodyParsers       = app.injector.instanceOf[BodyParsers.Default]
+        val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
+
+        val authAction = new AuthenticatedIdentifierAction(mockAuthConnector, frontendAppConfig, bodyParsers)
+
+        val controller = new Harness(authAction)
+        val result     = controller.onPageLoad()(fakeRequest)
+
+        whenReady(result.failed) {
+          result =>
+            result mustBe an[UnauthorizedException]
+        }
+      }
+    }
 
     "when the user hasn't logged in" - {
 
@@ -69,22 +112,6 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
         status(result) mustBe SEE_OTHER
 
         redirectLocation(result).get must startWith(frontendAppConfig.loginUrl)
-      }
-    }
-
-    "when the user doesn't have sufficient enrolments" - {
-
-      "must redirect the user to the unauthorised page" in {
-
-        val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
-
-        val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new InsufficientEnrolments), frontendAppConfig, bodyParsers)
-        val controller = new Harness(authAction)
-        val result     = controller.onPageLoad()(fakeRequest)
-
-        status(result) mustBe SEE_OTHER
-
-        redirectLocation(result) mustBe Some(routes.UnauthorisedController.onPageLoad().url)
       }
     }
 
