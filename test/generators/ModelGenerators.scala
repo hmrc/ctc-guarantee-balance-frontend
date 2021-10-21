@@ -16,4 +16,9 @@
 
 package generators
 
-trait ModelGenerators {}
+trait ModelGenerators {
+
+
+
+  
+}
