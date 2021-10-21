@@ -16,7 +16,7 @@
 
 package controllers
 
-import base.SpecBase
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import org.mockito.Matchers.any
 import org.mockito.Mockito.when
 import play.api.test.FakeRequest
@@ -25,7 +25,7 @@ import play.twirl.api.Html
 
 import scala.concurrent.Future
 
-class IndexControllerSpec extends SpecBase {
+class IndexControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   "return OK and the correct view for a GET" in {
 

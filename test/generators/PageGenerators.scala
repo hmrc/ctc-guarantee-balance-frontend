@@ -19,8 +19,4 @@ package generators
 import org.scalacheck.Arbitrary
 import pages._
 
-trait PageGenerators {
-
-  implicit lazy val arbitraryMyNewPagePage: Arbitrary[MyNewPagePage.type] =
-    Arbitrary(MyNewPagePage)
-}
+trait PageGenerators {}

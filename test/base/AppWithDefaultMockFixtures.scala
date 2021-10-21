@@ -16,6 +16,8 @@
 
 package base
 
+import controllers.actions._
+import models.UserAnswers
 import org.mockito.Mockito
 import org.scalatest.{BeforeAndAfterEach, TestSuite}
 import org.scalatestplus.mockito.MockitoSugar
@@ -24,8 +26,8 @@ import play.api.Application
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.Call
 import play.api.test.Helpers
+import repositories.SessionRepository
 import uk.gov.hmrc.nunjucks.NunjucksRenderer
 
 trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerSuite with GuiceFakeApplicationFactory with MockitoSugar {
@@ -33,21 +35,29 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
 
   override def beforeEach(): Unit =
     Mockito.reset(
-      mockRenderer
+      mockRenderer,
+      mockDataRetrievalAction,
+      mockSessionRepository
     )
 
-  final val mockRenderer: NunjucksRenderer = mock[NunjucksRenderer]
+  val mockRenderer: NunjucksRenderer = mock[NunjucksRenderer]
+
+  val mockDataRetrievalAction: DataRetrievalAction = mock[DataRetrievalAction]
+
+  val mockSessionRepository: SessionRepository = mock[SessionRepository]
 
   final override def fakeApplication(): Application =
-    guiceApplicationBuilder()
+    applicationBuilder()
       .build()
 
-  protected val onwardRoute: Call = Call("GET", "/foo")
-
-  def guiceApplicationBuilder(): GuiceApplicationBuilder =
+  protected def applicationBuilder(userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .overrides(
+        bind[DataRequiredAction].to[DataRequiredActionImpl],
+        bind[IdentifierAction].to[FakeIdentifierAction],
+        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers)),
         bind[NunjucksRenderer].toInstance(mockRenderer),
-        bind[MessagesApi].toInstance(Helpers.stubMessagesApi())
+        bind[MessagesApi].toInstance(Helpers.stubMessagesApi()),
+        bind[SessionRepository].toInstance(mockSessionRepository)
       )
 }

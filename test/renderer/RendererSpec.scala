@@ -16,7 +16,7 @@
 
 package renderer
 
-import base.SpecBase
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{times, verify, when}
@@ -26,7 +26,7 @@ import play.twirl.api.Html
 
 import scala.concurrent.Future
 
-class RendererSpec extends SpecBase {
+class RendererSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   implicit private val request: FakeRequest[_] = FakeRequest()
 

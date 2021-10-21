@@ -16,7 +16,7 @@
 
 package controllers
 
-import base.SpecBase
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{times, verify, when}
@@ -26,7 +26,7 @@ import play.twirl.api.Html
 
 import scala.concurrent.Future
 
-class UnauthorisedControllerSpec extends SpecBase {
+class UnauthorisedControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   "Unauthorised Controller" - {
 
