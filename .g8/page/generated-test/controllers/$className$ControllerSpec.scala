@@ -1,5 +1,6 @@
 package controllers
 
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import base.SpecBase
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.any
@@ -11,7 +12,7 @@ import play.twirl.api.Html
 
 import scala.concurrent.Future
 
-class $className$ControllerSpec extends SpecBase with MockitoSugar {
+class $className$ControllerSpec extends SpecBase with MockitoSugar with AppWithDefaultMockFixtures {
 
   "$className$ Controller" - {
 
