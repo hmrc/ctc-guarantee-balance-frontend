@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
-package generators
+package pages
 
-trait ModelGenerators {}
+import pages.behaviours.PageBehaviours
+
+class TestPagePageSpec extends PageBehaviours {
+
+  "TestPagePage" - {
+
+    beRetrievable[String](TestPagePage)
+
+    beSettable[String](TestPagePage)
+
+    beRemovable[String](TestPagePage)
+  }
+}

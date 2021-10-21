@@ -60,3 +60,9 @@ technicalDifficulties.heading = Sorry, there is a problem with the service
 technicalDifficulties.tryAgain = Try again later.
 technicalDifficulties.contact = You can
 technicalDifficulties.contact.link = contact the New Computerised Transit System helpdesk if you need to speak to someone about transit movements (opens in a new tab).
+
+testPage.title = testPage
+testPage.heading = testPage
+testPage.checkYourAnswersLabel = testPage
+testPage.error.required = Enter testPage
+testPage.error.length = TestPage must be 100 characters or less

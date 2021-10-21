@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
-package generators
+package pages
 
-trait ModelGenerators {}
+import play.api.libs.json.JsPath
+
+case object TestPagePage extends QuestionPage[String] {
+
+  override def path: JsPath = JsPath \ toString
+
+  override def toString: String = "testPage"
+}

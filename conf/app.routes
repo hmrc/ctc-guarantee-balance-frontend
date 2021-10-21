@@ -10,3 +10,8 @@ GET        /index                                                  controllers.I
 GET        /what-do-you-want-to-do                                 controllers.WhatDoYouWantToDoController.onPageLoad()
 
 GET        /this-service-has-been-reset                            controllers.SessionExpiredController.onPageLoad()
+
+GET        /testPage                        controllers.TestPageController.onPageLoad(mode: Mode = NormalMode)
+POST       /testPage                        controllers.TestPageController.onSubmit(mode: Mode = NormalMode)
+GET        /changeTestPage                  controllers.TestPageController.onPageLoad(mode: Mode = CheckMode)
+POST       /changeTestPage                  controllers.TestPageController.onSubmit(mode: Mode = CheckMode)

@@ -29,6 +29,21 @@ import uk.gov.hmrc.viewmodels.Text.Literal
 
 class CheckYourAnswersHelper(userAnswers: UserAnswers)(implicit messages: Messages) {
 
+  def testPage: Option[Row] = userAnswers.get(TestPagePage) map {
+    answer =>
+      Row(
+        key = Key(msg"testPage.checkYourAnswersLabel", classes = Seq("govuk-!-width-one-half")),
+        value = Value(lit"$answer"),
+        actions = List(
+          Action(
+            content = msg"site.edit",
+            href = routes.TestPageController.onPageLoad(CheckMode).url,
+            visuallyHiddenText = Some(msg"site.edit.hidden".withArgs(msg"testPage.checkYourAnswersLabel"))
+          )
+        )
+      )
+  }
+
   private def yesOrNo(answer: Boolean): Content =
     if (answer) {
       msg"site.yes"
