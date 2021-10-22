@@ -17,7 +17,6 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{times, verify, when}
