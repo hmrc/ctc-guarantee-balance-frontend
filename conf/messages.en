@@ -66,3 +66,11 @@ testPage.heading = testPage
 testPage.checkYourAnswersLabel = testPage
 testPage.error.required = Enter testPage
 testPage.error.length = TestPage must be 100 characters or less
+
+start.title = Check your guarantee balance
+start.heading = Check your guarantee balance
+start.subHeading = Before you start
+start.paragraph = You will need your:
+start.bullet1 = EORI number
+start.bullet2 = guarantee reference number
+start.button = Start now

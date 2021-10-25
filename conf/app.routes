@@ -15,3 +15,5 @@ GET        /testPage                        controllers.TestPageController.onPag
 POST       /testPage                        controllers.TestPageController.onSubmit(mode: Mode = NormalMode)
 GET        /changeTestPage                  controllers.TestPageController.onPageLoad(mode: Mode = CheckMode)
 POST       /changeTestPage                  controllers.TestPageController.onSubmit(mode: Mode = CheckMode)
+
+GET        /start                       controllers.StartController.onPageLoad()

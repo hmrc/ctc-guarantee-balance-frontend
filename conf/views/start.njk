@@ -1,0 +1,41 @@
+{% extends "includes/layout.njk" %}
+{% from "govuk/components/button/macro.njk"        import govukButton %}
+
+{% from "macros/title.njk"                         import title %}
+
+{% block pageTitle %}
+  {{ title(messages("start.title")) }}
+{% endblock %}
+
+{% block mainContent %}
+
+  <div class="govuk-main-wrapper">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+
+        <h1 class="govuk-heading-xl">
+          {{ messages("start.heading") }}
+        </h1>
+
+        <h class="govuk-heading-l">
+          {{ messages("start.subHeading") }}
+        </h2>
+
+        <p class="govuk-body">
+            <div class="govuk-body">{{ messages("start.paragraph") }}</div>
+            <ul class="govuk-list govuk-list--bullet">
+                <li> {{ messages("start.bullet1") }} </li>
+                <li> {{ messages("start.bullet2") }} </li>
+         </p>
+
+          {{ govukButton({
+                            text: messages("start.button"),
+                            href: "#",
+                            isStartButton: true
+                          }) }}
+
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
