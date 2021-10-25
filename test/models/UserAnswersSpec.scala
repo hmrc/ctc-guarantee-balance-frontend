@@ -30,31 +30,46 @@ class UserAnswersSpec extends SpecBase {
       override def path: JsPath = JsPath \ "foo"
     }
 
-    "must get data" in {
+    "get" - {
 
-      val userAnswers = UserAnswers("eoriNumber", JsObject(Map("foo" -> JsString("bar"))))
+      "must return data when defined" in {
 
-      userAnswers.get(TestPage) mustBe Some("bar")
+        val userAnswers = UserAnswers("eoriNumber", JsObject(Map("foo" -> JsString("bar"))))
+
+        userAnswers.get(TestPage) mustBe Some("bar")
+      }
+
+      "must return None when not defined" in {
+
+        val userAnswers = UserAnswers("eoriNumber")
+
+        userAnswers.get(TestPage) mustBe None
+      }
+
     }
 
-    "must set data" in {
+    "set" - {
 
-      val userAnswers = UserAnswers("eoriNumber")
+      "must set data" in {
 
-      val expectedUserAnswers = UserAnswers("eoriNumber", JsObject(Map("foo" -> JsString("bar"))))
+        val userAnswers = UserAnswers("eoriNumber")
 
-      userAnswers.set(TestPage, "bar") mustBe Success(expectedUserAnswers)
+        val expectedUserAnswers = UserAnswers("eoriNumber", JsObject(Map("foo" -> JsString("bar"))))
 
+        userAnswers.set(TestPage, "bar") mustBe Success(expectedUserAnswers)
+      }
     }
 
-    "must remove data" in {
+    "remove" - {
 
-      val userAnswers = UserAnswers("eoriNumber", JsObject(Map("foo" -> JsString("bar"))))
+      "must remove data" in {
 
-      val expectedUserAnswers = UserAnswers("eoriNumber")
+        val userAnswers = UserAnswers("eoriNumber", JsObject(Map("foo" -> JsString("bar"))))
 
-      userAnswers.remove(TestPage) mustBe Success(expectedUserAnswers)
+        val expectedUserAnswers = UserAnswers("eoriNumber")
+
+        userAnswers.remove(TestPage) mustBe Success(expectedUserAnswers)
+      }
     }
   }
-
 }
