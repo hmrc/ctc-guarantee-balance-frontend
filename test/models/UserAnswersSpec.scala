@@ -45,7 +45,6 @@ class UserAnswersSpec extends SpecBase {
 
         userAnswers.get(TestPage) mustBe None
       }
-
     }
 
     "set" - {
