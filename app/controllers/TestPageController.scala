@@ -18,8 +18,7 @@ package controllers
 
 import controllers.actions._
 import forms.TestPageFormProvider
-import javax.inject.Inject
-import models.Mode
+import models.{Mode, UserAnswers}
 import navigation.Navigator
 import pages.TestPagePage
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -30,6 +29,7 @@ import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class TestPageController @Inject() (
@@ -38,7 +38,6 @@ class TestPageController @Inject() (
   navigator: Navigator,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
-  requireData: DataRequiredAction,
   formProvider: TestPageFormProvider,
   val controllerComponents: MessagesControllerComponents,
   renderer: Renderer
@@ -59,7 +58,7 @@ class TestPageController @Inject() (
       renderer.render("testPage.njk", json).map(Ok(_))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
       form
         .bindFromRequest()
@@ -75,9 +74,19 @@ class TestPageController @Inject() (
           },
           value =>
             for {
-              updatedAnswers <- Future.fromTry(request.userAnswers.set(TestPagePage, value))
+              uaSetup        <- getOrCreateUserAnswers(request.eoriNumber)
+              updatedAnswers <- Future.fromTry(uaSetup.set(TestPagePage, value))
               _              <- sessionRepository.set(updatedAnswers)
             } yield Redirect(navigator.nextPage(TestPagePage, mode, updatedAnswers))
         )
+  }
+
+  def getOrCreateUserAnswers(eoriNumber: String): Future[UserAnswers] = {
+    val initialUserAnswers = UserAnswers(id = eoriNumber)
+
+    sessionRepository.get(id = eoriNumber) map {
+      userAnswers =>
+        userAnswers getOrElse initialUserAnswers
+    }
   }
 }
