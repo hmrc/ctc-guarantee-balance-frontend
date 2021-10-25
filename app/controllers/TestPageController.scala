@@ -49,15 +49,10 @@ class TestPageController @Inject() (
 
   private val form = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
-      val preparedForm = request.userAnswers.get(TestPagePage) match {
-        case None        => form
-        case Some(value) => form.fill(value)
-      }
-
       val json = Json.obj(
-        "form" -> preparedForm,
+        "form" -> form,
         "mode" -> mode
       )
 
