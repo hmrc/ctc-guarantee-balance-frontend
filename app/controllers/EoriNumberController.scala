@@ -53,7 +53,7 @@ class EoriNumberController @Inject() (
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
     implicit request: OptionalDataRequest[AnyContent] =>
       val getEoriNumber: Option[String] = request.userAnswers.flatMap(
-        x => x.get(EoriNumberPage)
+        userAnswers => userAnswers.get(EoriNumberPage)
       )
       val preparedForm = getEoriNumber match {
         case Some(value) => form.fill(value)
