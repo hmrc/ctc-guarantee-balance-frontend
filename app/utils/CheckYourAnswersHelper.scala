@@ -16,9 +16,8 @@
 
 package utils
 
-import java.time.format.DateTimeFormatter
-
 import controllers.routes
+import controllers.routes._
 import models.{CheckMode, UserAnswers}
 import pages._
 import play.api.i18n.Messages
@@ -26,4 +25,20 @@ import uk.gov.hmrc.viewmodels._
 import uk.gov.hmrc.viewmodels.SummaryList._
 import uk.gov.hmrc.viewmodels.Text.Literal
 
-class CheckYourAnswersHelper(userAnswers: UserAnswers)(implicit messages: Messages) {}
+class CheckYourAnswersHelper(userAnswers: UserAnswers)(implicit messages: Messages) {
+
+  def eoriNumber: Option[Row] = userAnswers.get(EoriNumberPage) map {
+    answer =>
+      Row(
+        key = Key(msg"eoriNumber.checkYourAnswersLabel", classes = Seq("govuk-!-width-one-half")),
+        value = Value(lit"$answer"),
+        actions = List(
+          Action(
+            content = msg"site.edit",
+            href = routes.EoriNumberController.onPageLoad(CheckMode).url,
+            visuallyHiddenText = Some(msg"site.edit.hidden".withArgs(msg"eoriNumber.checkYourAnswersLabel"))
+          )
+        )
+      )
+  }
+}

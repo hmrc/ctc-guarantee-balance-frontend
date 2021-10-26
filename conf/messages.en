@@ -66,3 +66,9 @@ testPage.heading = testPage
 testPage.checkYourAnswersLabel = testPage
 testPage.error.required = Enter testPage
 testPage.error.length = TestPage must be 100 characters or less
+
+eoriNumber.title = What is your EORI number?
+eoriNumber.heading = What is your EORI number?
+eoriNumber.checkYourAnswersLabel = EORI number
+eoriNumber.error.required = Enter your EORI Number
+eoriNumber.error.length = EORI number must be 17 characters or less
