@@ -16,16 +16,25 @@
 
 package forms
 
-import javax.inject.Inject
+import forms.Constants.{alphaNumericRegex, eoriNumberRegex, maxLengthEoriNumber}
 
+import javax.inject.Inject
 import forms.mappings.Mappings
 import play.api.data.Form
+
+import scala.util.matching.Regex
 
 class EoriNumberFormProvider @Inject() extends Mappings {
 
   def apply(): Form[String] =
     Form(
       "value" -> text("eoriNumber.error.required")
-        .verifying(maxLength(17, "eoriNumber.error.length"))
+        .verifying(
+          forms.StopOnFirstFail[String](
+            maxLength(maxLengthEoriNumber, "eoriNumber.error.length"),
+            regexp(alphaNumericRegex, "eoriNumber.error.invalidCharacters"),
+            regexp(eoriNumberRegex, "eoriNumber.error.invalidFormat")
+          )
+        )
     )
 }

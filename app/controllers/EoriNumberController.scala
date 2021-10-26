@@ -60,7 +60,7 @@ class EoriNumberController @Inject() (
       renderer.render("eoriNumber.njk", json).map(Ok(_))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
       form
         .bindFromRequest()
@@ -76,7 +76,8 @@ class EoriNumberController @Inject() (
           },
           value =>
             for {
-              updatedAnswers <- Future.fromTry(request.userAnswers.set(EoriNumberPage, value))
+              uaSetup        <- getOrCreateUserAnswers(request.eoriNumber)
+              updatedAnswers <- Future.fromTry(uaSetup.set(EoriNumberPage, value))
               _              <- sessionRepository.set(updatedAnswers)
             } yield Redirect(navigator.nextPage(EoriNumberPage, mode, updatedAnswers))
         )
