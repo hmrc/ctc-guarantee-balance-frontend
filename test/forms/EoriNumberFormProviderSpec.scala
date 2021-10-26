@@ -16,18 +16,17 @@
 
 package forms
 
-import forms.Constants.{eoriNumberRegex, maxLengthEoriNumber}
+import forms.Constants.{alphaNumericRegex, eoriNumberRegex, maxLengthEoriNumber}
 import forms.behaviours.StringFieldBehaviours
-import org.scalacheck.Gen
-import play.api.data.{Field, FormError}
+import play.api.data.FormError
 import wolfendale.scalacheck.regexp.RegexpGen
 
 class EoriNumberFormProviderSpec extends StringFieldBehaviours {
 
-  val requiredKey      = "eoriNumber.error.required"
-  val lengthKey        = "eoriNumber.error.length"
-  val invalidKey       = "eoriNumber.error.invalidCharacters"
-  val invalidFormatKey = "eoriNumber.error.invalidFormat"
+  val requiredKey          = "eoriNumber.error.required"
+  val lengthKey            = "eoriNumber.error.length"
+  val invalidCharactersKey = "eoriNumber.error.invalidCharacters"
+  val invalidFormatKey     = "eoriNumber.error.invalidFormat"
 
   val form = new EoriNumberFormProvider()()
 
@@ -54,18 +53,21 @@ class EoriNumberFormProviderSpec extends StringFieldBehaviours {
       requiredError = FormError(fieldName, requiredKey)
     )
 
-    behave like fieldWithInvalidCharacters(form, fieldName, invalidKey, maxLengthEoriNumber)
+    behave like fieldWithInvalidCharacters(
+      form,
+      fieldName,
+      alphaNumericRegex,
+      stringsOfLength(maxLengthEoriNumber),
+      invalidCharactersKey
+    )
 
-    "must not bind strings that do not match the eori number format regex" in {
-
-      val expectedError          = FormError(fieldName, invalidFormatKey, Seq(eoriNumberRegex))
-      val generator: Gen[String] = RegexpGen.from(s"^[0-9]{2}[a-zA-Z0-9]{15}")
-      forAll(generator) {
-        invalidString =>
-          val result: Field = form.bind(Map(fieldName -> invalidString)).apply(fieldName)
-          result.errors must contain(expectedError)
-      }
-    }
+    behave like fieldWithInvalidCharacters(
+      form,
+      fieldName,
+      eoriNumberRegex,
+      RegexpGen.from(alphaNumericRegex.replace("*", s"{$maxLengthEoriNumber}")),
+      invalidFormatKey
+    )
 
   }
 }

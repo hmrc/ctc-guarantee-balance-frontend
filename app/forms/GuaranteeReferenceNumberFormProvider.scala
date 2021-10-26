@@ -16,8 +16,9 @@
 
 package forms
 
-import javax.inject.Inject
+import forms.Constants.alphaNumericRegex
 
+import javax.inject.Inject
 import forms.mappings.Mappings
 import play.api.data.Form
 
@@ -26,6 +27,11 @@ class GuaranteeReferenceNumberFormProvider @Inject() extends Mappings {
   def apply(): Form[String] =
     Form(
       "value" -> text("guaranteeReferenceNumber.error.required")
-        .verifying(maxLength(24, "guaranteeReferenceNumber.error.length"))
+        .verifying(
+          forms.StopOnFirstFail[String](
+            maxLength(24, "guaranteeReferenceNumber.error.length"),
+            regexp(alphaNumericRegex, "guaranteeReferenceNumber.error.invalid")
+          )
+        )
     )
 }

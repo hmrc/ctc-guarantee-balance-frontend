@@ -17,12 +17,10 @@
 package forms
 
 import forms.Constants.{alphaNumericRegex, eoriNumberRegex, maxLengthEoriNumber}
-
-import javax.inject.Inject
 import forms.mappings.Mappings
 import play.api.data.Form
 
-import scala.util.matching.Regex
+import javax.inject.Inject
 
 class EoriNumberFormProvider @Inject() extends Mappings {
 
