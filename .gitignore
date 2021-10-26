@@ -32,7 +32,7 @@ bin
 /*.iml
 /*.ipr
 *.iws
-migrations
+/migrations
 .bloop/
 .bsp
 .metals/

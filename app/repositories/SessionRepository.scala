@@ -16,7 +16,7 @@
 
 package repositories
 
-import models.UserAnswers
+import models.{MongoDateTimeFormats, UserAnswers}
 import play.api.libs.json._
 import reactivemongo.api.WriteConcern
 import reactivemongo.play.json.collection.Helpers.idWrites
@@ -31,6 +31,8 @@ class DefaultSessionRepository @Inject() (
     extends SessionRepository {
 
   override def get(id: String): Future[Option[UserAnswers]] = {
+
+    implicit val dateWriter: Writes[LocalDateTime] = MongoDateTimeFormats.localDateTimeWrite
 
     val selector = Json.obj(
       "_id" -> id
@@ -63,6 +65,8 @@ class DefaultSessionRepository @Inject() (
   }
 
   override def set(userAnswers: UserAnswers): Future[Boolean] = {
+
+    implicit val dateWriter: Writes[LocalDateTime] = MongoDateTimeFormats.localDateTimeWrite
 
     val selector = Json.obj(
       "_id" -> userAnswers.id

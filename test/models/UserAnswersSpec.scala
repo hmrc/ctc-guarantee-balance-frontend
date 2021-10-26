@@ -20,8 +20,6 @@ import base.SpecBase
 import pages.QuestionPage
 import play.api.libs.json.{JsObject, JsPath, JsString}
 
-import scala.util.Success
-
 class UserAnswersSpec extends SpecBase {
 
   "UserAnswers" - {
@@ -55,7 +53,9 @@ class UserAnswersSpec extends SpecBase {
 
         val expectedUserAnswers = UserAnswers("eoriNumber", JsObject(Map("foo" -> JsString("bar"))))
 
-        userAnswers.set(TestPage, "bar") mustBe Success(expectedUserAnswers)
+        val result = userAnswers.set(TestPage, "bar").toOption.value.data
+
+        result mustBe expectedUserAnswers.data
       }
     }
 
@@ -67,7 +67,9 @@ class UserAnswersSpec extends SpecBase {
 
         val expectedUserAnswers = UserAnswers("eoriNumber")
 
-        userAnswers.remove(TestPage) mustBe Success(expectedUserAnswers)
+        val result = userAnswers.remove(TestPage).toOption.value.data
+
+        result mustBe expectedUserAnswers.data
       }
     }
   }
