@@ -17,13 +17,12 @@
 package utils
 
 import controllers.routes
-import models.{CheckMode, UserAnswers}
+import models.{Mode, UserAnswers}
 import pages._
-import play.api.i18n.Messages
 import uk.gov.hmrc.viewmodels.SummaryList._
 import uk.gov.hmrc.viewmodels._
 
-class CheckYourAnswersHelper(userAnswers: UserAnswers)(implicit messages: Messages) {
+class CheckYourAnswersHelper(userAnswers: UserAnswers, mode: Mode) {
 
   def eoriNumber: Option[Row] = userAnswers.get(EoriNumberPage) map {
     answer =>
@@ -33,10 +32,26 @@ class CheckYourAnswersHelper(userAnswers: UserAnswers)(implicit messages: Messag
         actions = List(
           Action(
             content = msg"site.edit",
-            href = routes.EoriNumberController.onPageLoad(CheckMode).url,
-            visuallyHiddenText = Some(msg"site.edit.hidden".withArgs(msg"eoriNumber.checkYourAnswersLabel"))
+            href = routes.EoriNumberController.onPageLoad(mode).url,
+            visuallyHiddenText = Some(msg"eoriNumber.checkYourAnswersLabel")
           )
         )
       )
   }
+
+  def guaranteeReferenceNumber: Option[Row] = userAnswers.get(GuaranteeReferenceNumberPage) map {
+    answer =>
+      Row(
+        key = Key(msg"guaranteeReferenceNumber.checkYourAnswersLabel", classes = Seq("govuk-!-width-one-half")),
+        value = Value(lit"$answer"),
+        actions = List(
+          Action(
+            content = msg"site.edit",
+            href = routes.GuaranteeReferenceNumberController.onPageLoad(mode).url,
+            visuallyHiddenText = Some(msg"guaranteeReferenceNumber.checkYourAnswersLabel")
+          )
+        )
+      )
+  }
+
 }

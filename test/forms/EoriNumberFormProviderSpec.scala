@@ -35,38 +35,38 @@ class EoriNumberFormProviderSpec extends StringFieldBehaviours {
     val fieldName = "value"
 
     behave like fieldThatBindsValidData(
-      form,
-      fieldName,
-      stringsWithMaxLength(maxEoriNumberLength)
+      form = form,
+      fieldName = fieldName,
+      validDataGenerator = stringsWithMaxLength(maxEoriNumberLength)
     )
 
     behave like fieldWithMaxLength(
-      form,
-      fieldName,
+      form = form,
+      fieldName = fieldName,
       maxLength = maxEoriNumberLength,
       lengthError = FormError(fieldName, lengthKey, Seq(maxEoriNumberLength))
     )
 
     behave like mandatoryField(
-      form,
-      fieldName,
+      form = form,
+      fieldName = fieldName,
       requiredError = FormError(fieldName, requiredKey)
     )
 
     behave like fieldWithInvalidCharacters(
-      form,
-      fieldName,
-      alphaNumericRegex,
-      stringsOfLength(maxEoriNumberLength),
-      invalidCharactersKey
+      form = form,
+      fieldName = fieldName,
+      regex = alphaNumericRegex,
+      gen = stringsOfLength(maxEoriNumberLength),
+      invalidKey = invalidCharactersKey
     )
 
     behave like fieldWithInvalidCharacters(
-      form,
-      fieldName,
-      eoriNumberRegex,
-      RegexpGen.from(alphaNumericRegex.replace("*", s"{$maxEoriNumberLength}")),
-      invalidFormatKey
+      form = form,
+      fieldName = fieldName,
+      regex = eoriNumberRegex,
+      gen = RegexpGen.from(alphaNumericRegex.replace("*", s"{$maxEoriNumberLength}")),
+      invalidKey = invalidFormatKey
     )
 
   }

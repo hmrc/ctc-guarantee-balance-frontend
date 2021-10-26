@@ -17,6 +17,7 @@
 package base
 
 import config.FrontendAppConfig
+import generators.Generators
 import models.UserAnswers
 import org.scalatest._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
@@ -40,7 +41,8 @@ trait SpecBase
     with ScalaFutures
     with IntegrationPatience
     with MockitoSugar
-    with GuiceOneAppPerSuite {
+    with GuiceOneAppPerSuite
+    with Generators {
 
   val configKey = "config"
 

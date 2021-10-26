@@ -33,30 +33,30 @@ class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
     val fieldName = "value"
 
     behave like fieldThatBindsValidData(
-      form,
-      fieldName,
-      stringsWithMaxLength(maxGuaranteeReferenceNumberLength)
+      form = form,
+      fieldName = fieldName,
+      validDataGenerator = stringsWithMaxLength(maxGuaranteeReferenceNumberLength)
     )
 
     behave like fieldWithMaxLength(
-      form,
-      fieldName,
+      form = form,
+      fieldName = fieldName,
       maxLength = maxGuaranteeReferenceNumberLength,
       lengthError = FormError(fieldName, lengthKey, Seq(maxGuaranteeReferenceNumberLength))
     )
 
     behave like mandatoryField(
-      form,
-      fieldName,
+      form = form,
+      fieldName = fieldName,
       requiredError = FormError(fieldName, requiredKey)
     )
 
     behave like fieldWithInvalidCharacters(
-      form,
-      fieldName,
-      alphaNumericRegex,
-      stringsOfLength(maxGuaranteeReferenceNumberLength),
-      invalidKey
+      form = form,
+      fieldName = fieldName,
+      regex = alphaNumericRegex,
+      gen = stringsOfLength(maxGuaranteeReferenceNumberLength),
+      invalidKey = invalidKey
     )
 
   }

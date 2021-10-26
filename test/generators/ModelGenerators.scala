@@ -16,4 +16,13 @@
 
 package generators
 
-trait ModelGenerators {}
+import models.{CheckMode, Mode, NormalMode}
+import org.scalacheck.{Arbitrary, Gen}
+
+trait ModelGenerators {
+
+  implicit lazy val arbitraryMode: Arbitrary[Mode] =
+    Arbitrary {
+      Gen.oneOf(NormalMode, CheckMode)
+    }
+}
