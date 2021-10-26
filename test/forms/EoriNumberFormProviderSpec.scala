@@ -16,7 +16,7 @@
 
 package forms
 
-import forms.Constants.{alphaNumericRegex, eoriNumberRegex, maxLengthEoriNumber}
+import forms.Constants.{alphaNumericRegex, eoriNumberRegex, maxEoriNumberLength}
 import forms.behaviours.StringFieldBehaviours
 import play.api.data.FormError
 import wolfendale.scalacheck.regexp.RegexpGen
@@ -37,14 +37,14 @@ class EoriNumberFormProviderSpec extends StringFieldBehaviours {
     behave like fieldThatBindsValidData(
       form,
       fieldName,
-      stringsWithMaxLength(maxLengthEoriNumber)
+      stringsWithMaxLength(maxEoriNumberLength)
     )
 
     behave like fieldWithMaxLength(
       form,
       fieldName,
-      maxLength = maxLengthEoriNumber,
-      lengthError = FormError(fieldName, lengthKey, Seq(maxLengthEoriNumber))
+      maxLength = maxEoriNumberLength,
+      lengthError = FormError(fieldName, lengthKey, Seq(maxEoriNumberLength))
     )
 
     behave like mandatoryField(
@@ -57,7 +57,7 @@ class EoriNumberFormProviderSpec extends StringFieldBehaviours {
       form,
       fieldName,
       alphaNumericRegex,
-      stringsOfLength(maxLengthEoriNumber),
+      stringsOfLength(maxEoriNumberLength),
       invalidCharactersKey
     )
 
@@ -65,7 +65,7 @@ class EoriNumberFormProviderSpec extends StringFieldBehaviours {
       form,
       fieldName,
       eoriNumberRegex,
-      RegexpGen.from(alphaNumericRegex.replace("*", s"{$maxLengthEoriNumber}")),
+      RegexpGen.from(alphaNumericRegex.replace("*", s"{$maxEoriNumberLength}")),
       invalidFormatKey
     )
 

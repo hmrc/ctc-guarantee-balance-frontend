@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package forms
+package views
 
-object Constants {
+import play.api.libs.json.Json
 
-  lazy val maxEoriNumberLength: Int               = 17
-  lazy val maxGuaranteeReferenceNumberLength: Int = 24
+class GuaranteeReferenceNumberViewSpec extends SingleViewSpec("guaranteeReferenceNumber.njk") {
 
-  lazy val alphaNumericRegex: String = "^[a-zA-Z0-9]*$"
-  lazy val eoriNumberRegex: String   = "^[a-zA-Z]{2}[0-9a-zA-Z]{1,15}"
+  "must render paragraph text" in {
+    val json = Json.obj()
+
+    val doc = renderDocument(json).futureValue
+
+    assertContainsText(doc, "guaranteeReferenceNumber.paragraph")
+  }
 
 }

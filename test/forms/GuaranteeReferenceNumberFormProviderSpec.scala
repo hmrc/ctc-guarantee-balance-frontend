@@ -16,7 +16,7 @@
 
 package forms
 
-import forms.Constants.alphaNumericRegex
+import forms.Constants.{alphaNumericRegex, maxGuaranteeReferenceNumberLength}
 import forms.behaviours.StringFieldBehaviours
 import play.api.data.FormError
 
@@ -25,7 +25,6 @@ class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
   val requiredKey = "guaranteeReferenceNumber.error.required"
   val lengthKey   = "guaranteeReferenceNumber.error.length"
   val invalidKey  = "guaranteeReferenceNumber.error.invalid"
-  val maxLength   = 24
 
   val form = new GuaranteeReferenceNumberFormProvider()()
 
@@ -36,14 +35,14 @@ class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
     behave like fieldThatBindsValidData(
       form,
       fieldName,
-      stringsWithMaxLength(maxLength)
+      stringsWithMaxLength(maxGuaranteeReferenceNumberLength)
     )
 
     behave like fieldWithMaxLength(
       form,
       fieldName,
-      maxLength = maxLength,
-      lengthError = FormError(fieldName, lengthKey, Seq(maxLength))
+      maxLength = maxGuaranteeReferenceNumberLength,
+      lengthError = FormError(fieldName, lengthKey, Seq(maxGuaranteeReferenceNumberLength))
     )
 
     behave like mandatoryField(
@@ -56,7 +55,7 @@ class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
       form,
       fieldName,
       alphaNumericRegex,
-      stringsOfLength(maxLength),
+      stringsOfLength(maxGuaranteeReferenceNumberLength),
       invalidKey
     )
 

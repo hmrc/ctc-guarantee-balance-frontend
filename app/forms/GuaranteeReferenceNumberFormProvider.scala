@@ -16,7 +16,7 @@
 
 package forms
 
-import forms.Constants.alphaNumericRegex
+import forms.Constants.{alphaNumericRegex, maxGuaranteeReferenceNumberLength}
 
 import javax.inject.Inject
 import forms.mappings.Mappings
@@ -29,7 +29,7 @@ class GuaranteeReferenceNumberFormProvider @Inject() extends Mappings {
       "value" -> text("guaranteeReferenceNumber.error.required")
         .verifying(
           forms.StopOnFirstFail[String](
-            maxLength(24, "guaranteeReferenceNumber.error.length"),
+            maxLength(maxGuaranteeReferenceNumberLength, "guaranteeReferenceNumber.error.length"),
             regexp(alphaNumericRegex, "guaranteeReferenceNumber.error.invalid")
           )
         )
