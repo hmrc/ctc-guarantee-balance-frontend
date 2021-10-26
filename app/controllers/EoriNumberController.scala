@@ -18,6 +18,7 @@ package controllers
 
 import controllers.actions._
 import forms.EoriNumberFormProvider
+import models.requests.OptionalDataRequest
 
 import javax.inject.Inject
 import models.{Mode, UserAnswers}
@@ -39,7 +40,6 @@ class EoriNumberController @Inject() (
   navigator: Navigator,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
-  requireData: DataRequiredAction,
   formProvider: EoriNumberFormProvider,
   val controllerComponents: MessagesControllerComponents,
   renderer: Renderer
@@ -51,9 +51,17 @@ class EoriNumberController @Inject() (
   private val form = formProvider()
 
   def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
-    implicit request =>
+    implicit request: OptionalDataRequest[AnyContent] =>
+      val getEoriNumber: Option[String] = request.userAnswers.flatMap(
+        x => x.get(EoriNumberPage)
+      )
+      val preparedForm = getEoriNumber match {
+        case Some(value) => form.fill(value)
+        case _           => form
+      }
+
       val json = Json.obj(
-        "form" -> form,
+        "form" -> preparedForm,
         "mode" -> mode
       )
 

@@ -16,7 +16,7 @@
 
 package forms
 
-import forms.Constants.{eoriNumberRegex, maxLengthEoriNumber}
+import forms.Constants.{alphaNumericRegex, eoriNumberRegex, maxLengthEoriNumber}
 import forms.behaviours.StringFieldBehaviours
 import org.scalacheck.Gen
 import play.api.data.{Field, FormError}
@@ -54,7 +54,7 @@ class EoriNumberFormProviderSpec extends StringFieldBehaviours {
       requiredError = FormError(fieldName, requiredKey)
     )
 
-    behave like fieldWithInvalidCharacters(form, fieldName, invalidKey, maxLengthEoriNumber)
+    behave like fieldWithInvalidCharacters(form, fieldName, invalidKey, maxLengthEoriNumber, alphaNumericRegex)
 
     "must not bind strings that do not match the eori number format regex" in {
 

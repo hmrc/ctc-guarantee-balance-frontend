@@ -22,8 +22,6 @@ import javax.inject.Inject
 import forms.mappings.Mappings
 import play.api.data.Form
 
-import scala.util.matching.Regex
-
 class EoriNumberFormProvider @Inject() extends Mappings {
 
   def apply(): Form[String] =

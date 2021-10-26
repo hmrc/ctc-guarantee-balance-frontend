@@ -33,16 +33,16 @@ trait StringFieldBehaviours extends FieldBehaviours {
       }
     }
 
-  def fieldWithInvalidCharacters(form: Form[_], fieldName: String, invalidKey: String, length: Int) =
+  def fieldWithInvalidCharacters(form: Form[_], fieldName: String, invalidKey: String, length: Int, args: Any*) =
     s"must not bind strings with invalid characters" in {
 
-      val expectedError          = FormError(fieldName, invalidKey)
+      val expectedError          = Seq(FormError(fieldName, invalidKey, args.toList))
       val generator: Gen[String] = RegexpGen.from(s"[!£^*(){}_+=:;|`~<>,±üçñèé@]{$length}")
 
       forAll(generator) {
         invalidString =>
           val result: Field = form.bind(Map(fieldName -> invalidString)).apply(fieldName)
-          result.errors must contain(expectedError)
+          result.errors must equal(expectedError)
       }
     }
 
