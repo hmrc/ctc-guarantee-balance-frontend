@@ -80,7 +80,8 @@ guaranteeReferenceNumber.heading = What is the guarantee reference number?
 guaranteeReferenceNumber.checkYourAnswersLabel = Guarantee reference number
 guaranteeReferenceNumber.paragraph = You must make sure this reference is up to date.
 guaranteeReferenceNumber.error.required = Enter the guarantee reference number
-guaranteeReferenceNumber.error.length = The guarantee reference number must be 24 characters or less
+guaranteeReferenceNumber.error.maxLength = The guarantee reference number must be 24 characters or less
+guaranteeReferenceNumber.error.minLength = The guarantee reference number must be 17 characters or more
 guaranteeReferenceNumber.error.invalid = The guarantee reference number must only include letters a to z without accents and numbers 0 to 9
 
 accessCode.title = What is the access code?

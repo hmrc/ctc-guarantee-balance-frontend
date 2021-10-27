@@ -45,6 +45,8 @@ class GuaranteeReferenceNumberControllerSpec extends SpecBase with MockitoSugar 
 
   lazy val guaranteeReferenceNumberRoute = routes.GuaranteeReferenceNumberController.onPageLoad(NormalMode).url
 
+  val validAnswer: String = "guaranteeRef1234567890"
+
   "GuaranteeReferenceNumber Controller" - {
 
     "must return OK and the correct view for a GET" in {
@@ -79,7 +81,7 @@ class GuaranteeReferenceNumberControllerSpec extends SpecBase with MockitoSugar 
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
 
-      val userAnswers    = UserAnswers(userAnswersId).set(GuaranteeReferenceNumberPage, "answer").success.value
+      val userAnswers    = UserAnswers(userAnswersId).set(GuaranteeReferenceNumberPage, validAnswer).success.value
       val application    = applicationBuilder(userAnswers = Some(userAnswers)).build()
       val request        = FakeRequest(GET, guaranteeReferenceNumberRoute)
       val templateCaptor = ArgumentCaptor.forClass(classOf[String])
@@ -91,7 +93,7 @@ class GuaranteeReferenceNumberControllerSpec extends SpecBase with MockitoSugar 
 
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
-      val filledForm = form.bind(Map("value" -> "answer"))
+      val filledForm = form.bind(Map("value" -> validAnswer))
 
       val expectedJson = Json.obj(
         "form" -> filledForm,
@@ -117,7 +119,7 @@ class GuaranteeReferenceNumberControllerSpec extends SpecBase with MockitoSugar 
 
       val request =
         FakeRequest(POST, guaranteeReferenceNumberRoute)
-          .withFormUrlEncodedBody(("value", "answer"))
+          .withFormUrlEncodedBody(("value", validAnswer))
 
       val result = route(application, request).value
 
@@ -176,7 +178,7 @@ class GuaranteeReferenceNumberControllerSpec extends SpecBase with MockitoSugar 
 
       val request =
         FakeRequest(POST, guaranteeReferenceNumberRoute)
-          .withFormUrlEncodedBody(("value", "answer"))
+          .withFormUrlEncodedBody(("value", validAnswer))
 
       val result = route(application, request).value
 
