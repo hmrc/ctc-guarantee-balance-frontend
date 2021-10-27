@@ -30,3 +30,5 @@ GET        /guarantee-reference-number              controllers.GuaranteeReferen
 POST       /guarantee-reference-number              controllers.GuaranteeReferenceNumberController.onSubmit(mode: Mode = NormalMode)
 GET        /change-guarantee-reference-number       controllers.GuaranteeReferenceNumberController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-guarantee-reference-number       controllers.GuaranteeReferenceNumberController.onSubmit(mode: Mode = CheckMode)
+
+GET        /check-your-answers                       controllers.CheckYourAnswersController.onPageLoad()
