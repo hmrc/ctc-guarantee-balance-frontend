@@ -51,7 +51,7 @@ class AccessCodeFormProviderSpec extends StringFieldBehaviours {
       requiredError = FormError(fieldName, requiredKey)
     )
 
-    behave like fieldWithInvalidCharacters(
+    behave like fieldThatDoesNotBindInvalidData(
       form = form,
       fieldName = fieldName,
       regex = alphaNumericRegex,

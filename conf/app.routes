@@ -1,34 +1,34 @@
 # microservice specific routes
 
-GET        /assets/*file                                           controllers.Assets.versioned(path="/public", file: Asset)
+GET        /assets/*file                            controllers.Assets.versioned(path="/public", file: Asset)
 
-GET        /error/cannot-use-service-no-eori                       controllers.UnauthorisedController.onPageLoad()
-GET        /keep-alive                                             controllers.KeepAliveController.keepAlive()
+GET        /error/cannot-use-service-no-eori        controllers.UnauthorisedController.onPageLoad()
+GET        /keep-alive                              controllers.KeepAliveController.keepAlive()
 
-GET        /                                                       controllers.RedirectController.onPageLoad()
-GET        /index                                                  controllers.IndexController.onPageLoad()
-GET        /what-do-you-want-to-do                                 controllers.WhatDoYouWantToDoController.onPageLoad()
+GET        /                                        controllers.RedirectController.onPageLoad()
+GET        /index                                   controllers.IndexController.onPageLoad()
+GET        /what-do-you-want-to-do                  controllers.WhatDoYouWantToDoController.onPageLoad()
 
-GET        /this-service-has-been-reset                            controllers.SessionExpiredController.onPageLoad()
+GET        /this-service-has-been-reset             controllers.SessionExpiredController.onPageLoad()
 
-GET        /testPage                        controllers.TestPageController.onPageLoad(mode: Mode = NormalMode)
-POST       /testPage                        controllers.TestPageController.onSubmit(mode: Mode = NormalMode)
-GET        /changeTestPage                  controllers.TestPageController.onPageLoad(mode: Mode = CheckMode)
-POST       /changeTestPage                  controllers.TestPageController.onSubmit(mode: Mode = CheckMode)
+GET        /testPage                                controllers.TestPageController.onPageLoad(mode: Mode = NormalMode)
+POST       /testPage                                controllers.TestPageController.onSubmit(mode: Mode = NormalMode)
+GET        /changeTestPage                          controllers.TestPageController.onPageLoad(mode: Mode = CheckMode)
+POST       /changeTestPage                          controllers.TestPageController.onSubmit(mode: Mode = CheckMode)
 
-GET        /access-code                        controllers.AccessCodeController.onPageLoad(mode: Mode = NormalMode)
-POST       /access-code                        controllers.AccessCodeController.onSubmit(mode: Mode = NormalMode)
-GET        /change-access-code                  controllers.AccessCodeController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-access-code                  controllers.AccessCodeController.onSubmit(mode: Mode = CheckMode)
-
-GET        /eori-number                        controllers.EoriNumberController.onPageLoad(mode: Mode = NormalMode)
-POST       /eori-number                        controllers.EoriNumberController.onSubmit(mode: Mode = NormalMode)
-GET        /change-eori-number                  controllers.EoriNumberController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-eori-number                  controllers.EoriNumberController.onSubmit(mode: Mode = CheckMode)
+GET        /eori-number                             controllers.EoriNumberController.onPageLoad(mode: Mode = NormalMode)
+POST       /eori-number                             controllers.EoriNumberController.onSubmit(mode: Mode = NormalMode)
+GET        /change-eori-number                      controllers.EoriNumberController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-eori-number                      controllers.EoriNumberController.onSubmit(mode: Mode = CheckMode)
 
 GET        /guarantee-reference-number              controllers.GuaranteeReferenceNumberController.onPageLoad(mode: Mode = NormalMode)
 POST       /guarantee-reference-number              controllers.GuaranteeReferenceNumberController.onSubmit(mode: Mode = NormalMode)
 GET        /change-guarantee-reference-number       controllers.GuaranteeReferenceNumberController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-guarantee-reference-number       controllers.GuaranteeReferenceNumberController.onSubmit(mode: Mode = CheckMode)
+
+GET        /access-code                             controllers.AccessCodeController.onPageLoad(mode: Mode = NormalMode)
+POST       /access-code                             controllers.AccessCodeController.onSubmit(mode: Mode = NormalMode)
+GET        /change-access-code                      controllers.AccessCodeController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-access-code                      controllers.AccessCodeController.onSubmit(mode: Mode = CheckMode)
 
 GET        /check-your-answers                       controllers.CheckYourAnswersController.onPageLoad()

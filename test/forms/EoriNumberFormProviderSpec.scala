@@ -53,7 +53,7 @@ class EoriNumberFormProviderSpec extends StringFieldBehaviours {
       requiredError = FormError(fieldName, requiredKey)
     )
 
-    behave like fieldWithInvalidCharacters(
+    behave like fieldThatDoesNotBindInvalidData(
       form = form,
       fieldName = fieldName,
       regex = alphaNumericRegex,
@@ -61,7 +61,7 @@ class EoriNumberFormProviderSpec extends StringFieldBehaviours {
       invalidKey = invalidCharactersKey
     )
 
-    behave like fieldWithInvalidCharacters(
+    behave like fieldThatDoesNotBindInvalidData(
       form = form,
       fieldName = fieldName,
       regex = eoriNumberRegex,
