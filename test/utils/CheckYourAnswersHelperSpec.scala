@@ -18,6 +18,7 @@ package utils
 
 import base.SpecBase
 import controllers.routes
+import forms.Constants.accessCodeLength
 import models.{CheckMode, Mode, UserAnswers}
 import org.scalacheck.Arbitrary.arbitrary
 import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
@@ -28,8 +29,8 @@ class CheckYourAnswersHelperSpec extends SpecBase {
 
   "eoriNumber" - {
 
-    "return None" - {
-      "EoriNumberPage undefined" in {
+    "must return None" - {
+      "when EoriNumberPage undefined" in {
 
         val answers = emptyUserAnswers
 
@@ -40,8 +41,8 @@ class CheckYourAnswersHelperSpec extends SpecBase {
       }
     }
 
-    "return Some(row)" - {
-      "EoriNumberPage defined" in {
+    "must return Some(row)" - {
+      "when EoriNumberPage defined" in {
 
         forAll(arbitrary[Mode], arbitrary[String]) {
           (mode, answer) =>
@@ -72,8 +73,8 @@ class CheckYourAnswersHelperSpec extends SpecBase {
 
   "guaranteeReferenceNumber" - {
 
-    "return None" - {
-      "GuaranteeReferenceNumberPage undefined" in {
+    "must return None" - {
+      "when GuaranteeReferenceNumberPage undefined" in {
 
         val answers = emptyUserAnswers
 
@@ -84,8 +85,8 @@ class CheckYourAnswersHelperSpec extends SpecBase {
       }
     }
 
-    "return Some(row)" - {
-      "GuaranteeReferenceNumberPage defined" in {
+    "must return Some(row)" - {
+      "when GuaranteeReferenceNumberPage defined" in {
 
         forAll(arbitrary[Mode], arbitrary[String]) {
           (mode, answer) =>
@@ -116,8 +117,8 @@ class CheckYourAnswersHelperSpec extends SpecBase {
 
   "accessCode" - {
 
-    "return None" - {
-      "AccessCodePage undefined" in {
+    "must return None" - {
+      "when AccessCodePage undefined" in {
 
         val answers = emptyUserAnswers
 
@@ -128,10 +129,10 @@ class CheckYourAnswersHelperSpec extends SpecBase {
       }
     }
 
-    "return Some(row)" - {
-      "AccessCodePage defined" in {
+    "must return Some(row)" - {
+      "when AccessCodePage defined" in {
 
-        forAll(arbitrary[Mode], arbitrary[String]) {
+        forAll(arbitrary[Mode], stringsOfLength(accessCodeLength)) {
           (mode, answer) =>
             val answers: UserAnswers = emptyUserAnswers.set(AccessCodePage, answer).success.value
 
@@ -143,7 +144,7 @@ class CheckYourAnswersHelperSpec extends SpecBase {
             result mustBe Some(
               Row(
                 key = Key(label, classes = Seq("govuk-!-width-one-half")),
-                value = Value(lit"$answer"),
+                value = Value(lit"••••"),
                 actions = List(
                   Action(
                     content = msg"site.edit",

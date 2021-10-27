@@ -58,7 +58,7 @@ class CheckYourAnswersHelper(userAnswers: UserAnswers, mode: Mode) {
     answer =>
       Row(
         key = Key(msg"accessCode.checkYourAnswersLabel", classes = Seq("govuk-!-width-one-half")),
-        value = Value(lit"$answer"),
+        value = Value(lit"${"•" * answer.length}"),
         actions = List(
           Action(
             content = msg"site.edit",
