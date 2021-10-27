@@ -10,7 +10,7 @@
 # Failing to follow this rule may result in test routes deployed in production.
 
 + nocsrf
-GET        /test/technicalDifficulties              controllers.testOnly.TestOnlyTechnicalDifficultiesController.onPageLoad()
+GET        /ctc-guarantee-balance/test-only/technicalDifficulties    controllers.testOnly.TestOnlyTechnicalDifficultiesController.onPageLoad()
 
 # Add all the application routes to the prod.routes file
 ->         /                          prod.Routes
