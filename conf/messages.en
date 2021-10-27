@@ -66,3 +66,11 @@ testPage.heading = testPage
 testPage.checkYourAnswersLabel = testPage
 testPage.error.required = Enter testPage
 testPage.error.length = TestPage must be 100 characters or less
+
+eoriNumber.title = What is your EORI number?
+eoriNumber.heading = What is your EORI number?
+eoriNumber.checkYourAnswersLabel = EORI number
+eoriNumber.error.required = Enter your EORI Number
+eoriNumber.error.length = Your EORI number must be 17 characters or less
+eoriNumber.error.invalidCharacters = Your EORI number must only include letters a to z without accents and numbers 0 to 9
+eoriNumber.error.invalidFormat = Enter your EORI number in the right format, like GB123456789012 or AT1A2B3C4D5E6F
