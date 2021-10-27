@@ -74,19 +74,24 @@ eoriNumber.checkYourAnswersLabel = EORI number
 eoriNumber.error.required = Enter your EORI Number
 eoriNumber.error.length = Your EORI number must be 17 characters or less
 eoriNumber.error.invalidCharacters = Your EORI number must only include letters a to z without accents and numbers 0 to 9
-eoriNumber.error.invalidFormat = Enter your EORI number in the right format, like GB123456789012 or AT1A2B3C4D5E6F
+eoriNumber.error.invalidFormat = Enter your EORI number in the right format, like GB123456123456
 
 guaranteeReferenceNumber.title = What is the guarantee reference number?
 guaranteeReferenceNumber.heading = What is the guarantee reference number?
 guaranteeReferenceNumber.checkYourAnswersLabel = Guarantee reference number
 guaranteeReferenceNumber.paragraph = You must make sure this reference is up to date.
 guaranteeReferenceNumber.error.required = Enter the guarantee reference number
-guaranteeReferenceNumber.error.length = The guarantee reference number must be 24 characters or less
+guaranteeReferenceNumber.error.maxLength = The guarantee reference number must be 24 characters or less
+guaranteeReferenceNumber.error.minLength = The guarantee reference number must be 17 characters or more
 guaranteeReferenceNumber.error.invalid = The guarantee reference number must only include letters a to z without accents and numbers 0 to 9
 
 accessCode.title = What is the access code?
 accessCode.heading = What is the access code?
 accessCode.checkYourAnswersLabel = Access code
 accessCode.error.required = Enter the access code
-accessCode.error.length = Access code must be 4 characters
-accessCode.error.invalidCharacters = Access code must only include letters a to z without accents and numbers 0 to 9
+accessCode.error.length = The access code must be 4 characters long, like 0000 or X9X9
+accessCode.error.invalidCharacters = The access code must only include letters a to z without accents and numbers 0 to 9
+
+checkYourAnswers.title = Check your answers
+checkYourAnswers.heading = Check your answers
+checkYourAnswers.preHeading = Guarantee balance details

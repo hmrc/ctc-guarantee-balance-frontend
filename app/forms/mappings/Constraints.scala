@@ -83,6 +83,14 @@ trait Constraints {
         Invalid(errorKey, maximum)
     }
 
+  protected def minLength(minimum: Int, errorKey: String): Constraint[String] =
+    Constraint {
+      case str if str.length >= minimum =>
+        Valid
+      case _ =>
+        Invalid(errorKey, minimum)
+    }
+
   protected def exactLength(exact: Int, errorKey: String): Constraint[String] =
     Constraint {
       case str if str.length == exact =>

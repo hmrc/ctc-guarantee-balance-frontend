@@ -30,3 +30,5 @@ GET        /access-code                             controllers.AccessCodeContro
 POST       /access-code                             controllers.AccessCodeController.onSubmit(mode: Mode = NormalMode)
 GET        /change-access-code                      controllers.AccessCodeController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-access-code                      controllers.AccessCodeController.onSubmit(mode: Mode = CheckMode)
+
+GET        /check-your-answers                       controllers.CheckYourAnswersController.onPageLoad()

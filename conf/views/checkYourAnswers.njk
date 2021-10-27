@@ -1,0 +1,38 @@
+{% extends "includes/layout.njk" %}
+
+{% from "macros/title.njk"                         import title %}
+{% from "govuk/components/summary-list/macro.njk"  import govukSummaryList %}
+{% from "govuk/components/button/macro.njk"        import govukButton %}
+{% from "macros/section.njk"                       import section as sectionMacro %}
+
+{% block pageTitle %}
+  {{ title(messages("checkYourAnswers.title")) }}
+{% endblock %}
+
+{% block mainContent %}
+
+  <div class="govuk-main-wrapper">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+
+        <span class="govuk-caption-xl">{{messages('checkYourAnswers.preHeading')}}</span>
+
+        <h1 class="govuk-heading-xl">
+          {{ messages("checkYourAnswers.heading") }}
+        </h1>
+
+        {{ csrf() | safe }}
+
+        {{ sectionMacro(section.title, section.rows) }}
+
+        {{ govukButton({
+          text: messages("site.continue"),
+          preventDoubleClick: true,
+          attributes: {id:"submit"}
+        }) }}
+
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

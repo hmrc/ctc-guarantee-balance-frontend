@@ -19,6 +19,7 @@ package forms
 object Constants {
 
   lazy val maxEoriNumberLength: Int               = 17
+  lazy val minGuaranteeReferenceNumberLength: Int = 17
   lazy val maxGuaranteeReferenceNumberLength: Int = 24
   lazy val accessCodeLength: Int                  = 4
 
