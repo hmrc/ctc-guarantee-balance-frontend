@@ -26,6 +26,7 @@ import play.api.data.validation.{Invalid, Valid, ValidationResult}
 
 import java.time.LocalDate
 
+// scalastyle:off magic.number
 class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyChecks with Generators with Constraints {
 
   "firstError" - {
@@ -154,6 +155,95 @@ class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyC
     }
   }
 
+  "minLength" - {
+
+    "must return Valid for a string longer than the allowed length" in {
+      val result = minLength(10, "error.length")("a" * 11)
+      result mustEqual Valid
+    }
+
+    "must return Invalid for an empty string" in {
+      val result = minLength(10, "error.length")("")
+      result mustEqual Invalid("error.length", 10)
+    }
+
+    "must return Valid for a string equal to the allowed length" in {
+      val result = minLength(10, "error.length")("a" * 10)
+      result mustEqual Valid
+    }
+
+    "must return Invalid for a string shorter than the allowed length" in {
+      val result = minLength(10, "error.length")("a" * 9)
+      result mustEqual Invalid("error.length", 10)
+    }
+  }
+
+  "maxLengthIgnoreSpaces" - {
+
+    "must return Valid for a string shorter than the allowed length" in {
+      val result = maxLengthIgnoreSpaces(10, "error.length")("a" * 9)
+      result mustEqual Valid
+    }
+
+    "must return Valid for an empty string" in {
+      val result = maxLengthIgnoreSpaces(10, "error.length")("")
+      result mustEqual Valid
+    }
+
+    "must return Valid for a string equal to the allowed length" in {
+      val result = maxLengthIgnoreSpaces(10, "error.length")("a" * 10)
+      result mustEqual Valid
+    }
+
+    "must return Invalid for a string longer than the allowed length" in {
+      val result = maxLengthIgnoreSpaces(10, "error.length")("a" * 11)
+      result mustEqual Invalid("error.length", 10)
+    }
+
+    "must return Valid for a string with non-space characters shorter than the allowed length" in {
+      val result = maxLengthIgnoreSpaces(10, "error.length")("a " * 9)
+      result mustEqual Valid
+    }
+
+    "must return Valid for a string with non-space characters equal to the allowed length" in {
+      val result = maxLengthIgnoreSpaces(10, "error.length")("a " * 10)
+      result mustEqual Valid
+    }
+  }
+
+  "minLengthIgnoreSpaces" - {
+
+    "must return Valid for a string longer than the allowed length" in {
+      val result = minLengthIgnoreSpaces(10, "error.length")("a" * 11)
+      result mustEqual Valid
+    }
+
+    "must return Invalid for an empty string" in {
+      val result = minLengthIgnoreSpaces(10, "error.length")("")
+      result mustEqual Invalid("error.length", 10)
+    }
+
+    "must return Valid for a string equal to the allowed length" in {
+      val result = minLengthIgnoreSpaces(10, "error.length")("a" * 10)
+      result mustEqual Valid
+    }
+
+    "must return Invalid for a string shorter than the allowed length" in {
+      val result = minLengthIgnoreSpaces(10, "error.length")("a" * 9)
+      result mustEqual Invalid("error.length", 10)
+    }
+
+    "must return Valid for a string with non-space characters longer than the allowed length" in {
+      val result = minLengthIgnoreSpaces(10, "error.length")("a " * 11)
+      result mustEqual Valid
+    }
+
+    "must return Valid for a string with non-space characters equal to the allowed length" in {
+      val result = minLengthIgnoreSpaces(10, "error.length")("a " * 10)
+      result mustEqual Valid
+    }
+  }
+
   "maxDate" - {
 
     "must return Valid for a date before or equal to the maximum" in {
@@ -216,3 +306,4 @@ class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyC
     }
   }
 }
+// scalastyle:on magic.number
