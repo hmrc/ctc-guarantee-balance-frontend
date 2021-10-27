@@ -32,7 +32,7 @@ trait StringFieldBehaviours extends FieldBehaviours {
       }
     }
 
-  def fieldWithInvalidCharacters(form: Form[_], fieldName: String, regex: String, gen: Gen[String], invalidKey: String): Unit =
+  def fieldThatDoesNotBindInvalidData(form: Form[_], fieldName: String, regex: String, gen: Gen[String], invalidKey: String): Unit =
     s"must not bind strings which don't match $regex" in {
 
       val expectedError = FormError(fieldName, invalidKey, Seq(regex))
