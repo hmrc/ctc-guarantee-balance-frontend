@@ -34,6 +34,7 @@ trait Generators extends UserAnswersGenerator with PageGenerators with ModelGene
       seq1 <- gen
       seq2 <- Gen.listOfN(seq1.length, genValue)
     } yield seq1.toSeq.zip(seq2).foldRight("") {
+
       case ((n, Some(v)), m) =>
         m + n + v
       case ((n, _), m) =>

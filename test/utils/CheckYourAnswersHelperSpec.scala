@@ -20,7 +20,7 @@ import base.SpecBase
 import controllers.routes
 import models.{CheckMode, Mode, UserAnswers}
 import org.scalacheck.Arbitrary.arbitrary
-import pages.{EoriNumberPage, GuaranteeReferenceNumberPage}
+import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import uk.gov.hmrc.viewmodels.MessageInterpolators
 import uk.gov.hmrc.viewmodels.SummaryList.{Action, Key, Row, Value}
 
@@ -104,6 +104,50 @@ class CheckYourAnswersHelperSpec extends SpecBase {
                   Action(
                     content = msg"site.edit",
                     href = routes.GuaranteeReferenceNumberController.onPageLoad(mode).url,
+                    visuallyHiddenText = Some(label)
+                  )
+                )
+              )
+            )
+        }
+      }
+    }
+  }
+
+  "accessCode" - {
+
+    "return None" - {
+      "AccessCodePage undefined" in {
+
+        val answers = emptyUserAnswers
+
+        val helper = new CheckYourAnswersHelper(answers, CheckMode)
+        val result = helper.accessCode
+
+        result mustBe None
+      }
+    }
+
+    "return Some(row)" - {
+      "AccessCodePage defined" in {
+
+        forAll(arbitrary[Mode], arbitrary[String]) {
+          (mode, answer) =>
+            val answers: UserAnswers = emptyUserAnswers.set(AccessCodePage, answer).success.value
+
+            val helper = new CheckYourAnswersHelper(answers, mode)
+            val result = helper.accessCode
+
+            val label = msg"accessCode.checkYourAnswersLabel"
+
+            result mustBe Some(
+              Row(
+                key = Key(label, classes = Seq("govuk-!-width-one-half")),
+                value = Value(lit"$answer"),
+                actions = List(
+                  Action(
+                    content = msg"site.edit",
+                    href = routes.AccessCodeController.onPageLoad(mode).url,
                     visuallyHiddenText = Some(label)
                   )
                 )

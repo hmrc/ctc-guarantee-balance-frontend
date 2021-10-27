@@ -16,6 +16,11 @@ POST       /testPage                        controllers.TestPageController.onSub
 GET        /changeTestPage                  controllers.TestPageController.onPageLoad(mode: Mode = CheckMode)
 POST       /changeTestPage                  controllers.TestPageController.onSubmit(mode: Mode = CheckMode)
 
+GET        /access-code                        controllers.AccessCodeController.onPageLoad(mode: Mode = NormalMode)
+POST       /access-code                        controllers.AccessCodeController.onSubmit(mode: Mode = NormalMode)
+GET        /change-access-code                  controllers.AccessCodeController.onPageLoad(mode: Mode = CheckMode)
+POST       /change-access-code                  controllers.AccessCodeController.onSubmit(mode: Mode = CheckMode)
+
 GET        /eori-number                        controllers.EoriNumberController.onPageLoad(mode: Mode = NormalMode)
 POST       /eori-number                        controllers.EoriNumberController.onSubmit(mode: Mode = NormalMode)
 GET        /change-eori-number                  controllers.EoriNumberController.onPageLoad(mode: Mode = CheckMode)

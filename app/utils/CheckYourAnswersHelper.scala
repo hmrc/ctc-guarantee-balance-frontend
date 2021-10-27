@@ -54,4 +54,19 @@ class CheckYourAnswersHelper(userAnswers: UserAnswers, mode: Mode) {
       )
   }
 
+  def accessCode: Option[Row] = userAnswers.get(AccessCodePage) map {
+    answer =>
+      Row(
+        key = Key(msg"accessCode.checkYourAnswersLabel", classes = Seq("govuk-!-width-one-half")),
+        value = Value(lit"$answer"),
+        actions = List(
+          Action(
+            content = msg"site.edit",
+            href = routes.AccessCodeController.onPageLoad(mode).url,
+            visuallyHiddenText = Some(msg"accessCode.checkYourAnswersLabel")
+          )
+        )
+      )
+  }
+
 }

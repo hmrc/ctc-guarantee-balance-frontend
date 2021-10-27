@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package forms
+package pages
 
-object Constants {
+import play.api.libs.json.JsPath
 
-  lazy val maxEoriNumberLength: Int               = 17
-  lazy val maxGuaranteeReferenceNumberLength: Int = 24
-  lazy val accessCodeLength: Int                  = 4
+case object AccessCodePage extends QuestionPage[String] {
 
-  lazy val alphaNumericRegex: String = "^[a-zA-Z0-9]*$"
-  lazy val eoriNumberRegex: String   = "^[a-zA-Z]{2}[0-9a-zA-Z]{1,15}"
+  override def path: JsPath = JsPath \ toString
 
+  override def toString: String = "accessCode"
 }

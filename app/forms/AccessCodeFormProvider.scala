@@ -16,13 +16,22 @@
 
 package forms
 
-object Constants {
+import forms.Constants.{accessCodeLength, alphaNumericRegex}
+import forms.mappings.Mappings
+import play.api.data.Form
 
-  lazy val maxEoriNumberLength: Int               = 17
-  lazy val maxGuaranteeReferenceNumberLength: Int = 24
-  lazy val accessCodeLength: Int                  = 4
+import javax.inject.Inject
 
-  lazy val alphaNumericRegex: String = "^[a-zA-Z0-9]*$"
-  lazy val eoriNumberRegex: String   = "^[a-zA-Z]{2}[0-9a-zA-Z]{1,15}"
+class AccessCodeFormProvider @Inject() extends Mappings {
 
+  def apply(): Form[String] =
+    Form(
+      "value" -> text("accessCode.error.required")
+        .verifying(
+          StopOnFirstFail[String](
+            exactLength(accessCodeLength, "accessCode.error.length"),
+            regexp(alphaNumericRegex, "accessCode.error.invalidCharacters")
+          )
+        )
+    )
 }

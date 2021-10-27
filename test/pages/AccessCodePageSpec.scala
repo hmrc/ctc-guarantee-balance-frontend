@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-package forms
+package pages
 
-object Constants {
+import pages.behaviours.PageBehaviours
 
-  lazy val maxEoriNumberLength: Int               = 17
-  lazy val maxGuaranteeReferenceNumberLength: Int = 24
-  lazy val accessCodeLength: Int                  = 4
+class AccessCodePageSpec extends PageBehaviours {
 
-  lazy val alphaNumericRegex: String = "^[a-zA-Z0-9]*$"
-  lazy val eoriNumberRegex: String   = "^[a-zA-Z]{2}[0-9a-zA-Z]{1,15}"
+  "AccessCodePage" - {
 
+    beRetrievable[String](AccessCodePage)
+
+    beSettable[String](AccessCodePage)
+
+    beRemovable[String](AccessCodePage)
+  }
 }
