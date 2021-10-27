@@ -16,9 +16,10 @@
 
 package forms.mappings
 
-import java.time.LocalDate
-
+import models.RichString
 import play.api.data.validation.{Constraint, Invalid, Valid}
+
+import java.time.LocalDate
 
 trait Constraints {
 
@@ -86,6 +87,22 @@ trait Constraints {
   protected def minLength(minimum: Int, errorKey: String): Constraint[String] =
     Constraint {
       case str if str.length >= minimum =>
+        Valid
+      case _ =>
+        Invalid(errorKey, minimum)
+    }
+
+  protected def maxLengthIgnoreSpaces(maximum: Int, errorKey: String): Constraint[String] =
+    Constraint {
+      case str if str.removeSpaces().length <= maximum =>
+        Valid
+      case _ =>
+        Invalid(errorKey, maximum)
+    }
+
+  protected def minLengthIgnoreSpaces(minimum: Int, errorKey: String): Constraint[String] =
+    Constraint {
+      case str if str.removeSpaces().length >= minimum =>
         Valid
       case _ =>
         Invalid(errorKey, minimum)
