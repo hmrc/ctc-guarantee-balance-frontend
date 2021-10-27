@@ -54,6 +54,16 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
         }
       }
 
+      "must go from Access code page to Check your answers page" in {
+
+        forAll(arbitrary[UserAnswers]) {
+          answers =>
+            navigator
+              .nextPage(AccessCodePage, mode, answers)
+              .mustBe(routes.CheckYourAnswersController.onPageLoad())
+        }
+      }
+
       "must go from a page that doesn't exist in the route map to Index" in {
 
         case object UnknownPage extends Page
@@ -91,6 +101,16 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
         }
       }
 
+      "must go from Access code page to Check your answers page" in {
+
+        forAll(arbitrary[UserAnswers]) {
+          answers =>
+            navigator
+              .nextPage(AccessCodePage, mode, answers)
+              .mustBe(routes.CheckYourAnswersController.onPageLoad())
+        }
+      }
+
       "must go from a page that doesn't exist in the route map to CheckYourAnswers" in {
 
         case object UnknownPage extends Page
@@ -99,7 +119,7 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
           answers =>
             navigator
               .nextPage(UnknownPage, CheckMode, answers)
-              .mustBe(routes.IndexController.onPageLoad()) // TODO update to CheckYourAnswers
+              .mustBe(routes.CheckYourAnswersController.onPageLoad())
         }
       }
 

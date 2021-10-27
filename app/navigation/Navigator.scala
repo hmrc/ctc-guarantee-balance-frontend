@@ -34,7 +34,7 @@ class Navigator @Inject() () {
 
   private val checkRoutes: Page => UserAnswers => Call = {
     allRoutes(CheckMode) orElse {
-      case _ => _ => routes.IndexController.onPageLoad() // TODO add CYA page
+      case _ => _ => routes.CheckYourAnswersController.onPageLoad()
     }
   }
 
@@ -48,5 +48,6 @@ class Navigator @Inject() () {
   private def allRoutes(mode: Mode): PartialFunction[Page, UserAnswers => Call] = {
     case EoriNumberPage               => _ => routes.GuaranteeReferenceNumberController.onPageLoad(mode)
     case GuaranteeReferenceNumberPage => _ => routes.AccessCodeController.onPageLoad(mode)
+    case AccessCodePage               => _ => routes.CheckYourAnswersController.onPageLoad()
   }
 }
