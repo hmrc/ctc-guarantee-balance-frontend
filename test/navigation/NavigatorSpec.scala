@@ -32,6 +32,28 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
 
     "in Normal mode" - {
 
+      val mode: Mode = NormalMode
+
+      "must go from EORI number page to GRN page" in {
+
+        forAll(arbitrary[UserAnswers]) {
+          answers =>
+            navigator
+              .nextPage(EoriNumberPage, mode, answers)
+              .mustBe(routes.GuaranteeReferenceNumberController.onPageLoad(mode))
+        }
+      }
+
+      "must go from GRN page to Access code page" in {
+
+        forAll(arbitrary[UserAnswers]) {
+          answers =>
+            navigator
+              .nextPage(GuaranteeReferenceNumberPage, mode, answers)
+              .mustBe(routes.AccessCodeController.onPageLoad(mode))
+        }
+      }
+
       "must go from a page that doesn't exist in the route map to Index" in {
 
         case object UnknownPage extends Page
@@ -46,6 +68,28 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
     }
 
     "in Check mode" - {
+
+      val mode: Mode = CheckMode
+
+      "must go from EORI number page to GRN page" in {
+
+        forAll(arbitrary[UserAnswers]) {
+          answers =>
+            navigator
+              .nextPage(EoriNumberPage, mode, answers)
+              .mustBe(routes.GuaranteeReferenceNumberController.onPageLoad(mode))
+        }
+      }
+
+      "must go from GRN page to Access code page" in {
+
+        forAll(arbitrary[UserAnswers]) {
+          answers =>
+            navigator
+              .nextPage(GuaranteeReferenceNumberPage, mode, answers)
+              .mustBe(routes.AccessCodeController.onPageLoad(mode))
+        }
+      }
 
       "must go from a page that doesn't exist in the route map to CheckYourAnswers" in {
 
