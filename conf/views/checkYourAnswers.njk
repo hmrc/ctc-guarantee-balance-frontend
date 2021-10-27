@@ -23,9 +23,7 @@
 
         {{ csrf() | safe }}
 
-        {% for section in sections %}
-          {{ sectionMacro(section.sectionTitle, section.rows) }}
-        {% endfor %}
+        {{ sectionMacro(section.title, section.rows) }}
 
         {{ govukButton({
           text: messages("site.continue"),

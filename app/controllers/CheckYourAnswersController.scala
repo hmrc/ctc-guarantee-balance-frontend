@@ -47,23 +47,23 @@ class CheckYourAnswersController @Inject() (
     implicit request =>
       val answers = createSections(request.userAnswers)
       val json = Json.obj(
-        "sections" -> Json.toJson(answers)
+        "section" -> Json.toJson(answers)
       )
 
       renderer.render("checkYourAnswers.njk", json).map(Ok(_))
   }
 
-  private def createSections(userAnswers: UserAnswers): Seq[Section] = {
+  //TODO onPost to be implemented once the backend is implemented
+
+  private def createSections(userAnswers: UserAnswers): Section = {
     val helper = new CheckYourAnswersHelper(userAnswers, CheckMode)
 
-    Seq(
-      Section(
-        Seq(
-          helper.eoriNumber,
-          helper.guaranteeReferenceNumber,
-          helper.accessCode
-        ).flatten
-      )
+    Section(
+      Seq(
+        helper.eoriNumber,
+        helper.guaranteeReferenceNumber,
+        helper.accessCode
+      ).flatten
     )
   }
 }
