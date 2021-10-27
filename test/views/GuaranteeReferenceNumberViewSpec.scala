@@ -14,24 +14,18 @@
  * limitations under the License.
  */
 
-package forms
+package views
 
-import forms.Constants.{accessCodeLength, alphaNumericRegex}
-import forms.mappings.Mappings
-import play.api.data.Form
+import play.api.libs.json.Json
 
-import javax.inject.Inject
+class GuaranteeReferenceNumberViewSpec extends SingleViewSpec("guaranteeReferenceNumber.njk") {
 
-class AccessCodeFormProvider @Inject() extends Mappings {
+  "must render paragraph text" in {
+    val json = Json.obj()
 
-  def apply(): Form[String] =
-    Form(
-      "value" -> text("accessCode.error.required")
-        .verifying(
-          StopOnFirstFail[String](
-            exactLength(accessCodeLength, "accessCode.error.length"),
-            regexp(alphaNumericRegex, "accessCode.error.invalidCharacters")
-          )
-        )
-    )
+    val doc = renderDocument(json).futureValue
+
+    assertContainsText(doc, "guaranteeReferenceNumber.paragraph")
+  }
+
 }

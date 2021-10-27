@@ -12,3 +12,8 @@ $hmrc-assets-path: "/ctc-guarantee-balance/assets/lib/hmrc-frontend/hmrc/assets"
 .govuk-summary-list__actions-list-item {
     display: inline-block;
 }
+
+.hint-as-label {
+    @extend .govuk-label;
+    @extend #{'.govuk-\\!-padding-bottom-2'};
+}

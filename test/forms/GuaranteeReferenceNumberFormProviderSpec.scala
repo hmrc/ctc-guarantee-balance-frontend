@@ -16,17 +16,17 @@
 
 package forms
 
-import forms.Constants.{accessCodeLength, alphaNumericRegex}
+import forms.Constants.{alphaNumericRegex, maxGuaranteeReferenceNumberLength}
 import forms.behaviours.StringFieldBehaviours
 import play.api.data.FormError
 
-class AccessCodeFormProviderSpec extends StringFieldBehaviours {
+class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
 
-  val requiredKey = "accessCode.error.required"
-  val lengthKey   = "accessCode.error.length"
-  val invalidKey  = "accessCode.error.invalidCharacters"
+  val requiredKey = "guaranteeReferenceNumber.error.required"
+  val lengthKey   = "guaranteeReferenceNumber.error.length"
+  val invalidKey  = "guaranteeReferenceNumber.error.invalid"
 
-  val form = new AccessCodeFormProvider()()
+  val form = new GuaranteeReferenceNumberFormProvider()()
 
   ".value" - {
 
@@ -35,14 +35,14 @@ class AccessCodeFormProviderSpec extends StringFieldBehaviours {
     behave like fieldThatBindsValidData(
       form = form,
       fieldName = fieldName,
-      validDataGenerator = stringsWithMaxLength(accessCodeLength)
+      validDataGenerator = stringsWithMaxLength(maxGuaranteeReferenceNumberLength)
     )
 
     behave like fieldWithMaxLength(
       form = form,
       fieldName = fieldName,
-      maxLength = accessCodeLength,
-      lengthError = FormError(fieldName, lengthKey, Seq(accessCodeLength))
+      maxLength = maxGuaranteeReferenceNumberLength,
+      lengthError = FormError(fieldName, lengthKey, Seq(maxGuaranteeReferenceNumberLength))
     )
 
     behave like mandatoryField(
@@ -55,7 +55,7 @@ class AccessCodeFormProviderSpec extends StringFieldBehaviours {
       form = form,
       fieldName = fieldName,
       regex = alphaNumericRegex,
-      gen = stringsOfLength(accessCodeLength),
+      gen = stringsOfLength(maxGuaranteeReferenceNumberLength),
       invalidKey = invalidKey
     )
 

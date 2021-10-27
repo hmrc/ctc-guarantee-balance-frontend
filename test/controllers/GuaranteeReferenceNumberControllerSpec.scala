@@ -17,7 +17,7 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import forms.AccessCodeFormProvider
+import forms.GuaranteeReferenceNumberFormProvider
 import matchers.JsonMatchers
 import models.{NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
@@ -25,7 +25,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.AccessCodePage
+import pages.GuaranteeReferenceNumberPage
 import play.api.inject.bind
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Call
@@ -36,16 +36,16 @@ import uk.gov.hmrc.viewmodels.NunjucksSupport
 
 import scala.concurrent.Future
 
-class AccessCodeControllerSpec extends SpecBase with MockitoSugar with NunjucksSupport with JsonMatchers with AppWithDefaultMockFixtures {
+class GuaranteeReferenceNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksSupport with JsonMatchers with AppWithDefaultMockFixtures {
 
   def onwardRoute = Call("GET", "/foo")
 
-  val formProvider = new AccessCodeFormProvider()
+  val formProvider = new GuaranteeReferenceNumberFormProvider()
   val form         = formProvider()
 
-  lazy val accessCodeRoute = routes.AccessCodeController.onPageLoad(NormalMode).url
+  lazy val guaranteeReferenceNumberRoute = routes.GuaranteeReferenceNumberController.onPageLoad(NormalMode).url
 
-  "AccessCode Controller" - {
+  "GuaranteeReferenceNumber Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
@@ -53,7 +53,7 @@ class AccessCodeControllerSpec extends SpecBase with MockitoSugar with NunjucksS
         .thenReturn(Future.successful(Html("")))
 
       val application    = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-      val request        = FakeRequest(GET, accessCodeRoute)
+      val request        = FakeRequest(GET, guaranteeReferenceNumberRoute)
       val templateCaptor = ArgumentCaptor.forClass(classOf[String])
       val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
 
@@ -68,7 +68,7 @@ class AccessCodeControllerSpec extends SpecBase with MockitoSugar with NunjucksS
         "mode" -> NormalMode
       )
 
-      templateCaptor.getValue mustEqual "accessCode.njk"
+      templateCaptor.getValue mustEqual "guaranteeReferenceNumber.njk"
       jsonCaptor.getValue must containJson(expectedJson)
 
       application.stop()
@@ -79,9 +79,9 @@ class AccessCodeControllerSpec extends SpecBase with MockitoSugar with NunjucksS
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
 
-      val userAnswers    = UserAnswers(userAnswersId).set(AccessCodePage, "1111").success.value
+      val userAnswers    = UserAnswers(userAnswersId).set(GuaranteeReferenceNumberPage, "answer").success.value
       val application    = applicationBuilder(userAnswers = Some(userAnswers)).build()
-      val request        = FakeRequest(GET, accessCodeRoute)
+      val request        = FakeRequest(GET, guaranteeReferenceNumberRoute)
       val templateCaptor = ArgumentCaptor.forClass(classOf[String])
       val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
 
@@ -91,14 +91,14 @@ class AccessCodeControllerSpec extends SpecBase with MockitoSugar with NunjucksS
 
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
-      val filledForm = form.bind(Map("value" -> "1111"))
+      val filledForm = form.bind(Map("value" -> "answer"))
 
       val expectedJson = Json.obj(
         "form" -> filledForm,
         "mode" -> NormalMode
       )
 
-      templateCaptor.getValue mustEqual "accessCode.njk"
+      templateCaptor.getValue mustEqual "guaranteeReferenceNumber.njk"
       jsonCaptor.getValue must containJson(expectedJson)
 
       application.stop()
@@ -116,8 +116,8 @@ class AccessCodeControllerSpec extends SpecBase with MockitoSugar with NunjucksS
           .build()
 
       val request =
-        FakeRequest(POST, accessCodeRoute)
-          .withFormUrlEncodedBody(("value", "1111"))
+        FakeRequest(POST, guaranteeReferenceNumberRoute)
+          .withFormUrlEncodedBody(("value", "answer"))
 
       val result = route(application, request).value
 
@@ -133,7 +133,7 @@ class AccessCodeControllerSpec extends SpecBase with MockitoSugar with NunjucksS
         .thenReturn(Future.successful(Html("")))
 
       val application    = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-      val request        = FakeRequest(POST, accessCodeRoute).withFormUrlEncodedBody(("value", ""))
+      val request        = FakeRequest(POST, guaranteeReferenceNumberRoute).withFormUrlEncodedBody(("value", ""))
       val boundForm      = form.bind(Map("value" -> ""))
       val templateCaptor = ArgumentCaptor.forClass(classOf[String])
       val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
@@ -149,7 +149,7 @@ class AccessCodeControllerSpec extends SpecBase with MockitoSugar with NunjucksS
         "mode" -> NormalMode
       )
 
-      templateCaptor.getValue mustEqual "accessCode.njk"
+      templateCaptor.getValue mustEqual "guaranteeReferenceNumber.njk"
       jsonCaptor.getValue must containJson(expectedJson)
 
       application.stop()
@@ -159,7 +159,7 @@ class AccessCodeControllerSpec extends SpecBase with MockitoSugar with NunjucksS
 
       val application = applicationBuilder(userAnswers = None).build()
 
-      val request = FakeRequest(GET, accessCodeRoute)
+      val request = FakeRequest(GET, guaranteeReferenceNumberRoute)
 
       val result = route(application, request).value
 
@@ -175,7 +175,7 @@ class AccessCodeControllerSpec extends SpecBase with MockitoSugar with NunjucksS
       val application = applicationBuilder(userAnswers = None).build()
 
       val request =
-        FakeRequest(POST, accessCodeRoute)
+        FakeRequest(POST, guaranteeReferenceNumberRoute)
           .withFormUrlEncodedBody(("value", "answer"))
 
       val result = route(application, request).value

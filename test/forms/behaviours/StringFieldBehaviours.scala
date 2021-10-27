@@ -19,7 +19,6 @@ package forms.behaviours
 import org.scalacheck.Gen
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import play.api.data.{Field, Form, FormError}
-import wolfendale.scalacheck.regexp.RegexpGen
 
 trait StringFieldBehaviours extends FieldBehaviours {
 
@@ -33,16 +32,15 @@ trait StringFieldBehaviours extends FieldBehaviours {
       }
     }
 
-  def fieldWithInvalidCharacters(form: Form[_], fieldName: String, invalidKey: String, length: Int, args: Any*) =
-    s"must not bind strings with invalid characters" in {
+  def fieldWithInvalidCharacters(form: Form[_], fieldName: String, regex: String, gen: Gen[String], invalidKey: String): Unit =
+    s"must not bind strings which don't match $regex" in {
 
-      val expectedError          = Seq(FormError(fieldName, invalidKey, args.toList))
-      val generator: Gen[String] = RegexpGen.from(s"[!£^*(){}_+=:;|`~<>,±üçñèé@]{$length}")
+      val expectedError = FormError(fieldName, invalidKey, Seq(regex))
 
-      forAll(generator) {
+      forAll(gen.retryUntil(!_.matches(regex))) {
         invalidString =>
           val result: Field = form.bind(Map(fieldName -> invalidString)).apply(fieldName)
-          result.errors must equal(expectedError)
+          result.errors must contain(expectedError)
       }
     }
 

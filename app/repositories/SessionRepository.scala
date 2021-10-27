@@ -66,8 +66,6 @@ class DefaultSessionRepository @Inject() (
 
   override def set(userAnswers: UserAnswers): Future[Boolean] = {
 
-    implicit val dateWriter: Writes[LocalDateTime] = MongoDateTimeFormats.localDateTimeWrite
-
     val selector = Json.obj(
       "_id" -> userAnswers.id
     )

@@ -14,24 +14,18 @@
  * limitations under the License.
  */
 
-package forms
+package pages
 
-import forms.Constants.{accessCodeLength, alphaNumericRegex}
-import forms.mappings.Mappings
-import play.api.data.Form
+import pages.behaviours.PageBehaviours
 
-import javax.inject.Inject
+class GuaranteeReferenceNumberPageSpec extends PageBehaviours {
 
-class AccessCodeFormProvider @Inject() extends Mappings {
+  "GuaranteeReferenceNumberPage" - {
 
-  def apply(): Form[String] =
-    Form(
-      "value" -> text("accessCode.error.required")
-        .verifying(
-          StopOnFirstFail[String](
-            exactLength(accessCodeLength, "accessCode.error.length"),
-            regexp(alphaNumericRegex, "accessCode.error.invalidCharacters")
-          )
-        )
-    )
+    beRetrievable[String](GuaranteeReferenceNumberPage)
+
+    beSettable[String](GuaranteeReferenceNumberPage)
+
+    beRemovable[String](GuaranteeReferenceNumberPage)
+  }
 }

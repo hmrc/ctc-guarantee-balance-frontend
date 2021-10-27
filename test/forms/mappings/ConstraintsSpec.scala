@@ -22,7 +22,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
+import play.api.data.validation.{Invalid, Valid, ValidationResult}
 
 import java.time.LocalDate
 

@@ -16,21 +16,21 @@
 
 package forms
 
-import forms.Constants.{accessCodeLength, alphaNumericRegex}
+import forms.Constants.{alphaNumericRegex, maxGuaranteeReferenceNumberLength}
+
+import javax.inject.Inject
 import forms.mappings.Mappings
 import play.api.data.Form
 
-import javax.inject.Inject
-
-class AccessCodeFormProvider @Inject() extends Mappings {
+class GuaranteeReferenceNumberFormProvider @Inject() extends Mappings {
 
   def apply(): Form[String] =
     Form(
-      "value" -> text("accessCode.error.required")
+      "value" -> text("guaranteeReferenceNumber.error.required")
         .verifying(
-          StopOnFirstFail[String](
-            exactLength(accessCodeLength, "accessCode.error.length"),
-            regexp(alphaNumericRegex, "accessCode.error.invalidCharacters")
+          forms.StopOnFirstFail[String](
+            maxLength(maxGuaranteeReferenceNumberLength, "guaranteeReferenceNumber.error.length"),
+            regexp(alphaNumericRegex, "guaranteeReferenceNumber.error.invalid")
           )
         )
     )
