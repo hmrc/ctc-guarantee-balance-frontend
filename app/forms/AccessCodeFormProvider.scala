@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package generators
+package forms
 
-import org.scalacheck.Arbitrary
-import pages._
+import forms.Constants.alphaNumericRegex
 
-trait PageGenerators {
+import javax.inject.Inject
+import forms.mappings.Mappings
+import play.api.data.Form
 
-  implicit lazy val arbitraryAccessCodePage: Arbitrary[AccessCodePage.type] =
-    Arbitrary(AccessCodePage)
+class AccessCodeFormProvider @Inject() extends Mappings {
 
-  implicit lazy val arbitraryTestPagePage: Arbitrary[TestPagePage.type] =
-    Arbitrary(TestPagePage)
+  val accessCodeLength = 4
 
+  def apply(): Form[String] =
+    Form(
+      "value" -> text("accessCode.error.required")
+        .verifying(
+          StopOnFirstFail[String](exactLength(accessCodeLength, "accessCode.error.length"), regexp(alphaNumericRegex, "accessCode.error.invalidCharacters"))
+        )
+    )
 }
