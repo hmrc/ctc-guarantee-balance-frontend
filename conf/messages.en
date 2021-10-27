@@ -11,9 +11,9 @@ site.no = No
 site.yes = Yes
 site.continue = Continue
 site.confirmAndSend = Confirm and send
-site.service_name = Guarantee Balance
+site.service_name = Check your guarantee balance
 site.textarea.char_limit = (Limit is {0} characters)
-site.title.suffix = - Guarantee Balance - GOV.UK
+site.title.suffix = - Check your guarantee balance - GOV.UK
 site.youMust = You must
 
 error.title.prefix = Error:
@@ -46,7 +46,7 @@ pageNotFound.heading = Page not found
 pageNotFound.paragraph1 = If you typed the web address, check it is correct.
 pageNotFound.paragraph2 = If you pasted the web address, check you copied the entire address.
 pageNotFound.paragraph3Start = If the web address is correct or you selected a link or button,
-pageNotFound.contactLink=contact the New Computerised Transit System(NCTS) helpdesk if you need to speak to someone about your transit movement (opens in a new tab)
+pageNotFound.contactLink=contact the New Computerised Transit System(NCTS) helpdesk if you need to speak to someone about your guarantee balance (opens in a new tab)
 
 unauthorised.title = You cannot use this service
 unauthorised.heading = You cannot use this service
@@ -58,8 +58,9 @@ unauthorised.again.later = again later.
 technicalDifficulties.title = Sorry, there is a problem with the service
 technicalDifficulties.heading = Sorry, there is a problem with the service
 technicalDifficulties.tryAgain = Try again later.
+technicalDifficulties.savedAnswers = We have not saved your answers.
 technicalDifficulties.contact = You can
-technicalDifficulties.contact.link = contact the New Computerised Transit System helpdesk if you need to speak to someone about transit movements (opens in a new tab).
+technicalDifficulties.contact.link = contact the New Computerised Transit System helpdesk if you need to speak to someone about your guarantee balance (opens in a new tab)
 
 testPage.title = testPage
 testPage.heading = testPage
