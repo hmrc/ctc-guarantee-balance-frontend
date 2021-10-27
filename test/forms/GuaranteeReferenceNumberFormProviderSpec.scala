@@ -16,15 +16,16 @@
 
 package forms
 
-import forms.Constants.{alphaNumericRegex, maxGuaranteeReferenceNumberLength}
+import forms.Constants.{alphaNumericRegex, maxGuaranteeReferenceNumberLength, minGuaranteeReferenceNumberLength}
 import forms.behaviours.StringFieldBehaviours
 import play.api.data.FormError
 
 class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
 
-  val requiredKey = "guaranteeReferenceNumber.error.required"
-  val lengthKey   = "guaranteeReferenceNumber.error.length"
-  val invalidKey  = "guaranteeReferenceNumber.error.invalid"
+  val requiredKey  = "guaranteeReferenceNumber.error.required"
+  val maxLengthKey = "guaranteeReferenceNumber.error.maxLength"
+  val minLengthKey = "guaranteeReferenceNumber.error.minLength"
+  val invalidKey   = "guaranteeReferenceNumber.error.invalid"
 
   val form = new GuaranteeReferenceNumberFormProvider()()
 
@@ -42,7 +43,14 @@ class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
       form = form,
       fieldName = fieldName,
       maxLength = maxGuaranteeReferenceNumberLength,
-      lengthError = FormError(fieldName, lengthKey, Seq(maxGuaranteeReferenceNumberLength))
+      lengthError = FormError(fieldName, maxLengthKey, Seq(maxGuaranteeReferenceNumberLength))
+    )
+
+    behave like fieldWithMinLength(
+      form = form,
+      fieldName = fieldName,
+      minLength = minGuaranteeReferenceNumberLength,
+      lengthError = FormError(fieldName, minLengthKey, Seq(minGuaranteeReferenceNumberLength))
     )
 
     behave like mandatoryField(
