@@ -33,7 +33,7 @@ trait StringFieldBehaviours extends FieldBehaviours {
     }
 
   def fieldWithMinLength(form: Form[_], fieldName: String, minLength: Int, lengthError: FormError): Unit =
-    s"must not bind strings longer than $minLength characters" in {
+    s"must not bind strings shorter than $minLength characters" in {
 
       forAll(stringsWithMaxLength(minLength - 1)) {
         string =>
