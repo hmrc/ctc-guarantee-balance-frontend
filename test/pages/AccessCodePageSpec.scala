@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package generators
+package pages
 
-import org.scalacheck.Arbitrary
-import pages._
+import pages.behaviours.PageBehaviours
 
-trait PageGenerators {
+class AccessCodePageSpec extends PageBehaviours {
 
-  implicit lazy val arbitraryAccessCodePage: Arbitrary[AccessCodePage.type] =
-    Arbitrary(AccessCodePage)
+  "AccessCodePage" - {
 
-  implicit lazy val arbitraryTestPagePage: Arbitrary[TestPagePage.type] =
-    Arbitrary(TestPagePage)
+    beRetrievable[String](AccessCodePage)
 
+    beSettable[String](AccessCodePage)
+
+    beRemovable[String](AccessCodePage)
+  }
 }

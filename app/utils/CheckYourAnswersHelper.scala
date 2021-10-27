@@ -17,15 +17,28 @@
 package utils
 
 import controllers.routes
-import controllers.routes._
 import models.{CheckMode, UserAnswers}
 import pages._
 import play.api.i18n.Messages
-import uk.gov.hmrc.viewmodels._
 import uk.gov.hmrc.viewmodels.SummaryList._
-import uk.gov.hmrc.viewmodels.Text.Literal
+import uk.gov.hmrc.viewmodels._
 
 class CheckYourAnswersHelper(userAnswers: UserAnswers)(implicit messages: Messages) {
+
+  def accessCode: Option[Row] = userAnswers.get(AccessCodePage) map {
+    answer =>
+      Row(
+        key = Key(msg"accessCode.checkYourAnswersLabel", classes = Seq("govuk-!-width-one-half")),
+        value = Value(lit"$answer"),
+        actions = List(
+          Action(
+            content = msg"site.edit",
+            href = routes.AccessCodeController.onPageLoad(CheckMode).url,
+            visuallyHiddenText = Some(msg"site.edit.hidden".withArgs(msg"accessCode.checkYourAnswersLabel"))
+          )
+        )
+      )
+  }
 
   def eoriNumber: Option[Row] = userAnswers.get(EoriNumberPage) map {
     answer =>
