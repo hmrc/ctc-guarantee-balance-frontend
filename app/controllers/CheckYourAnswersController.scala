@@ -54,6 +54,7 @@ class CheckYourAnswersController @Inject() (
   }
 
   //TODO onPost to be implemented once the backend is implemented
+  //TODO call .removeSpaces() on GRN before sending to backend
 
   private def createSections(userAnswers: UserAnswers): Section = {
     val helper = new CheckYourAnswersHelper(userAnswers, CheckMode)

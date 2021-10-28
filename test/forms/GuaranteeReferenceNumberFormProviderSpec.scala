@@ -16,7 +16,7 @@
 
 package forms
 
-import forms.Constants.{alphaNumericRegex, maxGuaranteeReferenceNumberLength, minGuaranteeReferenceNumberLength}
+import forms.Constants.{alphaNumericWithSpacesRegex, maxGuaranteeReferenceNumberLength, minGuaranteeReferenceNumberLength}
 import forms.behaviours.StringFieldBehaviours
 import play.api.data.FormError
 
@@ -62,9 +62,18 @@ class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
     behave like fieldThatDoesNotBindInvalidData(
       form = form,
       fieldName = fieldName,
-      regex = alphaNumericRegex,
+      regex = alphaNumericWithSpacesRegex,
       gen = stringsOfLength(maxGuaranteeReferenceNumberLength),
       invalidKey = invalidKey
+    )
+
+    behave like fieldThatIgnoresSpaces(
+      form = form,
+      fieldName = fieldName,
+      regex = alphaNumericWithSpacesRegex,
+      minLength = minGuaranteeReferenceNumberLength,
+      maxLength = maxGuaranteeReferenceNumberLength,
+      lengthError = FormError(fieldName, minLengthKey, Seq(minGuaranteeReferenceNumberLength))
     )
 
   }
