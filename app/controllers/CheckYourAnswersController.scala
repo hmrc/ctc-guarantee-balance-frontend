@@ -52,9 +52,9 @@ class CheckYourAnswersController @Inject() (
       renderer.render("checkYourAnswers.njk", json).map(Ok(_))
   }
 
-  //TODO call .removeSpaces() on GRN before sending to backend
   def onSubmit: Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
+      // TODO - send answers to backend, calling .removeSpaces() on GRN
       Redirect(routes.BalanceConfirmationController.onPageLoad())
   }
 
