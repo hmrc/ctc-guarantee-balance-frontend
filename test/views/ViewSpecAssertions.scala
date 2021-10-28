@@ -100,6 +100,16 @@ trait ViewSpecAssertions extends Matchers {
     }
   }
 
+  def assertPageHasLink(doc: Document, id: String, expectedText: String, expectedHref: String): Assertion = {
+    val link = doc.selectFirst(s"a[id=$id]")
+    assertLinkHasExpectedAttributes(link, expectedText, expectedHref)
+  }
+
+  private def assertLinkHasExpectedAttributes(link: Element, expectedText: String, expectedHref: String): Assertion = {
+    link.text() mustBe expectedText
+    link.attr("href") mustBe expectedHref
+  }
+
   def assertPageHasSignOutLink(doc: Document, expectedText: String, expectedHref: String): Assertion = {
     val link = doc.getElementsByClass("hmrc-sign-out-nav__link").first()
     link.text() mustBe expectedText
