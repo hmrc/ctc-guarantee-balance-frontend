@@ -17,7 +17,6 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import base.SpecBase
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{times, verify, when}
@@ -55,6 +54,29 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
     "must redirect to Session Expired for a GET if no existing data is found" in {
 
       val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+
+      val result = route(app, request).value
+
+      status(result) mustEqual SEE_OTHER
+
+      redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
+    }
+
+    "must redirect to Balance Confirmation for a POST" in {
+
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val request     = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+
+      val result = route(application, request).value
+
+      status(result) mustEqual SEE_OTHER
+
+      redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
+    }
+
+    "must redirect to Session Expired for a POST if no existing data is found" in {
+
+      val request = FakeRequest(GET, routes.CheckYourAnswersController.onSubmit().url)
 
       val result = route(app, request).value
 

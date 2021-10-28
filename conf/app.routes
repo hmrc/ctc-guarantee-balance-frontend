@@ -32,5 +32,6 @@ GET        /change-access-code                      controllers.AccessCodeContro
 POST       /change-access-code                      controllers.AccessCodeController.onSubmit(mode: Mode = CheckMode)
 
 GET        /check-your-answers                      controllers.CheckYourAnswersController.onPageLoad()
+POST       /check-your-answers                      controllers.CheckYourAnswersController.onSubmit()
 
 GET        /balance-confirmation                    controllers.BalanceConfirmationController.onPageLoad()
