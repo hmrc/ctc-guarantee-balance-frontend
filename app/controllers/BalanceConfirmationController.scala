@@ -17,12 +17,14 @@
 package controllers
 
 import controllers.actions._
-import javax.inject.Inject
+import models.{Balance, NormalMode}
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class BalanceConfirmationController @Inject() (
@@ -38,6 +40,12 @@ class BalanceConfirmationController @Inject() (
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      renderer.render("balanceConfirmation.njk").map(Ok(_))
+      val json = Json.obj(
+        "balance"                         -> Balance(8500).forDisplay, // TODO - retrieve actual balance
+        "isNctsUser"                      -> true, // TODO - determine if user came from GOV.UK or NCTS
+        "checkAnotherGuaranteeBalanceUrl" -> routes.EoriNumberController.onPageLoad(NormalMode).url
+      )
+
+      renderer.render("balanceConfirmation.njk", json).map(Ok(_))
   }
 }
