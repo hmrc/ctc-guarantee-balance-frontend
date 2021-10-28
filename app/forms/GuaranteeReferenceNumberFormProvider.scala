@@ -29,9 +29,8 @@ class GuaranteeReferenceNumberFormProvider @Inject() extends Mappings {
       "value" -> text("guaranteeReferenceNumber.error.required")
         .verifying(
           forms.StopOnFirstFail[String](
-            maxLengthIgnoreSpaces(maxGuaranteeReferenceNumberLength, "guaranteeReferenceNumber.error.maxLength"),
-            minLengthIgnoreSpaces(minGuaranteeReferenceNumberLength, "guaranteeReferenceNumber.error.minLength"),
-            regexp(alphaNumericWithSpacesRegex, "guaranteeReferenceNumber.error.invalid")
+            maxLength(maxGuaranteeReferenceNumberLength, "guaranteeReferenceNumber.error.length"),
+            regexp(alphaNumericRegex, "guaranteeReferenceNumber.error.invalid")
           )
         )
     )
