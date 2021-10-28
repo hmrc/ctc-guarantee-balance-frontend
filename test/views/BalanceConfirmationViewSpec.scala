@@ -85,7 +85,7 @@ class BalanceConfirmationViewSpec extends SingleViewSpec("balanceConfirmation.nj
         doc = doc,
         id = "manage-transit-movements",
         expectedText = "balanceConfirmation.fromNcts.link2",
-        expectedHref = frontendAppConfig.manageTransitMovementsUrl
+        expectedHref = controllers.routes.BalanceConfirmationController.manageTransitMovements().url
       )
     }
 

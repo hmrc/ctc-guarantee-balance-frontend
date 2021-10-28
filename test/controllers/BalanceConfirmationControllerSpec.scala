@@ -18,13 +18,13 @@ package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import matchers.JsonMatchers.containJson
-import models.{Balance, NormalMode}
+import models.{Balance, NormalMode, UserAnswers}
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{times, verify}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.mockito.MockitoSugar
-import pages.IsNctsUserPage
+import pages.{EoriNumberPage, IsNctsUserPage}
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -33,64 +33,111 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
 
   "BalanceConfirmation Controller" - {
 
-    "return OK and the correct view for a GET" - {
+    ".onPageLoad" - {
+      "must return OK and the correct view for a GET" - {
 
-      "IsNctsUserPage undefined" in {
+        "IsNctsUserPage undefined" in {
 
-        val application    = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-        val request        = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
-        val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-        val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
+          val application    = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+          val request        = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
+          val templateCaptor = ArgumentCaptor.forClass(classOf[String])
+          val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
 
-        val result = route(application, request).value
+          val result = route(application, request).value
 
-        status(result) mustEqual OK
+          status(result) mustEqual OK
 
-        verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
+          verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
-        val expectedJson = Json.obj(
-          "balance"                         -> Balance(8500).toString,
-          "isNctsUser"                      -> false,
-          "checkAnotherGuaranteeBalanceUrl" -> routes.EoriNumberController.onPageLoad(NormalMode).url
-        )
+          val expectedJson = Json.obj(
+            "balance"                         -> Balance(8500).toString,
+            "isNctsUser"                      -> false,
+            "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
+          )
 
-        templateCaptor.getValue mustEqual "balanceConfirmation.njk"
-        jsonCaptor.getValue must containJson(expectedJson)
+          templateCaptor.getValue mustEqual "balanceConfirmation.njk"
+          jsonCaptor.getValue must containJson(expectedJson)
 
-        application.stop()
-      }
+          application.stop()
+        }
 
-      "IsNctsUserPage defined" in {
+        "IsNctsUserPage defined" in {
 
-        forAll(arbitrary[Boolean]) {
-          bool =>
-            beforeEach()
+          forAll(arbitrary[Boolean]) {
+            bool =>
+              beforeEach()
 
-            val userAnswers = emptyUserAnswers.set(IsNctsUserPage, bool).success.value
+              val userAnswers = emptyUserAnswers.set(IsNctsUserPage, bool).success.value
 
-            val application    = applicationBuilder(userAnswers = Some(userAnswers)).build()
-            val request        = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
-            val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-            val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
+              val application    = applicationBuilder(userAnswers = Some(userAnswers)).build()
+              val request        = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
+              val templateCaptor = ArgumentCaptor.forClass(classOf[String])
+              val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
 
-            val result = route(application, request).value
+              val result = route(application, request).value
 
-            status(result) mustEqual OK
+              status(result) mustEqual OK
 
-            verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
+              verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
-            val expectedJson = Json.obj(
-              "balance"                         -> Balance(8500).toString,
-              "isNctsUser"                      -> bool,
-              "checkAnotherGuaranteeBalanceUrl" -> routes.EoriNumberController.onPageLoad(NormalMode).url
-            )
+              val expectedJson = Json.obj(
+                "balance"                         -> Balance(8500).toString,
+                "isNctsUser"                      -> bool,
+                "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
+              )
 
-            templateCaptor.getValue mustEqual "balanceConfirmation.njk"
-            jsonCaptor.getValue must containJson(expectedJson)
+              templateCaptor.getValue mustEqual "balanceConfirmation.njk"
+              jsonCaptor.getValue must containJson(expectedJson)
 
-            application.stop()
+              application.stop()
+          }
         }
       }
     }
+
+    ".checkAnotherGuaranteeBalance" - {
+      "must clear user answers and redirect to EORI Number page" in {
+
+        val userAnswers = emptyUserAnswers.set(EoriNumberPage, "eori").success.value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+        val request     = FakeRequest(GET, routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+
+        redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
+
+        val uaCaptor = ArgumentCaptor.forClass(classOf[UserAnswers])
+        verify(mockSessionRepository).set(uaCaptor.capture)
+        uaCaptor.getValue.data mustEqual Json.obj()
+
+        application.stop()
+      }
+    }
+
+    ".manageTransitMovements" - {
+      "must clear user answers and redirect to manage transit movements" in {
+
+        val userAnswers = emptyUserAnswers.set(EoriNumberPage, "eori").success.value
+
+        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+        val request     = FakeRequest(GET, routes.BalanceConfirmationController.manageTransitMovements().url)
+
+        val result = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+
+        redirectLocation(result).value mustEqual frontendAppConfig.manageTransitMovementsUrl
+
+        val uaCaptor = ArgumentCaptor.forClass(classOf[UserAnswers])
+        verify(mockSessionRepository).set(uaCaptor.capture)
+        uaCaptor.getValue.data mustEqual Json.obj()
+
+        application.stop()
+      }
+    }
+
   }
 }

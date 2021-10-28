@@ -53,7 +53,7 @@ class AccessCodeController @Inject() (
     implicit request =>
       val preparedForm = request.userAnswers.get(AccessCodePage) match {
         case None        => form
-        case Some(value) => form.fill(value)
+        case Some(value) => form.fill(value) // TODO - this doesn't prefill the form because of the 'passwordy' nature of the input
       }
 
       val json = Json.obj(

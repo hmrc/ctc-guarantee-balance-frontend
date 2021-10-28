@@ -62,6 +62,8 @@ final case class UserAnswers(
         page.cleanup(None, updatedAnswers)
     }
   }
+
+  def clear: UserAnswers = this.copy(data = Json.obj())
 }
 
 object UserAnswers {
