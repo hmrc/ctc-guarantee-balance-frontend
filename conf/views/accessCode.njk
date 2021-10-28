@@ -31,16 +31,17 @@
 
           {{ csrf() | safe }}
 
-           {{ govukInput({
-             label: {
-                  text: messages('accessCode.heading'),
-                  isPageHeading: true,
-                  classes: "govuk-label--xl govuk-!-padding-bottom-5"
-             },
+          {{ govukInput({
+            label: {
+              text: messages('accessCode.heading'),
+              isPageHeading: true,
+              classes: "govuk-label--xl govuk-!-padding-bottom-5"
+            },
             type: "password",
             id: "value",
             classes: "govuk-input--width-5",
             name: "value",
+            value: form.value.value,
             errorMessage: form.value.error
           }) }}
 
