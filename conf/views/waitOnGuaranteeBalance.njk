@@ -1,6 +1,7 @@
 {% extends 'error.njk' %}
 {% extends "includes/layout.njk" %}
 
+{% from "govuk/components/button/macro.njk"        import govukButton %}
 {% from "macros/title.njk"                         import title %}
 
 {% block pageTitle %}
@@ -15,6 +16,10 @@
       <p class="govuk-body">{{ messages("waitOnGuaranteeBalance.paragraph", waitTimeInSeconds) }}</p>
       <form action="{{ routes.controllers.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url }}" method="post">
          {{ csrf() | safe }}
+
+         {{ govukButton({
+            text: messages("site.continue")
+         }) }}
       </form>
    </div>
   </div>
