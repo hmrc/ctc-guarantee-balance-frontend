@@ -95,3 +95,11 @@ accessCode.error.invalidCharacters = The access code must only include letters a
 checkYourAnswers.title = Check your answers
 checkYourAnswers.heading = Check your answers
 checkYourAnswers.preHeading = Guarantee balance details
+
+balanceConfirmation.title = Your balance
+balanceConfirmation.heading = Your balance
+balanceConfirmation.fromGovUk.p = You can
+balanceConfirmation.fromGovUk.link = check another guarantee balance
+balanceConfirmation.fromNcts.p = You can:
+balanceConfirmation.fromNcts.link1 = check another guarantee balance
+balanceConfirmation.fromNcts.link2 = manage your transit movements

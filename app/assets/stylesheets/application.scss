@@ -17,3 +17,11 @@ $hmrc-assets-path: "/ctc-guarantee-balance/assets/lib/hmrc-frontend/hmrc/assets"
     @extend .govuk-label;
     @extend #{'.govuk-\\!-padding-bottom-2'};
 }
+
+p {
+    @extend .govuk-body;
+}
+
+a {
+    @extend .govuk-link;
+}
