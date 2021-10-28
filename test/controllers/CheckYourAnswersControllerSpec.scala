@@ -17,9 +17,8 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import base.SpecBase
 import org.mockito.ArgumentCaptor
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.FakeRequest
@@ -37,9 +36,9 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
 
-      val application    = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-      val request        = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
-      val templateCaptor = ArgumentCaptor.forClass(classOf[String])
+      val application                            = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val request                                = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
 
       val result = route(application, request).value
 
@@ -62,5 +61,31 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
       redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
     }
+
+    "must redirect to session expired if GRN is not found in user answer " in {
+
+      val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+
+      val result = route(app, request).value
+
+      status(result) mustEqual SEE_OTHER
+
+      redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
+
+    }
+
+    "must redirect to rate limit if lock in mongo repository is taken for that user and GRN " in {
+      val application = applicationBuilder(userAnswers = Some(nonEmptyUserAnswers)).build()
+      val request     = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+      when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(false))
+
+      val result = route(application, request).value
+
+      status(result) mustEqual SEE_OTHER
+
+      redirectLocation(result).value mustEqual routes.RateLimitController.onPageLoad().url
+
+    }
+
   }
 }

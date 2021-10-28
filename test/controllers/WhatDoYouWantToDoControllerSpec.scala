@@ -18,7 +18,7 @@ package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import org.mockito.ArgumentCaptor
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._

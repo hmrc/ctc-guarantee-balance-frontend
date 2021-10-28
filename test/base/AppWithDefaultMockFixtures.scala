@@ -28,6 +28,7 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers
 import repositories.SessionRepository
+import uk.gov.hmrc.mongo.lock.MongoLockRepository
 import uk.gov.hmrc.nunjucks.NunjucksRenderer
 
 trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerSuite with GuiceFakeApplicationFactory with MockitoSugar {
@@ -40,11 +41,10 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
       mockSessionRepository
     )
 
-  val mockRenderer: NunjucksRenderer = mock[NunjucksRenderer]
-
+  val mockRenderer: NunjucksRenderer               = mock[NunjucksRenderer]
   val mockDataRetrievalAction: DataRetrievalAction = mock[DataRetrievalAction]
-
-  val mockSessionRepository: SessionRepository = mock[SessionRepository]
+  val mockSessionRepository: SessionRepository     = mock[SessionRepository]
+  val mockMongoLockRepository: MongoLockRepository = mock[MongoLockRepository]
 
   final override def fakeApplication(): Application =
     applicationBuilder()
@@ -58,6 +58,7 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers)),
         bind[NunjucksRenderer].toInstance(mockRenderer),
         bind[MessagesApi].toInstance(Helpers.stubMessagesApi()),
-        bind[SessionRepository].toInstance(mockSessionRepository)
+        bind[SessionRepository].toInstance(mockSessionRepository),
+        bind[MongoLockRepository].toInstance(mockMongoLockRepository)
       )
 }

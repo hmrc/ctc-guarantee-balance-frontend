@@ -29,8 +29,8 @@ object AppDependencies {
     "org.scalatestplus"         %% "scalatestplus-scalacheck" % "3.1.0.0-RC2",
     "org.pegdown"               % "pegdown"                   % "1.6.0",
     "org.jsoup"                 % "jsoup"                     % "1.14.2",
+    "org.mockito"               % "mockito-core"              % "3.12.4",
     "com.typesafe.play"         %% "play-test"                % PlayVersion.current,
-    "org.mockito"               % "mockito-all"               % "1.10.19",
     "org.scalacheck"            %% "scalacheck"               % "1.15.0",
     "com.github.tomakehurst"    %  "wiremock-standalone"      % "2.27.2",
     "wolfendale"                %% "scalacheck-gen-regexp"    % "0.1.2"

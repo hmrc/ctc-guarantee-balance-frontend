@@ -50,6 +50,11 @@ trait SpecBase
 
   def emptyUserAnswers = UserAnswers(userAnswersId, Json.obj())
 
+  val nonEmptyUserAnswers: UserAnswers = UserAnswers(
+    userAnswersId,
+    Json.obj("eoriNumber" -> "GB1234567", "guaranteeReferenceNumber" -> "GB1234567890123456")
+  )
+
   def injector: Injector = app.injector
 
   def frontendAppConfig: FrontendAppConfig = injector.instanceOf[FrontendAppConfig]

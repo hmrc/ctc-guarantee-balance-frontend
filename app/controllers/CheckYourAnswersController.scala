@@ -16,13 +16,17 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions._
 import models.{CheckMode, UserAnswers}
+import pages.{EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.{Format, Json, Reads}
+import play.api.mvc.Results.Redirect
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
 import uk.gov.hmrc.http.HttpReads.{is2xx, is4xx}
+import uk.gov.hmrc.mongo.lock.MongoLockRepository
 //import uk.gov.hmrc.mongo.lock.MongoLockRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
@@ -39,8 +43,9 @@ class CheckYourAnswersController @Inject() (
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
   val controllerComponents: MessagesControllerComponents,
-  renderer: Renderer
-  // mongoLockRepository: MongoLockRepository
+  renderer: Renderer,
+  mongoLockRepository: MongoLockRepository,
+  config: FrontendAppConfig
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -56,51 +61,37 @@ class CheckYourAnswersController @Inject() (
       renderer.render("checkYourAnswers.njk", json).map(Ok(_))
   }
 
-  def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  //TODO onSubmit to be completed once the backend is implemented
+  //TODO call .removeSpaces() on GRN before sending to backend
+  
+  def onSubmit(): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
-      println("\n\n\n\nrequest" + request)
-      val answers = createSections(request.userAnswers)
-      val json = Json.obj(
-        "section" -> Json.toJson(answers)
-      )
+      val eoriNumber: String = request.eoriNumber
 
-      renderer.render("checkYourAnswers.njk", json).map(Ok(_))
-//        val jsonGuarantees = Json.parse(request.userAnswers.data.value.getOrElse("guarantees", "").toString)
-//
-//        implicit val a: Format[guarantees] = Json.format[guarantees]
-//        implicit val b: Reads[guarantees]  = Json.reads[guarantees]
-//
-//        val listOfGuarantees = jsonGuarantees.as[guarantees]
-//        val owner            = java.util.UUID.randomUUID().toString
-//        val duration         = 60.seconds
-//
-//        mongoLockRepository
-//          .takeLock((request.userAnswers. listOfGuarantees.guaranteeReference.trim.toLowerCase).hashCode.toString, owner, duration)
-//          .flatMap {
-//            lockTaken =>
-//              if (true) {
-//                submissionService.submit(request.userAnswers) flatMap {
-//
-//                  case Right(value) =>
-//                    value.status match {
-//                      case status if is2xx(status) => Future.successful(Redirect(routes.SubmissionConfirmationController.onPageLoad(lrn)))
-//                      case status if is4xx(status) => errorHandler.onClientError(request, status)
-//                      case _                       => renderTechnicalDifficultiesPage
-//                    }
-//
-//                  case Left(_) => // TODO we can pass this value back to help debug
-//                    errorHandler.onClientError(request, BAD_REQUEST)
-//                }
-//              } else {
-//                println("\n\n\n\n\n\n\n\nLockNotTking\n\n\n\n\n\n")
-//                Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
-//              }
-//          }
+      val guaranteedReferenceNumber: Option[String] = request.userAnswers
+        .flatMap(
+          userAnswers => userAnswers.get(GuaranteeReferenceNumberPage)
+        )
 
+      guaranteedReferenceNumber match {
+        case None => Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
+        case Some(guaranteedReferenceNumber: String) =>
+          checkRateLimit(eoriNumber, guaranteedReferenceNumber).flatMap {
+            lockTaken =>
+              if (lockTaken) {
+                ??? //todo this needs to be completed once the back end direction has been confirmed
+              } else {
+                Future.successful(Redirect(routes.RateLimitController.onPageLoad()))
+              }
+          }
+      }
   }
 
-  //TODO onPost to be implemented once the backend is implemented
-  //TODO call .removeSpaces() on GRN before sending to backend
+  private def checkRateLimit(eoriNumber: String, guaranteedReferenceNumber: String) = {
+    val lockId   = (eoriNumber + guaranteedReferenceNumber.trim.toLowerCase).hashCode.toString
+    val duration = config.rateLimitDuration.seconds
+    mongoLockRepository.takeLock(lockId, eoriNumber, duration)
+  }
 
   private def createSections(userAnswers: UserAnswers): Section = {
     val helper = new CheckYourAnswersHelper(userAnswers, CheckMode)
@@ -113,12 +104,5 @@ class CheckYourAnswersController @Inject() (
       ).flatten
     )
   }
-
-  case class guarantees(
-    guaranteeType: String,
-    guaranteeReference: String,
-    liabilityAmount: String,
-    accessCode: String
-  )
 
 }
