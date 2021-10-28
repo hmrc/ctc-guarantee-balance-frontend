@@ -23,9 +23,8 @@ import models.{Mode, NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.any
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.Mockito.{times, verify}
 import org.scalacheck.Arbitrary.arbitrary
-import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{EoriNumberPage, IsNctsUserPage}
 import play.api.inject.bind
@@ -33,19 +32,11 @@ import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.twirl.api.Html
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 
 import java.time.LocalDateTime
-import scala.concurrent.Future
 
-class EoriNumberControllerSpec
-    extends SpecBase
-    with MockitoSugar
-    with NunjucksSupport
-    with JsonMatchers
-    with AppWithDefaultMockFixtures
-    with BeforeAndAfterEach {
+class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksSupport with JsonMatchers with AppWithDefaultMockFixtures {
 
   def onwardRoute = Call("GET", "/foo")
 
@@ -56,11 +47,6 @@ class EoriNumberControllerSpec
 
   def eoriNumberRoute(mode: Mode = NormalMode, isNctsUser: Boolean): String = routes.EoriNumberController.onPageLoad(mode, isNctsUser).url
 
-  override def beforeEach(): Unit = {
-    super.beforeEach()
-    when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-  }
-
   "EoriNumber Controller" - {
 
     "must return OK and the correct view for a GET" in {
@@ -68,9 +54,6 @@ class EoriNumberControllerSpec
       forAll(arbitrary[Mode], arbitrary[Boolean]) {
         (mode, bool) =>
           beforeEach()
-
-          when(mockRenderer.render(any(), any())(any()))
-            .thenReturn(Future.successful(Html("")))
 
           val application    = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
           val request        = FakeRequest(GET, eoriNumberRoute(mode, isNctsUser = bool))
@@ -101,9 +84,6 @@ class EoriNumberControllerSpec
       forAll(arbitrary[Mode], arbitrary[Boolean]) {
         (mode, bool) =>
           beforeEach()
-
-          when(mockRenderer.render(any(), any())(any()))
-            .thenReturn(Future.successful(Html("")))
 
           val userAnswers = UserAnswers(userAnswersId).set(EoriNumberPage, validAnswer).success.value
 
@@ -208,9 +188,6 @@ class EoriNumberControllerSpec
       forAll(arbitrary[Mode], arbitrary[Boolean]) {
         (mode, bool) =>
           beforeEach()
-
-          when(mockRenderer.render(any(), any())(any()))
-            .thenReturn(Future.successful(Html("")))
 
           val application    = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
           val request        = FakeRequest(POST, eoriNumberRoute(mode, isNctsUser = bool)).withFormUrlEncodedBody(("value", ""))

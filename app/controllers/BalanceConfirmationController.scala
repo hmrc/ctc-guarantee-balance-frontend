@@ -18,6 +18,7 @@ package controllers
 
 import controllers.actions._
 import models.{Balance, NormalMode}
+import pages.IsNctsUserPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -40,9 +41,10 @@ class BalanceConfirmationController @Inject() (
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
+      val isNctsUser = request.userAnswers.get(IsNctsUserPage).getOrElse(false)
       val json = Json.obj(
         "balance"                         -> Balance(8500).toString, // TODO - retrieve actual balance
-        "isNctsUser"                      -> true, // TODO - determine if user came from GOV.UK or NCTS
+        "isNctsUser"                      -> isNctsUser,
         "checkAnotherGuaranteeBalanceUrl" -> routes.EoriNumberController.onPageLoad(NormalMode).url
       )
 

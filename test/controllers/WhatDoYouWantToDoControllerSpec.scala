@@ -19,21 +19,15 @@ package controllers
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.any
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.Mockito.{times, verify}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.twirl.api.Html
-
-import scala.concurrent.Future
 
 class WhatDoYouWantToDoControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   "WhatDoYouWantToDoController" - {
 
     "must return OK and the correct view for a GET" in {
-
-      when(mockRenderer.render(any(), any())(any()))
-        .thenReturn(Future.successful(Html("")))
 
       val request = FakeRequest(GET, routes.WhatDoYouWantToDoController.onPageLoad().url)
 
