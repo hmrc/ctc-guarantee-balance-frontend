@@ -18,8 +18,8 @@ package models
 
 class Balance(balance: Int) {
 
-  private val formatter  = java.text.NumberFormat.getIntegerInstance
-  def forDisplay: String = s"£${formatter.format(balance)}"
+  private val formatter         = java.text.NumberFormat.getIntegerInstance
+  override def toString: String = s"£${formatter.format(balance)}"
 }
 
 object Balance {

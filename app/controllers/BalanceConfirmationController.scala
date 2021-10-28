@@ -41,7 +41,7 @@ class BalanceConfirmationController @Inject() (
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       val json = Json.obj(
-        "balance"                         -> Balance(8500).forDisplay, // TODO - retrieve actual balance
+        "balance"                         -> Balance(8500).toString, // TODO - retrieve actual balance
         "isNctsUser"                      -> true, // TODO - determine if user came from GOV.UK or NCTS
         "checkAnotherGuaranteeBalanceUrl" -> routes.EoriNumberController.onPageLoad(NormalMode).url
       )
