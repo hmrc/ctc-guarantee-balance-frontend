@@ -36,4 +36,4 @@ POST       /check-your-answers                      controllers.CheckYourAnswers
 
 GET        /balance-confirmation                    controllers.BalanceConfirmationController.onPageLoad()
 
-GET        /detailsDontMatch                       controllers.DetailsDontMatchController.onPageLoad()
+GET        /details-do-not-match                    controllers.DetailsDontMatchController.onPageLoad()
