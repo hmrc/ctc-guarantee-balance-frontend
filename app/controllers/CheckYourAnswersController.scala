@@ -63,7 +63,7 @@ class CheckYourAnswersController @Inject() (
 
   //TODO onSubmit to be completed once the backend is implemented
   //TODO call .removeSpaces() on GRN before sending to backend
-  
+
   def onSubmit(): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
       val eoriNumber: String = request.eoriNumber

@@ -96,7 +96,8 @@ checkYourAnswers.title = Check your answers
 checkYourAnswers.heading = Check your answers
 checkYourAnswers.preHeading = Guarantee balance details
 
-rateLimit.title = Please wait while we get your details
-rateLimit.heading = Please wait while we get your details
-rateLimit.paragraph = This may take up to 60 seconds.
-
+rateLimit.title = You must try again
+rateLimit.heading = You must try again
+rateLimit.paragraph = We were unable to get your details. You can try again and this may take up to 60 seconds.
+rateLimit.button = Try again
+rateLimit.href = routes.EoriNumberController.onPageload().url

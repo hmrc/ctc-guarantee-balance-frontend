@@ -17,8 +17,11 @@
 package controllers
 
 import controllers.actions._
+import models.Mode
+
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -35,8 +38,10 @@ class RateLimitController @Inject() (
     extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData).async {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
-      renderer.render("rateLimit.njk").map(Ok(_))
+      val json = Json.obj("nextPageUrl" -> controllers.routes.EoriNumberController.onPageLoad(mode).url)
+
+      renderer.render("rateLimit.njk", json).map(Ok(_))
   }
 }

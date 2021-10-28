@@ -1,6 +1,7 @@
 {% extends "includes/layout.njk" %}
 
 {% from "macros/title.njk"                         import title %}
+{% from "govuk/components/button/macro.njk"        import govukButton %}
 
 {% block pageTitle %}
   {{ title(messages("rateLimit.title")) }}
@@ -19,6 +20,14 @@
         <p class="govuk-body">
               {{ messages("rateLimit.paragraph") }}
         </p>
+
+        {{ govukButton({
+           text: messages("rateLimit.button"),
+           preventDoubleClick: true,
+           href: nextPageUrl,
+           isStartButton: false
+        }) }}
+
 
       </div>
     </div>
