@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package forms
+package models
 
-object Constants {
+class Balance(balance: Int) {
 
-  lazy val maxEoriNumberLength: Int               = 17
-  lazy val minGuaranteeReferenceNumberLength: Int = 17
-  lazy val maxGuaranteeReferenceNumberLength: Int = 24
-  lazy val accessCodeLength: Int                  = 4
+  private val formatter  = java.text.NumberFormat.getIntegerInstance
+  def forDisplay: String = s"£${formatter.format(balance)}"
+}
 
-  lazy val alphaNumericRegex: String           = "^[a-zA-Z0-9]*$"
-  lazy val alphaNumericWithSpacesRegex: String = "^[a-zA-Z0-9 ]*$"
-  lazy val eoriNumberRegex: String             = "(?i)(gb|xi).*"
-
+object Balance {
+  def apply(balance: Int) = new Balance(balance)
 }

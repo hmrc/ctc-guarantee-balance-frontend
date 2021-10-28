@@ -20,8 +20,12 @@
           {{ messages("technicalDifficulties.tryAgain") }}
         </p>
 
+        <p class="govuk-body">
+          {{ messages("technicalDifficulties.savedAnswers") }}
+        </p>
+
         <p class="govuk-body">{{ messages("technicalDifficulties.contact") }}
-          <a class="govuk-link" href={{ contactUrl }} target="_blank" rel="noopener noreferrer">{{ messages("technicalDifficulties.contact.link") }}</a>.
+          <a class="govuk-link" id="contact-link" href="{{ contactUrl }}" target="_blank" rel="noopener noreferrer">{{ messages("technicalDifficulties.contact.link") }}</a>.
         </p>
 
       </div>
