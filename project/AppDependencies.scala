@@ -7,6 +7,7 @@ object AppDependencies {
     play.sbt.PlayImport.ws,
     "org.reactivemongo"          %% "play2-reactivemongo"             % "0.20.13-play28",
     "org.reactivemongo"          %% "reactivemongo-play-json-compat"  % "0.20.13-play28",
+    "uk.gov.hmrc.mongo"          %% "hmrc-mongo-play-28"              % "0.55.0",
     "uk.gov.hmrc"                %% "logback-json-logger"             % "5.1.0",
     "uk.gov.hmrc"                %% "play-conditional-form-mapping"   % "1.9.0-play-28",
     "uk.gov.hmrc"                %% "bootstrap-frontend-play-28"      % "5.16.0",
