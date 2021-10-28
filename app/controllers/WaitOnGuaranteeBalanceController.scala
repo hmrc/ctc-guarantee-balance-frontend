@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import javax.inject.Inject
 import models.BalanceId
 import play.api.i18n.I18nSupport
@@ -26,14 +27,16 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.ExecutionContext
 
-class WaitOnGuaranteeBalanceController @Inject() (cc: MessagesControllerComponents, renderer: Renderer)(implicit ec: ExecutionContext)
-    extends FrontendController(cc)
+class WaitOnGuaranteeBalanceController @Inject() (cc: MessagesControllerComponents, renderer: Renderer, config: FrontendAppConfig)(implicit
+  ec: ExecutionContext
+) extends FrontendController(cc)
     with I18nSupport {
 
   def onPageLoad(balanceId: BalanceId): Action[AnyContent] = Action.async {
     implicit request =>
       val json = Json.obj(
-        "balanceId" -> balanceId
+        "balanceId"         -> balanceId,
+        "waitTimeInSeconds" -> config.waitTimeInSeconds
       )
       renderer.render("waitOnGuaranteeBalance.njk", json).map(Ok(_))
   }
