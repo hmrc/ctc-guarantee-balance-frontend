@@ -16,11 +16,11 @@
 
 package forms
 
-import forms.Constants.{alphaNumericRegex, maxGuaranteeReferenceNumberLength}
-
-import javax.inject.Inject
+import forms.Constants._
 import forms.mappings.Mappings
 import play.api.data.Form
+
+import javax.inject.Inject
 
 class GuaranteeReferenceNumberFormProvider @Inject() extends Mappings {
 
@@ -29,8 +29,9 @@ class GuaranteeReferenceNumberFormProvider @Inject() extends Mappings {
       "value" -> text("guaranteeReferenceNumber.error.required")
         .verifying(
           forms.StopOnFirstFail[String](
-            maxLength(maxGuaranteeReferenceNumberLength, "guaranteeReferenceNumber.error.length"),
-            regexp(alphaNumericRegex, "guaranteeReferenceNumber.error.invalid")
+            maxLengthIgnoreSpaces(maxGuaranteeReferenceNumberLength, "guaranteeReferenceNumber.error.maxLength"),
+            minLengthIgnoreSpaces(minGuaranteeReferenceNumberLength, "guaranteeReferenceNumber.error.minLength"),
+            regexp(alphaNumericWithSpacesRegex, "guaranteeReferenceNumber.error.invalid")
           )
         )
     )
