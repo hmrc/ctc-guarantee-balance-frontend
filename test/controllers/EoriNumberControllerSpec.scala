@@ -79,7 +79,7 @@ class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksS
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
 
-      val userAnswers    = UserAnswers(userAnswersId).set(EoriNumberPage, "answer").success.value
+      val userAnswers    = UserAnswers(userAnswersId).set(EoriNumberPage, "GB123").success.value
       val application    = applicationBuilder(userAnswers = Some(userAnswers)).build()
       val request        = FakeRequest(GET, eoriNumberRoute)
       val templateCaptor = ArgumentCaptor.forClass(classOf[String])
@@ -91,7 +91,7 @@ class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksS
 
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
-      val filledForm = form.bind(Map("value" -> "answer"))
+      val filledForm = form.bind(Map("value" -> "GB123"))
 
       val expectedJson = Json.obj(
         "form" -> filledForm,
@@ -118,7 +118,7 @@ class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksS
 
       val request =
         FakeRequest(POST, eoriNumberRoute)
-          .withFormUrlEncodedBody(("value", "answer"))
+          .withFormUrlEncodedBody(("value", "GB123"))
 
       val result = route(application, request).value
 
