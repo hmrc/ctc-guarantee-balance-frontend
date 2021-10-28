@@ -18,19 +18,27 @@ package views
 
 import play.api.libs.json.Json
 
-class TryAgainViewSpec extends SingleViewSpec("tryAgain.njk", hasSignOutLink = true) {
+class TryGuaranteeBalanceAgainViewSpec extends SingleViewSpec("tryGuaranteeBalanceAgain.njk", hasSignOutLink = true) {
 
   "must render correct heading" in {
     val json = Json.obj()
     val doc  = renderDocument(json).futureValue
 
-    assertPageTitleEqualsMessage(doc, "tryAgain.heading")
+    assertPageTitleEqualsMessage(doc, "tryGuaranteeBalanceAgain.heading")
   }
 
-  "must render tryAgain text" in {
+  "display link with id contact-link" in {
+    val json = Json.obj(
+      "checkDetailsUrl" -> "http://checkDetails"
+    )
+    val doc = renderDocument(json).futureValue
+
+    assertPageHasLink(doc, "checkDetails-link", "tryGuaranteeBalanceAgain.checkDetails.link", "http://checkDetails")
+  }
+
+  "behave like a page with a submit button" in {
     val json = Json.obj()
     val doc  = renderDocument(json).futureValue
-
-    assertContainsText(doc, "tryAgain.paragraph")
+    assertPageHasButton(doc, "site.tryAgain")
   }
 }

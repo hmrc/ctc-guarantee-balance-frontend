@@ -16,7 +16,7 @@
 
 package controllers
 
-import config.FrontendAppConfig
+import controllers.actions.{DataRetrievalAction, IdentifierAction}
 import javax.inject.Inject
 import models.BalanceId
 import play.api.i18n.I18nSupport
@@ -27,17 +27,25 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.ExecutionContext
 
-class TryAgainController @Inject() (cc: MessagesControllerComponents, renderer: Renderer, config: FrontendAppConfig)(implicit ec: ExecutionContext)
-    extends FrontendController(cc)
+class TryGuaranteeBalanceAgainController @Inject() (cc: MessagesControllerComponents,
+                                                    renderer: Renderer,
+                                                    identify: IdentifierAction,
+                                                    getData: DataRetrievalAction
+)(implicit
+  ec: ExecutionContext
+) extends FrontendController(cc)
     with I18nSupport {
 
-  def onPageLoad(balanceId: BalanceId): Action[AnyContent] = Action.async {
+  def onPageLoad(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
       val json = Json.obj(
-        "balanceId"             -> balanceId,
-        "tryAgainTimeInSeconds" -> config.tryAgainTimeInSeconds
+        "balanceId"       -> balanceId,
+        "checkDetailsUrl" -> routes.CheckYourAnswersController.onPageLoad().url
       )
-      renderer.render("tryAgain.njk", json).map(Ok(_))
+      renderer.render("tryGuaranteeBalanceAgain.njk", json).map(Ok(_))
   }
 
+  def onSubmit(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData) {
+    Redirect(routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId))
+  }
 }

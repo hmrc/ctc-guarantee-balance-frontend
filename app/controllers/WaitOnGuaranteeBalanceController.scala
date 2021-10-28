@@ -48,6 +48,6 @@ class WaitOnGuaranteeBalanceController @Inject() (cc: MessagesControllerComponen
   }
 
   def onSubmit(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData) {
-    Redirect(routes.TryAgainController.onPageLoad(balanceId))
+    Redirect(routes.TryGuaranteeBalanceAgainController.onPageLoad(balanceId))
   }
 }

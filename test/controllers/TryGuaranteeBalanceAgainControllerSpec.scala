@@ -27,16 +27,16 @@ import play.twirl.api.Html
 
 import scala.concurrent.Future
 
-class TryAgainControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
+class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
-  "TryAgainController" - {
+  "TryGuaranteeBalanceAgainController" - {
 
     "must return OK and the correct view for a GET" in {
 
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
 
-      val request = FakeRequest(GET, routes.TryAgainController.onPageLoad(BalanceId("1")).url)
+      val request = FakeRequest(GET, routes.TryGuaranteeBalanceAgainController.onPageLoad(BalanceId("1")).url)
 
       val result = route(app, request).value
 
@@ -46,7 +46,7 @@ class TryAgainControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
 
-      templateCaptor.getValue mustEqual "tryAgain.njk"
+      templateCaptor.getValue mustEqual "tryGuaranteeBalanceAgain.njk"
     }
   }
 }

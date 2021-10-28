@@ -37,6 +37,7 @@ POST       /check-your-answers                      controllers.CheckYourAnswers
 GET        /:balanceId/wait-on-balance              controllers.WaitOnGuaranteeBalanceController.onPageLoad(balanceId: BalanceId)
 POST       /:balanceId/wait-on-balance              controllers.WaitOnGuaranteeBalanceController.onSubmit(balanceId: BalanceId)
 
-GET        /:balanceId/try-again                    controllers.TryAgainController.onPageLoad(balanceId: BalanceId)
+GET        /:balanceId/try-again                    controllers.TryGuaranteeBalanceAgainController.onPageLoad(balanceId: BalanceId)
+POST       /:balanceId/try-again                    controllers.TryGuaranteeBalanceAgainController.onSubmit(balanceId: BalanceId)
 
 GET        /balance-confirmation                    controllers.BalanceConfirmationController.onPageLoad()
