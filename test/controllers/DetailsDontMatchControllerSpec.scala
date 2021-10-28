@@ -51,8 +51,10 @@ class DetailsDontMatchControllerSpec extends SpecBase with MockitoSugar with App
 
       val expectedJson = Json.obj("checkYourAnswersUrl" -> routes.CheckYourAnswersController.onPageLoad().url)
 
+      val jsonCaptorWithoutConfig: JsObject = jsonCaptor.getValue - configKey
+
       templateCaptor.getValue mustEqual "detailsDontMatch.njk"
-      jsonCaptor.getValue mustEqual expectedJson
+      jsonCaptorWithoutConfig mustEqual expectedJson
 
       application.stop()
     }
