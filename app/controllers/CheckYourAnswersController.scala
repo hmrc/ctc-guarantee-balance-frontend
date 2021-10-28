@@ -54,7 +54,7 @@ class CheckYourAnswersController @Inject() (
 
   def onSubmit: Action[AnyContent] = (identify andThen getData andThen requireData) {
     implicit request =>
-      // TODO - send answers to backend, calling .removeSpaces() on GRN
+      // TODO - send answers to backend
       Redirect(routes.BalanceConfirmationController.onPageLoad())
   }
 
