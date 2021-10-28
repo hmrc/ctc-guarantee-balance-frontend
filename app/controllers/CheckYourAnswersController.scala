@@ -18,8 +18,6 @@ package controllers
 
 import controllers.actions._
 import models.{CheckMode, UserAnswers}
-
-import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -29,6 +27,7 @@ import uk.gov.hmrc.viewmodels.NunjucksSupport
 import utils.CheckYourAnswersHelper
 import viewModels.Section
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class CheckYourAnswersController @Inject() (
@@ -53,8 +52,11 @@ class CheckYourAnswersController @Inject() (
       renderer.render("checkYourAnswers.njk", json).map(Ok(_))
   }
 
-  //TODO onPost to be implemented once the backend is implemented
-  //TODO call .removeSpaces() on GRN before sending to backend
+  def onSubmit: Action[AnyContent] = (identify andThen getData andThen requireData) {
+    implicit request =>
+      // TODO - send answers to backend, calling .removeSpaces() on GRN
+      Redirect(routes.BalanceConfirmationController.onPageLoad())
+  }
 
   private def createSections(userAnswers: UserAnswers): Section = {
     val helper = new CheckYourAnswersHelper(userAnswers, CheckMode)
