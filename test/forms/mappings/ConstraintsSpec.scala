@@ -209,6 +209,11 @@ class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyC
       val result = maxLengthIgnoreSpaces(10, "error.length")("a " * 10)
       result mustEqual Valid
     }
+
+    "must return Invalid for a string with non-space characters longer than the allowed length" in {
+      val result = maxLengthIgnoreSpaces(10, "error.length")("a " * 11)
+      result mustEqual Invalid("error.length", 10)
+    }
   }
 
   "minLengthIgnoreSpaces" - {
@@ -241,6 +246,11 @@ class ConstraintsSpec extends AnyFreeSpec with Matchers with ScalaCheckPropertyC
     "must return Valid for a string with non-space characters equal to the allowed length" in {
       val result = minLengthIgnoreSpaces(10, "error.length")("a " * 10)
       result mustEqual Valid
+    }
+
+    "must return Invalid for a string with non-space characters shorter than the allowed length" in {
+      val result = minLengthIgnoreSpaces(10, "error.length")("a " * 9)
+      result mustEqual Invalid("error.length", 10)
     }
   }
 
