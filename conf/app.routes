@@ -35,3 +35,5 @@ GET        /check-your-answers                      controllers.CheckYourAnswers
 POST       /check-your-answers                      controllers.CheckYourAnswersController.onSubmit()
 
 GET        /balance-confirmation                    controllers.BalanceConfirmationController.onPageLoad()
+
+GET        /detailsDontMatch                       controllers.DetailsDontMatchController.onPageLoad()

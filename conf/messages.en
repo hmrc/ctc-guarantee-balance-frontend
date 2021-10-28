@@ -102,3 +102,6 @@ balanceConfirmation.fromGovUk.link = check another guarantee balance
 balanceConfirmation.fromNcts.p = You can:
 balanceConfirmation.fromNcts.link1 = check another guarantee balance
 balanceConfirmation.fromNcts.link2 = manage your transit movements
+
+detailsDontMatch.title = detailsDontMatch
+detailsDontMatch.heading = detailsDontMatch
