@@ -17,6 +17,7 @@
 package controllers
 
 import config.FrontendAppConfig
+import controllers.actions.{DataRetrievalAction, IdentifierAction}
 import javax.inject.Inject
 import models.BalanceId
 import play.api.i18n.I18nSupport
@@ -27,12 +28,17 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.ExecutionContext
 
-class WaitOnGuaranteeBalanceController @Inject() (cc: MessagesControllerComponents, renderer: Renderer, config: FrontendAppConfig)(implicit
+class WaitOnGuaranteeBalanceController @Inject() (cc: MessagesControllerComponents,
+                                                  renderer: Renderer,
+                                                  config: FrontendAppConfig,
+                                                  identify: IdentifierAction,
+                                                  getData: DataRetrievalAction
+)(implicit
   ec: ExecutionContext
 ) extends FrontendController(cc)
     with I18nSupport {
 
-  def onPageLoad(balanceId: BalanceId): Action[AnyContent] = Action.async {
+  def onPageLoad(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
       val json = Json.obj(
         "balanceId"         -> balanceId,
@@ -41,4 +47,7 @@ class WaitOnGuaranteeBalanceController @Inject() (cc: MessagesControllerComponen
       renderer.render("waitOnGuaranteeBalance.njk", json).map(Ok(_))
   }
 
+  def onSubmit(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData) {
+    Redirect(routes.TryAgainController.onPageLoad(balanceId))
+  }
 }

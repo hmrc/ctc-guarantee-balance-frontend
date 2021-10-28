@@ -32,6 +32,7 @@ GET        /change-access-code                      controllers.AccessCodeContro
 POST       /change-access-code                      controllers.AccessCodeController.onSubmit(mode: Mode = CheckMode)
 
 GET        /:balanceId/wait-on-balance              controllers.WaitOnGuaranteeBalanceController.onPageLoad(balanceId: BalanceId)
+POST       /:balanceId/wait-on-balance              controllers.WaitOnGuaranteeBalanceController.onSubmit(balanceId: BalanceId)
 
 GET        /:balanceId/try-again                    controllers.TryAgainController.onPageLoad(balanceId: BalanceId)
 

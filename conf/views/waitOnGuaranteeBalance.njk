@@ -13,6 +13,9 @@
 
       <h1 class="govuk-heading-xl">{{ messages("waitOnGuaranteeBalance.heading") }}</h1>
       <p class="govuk-body">{{ messages("waitOnGuaranteeBalance.paragraph", waitTimeInSeconds) }}</p>
+      <form action="{{ routes.controllers.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url }}" method="post">
+         {{ csrf() | safe }}
+      </form>
    </div>
   </div>
 {% endblock %}
