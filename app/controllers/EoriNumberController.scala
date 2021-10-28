@@ -19,11 +19,9 @@ package controllers
 import controllers.actions._
 import forms.EoriNumberFormProvider
 import models.requests.OptionalDataRequest
-
-import javax.inject.Inject
 import models.{Mode, UserAnswers}
 import navigation.Navigator
-import pages.EoriNumberPage
+import pages.{EoriNumberPage, IsNctsUserPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -32,7 +30,9 @@ import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 class EoriNumberController @Inject() (
   override val messagesApi: MessagesApi,
@@ -50,33 +50,35 @@ class EoriNumberController @Inject() (
 
   private val form = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
+  def onPageLoad(mode: Mode, isNctsUser: Boolean): Action[AnyContent] = (identify andThen getData).async {
     implicit request: OptionalDataRequest[AnyContent] =>
-      val getEoriNumber: Option[String] = request.userAnswers.flatMap(
-        userAnswers => userAnswers.get(EoriNumberPage)
+      val eoriNumber: Option[String] = request.userAnswers.flatMap(
+        _.get(EoriNumberPage)
       )
-      val preparedForm = getEoriNumber match {
+      val preparedForm = eoriNumber match {
         case Some(value) => form.fill(value)
         case _           => form
       }
 
       val json = Json.obj(
-        "form" -> preparedForm,
-        "mode" -> mode
+        "form"       -> preparedForm,
+        "mode"       -> mode,
+        "isNctsUser" -> isNctsUser
       )
 
       renderer.render("eoriNumber.njk", json).map(Ok(_))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
+  def onSubmit(mode: Mode, isNctsUser: Boolean): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
       form
         .bindFromRequest()
         .fold(
           formWithErrors => {
             val json = Json.obj(
-              "form" -> formWithErrors,
-              "mode" -> mode
+              "form"       -> formWithErrors,
+              "mode"       -> mode,
+              "isNctsUser" -> isNctsUser
             )
 
             renderer.render("eoriNumber.njk", json).map(BadRequest(_))
@@ -84,19 +86,17 @@ class EoriNumberController @Inject() (
           },
           value =>
             for {
-              uaSetup        <- getOrCreateUserAnswers(request.eoriNumber)
-              updatedAnswers <- Future.fromTry(uaSetup.set(EoriNumberPage, value))
+              updatedAnswers <- Future.fromTry(populateUserAnswers(getOrCreateUserAnswers, value, isNctsUser))
               _              <- sessionRepository.set(updatedAnswers)
             } yield Redirect(navigator.nextPage(EoriNumberPage, mode, updatedAnswers))
         )
   }
 
-  def getOrCreateUserAnswers(eoriNumber: String): Future[UserAnswers] = {
-    val initialUserAnswers = UserAnswers(id = eoriNumber)
+  private def getOrCreateUserAnswers(implicit request: OptionalDataRequest[AnyContent]): UserAnswers =
+    request.userAnswers getOrElse UserAnswers(id = request.eoriNumber)
 
-    sessionRepository.get(id = eoriNumber) map {
-      userAnswers =>
-        userAnswers getOrElse initialUserAnswers
-    }
-  }
+  private def populateUserAnswers(userAnswers: UserAnswers, eoriNumber: String, isNctsUser: Boolean): Try[UserAnswers] =
+    userAnswers
+      .set(EoriNumberPage, eoriNumber)
+      .flatMap(_.set(IsNctsUserPage, isNctsUser))
 }

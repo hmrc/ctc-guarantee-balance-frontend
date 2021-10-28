@@ -19,13 +19,15 @@ package controllers
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import forms.EoriNumberFormProvider
 import matchers.JsonMatchers
-import models.{NormalMode, UserAnswers}
+import models.{Mode, NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{times, verify, when}
+import org.scalacheck.Arbitrary.arbitrary
+import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
-import pages.EoriNumberPage
+import pages.{EoriNumberPage, IsNctsUserPage}
 import play.api.inject.bind
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Call
@@ -34,126 +36,205 @@ import play.api.test.Helpers._
 import play.twirl.api.Html
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 
+import java.time.LocalDateTime
 import scala.concurrent.Future
 
-class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksSupport with JsonMatchers with AppWithDefaultMockFixtures {
+class EoriNumberControllerSpec
+    extends SpecBase
+    with MockitoSugar
+    with NunjucksSupport
+    with JsonMatchers
+    with AppWithDefaultMockFixtures
+    with BeforeAndAfterEach {
 
   def onwardRoute = Call("GET", "/foo")
 
   val formProvider = new EoriNumberFormProvider()
   val form         = formProvider()
 
-  lazy val eoriNumberRoute = routes.EoriNumberController.onPageLoad(NormalMode).url
+  val validAnswer: String = "GB123"
+
+  def eoriNumberRoute(mode: Mode = NormalMode, isNctsUser: Boolean): String = routes.EoriNumberController.onPageLoad(mode, isNctsUser).url
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+  }
 
   "EoriNumber Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
-      when(mockRenderer.render(any(), any())(any()))
-        .thenReturn(Future.successful(Html("")))
+      forAll(arbitrary[Mode], arbitrary[Boolean]) {
+        (mode, bool) =>
+          beforeEach()
 
-      val application    = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-      val request        = FakeRequest(GET, eoriNumberRoute)
-      val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-      val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
+          when(mockRenderer.render(any(), any())(any()))
+            .thenReturn(Future.successful(Html("")))
 
-      val result = route(application, request).value
+          val application    = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+          val request        = FakeRequest(GET, eoriNumberRoute(mode, isNctsUser = bool))
+          val templateCaptor = ArgumentCaptor.forClass(classOf[String])
+          val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
 
-      status(result) mustEqual OK
+          val result = route(application, request).value
 
-      verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
+          status(result) mustEqual OK
 
-      val expectedJson = Json.obj(
-        "form" -> form,
-        "mode" -> NormalMode
-      )
+          verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
-      templateCaptor.getValue mustEqual "eoriNumber.njk"
-      jsonCaptor.getValue must containJson(expectedJson)
+          val expectedJson = Json.obj(
+            "form"       -> form,
+            "mode"       -> mode,
+            "isNctsUser" -> bool
+          )
 
-      application.stop()
+          templateCaptor.getValue mustEqual "eoriNumber.njk"
+          jsonCaptor.getValue must containJson(expectedJson)
+
+          application.stop()
+      }
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      when(mockRenderer.render(any(), any())(any()))
-        .thenReturn(Future.successful(Html("")))
+      forAll(arbitrary[Mode], arbitrary[Boolean]) {
+        (mode, bool) =>
+          beforeEach()
 
-      val userAnswers    = UserAnswers(userAnswersId).set(EoriNumberPage, "GB123").success.value
-      val application    = applicationBuilder(userAnswers = Some(userAnswers)).build()
-      val request        = FakeRequest(GET, eoriNumberRoute)
-      val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-      val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
+          when(mockRenderer.render(any(), any())(any()))
+            .thenReturn(Future.successful(Html("")))
 
-      val result = route(application, request).value
+          val userAnswers = UserAnswers(userAnswersId).set(EoriNumberPage, validAnswer).success.value
 
-      status(result) mustEqual OK
+          val application    = applicationBuilder(userAnswers = Some(userAnswers)).build()
+          val request        = FakeRequest(GET, eoriNumberRoute(mode, isNctsUser = bool))
+          val templateCaptor = ArgumentCaptor.forClass(classOf[String])
+          val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
 
-      verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
+          val result = route(application, request).value
 
-      val filledForm = form.bind(Map("value" -> "GB123"))
+          status(result) mustEqual OK
 
-      val expectedJson = Json.obj(
-        "form" -> filledForm,
-        "mode" -> NormalMode
-      )
+          verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
-      templateCaptor.getValue mustEqual "eoriNumber.njk"
-      jsonCaptor.getValue must containJson(expectedJson)
+          val filledForm = form.bind(Map("value" -> validAnswer))
 
-      application.stop()
+          val expectedJson = Json.obj(
+            "form"       -> filledForm,
+            "mode"       -> mode,
+            "isNctsUser" -> bool
+          )
+
+          templateCaptor.getValue mustEqual "eoriNumber.njk"
+          jsonCaptor.getValue must containJson(expectedJson)
+
+          application.stop()
+      }
+    }
+
+    "must redirect to the next page when valid data is submitted and there are existing user answers" in {
+
+      forAll(arbitrary[Boolean]) {
+        bool =>
+          beforeEach()
+
+          val time = LocalDateTime.now()
+
+          val application =
+            applicationBuilder(userAnswers = Some(emptyUserAnswers.copy(lastUpdated = time)))
+              .overrides(
+                bind[Navigator].toInstance(new FakeNavigator(onwardRoute))
+              )
+              .build()
+
+          val request =
+            FakeRequest(POST, eoriNumberRoute(isNctsUser = bool))
+              .withFormUrlEncodedBody(("value", validAnswer))
+
+          val result = route(application, request).value
+
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual onwardRoute.url
+
+          val uaCaptor = ArgumentCaptor.forClass(classOf[UserAnswers])
+          verify(mockSessionRepository).set(uaCaptor.capture)
+
+          uaCaptor.getValue.lastUpdated mustBe time // check that user answers have been persisted
+          uaCaptor.getValue.get(EoriNumberPage).get mustBe validAnswer
+          uaCaptor.getValue.get(IsNctsUserPage).get mustBe bool
+
+          application.stop()
+      }
     }
 
     "must redirect to the next page when valid data is submitted and there are no existing user answers" in {
 
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
-      when(mockSessionRepository.get(any())) thenReturn Future.successful(None)
+      forAll(arbitrary[Boolean]) {
+        bool =>
+          beforeEach()
 
-      val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(
-            bind[Navigator].toInstance(new FakeNavigator(onwardRoute))
-          )
-          .build()
+          val time = LocalDateTime.now()
 
-      val request =
-        FakeRequest(POST, eoriNumberRoute)
-          .withFormUrlEncodedBody(("value", "GB123"))
+          val application =
+            applicationBuilder(userAnswers = None)
+              .overrides(
+                bind[Navigator].toInstance(new FakeNavigator(onwardRoute))
+              )
+              .build()
 
-      val result = route(application, request).value
+          val request =
+            FakeRequest(POST, eoriNumberRoute(isNctsUser = bool))
+              .withFormUrlEncodedBody(("value", validAnswer))
 
-      status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual onwardRoute.url
+          val result = route(application, request).value
 
-      application.stop()
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual onwardRoute.url
+
+          val uaCaptor = ArgumentCaptor.forClass(classOf[UserAnswers])
+          verify(mockSessionRepository).set(uaCaptor.capture)
+
+          uaCaptor.getValue.lastUpdated.isAfter(time) mustBe true // check that new user answers have been created
+          uaCaptor.getValue.get(EoriNumberPage).get mustBe validAnswer
+          uaCaptor.getValue.get(IsNctsUserPage).get mustBe bool
+
+          application.stop()
+      }
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      when(mockRenderer.render(any(), any())(any()))
-        .thenReturn(Future.successful(Html("")))
+      forAll(arbitrary[Mode], arbitrary[Boolean]) {
+        (mode, bool) =>
+          beforeEach()
 
-      val application    = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-      val request        = FakeRequest(POST, eoriNumberRoute).withFormUrlEncodedBody(("value", ""))
-      val boundForm      = form.bind(Map("value" -> ""))
-      val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-      val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
+          when(mockRenderer.render(any(), any())(any()))
+            .thenReturn(Future.successful(Html("")))
 
-      val result = route(application, request).value
+          val application    = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+          val request        = FakeRequest(POST, eoriNumberRoute(mode, isNctsUser = bool)).withFormUrlEncodedBody(("value", ""))
+          val boundForm      = form.bind(Map("value" -> ""))
+          val templateCaptor = ArgumentCaptor.forClass(classOf[String])
+          val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
 
-      status(result) mustEqual BAD_REQUEST
+          val result = route(application, request).value
 
-      verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
+          status(result) mustEqual BAD_REQUEST
 
-      val expectedJson = Json.obj(
-        "form" -> boundForm,
-        "mode" -> NormalMode
-      )
+          verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
-      templateCaptor.getValue mustEqual "eoriNumber.njk"
-      jsonCaptor.getValue must containJson(expectedJson)
+          val expectedJson = Json.obj(
+            "form"       -> boundForm,
+            "mode"       -> mode,
+            "isNctsUser" -> bool
+          )
 
-      application.stop()
+          templateCaptor.getValue mustEqual "eoriNumber.njk"
+          jsonCaptor.getValue must containJson(expectedJson)
+
+          application.stop()
+      }
     }
 
   }
