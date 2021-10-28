@@ -16,15 +16,14 @@
 
 package forms
 
-import forms.Constants.{alphaNumericWithSpacesRegex, maxGuaranteeReferenceNumberLength, minGuaranteeReferenceNumberLength}
+import forms.Constants.{alphaNumericRegex, maxGuaranteeReferenceNumberLength}
 import forms.behaviours.StringFieldBehaviours
 import play.api.data.FormError
 
 class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
 
   val requiredKey  = "guaranteeReferenceNumber.error.required"
-  val maxLengthKey = "guaranteeReferenceNumber.error.maxLength"
-  val minLengthKey = "guaranteeReferenceNumber.error.minLength"
+  val maxLengthKey = "guaranteeReferenceNumber.error.length"
   val invalidKey   = "guaranteeReferenceNumber.error.invalid"
 
   val form = new GuaranteeReferenceNumberFormProvider()()
@@ -46,13 +45,6 @@ class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
       lengthError = FormError(fieldName, maxLengthKey, Seq(maxGuaranteeReferenceNumberLength))
     )
 
-    behave like fieldWithMinLength(
-      form = form,
-      fieldName = fieldName,
-      minLength = minGuaranteeReferenceNumberLength,
-      lengthError = FormError(fieldName, minLengthKey, Seq(minGuaranteeReferenceNumberLength))
-    )
-
     behave like mandatoryField(
       form = form,
       fieldName = fieldName,
@@ -62,18 +54,9 @@ class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
     behave like fieldThatDoesNotBindInvalidData(
       form = form,
       fieldName = fieldName,
-      regex = alphaNumericWithSpacesRegex,
+      regex = alphaNumericRegex,
       gen = stringsOfLength(maxGuaranteeReferenceNumberLength),
       invalidKey = invalidKey
-    )
-
-    behave like fieldThatIgnoresSpaces(
-      form = form,
-      fieldName = fieldName,
-      regex = alphaNumericWithSpacesRegex,
-      minLength = minGuaranteeReferenceNumberLength,
-      maxLength = maxGuaranteeReferenceNumberLength,
-      lengthError = FormError(fieldName, minLengthKey, Seq(minGuaranteeReferenceNumberLength))
     )
 
   }

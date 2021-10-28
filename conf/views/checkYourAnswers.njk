@@ -21,15 +21,19 @@
           {{ messages("checkYourAnswers.heading") }}
         </h1>
 
-        {{ csrf() | safe }}
+        <form action="{{ routes.controllers.CheckYourAnswersController.onSubmit(mode).url }}" method="post">
 
-        {{ sectionMacro(section.title, section.rows) }}
+          {{ csrf() | safe }}
 
-        {{ govukButton({
-          text: messages("site.continue"),
-          preventDoubleClick: true,
-          attributes: {id:"submit"}
-        }) }}
+          {{ sectionMacro(section.title, section.rows) }}
+
+          {{ govukButton({
+            text: messages("site.continue"),
+            preventDoubleClick: true,
+            attributes: {id: "submit"}
+          }) }}
+
+        </form>
 
       </div>
     </div>

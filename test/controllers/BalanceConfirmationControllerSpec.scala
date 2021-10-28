@@ -27,9 +27,9 @@ import play.twirl.api.Html
 
 import scala.concurrent.Future
 
-class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with AppWithDefaultMockFixtures {
+class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with AppWithDefaultMockFixtures {
 
-  "CheckYourAnswers Controller" - {
+  "BalanceConfirmation Controller" - {
 
     "return OK and the correct view for a GET" in {
 
@@ -37,7 +37,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
         .thenReturn(Future.successful(Html("")))
 
       val application    = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-      val request        = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+      val request        = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
       val templateCaptor = ArgumentCaptor.forClass(classOf[String])
 
       val result = route(application, request).value
@@ -46,43 +46,9 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
 
-      templateCaptor.getValue mustEqual "checkYourAnswers.njk"
+      templateCaptor.getValue mustEqual "balanceConfirmation.njk"
 
       application.stop()
-    }
-
-    "must redirect to Session Expired for a GET if no existing data is found" in {
-
-      val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
-
-      val result = route(app, request).value
-
-      status(result) mustEqual SEE_OTHER
-
-      redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
-    }
-
-    "must redirect to Balance Confirmation for a POST" in {
-
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-      val request     = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-
-      val result = route(application, request).value
-
-      status(result) mustEqual SEE_OTHER
-
-      redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
-    }
-
-    "must redirect to Session Expired for a POST if no existing data is found" in {
-
-      val request = FakeRequest(GET, routes.CheckYourAnswersController.onSubmit().url)
-
-      val result = route(app, request).value
-
-      status(result) mustEqual SEE_OTHER
-
-      redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
     }
   }
 }
