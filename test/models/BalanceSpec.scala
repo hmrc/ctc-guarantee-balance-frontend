@@ -21,31 +21,31 @@ import base.SpecBase
 // scalastyle:off magic.number
 class BalanceSpec extends SpecBase {
 
-  ".forDisplay" - {
+  ".toString" - {
 
     "must display a balance of 1 as £1" in {
       val balance = Balance(1)
-      balance.forDisplay mustEqual "£1"
+      balance.toString mustEqual "£1"
     }
 
     "must display a balance of 10 as £10" in {
       val balance = Balance(10)
-      balance.forDisplay mustEqual "£10"
+      balance.toString mustEqual "£10"
     }
 
     "must display a balance of 1000 as £1,000" in {
       val balance = Balance(1000)
-      balance.forDisplay mustEqual "£1,000"
+      balance.toString mustEqual "£1,000"
     }
 
     "must display a balance of 10000 as £10,000" in {
       val balance = Balance(10000)
-      balance.forDisplay mustEqual "£10,000"
+      balance.toString mustEqual "£10,000"
     }
 
     "must display a balance of 1000000 as £1,000,000" in {
       val balance = Balance(1000000)
-      balance.forDisplay mustEqual "£1,000,000"
+      balance.toString mustEqual "£1,000,000"
     }
 
   }

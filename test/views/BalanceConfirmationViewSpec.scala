@@ -25,7 +25,7 @@ class BalanceConfirmationViewSpec extends SingleViewSpec("balanceConfirmation.nj
   "must render balance confirmation" in {
     forAll(arbitrary[Int]) {
       balance =>
-        val balanceForDisplay = Balance(balance).forDisplay
+        val balanceForDisplay = Balance(balance).toString
 
         val json = Json.obj(
           "balance" -> balanceForDisplay
