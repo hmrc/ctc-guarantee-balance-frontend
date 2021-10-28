@@ -27,13 +27,13 @@ import javax.inject.{Inject, Singleton}
 class Navigator @Inject() () {
 
   private val normalRoutes: Page => UserAnswers => Call = {
-    allRoutes(NormalMode) orElse {
+    commonRoutes(NormalMode) orElse {
       case _ => _ => routes.IndexController.onPageLoad()
     }
   }
 
   private val checkRoutes: Page => UserAnswers => Call = {
-    allRoutes(CheckMode) orElse {
+    commonRoutes(CheckMode) orElse {
       case _ => _ => routes.CheckYourAnswersController.onPageLoad()
     }
   }
@@ -45,7 +45,7 @@ class Navigator @Inject() () {
       checkRoutes(page)(userAnswers)
   }
 
-  private def allRoutes(mode: Mode): PartialFunction[Page, UserAnswers => Call] = {
+  private def commonRoutes(mode: Mode): PartialFunction[Page, UserAnswers => Call] = {
     case EoriNumberPage               => _ => routes.GuaranteeReferenceNumberController.onPageLoad(mode)
     case GuaranteeReferenceNumberPage => _ => routes.AccessCodeController.onPageLoad(mode)
     case AccessCodePage               => _ => routes.CheckYourAnswersController.onPageLoad()
