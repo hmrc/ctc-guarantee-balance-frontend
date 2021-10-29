@@ -16,6 +16,7 @@
 
 package models
 
+import pages.ReferralPage
 import play.api.libs.json._
 import queries._
 
@@ -63,7 +64,8 @@ final case class UserAnswers(
     }
   }
 
-  def clear: UserAnswers = this.copy(data = Json.obj())
+  def clear: UserAnswers =
+    this.copy(data = this.data.transform(ReferralPage.path.json.pickBranch).getOrElse(Json.obj()))
 }
 
 object UserAnswers {
