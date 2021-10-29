@@ -16,6 +16,7 @@
 
 package views
 
+import controllers.routes
 import play.api.libs.json.Json
 
 class TryGuaranteeBalanceAgainViewSpec extends SingleViewSpec("tryGuaranteeBalanceAgain.njk", hasSignOutLink = true) {
@@ -27,13 +28,11 @@ class TryGuaranteeBalanceAgainViewSpec extends SingleViewSpec("tryGuaranteeBalan
     assertPageTitleEqualsMessage(doc, "tryGuaranteeBalanceAgain.heading")
   }
 
-  "display link with id contact-link" in {
-    val json = Json.obj(
-      "checkDetailsUrl" -> "http://checkDetails"
-    )
-    val doc = renderDocument(json).futureValue
+  "display link with id checkDetails-link" in {
+    val json = Json.obj()
+    val doc  = renderDocument(json).futureValue
 
-    assertPageHasLink(doc, "checkDetails-link", "tryGuaranteeBalanceAgain.checkDetails.link", "http://checkDetails")
+    assertPageHasLink(doc, "checkDetails-link", "tryGuaranteeBalanceAgain.checkDetails.link", routes.CheckYourAnswersController.onPageLoad().url)
   }
 
   "behave like a page with a submit button" in {

@@ -37,6 +37,6 @@ class WaitOnGuaranteeBalanceViewSpec extends SingleViewSpec("waitOnGuaranteeBala
   "behave like a page with a submit button" in {
     val json = Json.obj()
     val doc  = renderDocument(json).futureValue
-    assertPageHasButton(doc, "site.tryAgain")
+    assertPageHasButton(doc, "site.continueWaiting")
   }
 }

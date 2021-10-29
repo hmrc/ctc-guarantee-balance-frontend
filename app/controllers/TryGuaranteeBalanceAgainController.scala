@@ -39,8 +39,7 @@ class TryGuaranteeBalanceAgainController @Inject() (cc: MessagesControllerCompon
   def onPageLoad(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
       val json = Json.obj(
-        "balanceId"       -> balanceId,
-        "checkDetailsUrl" -> routes.CheckYourAnswersController.onPageLoad().url
+        "balanceId" -> balanceId
       )
       renderer.render("tryGuaranteeBalanceAgain.njk", json).map(Ok(_))
   }

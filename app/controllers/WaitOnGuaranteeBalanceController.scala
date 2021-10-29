@@ -24,12 +24,14 @@ import play.api.i18n.I18nSupport
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
+import services.{BalanceStatus, GuaranteeBalanceService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class WaitOnGuaranteeBalanceController @Inject() (cc: MessagesControllerComponents,
                                                   renderer: Renderer,
+                                                  balanceService: GuaranteeBalanceService,
                                                   config: FrontendAppConfig,
                                                   identify: IdentifierAction,
                                                   getData: DataRetrievalAction
@@ -47,7 +49,18 @@ class WaitOnGuaranteeBalanceController @Inject() (cc: MessagesControllerComponen
       renderer.render("waitOnGuaranteeBalance.njk", json).map(Ok(_))
   }
 
-  def onSubmit(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData) {
-    Redirect(routes.TryGuaranteeBalanceAgainController.onPageLoad(balanceId))
+  def onSubmit(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData).async {
+    implicit request =>
+      balanceService.getGuaranteeBalance(balanceId).flatMap {
+        case Some(BalanceStatus.PendingStatus) =>
+          renderer.render("waitOnGuaranteeBalance.njk").map(Ok(_))
+        case Some(BalanceStatus.DataReturned) =>
+          renderer.render("controlDecision.njk").map(Ok(_))
+        case Some(BalanceStatus.NoMatch) =>
+          Future.successful(Redirect(routes.DetailsDontMatchController.onPageLoad()))
+        case None =>
+          Future.successful(Redirect(routes.TryGuaranteeBalanceAgainController.onPageLoad(balanceId)))
+      }
   }
+
 }

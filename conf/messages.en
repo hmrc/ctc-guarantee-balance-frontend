@@ -10,6 +10,7 @@ site.edit.hidden = Change {0}
 site.no = No
 site.yes = Yes
 site.continue = Continue
+site.continueWaiting = Continue waiting
 site.tryAgain = Try again
 site.confirmAndSend = Confirm and send
 site.service_name = Check your guarantee balance
