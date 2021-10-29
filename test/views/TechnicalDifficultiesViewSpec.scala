@@ -16,9 +16,10 @@
 
 package views
 
+import base.AppWithDefaultMockFixtures
 import play.api.libs.json.Json
 
-class TechnicalDifficultiesViewSpec extends SingleViewSpec("technicalDifficulties.njk") {
+class TechnicalDifficultiesViewSpec extends SingleViewSpec("technicalDifficulties.njk") with AppWithDefaultMockFixtures {
 
   "must render tryAgain text" in {
     val json = Json.obj()

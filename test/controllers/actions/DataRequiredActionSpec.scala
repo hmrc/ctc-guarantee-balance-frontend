@@ -23,10 +23,12 @@ import models.requests.{DataRequest, OptionalDataRequest}
 import org.scalatest.EitherValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.mvc.Result
+import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.Helpers._
-
 import java.time.LocalDateTime
+
+import play.api.test.FakeRequest
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -35,6 +37,8 @@ class DataRequiredActionSpec extends SpecBase with MockitoSugar with ScalaFuture
   object Harness extends DataRequiredActionImpl {
     def callRefine[A](request: OptionalDataRequest[A]): Future[Either[Result, DataRequest[A]]] = refine(request)
   }
+
+  def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")
 
   "Data Required Action" - {
 

@@ -16,6 +16,7 @@
 
 package base
 
+import config.FrontendAppConfig
 import controllers.actions._
 import models.UserAnswers
 import org.mockito.Mockito
@@ -23,10 +24,11 @@ import org.scalatest.{BeforeAndAfterEach, TestSuite}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.{GuiceFakeApplicationFactory, GuiceOneAppPerSuite}
 import play.api.Application
-import play.api.i18n.MessagesApi
-import play.api.inject.bind
+import play.api.i18n.{Messages, MessagesApi}
+import play.api.inject.{bind, Injector}
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.test.Helpers
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.{FakeRequest, Helpers}
 import repositories.SessionRepository
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
 import uk.gov.hmrc.nunjucks.NunjucksRenderer
@@ -38,7 +40,8 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
     Mockito.reset(
       mockRenderer,
       mockDataRetrievalAction,
-      mockSessionRepository
+      mockSessionRepository,
+      mockMongoLockRepository
     )
 
   val mockRenderer: NunjucksRenderer               = mock[NunjucksRenderer]
@@ -61,4 +64,14 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
         bind[SessionRepository].toInstance(mockSessionRepository),
         bind[MongoLockRepository].toInstance(mockMongoLockRepository)
       )
+
+  def injector: Injector = app.injector
+
+  def frontendAppConfig: FrontendAppConfig = injector.instanceOf[FrontendAppConfig]
+
+  def messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
+
+  def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")
+
+  implicit def messages: Messages = messagesApi.preferred(fakeRequest)
 }
