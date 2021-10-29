@@ -74,8 +74,8 @@ class CheckYourAnswersController @Inject() (
         case None => Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
         case Some(guaranteedReferenceNumber: String) =>
           checkRateLimit(eoriNumber, guaranteedReferenceNumber).flatMap {
-            lockTaken =>
-              if (lockTaken) {
+            lockFree =>
+              if (lockFree) {
                 ??? //todo this needs to be completed once the back end direction has been confirmed
               } else {
                 Future.successful(Redirect(routes.RateLimitController.onPageLoad()))
@@ -84,7 +84,7 @@ class CheckYourAnswersController @Inject() (
       }
   }
 
-  private def checkRateLimit(eoriNumber: String, guaranteedReferenceNumber: String) = {
+  private def checkRateLimit(eoriNumber: String, guaranteedReferenceNumber: String): Future[Boolean] = {
     val lockId   = (eoriNumber + guaranteedReferenceNumber.trim.toLowerCase).hashCode.toString
     val duration = config.rateLimitDuration.seconds
     mongoLockRepository.takeLock(lockId, eoriNumber, duration)
