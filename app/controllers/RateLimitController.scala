@@ -17,8 +17,7 @@
 package controllers
 
 import controllers.actions._
-import models.Mode
-
+import models.{Mode, NormalMode}
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
@@ -38,9 +37,9 @@ class RateLimitController @Inject() (
     extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
-      val json = Json.obj("nextPageUrl" -> controllers.routes.EoriNumberController.onPageLoad(mode).url)
+      val json = Json.obj("nextPageUrl" -> controllers.routes.EoriNumberController.onPageLoad(NormalMode).url)
 
       renderer.render("rateLimit.njk", json).map(Ok(_))
   }

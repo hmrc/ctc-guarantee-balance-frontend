@@ -112,4 +112,3 @@ rateLimit.title = You must try again
 rateLimit.heading = You must try again
 rateLimit.paragraph = We were unable to get your details. You can try again and this may take up to 60 seconds.
 rateLimit.button = Try again
-rateLimit.href = routes.EoriNumberController.onPageload().url
