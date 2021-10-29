@@ -14,20 +14,8 @@
  * limitations under the License.
  */
 
-package generators
+package models
 
-import models._
-import org.scalacheck.{Arbitrary, Gen}
-
-trait ModelGenerators {
-
-  implicit lazy val arbitraryMode: Arbitrary[Mode] =
-    Arbitrary {
-      Gen.oneOf(NormalMode, CheckMode)
-    }
-
-  implicit lazy val arbitraryReferral: Arbitrary[Referral] =
-    Arbitrary {
-      Gen.oneOf(Referral.values)
-    }
+class WithName(string: String) {
+  override val toString: String = string
 }

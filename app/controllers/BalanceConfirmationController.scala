@@ -18,9 +18,10 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions._
+import models.Referral.GovUK
 import models.requests.DataRequest
-import models.{Balance, NormalMode}
-import pages.IsNctsUserPage
+import models.{Balance, NormalMode, Referral}
+import pages.ReferralPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -48,7 +49,7 @@ class BalanceConfirmationController @Inject() (
     implicit request =>
       val json = Json.obj(
         "balance"                         -> Balance(8500).toString, // TODO - retrieve actual balance
-        "isNctsUser"                      -> isNctsUser,
+        "referral"                        -> referral,
         "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
       )
 
@@ -57,7 +58,7 @@ class BalanceConfirmationController @Inject() (
 
   def checkAnotherGuaranteeBalance: Action[AnyContent] =
     clearUserAnswersAndRedirect(
-      isNctsUser => routes.EoriNumberController.onPageLoad(NormalMode, isNctsUser).url
+      referral => routes.EoriNumberController.onPageLoad(NormalMode, referral).url
     )
 
   def manageTransitMovements: Action[AnyContent] =
@@ -65,14 +66,14 @@ class BalanceConfirmationController @Inject() (
       _ => appConfig.manageTransitMovementsUrl
     )
 
-  private def clearUserAnswersAndRedirect(url: Boolean => String): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  private def clearUserAnswersAndRedirect(url: Referral => String): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       sessionRepository.set(request.userAnswers.clear) map {
         _ =>
-          Redirect(url(isNctsUser))
+          Redirect(url(referral))
       }
   }
 
-  private def isNctsUser(implicit request: DataRequest[AnyContent]): Boolean =
-    request.userAnswers.get(IsNctsUserPage).getOrElse(false)
+  private def referral(implicit request: DataRequest[AnyContent]): Referral =
+    request.userAnswers.get(ReferralPage).getOrElse(GovUK)
 }

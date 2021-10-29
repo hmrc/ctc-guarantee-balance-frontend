@@ -19,9 +19,9 @@ package controllers
 import controllers.actions._
 import forms.EoriNumberFormProvider
 import models.requests.OptionalDataRequest
-import models.{Mode, UserAnswers}
+import models.{Mode, Referral, UserAnswers}
 import navigation.Navigator
-import pages.{EoriNumberPage, IsNctsUserPage}
+import pages.{EoriNumberPage, ReferralPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -50,7 +50,7 @@ class EoriNumberController @Inject() (
 
   private val form = formProvider()
 
-  def onPageLoad(mode: Mode, isNctsUser: Boolean): Action[AnyContent] = (identify andThen getData).async {
+  def onPageLoad(mode: Mode, referral: Referral): Action[AnyContent] = (identify andThen getData).async {
     implicit request: OptionalDataRequest[AnyContent] =>
       val eoriNumber: Option[String] = request.userAnswers.flatMap(
         _.get(EoriNumberPage)
@@ -61,24 +61,24 @@ class EoriNumberController @Inject() (
       }
 
       val json = Json.obj(
-        "form"       -> preparedForm,
-        "mode"       -> mode,
-        "isNctsUser" -> isNctsUser
+        "form"     -> preparedForm,
+        "mode"     -> mode,
+        "referral" -> referral
       )
 
       renderer.render("eoriNumber.njk", json).map(Ok(_))
   }
 
-  def onSubmit(mode: Mode, isNctsUser: Boolean): Action[AnyContent] = (identify andThen getData).async {
+  def onSubmit(mode: Mode, referral: Referral): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
       form
         .bindFromRequest()
         .fold(
           formWithErrors => {
             val json = Json.obj(
-              "form"       -> formWithErrors,
-              "mode"       -> mode,
-              "isNctsUser" -> isNctsUser
+              "form"     -> formWithErrors,
+              "mode"     -> mode,
+              "referral" -> referral
             )
 
             renderer.render("eoriNumber.njk", json).map(BadRequest(_))
@@ -86,7 +86,7 @@ class EoriNumberController @Inject() (
           },
           value =>
             for {
-              updatedAnswers <- Future.fromTry(populateUserAnswers(getOrCreateUserAnswers, value, isNctsUser))
+              updatedAnswers <- Future.fromTry(populateUserAnswers(getOrCreateUserAnswers, value, referral))
               _              <- sessionRepository.set(updatedAnswers)
             } yield Redirect(navigator.nextPage(EoriNumberPage, mode, updatedAnswers))
         )
@@ -95,8 +95,8 @@ class EoriNumberController @Inject() (
   private def getOrCreateUserAnswers(implicit request: OptionalDataRequest[AnyContent]): UserAnswers =
     request.userAnswers getOrElse UserAnswers(id = request.eoriNumber)
 
-  private def populateUserAnswers(userAnswers: UserAnswers, eoriNumber: String, isNctsUser: Boolean): Try[UserAnswers] =
+  private def populateUserAnswers(userAnswers: UserAnswers, eoriNumber: String, referral: Referral): Try[UserAnswers] =
     userAnswers
       .set(EoriNumberPage, eoriNumber)
-      .flatMap(_.set(IsNctsUserPage, isNctsUser))
+      .flatMap(_.set(ReferralPage, referral))
 }

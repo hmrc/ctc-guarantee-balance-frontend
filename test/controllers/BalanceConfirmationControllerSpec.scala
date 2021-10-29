@@ -18,13 +18,14 @@ package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import matchers.JsonMatchers.containJson
-import models.{Balance, NormalMode, UserAnswers}
+import models.Referral._
+import models.{Balance, NormalMode, Referral, UserAnswers}
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{times, verify}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{EoriNumberPage, IsNctsUserPage}
+import pages.{EoriNumberPage, ReferralPage}
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -36,7 +37,7 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
     ".onPageLoad" - {
       "must return OK and the correct view for a GET" - {
 
-        "IsNctsUserPage undefined" in {
+        "ReferralPage undefined" in {
 
           val application    = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
           val request        = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
@@ -51,7 +52,7 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
 
           val expectedJson = Json.obj(
             "balance"                         -> Balance(8500).toString,
-            "isNctsUser"                      -> false,
+            "referral"                        -> GovUK,
             "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
           )
 
@@ -61,13 +62,13 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
           application.stop()
         }
 
-        "IsNctsUserPage defined" in {
+        "ReferralPage defined" in {
 
-          forAll(arbitrary[Boolean]) {
-            bool =>
+          forAll(arbitrary[Referral]) {
+            referral =>
               beforeEach()
 
-              val userAnswers = emptyUserAnswers.set(IsNctsUserPage, bool).success.value
+              val userAnswers = emptyUserAnswers.set(ReferralPage, referral).success.value
 
               val application    = applicationBuilder(userAnswers = Some(userAnswers)).build()
               val request        = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
@@ -82,7 +83,7 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
 
               val expectedJson = Json.obj(
                 "balance"                         -> Balance(8500).toString,
-                "isNctsUser"                      -> bool,
+                "referral"                        -> referral,
                 "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
               )
 

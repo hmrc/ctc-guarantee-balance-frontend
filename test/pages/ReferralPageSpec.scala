@@ -16,11 +16,17 @@
 
 package pages
 
-import play.api.libs.json.JsPath
+import models.Referral
+import pages.behaviours.PageBehaviours
 
-case object IsNctsUserPage extends QuestionPage[Boolean] {
+class ReferralPageSpec extends PageBehaviours {
 
-  override def path: JsPath = JsPath \ toString
+  "ReferralPage" - {
 
-  override def toString: String = "isNctsUser"
+    beRetrievable[Referral](ReferralPage)
+
+    beSettable[Referral](ReferralPage)
+
+    beRemovable[Referral](ReferralPage)
+  }
 }

@@ -23,21 +23,23 @@
           </div>
         </div>
 
-        {% if isNctsUser %}
+        {% switch referral %}
 
-          <p>{{ messages("balanceConfirmation.fromNcts.p") }}</p>
-          <ul class="govuk-list govuk-list--bullet">
-            <li><a href={{ checkAnotherGuaranteeBalanceUrl }} id="check-another-guarantee-balance">{{ messages("balanceConfirmation.fromNcts.link1") }}</a></li>
-            <li><a href={{ routes.controllers.BalanceConfirmationController.manageTransitMovements().url }} id="manage-transit-movements">{{ messages("balanceConfirmation.fromNcts.link2") }}</a></li>
-          </ul>
+          {% case "govuk" %}
 
-        {% else %}
+            <p>{{ messages("balanceConfirmation.fromGovUk.p") }}
+              <a href={{ checkAnotherGuaranteeBalanceUrl }} id="check-another-guarantee-balance">{{ messages("balanceConfirmation.fromGovUk.link") }}</a>.
+            </p>
 
-          <p>{{ messages("balanceConfirmation.fromGovUk.p") }}
-            <a href={{ checkAnotherGuaranteeBalanceUrl }} id="check-another-guarantee-balance">{{ messages("balanceConfirmation.fromGovUk.link") }}</a>.
-          </p>
+          {% case "ncts" %}
 
-        {% endif %}
+            <p>{{ messages("balanceConfirmation.fromNcts.p") }}</p>
+            <ul class="govuk-list govuk-list--bullet">
+              <li><a href={{ checkAnotherGuaranteeBalanceUrl }} id="check-another-guarantee-balance">{{ messages("balanceConfirmation.fromNcts.link1") }}</a></li>
+              <li><a href={{ routes.controllers.BalanceConfirmationController.manageTransitMovements().url }} id="manage-transit-movements">{{ messages("balanceConfirmation.fromNcts.link2") }}</a></li>
+            </ul>
+
+        {% endswitch %}
 
       </div>
     </div>
