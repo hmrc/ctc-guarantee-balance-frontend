@@ -18,23 +18,22 @@ package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
+import pages.GuaranteeReferenceNumberPage
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.twirl.api.Html
 
 import scala.concurrent.Future
 
 class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with AppWithDefaultMockFixtures {
 
+  private val grn: String = "grn"
+
   "CheckYourAnswers Controller" - {
 
     "return OK and the correct view for a GET" in {
-
-      when(mockRenderer.render(any(), any())(any()))
-        .thenReturn(Future.successful(Html("")))
 
       val application                            = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
       val request                                = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
@@ -62,9 +61,10 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
       redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
     }
 
-    "must redirect to Balance Confirmation for a POST" in {
+    "must redirect to Balance Confirmation for a POST if no lock in mongo repository for that user and GRN" in {
 
-      val application = applicationBuilder(userAnswers = Some(nonEmptyUserAnswers)).build()
+      val userAnswers = emptyUserAnswers.set(GuaranteeReferenceNumberPage, grn).success.value
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
       val request     = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
       when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
 
@@ -73,11 +73,14 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
       status(result) mustEqual SEE_OTHER
 
       redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
+
+      val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
+      verify(mockMongoLockRepository).takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())
     }
 
     "must redirect to Session Expired for a POST if no existing data is found" in {
 
-      val request = FakeRequest(GET, routes.CheckYourAnswersController.onSubmit().url)
+      val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
 
       val result = route(app, request).value
 
@@ -88,9 +91,10 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
     "must redirect to session expired if GRN is not found in user answer " in {
 
-      val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val request     = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
 
-      val result = route(app, request).value
+      val result = route(application, request).value
 
       status(result) mustEqual SEE_OTHER
 
@@ -98,8 +102,10 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
     }
 
-    "must redirect to rate limit if lock in mongo repository is taken for that user and GRN " in {
-      val application = applicationBuilder(userAnswers = Some(nonEmptyUserAnswers)).build()
+    "must redirect to rate limit if lock in mongo repository for that user and GRN" in {
+
+      val userAnswers = emptyUserAnswers.set(GuaranteeReferenceNumberPage, grn).success.value
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
       val request     = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
       when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(false))
 
@@ -108,6 +114,9 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
       status(result) mustEqual SEE_OTHER
 
       redirectLocation(result).value mustEqual routes.RateLimitController.onPageLoad().url
+
+      val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
+      verify(mockMongoLockRepository).takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())
 
     }
 

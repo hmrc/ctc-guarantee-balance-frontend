@@ -30,7 +30,6 @@ import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.twirl.api.Html
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 
 import scala.concurrent.Future
@@ -48,13 +47,10 @@ class TestPageControllerSpec extends SpecBase with MockitoSugar with NunjucksSup
 
     "must return OK and the correct view for a GET" in {
 
-      when(mockRenderer.render(any(), any())(any()))
-        .thenReturn(Future.successful(Html("")))
-
-      val application    = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-      val request        = FakeRequest(GET, testPageRoute)
-      val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-      val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
+      val application                            = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val request                                = FakeRequest(GET, testPageRoute)
+      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+      val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
 
       val result = route(application, request).value
 
@@ -76,7 +72,6 @@ class TestPageControllerSpec extends SpecBase with MockitoSugar with NunjucksSup
     "must redirect to the next page when valid data is submitted with a existing UserAnswers" in {
 
       when(mockSessionRepository.get(any())) thenReturn Future.successful(Some(UserAnswers("foo")))
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
@@ -100,7 +95,6 @@ class TestPageControllerSpec extends SpecBase with MockitoSugar with NunjucksSup
     "must redirect to the next page when valid data is submitted without existing UserAnswers" in {
 
       when(mockSessionRepository.get(any())) thenReturn Future.successful(None)
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       val application =
         applicationBuilder(userAnswers = Some(emptyUserAnswers))
@@ -123,14 +117,11 @@ class TestPageControllerSpec extends SpecBase with MockitoSugar with NunjucksSup
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      when(mockRenderer.render(any(), any())(any()))
-        .thenReturn(Future.successful(Html("")))
-
-      val application    = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-      val request        = FakeRequest(POST, testPageRoute).withFormUrlEncodedBody(("value", ""))
-      val boundForm      = form.bind(Map("value" -> ""))
-      val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-      val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
+      val application                            = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val request                                = FakeRequest(POST, testPageRoute).withFormUrlEncodedBody(("value", ""))
+      val boundForm                              = form.bind(Map("value" -> ""))
+      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+      val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
 
       val result = route(application, request).value
 

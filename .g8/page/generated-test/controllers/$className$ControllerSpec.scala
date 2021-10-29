@@ -23,7 +23,7 @@ class $className$ControllerSpec extends SpecBase with MockitoSugar with AppWithD
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
       val request = FakeRequest(GET, routes.$className$Controller.onPageLoad().url)
-      val templateCaptor = ArgumentCaptor.forClass(classOf[String])
+      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
 
       val result = route(application, request).value
 

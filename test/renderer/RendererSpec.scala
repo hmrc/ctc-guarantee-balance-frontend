@@ -19,12 +19,9 @@ package renderer
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.Mockito.{times, verify}
 import play.api.libs.json._
 import play.api.test.FakeRequest
-import play.twirl.api.Html
-
-import scala.concurrent.Future
 
 class RendererSpec extends SpecBase with AppWithDefaultMockFixtures {
 
@@ -36,11 +33,8 @@ class RendererSpec extends SpecBase with AppWithDefaultMockFixtures {
 
       "when called with only a template" in {
 
-        when(mockRenderer.render(any(), any())(any()))
-          .thenReturn(Future.successful(Html("")))
-
-        val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-        val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
+        val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+        val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
 
         val renderer = app.injector.instanceOf[Renderer]
 
@@ -58,11 +52,8 @@ class RendererSpec extends SpecBase with AppWithDefaultMockFixtures {
 
       "when called with a template and a JsObject" in {
 
-        when(mockRenderer.render(any(), any())(any()))
-          .thenReturn(Future.successful(Html("")))
-
-        val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-        val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
+        val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+        val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
 
         val renderer = app.injector.instanceOf[Renderer]
 
@@ -80,11 +71,8 @@ class RendererSpec extends SpecBase with AppWithDefaultMockFixtures {
 
       "when called with a template and a writable object" in {
 
-        when(mockRenderer.render(any(), any())(any()))
-          .thenReturn(Future.successful(Html("")))
-
-        val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-        val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
+        val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+        val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
 
         val renderer = app.injector.instanceOf[Renderer]
 

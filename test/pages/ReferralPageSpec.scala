@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package controllers
+package pages
 
-import base.{AppWithDefaultMockFixtures, SpecBase}
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import models.Referral
+import pages.behaviours.PageBehaviours
 
-class IndexControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
+class ReferralPageSpec extends PageBehaviours {
 
-  "return OK and the correct view for a GET" in {
+  "ReferralPage" - {
 
-    val request = FakeRequest(GET, routes.IndexController.onPageLoad().url)
+    beRetrievable[Referral](ReferralPage)
 
-    val result = route(app, request).value
+    beSettable[Referral](ReferralPage)
 
-    status(result) mustEqual SEE_OTHER
-    redirectLocation(result).value mustEqual routes.WhatDoYouWantToDoController.onPageLoad().url
+    beRemovable[Referral](ReferralPage)
   }
 }

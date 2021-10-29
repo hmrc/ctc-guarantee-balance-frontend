@@ -16,12 +16,17 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions._
-import models.{Balance, NormalMode}
+import models.Referral.GovUK
+import models.requests.DataRequest
+import models.{Balance, NormalMode, Referral}
+import pages.ReferralPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
+import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.Inject
@@ -29,11 +34,13 @@ import scala.concurrent.ExecutionContext
 
 class BalanceConfirmationController @Inject() (
   override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
   val controllerComponents: MessagesControllerComponents,
-  renderer: Renderer
+  renderer: Renderer,
+  appConfig: FrontendAppConfig
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
@@ -41,11 +48,28 @@ class BalanceConfirmationController @Inject() (
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       val json = Json.obj(
-        "balance"                         -> Balance(8500).toString, // TODO - retrieve actual balance
-        "isNctsUser"                      -> true, // TODO - determine if user came from GOV.UK or NCTS
-        "checkAnotherGuaranteeBalanceUrl" -> routes.EoriNumberController.onPageLoad(NormalMode).url
+        "balance"                         -> Balance(8500).toString, // TODO - retrieve actual balance along with the currency
+        "referral"                        -> referral,
+        "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
       )
 
       renderer.render("balanceConfirmation.njk", json).map(Ok(_))
   }
+
+  def checkAnotherGuaranteeBalance: Action[AnyContent] =
+    clearUserAnswersAndRedirect(routes.EoriNumberController.onPageLoad(NormalMode).url)
+
+  def manageTransitMovements: Action[AnyContent] =
+    clearUserAnswersAndRedirect(appConfig.manageTransitMovementsUrl)
+
+  private def clearUserAnswersAndRedirect(url: String): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+    implicit request =>
+      sessionRepository.set(request.userAnswers.clear) map {
+        _ =>
+          Redirect(url)
+      }
+  }
+
+  private def referral(implicit request: DataRequest[AnyContent]): Referral =
+    request.userAnswers.get(ReferralPage).getOrElse(GovUK)
 }

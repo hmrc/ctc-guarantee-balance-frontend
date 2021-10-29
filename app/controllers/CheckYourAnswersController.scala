@@ -48,7 +48,7 @@ class CheckYourAnswersController @Inject() (
     with I18nSupport
     with NunjucksSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       val answers = createSections(request.userAnswers)
       val json = Json.obj(
@@ -58,19 +58,12 @@ class CheckYourAnswersController @Inject() (
       renderer.render("checkYourAnswers.njk", json).map(Ok(_))
   }
 
-  def onSubmit(): Action[AnyContent] = (identify andThen getData).async {
+  def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      val eoriNumber: String = request.eoriNumber
-
-      val guaranteedReferenceNumber: Option[String] = request.userAnswers
-        .flatMap(
-          userAnswers => userAnswers.get(GuaranteeReferenceNumberPage)
-        )
-
-      guaranteedReferenceNumber match {
+      request.userAnswers.get(GuaranteeReferenceNumberPage) match {
         case None => Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
         case Some(guaranteedReferenceNumber: String) =>
-          checkRateLimit(eoriNumber, guaranteedReferenceNumber).flatMap {
+          checkRateLimit(request.eoriNumber, guaranteedReferenceNumber).flatMap {
             lockFree =>
               if (lockFree) {
                 Future.successful(
