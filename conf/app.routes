@@ -16,6 +16,8 @@ POST       /testPage                                controllers.TestPageControll
 GET        /changeTestPage                          controllers.TestPageController.onPageLoad(mode: Mode = CheckMode)
 POST       /changeTestPage                          controllers.TestPageController.onSubmit(mode: Mode = CheckMode)
 
+GET        /start                                   controllers.StartController.start(referral: Referral ?= GovUK)
+
 GET        /eori-number                             controllers.EoriNumberController.onPageLoad(mode: Mode = NormalMode)
 POST       /eori-number                             controllers.EoriNumberController.onSubmit(mode: Mode = NormalMode)
 GET        /change-eori-number                      controllers.EoriNumberController.onPageLoad(mode: Mode = CheckMode)
@@ -35,5 +37,7 @@ GET        /check-your-answers                      controllers.CheckYourAnswers
 POST       /check-your-answers                      controllers.CheckYourAnswersController.onSubmit()
 
 GET        /balance-confirmation                    controllers.BalanceConfirmationController.onPageLoad()
+GET        /check-another-guarantee-balance         controllers.BalanceConfirmationController.checkAnotherGuaranteeBalance()
+GET        /manage-transit-movements                controllers.BalanceConfirmationController.manageTransitMovements()
 
 GET        /details-do-not-match                    controllers.DetailsDontMatchController.onPageLoad()

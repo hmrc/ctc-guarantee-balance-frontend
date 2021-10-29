@@ -17,32 +17,35 @@
 package controllers
 
 import controllers.actions._
+import models.{NormalMode, Referral, UserAnswers}
+import pages.ReferralPage
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import renderer.Renderer
+import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import uk.gov.hmrc.viewmodels.NunjucksSupport
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
-class DetailsDontMatchController @Inject() (
+class StartController @Inject() (
   override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
-  requireData: DataRequiredAction,
-  val controllerComponents: MessagesControllerComponents,
-  renderer: Renderer
+  val controllerComponents: MessagesControllerComponents
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
-    with I18nSupport {
+    with I18nSupport
+    with NunjucksSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def start(referral: Referral): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
-      val json = Json.obj(
-        "checkYourAnswersUrl" -> routes.CheckYourAnswersController.onPageLoad().url
-      )
+      val userAnswers = request.userAnswers getOrElse UserAnswers(id = request.eoriNumber)
 
-      renderer.render("detailsDontMatch.njk", json).map(Ok(_))
+      for {
+        updatedAnswers <- Future.fromTry(userAnswers.set(ReferralPage, referral))
+        _              <- sessionRepository.set(updatedAnswers)
+      } yield Redirect(routes.EoriNumberController.onPageLoad(NormalMode))
   }
 }
