@@ -57,20 +57,16 @@ class BalanceConfirmationController @Inject() (
   }
 
   def checkAnotherGuaranteeBalance: Action[AnyContent] =
-    clearUserAnswersAndRedirect(
-      referral => routes.EoriNumberController.onPageLoad(NormalMode, referral).url
-    )
+    clearUserAnswersAndRedirect(routes.EoriNumberController.onPageLoad(NormalMode).url)
 
   def manageTransitMovements: Action[AnyContent] =
-    clearUserAnswersAndRedirect(
-      _ => appConfig.manageTransitMovementsUrl
-    )
+    clearUserAnswersAndRedirect(appConfig.manageTransitMovementsUrl)
 
-  private def clearUserAnswersAndRedirect(url: Referral => String): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  private def clearUserAnswersAndRedirect(url: String): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       sessionRepository.set(request.userAnswers.clear) map {
         _ =>
-          Redirect(url(referral))
+          Redirect(url)
       }
   }
 

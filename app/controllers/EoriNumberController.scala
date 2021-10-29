@@ -18,10 +18,9 @@ package controllers
 
 import controllers.actions._
 import forms.EoriNumberFormProvider
-import models.requests.OptionalDataRequest
-import models.{Mode, Referral, UserAnswers}
+import models.Mode
 import navigation.Navigator
-import pages.{EoriNumberPage, ReferralPage}
+import pages.EoriNumberPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -32,7 +31,6 @@ import uk.gov.hmrc.viewmodels.NunjucksSupport
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
 class EoriNumberController @Inject() (
   override val messagesApi: MessagesApi,
@@ -40,6 +38,7 @@ class EoriNumberController @Inject() (
   navigator: Navigator,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
   formProvider: EoriNumberFormProvider,
   val controllerComponents: MessagesControllerComponents,
   renderer: Renderer
@@ -50,35 +49,30 @@ class EoriNumberController @Inject() (
 
   private val form = formProvider()
 
-  def onPageLoad(mode: Mode, referral: Referral): Action[AnyContent] = (identify andThen getData).async {
-    implicit request: OptionalDataRequest[AnyContent] =>
-      val eoriNumber: Option[String] = request.userAnswers.flatMap(
-        _.get(EoriNumberPage)
-      )
-      val preparedForm = eoriNumber match {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+    implicit request =>
+      val preparedForm = request.userAnswers.get(EoriNumberPage) match {
         case Some(value) => form.fill(value)
         case _           => form
       }
 
       val json = Json.obj(
-        "form"     -> preparedForm,
-        "mode"     -> mode,
-        "referral" -> referral
+        "form" -> preparedForm,
+        "mode" -> mode
       )
 
       renderer.render("eoriNumber.njk", json).map(Ok(_))
   }
 
-  def onSubmit(mode: Mode, referral: Referral): Action[AnyContent] = (identify andThen getData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       form
         .bindFromRequest()
         .fold(
           formWithErrors => {
             val json = Json.obj(
-              "form"     -> formWithErrors,
-              "mode"     -> mode,
-              "referral" -> referral
+              "form" -> formWithErrors,
+              "mode" -> mode
             )
 
             renderer.render("eoriNumber.njk", json).map(BadRequest(_))
@@ -86,17 +80,9 @@ class EoriNumberController @Inject() (
           },
           value =>
             for {
-              updatedAnswers <- Future.fromTry(populateUserAnswers(getOrCreateUserAnswers, value, referral))
+              updatedAnswers <- Future.fromTry(request.userAnswers.set(EoriNumberPage, value))
               _              <- sessionRepository.set(updatedAnswers)
             } yield Redirect(navigator.nextPage(EoriNumberPage, mode, updatedAnswers))
         )
   }
-
-  private def getOrCreateUserAnswers(implicit request: OptionalDataRequest[AnyContent]): UserAnswers =
-    request.userAnswers getOrElse UserAnswers(id = request.eoriNumber)
-
-  private def populateUserAnswers(userAnswers: UserAnswers, eoriNumber: String, referral: Referral): Try[UserAnswers] =
-    userAnswers
-      .set(EoriNumberPage, eoriNumber)
-      .flatMap(_.set(ReferralPage, referral))
 }
