@@ -86,7 +86,7 @@ class CheckYourAnswersController @Inject() (
   private def checkRateLimit(eoriNumber: String, guaranteedReferenceNumber: String): Future[Boolean] = {
     val lockId   = (eoriNumber + guaranteedReferenceNumber.trim.toLowerCase).hashCode.toString
     val duration = config.rateLimitDuration.seconds
-    mongoLockRepository.takeLock(lockId, java.util.UUID.randomUUID().toString, duration)
+    mongoLockRepository.takeLock(lockId, eoriNumber, duration)
   }
 
   private def createSections(userAnswers: UserAnswers): Section = {
