@@ -1,6 +1,7 @@
 {% extends "includes/layout.njk" %}
 
 {% from "macros/title.njk"                         import title %}
+{% from "govuk/components/panel/macro.njk"         import govukPanel %}
 
 {% block pageTitle %}
   {{ title(messages("balanceConfirmation.title")) }}
@@ -12,16 +13,10 @@
     <div class="govuk-grid-row">
       <div class="govuk-grid-column-two-thirds">
 
-        <div class="govuk-panel govuk-panel--confirmation">
-          <h1 class="govuk-panel__title">
-            {{ messages("balanceConfirmation.heading") }}
-          </h1>
-
-          <div class="govuk-panel__body">
-            <br>
-            <strong>{{ balance }}</strong>
-          </div>
-        </div>
+        {{ govukPanel({
+          titleText: messages("balanceConfirmation.heading"),
+          html: "<br><strong>" + balance + "</strong>"
+        }) }}
 
         {% switch referral %}
 
