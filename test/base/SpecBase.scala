@@ -41,6 +41,6 @@ trait SpecBase
 
   val userAnswersId = "id"
 
-  def emptyUserAnswers = UserAnswers(userAnswersId, Json.obj())
+  def emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId, Json.obj())
 
 }
