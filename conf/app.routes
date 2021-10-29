@@ -41,3 +41,5 @@ GET        /:balanceId/try-again                    controllers.TryGuaranteeBala
 POST       /:balanceId/try-again                    controllers.TryGuaranteeBalanceAgainController.onSubmit(balanceId: BalanceId)
 
 GET        /balance-confirmation                    controllers.BalanceConfirmationController.onPageLoad()
+
+GET        /details-do-not-match                    controllers.DetailsDontMatchController.onPageLoad()
