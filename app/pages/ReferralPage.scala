@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-package controllers
+package pages
 
-import base.{AppWithDefaultMockFixtures, SpecBase}
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import models.Referral
+import play.api.libs.json.JsPath
 
-class IndexControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
+case object ReferralPage extends QuestionPage[Referral] {
 
-  "return OK and the correct view for a GET" in {
+  override def path: JsPath = JsPath \ toString
 
-    val request = FakeRequest(GET, routes.IndexController.onPageLoad().url)
-
-    val result = route(app, request).value
-
-    status(result) mustEqual SEE_OTHER
-    redirectLocation(result).value mustEqual routes.WhatDoYouWantToDoController.onPageLoad().url
-  }
+  override def toString: String = "referral"
 }

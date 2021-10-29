@@ -17,8 +17,9 @@
 package models
 
 import base.SpecBase
-import pages.QuestionPage
-import play.api.libs.json.{JsObject, JsPath, JsString}
+import org.scalacheck.Arbitrary.arbitrary
+import pages.{QuestionPage, ReferralPage}
+import play.api.libs.json.{JsObject, JsPath, JsString, Json}
 
 class UserAnswersSpec extends SpecBase {
 
@@ -70,6 +71,26 @@ class UserAnswersSpec extends SpecBase {
         val result = userAnswers.remove(TestPage).toOption.value.data
 
         result mustBe expectedUserAnswers.data
+      }
+    }
+
+    "clear" - {
+
+      "must clear everything except ReferralPage when there is an answer for ReferralPage" in {
+
+        forAll(arbitrary[UserAnswers], arbitrary[Referral]) {
+          (userAnswers, referral) =>
+            val userAnswersWithReferral = userAnswers.set(ReferralPage, referral).success.value
+
+            userAnswersWithReferral.clear.data mustEqual Json.obj((ReferralPage.toString, referral))
+        }
+      }
+
+      "must clear everything when there is no answer for ReferralPage" in {
+
+        forAll(arbitrary[UserAnswers]) {
+          _.clear.data mustEqual Json.obj()
+        }
       }
     }
   }

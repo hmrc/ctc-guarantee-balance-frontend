@@ -18,10 +18,7 @@ package controllers
 
 import controllers.actions._
 import forms.EoriNumberFormProvider
-import models.requests.OptionalDataRequest
-
-import javax.inject.Inject
-import models.{Mode, UserAnswers}
+import models.Mode
 import navigation.Navigator
 import pages.EoriNumberPage
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -32,6 +29,7 @@ import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class EoriNumberController @Inject() (
@@ -40,6 +38,7 @@ class EoriNumberController @Inject() (
   navigator: Navigator,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
   formProvider: EoriNumberFormProvider,
   val controllerComponents: MessagesControllerComponents,
   renderer: Renderer
@@ -50,12 +49,9 @@ class EoriNumberController @Inject() (
 
   private val form = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
-    implicit request: OptionalDataRequest[AnyContent] =>
-      val getEoriNumber: Option[String] = request.userAnswers.flatMap(
-        userAnswers => userAnswers.get(EoriNumberPage)
-      )
-      val preparedForm = getEoriNumber match {
+  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+    implicit request =>
+      val preparedForm = request.userAnswers.get(EoriNumberPage) match {
         case Some(value) => form.fill(value)
         case _           => form
       }
@@ -68,7 +64,7 @@ class EoriNumberController @Inject() (
       renderer.render("eoriNumber.njk", json).map(Ok(_))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       form
         .bindFromRequest()
@@ -84,19 +80,9 @@ class EoriNumberController @Inject() (
           },
           value =>
             for {
-              uaSetup        <- getOrCreateUserAnswers(request.eoriNumber)
-              updatedAnswers <- Future.fromTry(uaSetup.set(EoriNumberPage, value))
+              updatedAnswers <- Future.fromTry(request.userAnswers.set(EoriNumberPage, value))
               _              <- sessionRepository.set(updatedAnswers)
             } yield Redirect(navigator.nextPage(EoriNumberPage, mode, updatedAnswers))
         )
-  }
-
-  def getOrCreateUserAnswers(eoriNumber: String): Future[UserAnswers] = {
-    val initialUserAnswers = UserAnswers(id = eoriNumber)
-
-    sessionRepository.get(id = eoriNumber) map {
-      userAnswers =>
-        userAnswers getOrElse initialUserAnswers
-    }
   }
 }

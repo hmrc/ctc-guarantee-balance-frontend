@@ -17,20 +17,12 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import org.mockito.Matchers.any
-import org.mockito.Mockito.when
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.twirl.api.Html
-
-import scala.concurrent.Future
 
 class RedirectControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   "return OK and the correct view for a GET" in {
-
-    when(mockRenderer.render(any(), any())(any()))
-      .thenReturn(Future.successful(Html("")))
 
     val request = FakeRequest(GET, routes.RedirectController.onPageLoad().url)
 
