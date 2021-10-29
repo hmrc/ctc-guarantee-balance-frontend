@@ -37,8 +37,8 @@ class RateLimitControllerSpec extends SpecBase with MockitoSugar with AppWithDef
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
 
-      val application    = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-      val request        = FakeRequest(GET, routes.RateLimitController.onPageLoad().url)
+      val application                            = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val request                                = FakeRequest(GET, routes.RateLimitController.onPageLoad().url)
       val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
 
       val result = route(application, request).value
