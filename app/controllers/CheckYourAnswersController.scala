@@ -76,7 +76,9 @@ class CheckYourAnswersController @Inject() (
           checkRateLimit(eoriNumber, guaranteedReferenceNumber).flatMap {
             lockFree =>
               if (lockFree) {
-                ??? //todo this needs to be completed once the back end direction has been confirmed
+                Future.successful(
+                  Redirect(routes.BalanceConfirmationController.onPageLoad())
+                ) //todo this needs to be completed once the back end direction has been confirmed
               } else {
                 Future.successful(Redirect(routes.RateLimitController.onPageLoad()))
               }

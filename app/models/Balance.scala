@@ -14,24 +14,14 @@
  * limitations under the License.
  */
 
-package forms
+package models
 
-import forms.Constants._
-import forms.mappings.Mappings
-import play.api.data.Form
+class Balance(balance: Int) {
 
-import javax.inject.Inject
+  private val formatter         = java.text.NumberFormat.getIntegerInstance
+  override def toString: String = s"£${formatter.format(balance)}"
+}
 
-class GuaranteeReferenceNumberFormProvider @Inject() extends Mappings {
-
-  def apply(): Form[String] =
-    Form(
-      "value" -> text("guaranteeReferenceNumber.error.required")
-        .verifying(
-          forms.StopOnFirstFail[String](
-            maxLength(maxGuaranteeReferenceNumberLength, "guaranteeReferenceNumber.error.length"),
-            regexp(alphaNumericRegex, "guaranteeReferenceNumber.error.invalid")
-          )
-        )
-    )
+object Balance {
+  def apply(balance: Int) = new Balance(balance)
 }

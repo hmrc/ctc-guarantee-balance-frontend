@@ -1,0 +1,46 @@
+{% extends "includes/layout.njk" %}
+
+{% from "macros/title.njk"                         import title %}
+
+{% block pageTitle %}
+  {{ title(messages("balanceConfirmation.title")) }}
+{% endblock %}
+
+{% block mainContent %}
+
+  <div class="govuk-main-wrapper">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+
+        <div class="govuk-panel govuk-panel--confirmation">
+          <h1 class="govuk-panel__title">
+            {{ messages("balanceConfirmation.heading") }}
+          </h1>
+
+          <div class="govuk-panel__body">
+            <br>
+            <strong>{{ balance }}</strong>
+          </div>
+        </div>
+
+        {% if isNctsUser %}
+
+          <p>{{ messages("balanceConfirmation.fromNcts.p") }}</p>
+          <ul class="govuk-list govuk-list--bullet">
+            <li><a href={{ checkAnotherGuaranteeBalanceUrl }} id="check-another-guarantee-balance">{{ messages("balanceConfirmation.fromNcts.link1") }}</a></li>
+            <li><a href={{ config.manageTransitMovementsUrl }} id="manage-transit-movements">{{ messages("balanceConfirmation.fromNcts.link2") }}</a></li>
+          </ul>
+
+        {% else %}
+
+          <p>{{ messages("balanceConfirmation.fromGovUk.p") }}
+            <a href={{ checkAnotherGuaranteeBalanceUrl }} id="check-another-guarantee-balance">{{ messages("balanceConfirmation.fromGovUk.link") }}</a>.
+          </p>
+
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

@@ -35,3 +35,9 @@ GET        /check-your-answers                      controllers.CheckYourAnswers
 POST       /check-your-answers                      controllers.CheckYourAnswersController.onSubmit()
 
 GET        /rate-limit                              controllers.RateLimitController.onPageLoad(mode: Mode = NormalMode)
+GET        /check-your-answers                      controllers.CheckYourAnswersController.onPageLoad()
+POST       /check-your-answers                      controllers.CheckYourAnswersController.onSubmit()
+
+GET        /balance-confirmation                    controllers.BalanceConfirmationController.onPageLoad()
+
+GET        /details-do-not-match                    controllers.DetailsDontMatchController.onPageLoad()
