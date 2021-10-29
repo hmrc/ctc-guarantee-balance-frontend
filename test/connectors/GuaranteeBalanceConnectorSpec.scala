@@ -18,9 +18,10 @@ package connectors
 
 import java.util.UUID
 
-import base.SpecBase
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
+import models.UserAnswers
 import models.backend.{BalanceRequestPending, BalanceRequestSuccess}
 import models.requests.BalanceRequest
 import models.values._
@@ -32,9 +33,9 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 
-class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler with ScalaCheckPropertyChecks {
+class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler with ScalaCheckPropertyChecks with AppWithDefaultMockFixtures {
 
-  override lazy val app: Application = new GuiceApplicationBuilder()
+  override lazy val app: Application = applicationBuilder()
     .configure(
       conf = "microservice.services.common-transit-convention-guarantee-balance.port" -> server.port()
     )
@@ -76,7 +77,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
             .willReturn(okJson(balanceRequestSuccessResponseJson))
         )
 
-        val expectedResponse = BalanceRequestSuccess(BigDecimal(3.14), CurrencyCode("cc"))
+        val expectedResponse = BalanceRequestSuccess(BigDecimal(3.14), CurrencyCode("EUR"))
 
         val result = connector.submitBalanceRequest(request).futureValue
         result mustBe Right(expectedResponse)

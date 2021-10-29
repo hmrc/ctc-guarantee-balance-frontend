@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-package controllers
+package models
 
-import base.{AppWithDefaultMockFixtures, SpecBase}
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
+class Balance(balance: Int) {
 
-class IndexControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
+  private val formatter         = java.text.NumberFormat.getIntegerInstance
+  override def toString: String = s"£${formatter.format(balance)}"
+}
 
-  "return OK and the correct view for a GET" in {
-
-    val request = FakeRequest(GET, routes.IndexController.onPageLoad().url)
-
-    val result = route(app, request).value
-
-    status(result) mustEqual SEE_OTHER
-    redirectLocation(result).value mustEqual routes.WhatDoYouWantToDoController.onPageLoad().url
-  }
+object Balance {
+  def apply(balance: Int) = new Balance(balance)
 }

@@ -18,7 +18,9 @@ package base
 
 import controllers.actions._
 import models.UserAnswers
+import org.mockito.Matchers.any
 import org.mockito.Mockito
+import org.mockito.Mockito.when
 import org.scalatest.{BeforeAndAfterEach, TestSuite}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.{GuiceFakeApplicationFactory, GuiceOneAppPerSuite}
@@ -27,18 +29,27 @@ import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers
+import play.twirl.api.Html
 import repositories.SessionRepository
 import uk.gov.hmrc.nunjucks.NunjucksRenderer
+
+import scala.concurrent.Future
 
 trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerSuite with GuiceFakeApplicationFactory with MockitoSugar {
   self: TestSuite =>
 
-  override def beforeEach(): Unit =
+  override def beforeEach(): Unit = {
     Mockito.reset(
       mockRenderer,
       mockDataRetrievalAction,
       mockSessionRepository
     )
+
+    when(mockRenderer.render(any(), any())(any()))
+      .thenReturn(Future.successful(Html("")))
+
+    when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+  }
 
   val mockRenderer: NunjucksRenderer = mock[NunjucksRenderer]
 

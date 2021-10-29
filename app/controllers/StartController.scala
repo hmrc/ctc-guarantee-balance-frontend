@@ -17,56 +17,35 @@
 package controllers
 
 import controllers.actions._
-import models.{CheckMode, UserAnswers}
+import models.{NormalMode, Referral, UserAnswers}
+import pages.ReferralPage
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import renderer.Renderer
+import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
-import utils.CheckYourAnswersHelper
-import viewModels.Section
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
-class CheckYourAnswersController @Inject() (
+class StartController @Inject() (
   override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
-  requireData: DataRequiredAction,
-  val controllerComponents: MessagesControllerComponents,
-  renderer: Renderer
+  val controllerComponents: MessagesControllerComponents
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
     with NunjucksSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def start(referral: Referral): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
-      val answers = createSections(request.userAnswers)
-      val json = Json.obj(
-        "section" -> Json.toJson(answers)
-      )
+      val userAnswers = request.userAnswers getOrElse UserAnswers(id = request.eoriNumber)
 
-      renderer.render("checkYourAnswers.njk", json).map(Ok(_))
-  }
-
-  def onSubmit: Action[AnyContent] = (identify andThen getData andThen requireData) {
-    implicit request =>
-      // TODO - send answers to backend
-      Redirect(routes.BalanceConfirmationController.onPageLoad())
-  }
-
-  private def createSections(userAnswers: UserAnswers): Section = {
-    val helper = new CheckYourAnswersHelper(userAnswers, CheckMode)
-
-    Section(
-      Seq(
-        helper.eoriNumber,
-        helper.guaranteeReferenceNumber,
-        helper.accessCode
-      ).flatten
-    )
+      for {
+        updatedAnswers <- Future.fromTry(userAnswers.set(ReferralPage, referral))
+        _              <- sessionRepository.set(updatedAnswers)
+      } yield Redirect(routes.EoriNumberController.onPageLoad(NormalMode))
   }
 }

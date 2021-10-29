@@ -17,20 +17,16 @@
 package controllers
 
 import controllers.actions._
-import models.{CheckMode, UserAnswers}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import uk.gov.hmrc.viewmodels.NunjucksSupport
-import utils.CheckYourAnswersHelper
-import viewModels.Section
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class CheckYourAnswersController @Inject() (
+class DetailsDontMatchController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
@@ -39,34 +35,14 @@ class CheckYourAnswersController @Inject() (
   renderer: Renderer
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
-    with I18nSupport
-    with NunjucksSupport {
+    with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      val answers = createSections(request.userAnswers)
       val json = Json.obj(
-        "section" -> Json.toJson(answers)
+        "checkYourAnswersUrl" -> routes.CheckYourAnswersController.onPageLoad().url
       )
 
-      renderer.render("checkYourAnswers.njk", json).map(Ok(_))
-  }
-
-  def onSubmit: Action[AnyContent] = (identify andThen getData andThen requireData) {
-    implicit request =>
-      // TODO - send answers to backend
-      Redirect(routes.BalanceConfirmationController.onPageLoad())
-  }
-
-  private def createSections(userAnswers: UserAnswers): Section = {
-    val helper = new CheckYourAnswersHelper(userAnswers, CheckMode)
-
-    Section(
-      Seq(
-        helper.eoriNumber,
-        helper.guaranteeReferenceNumber,
-        helper.accessCode
-      ).flatten
-    )
+      renderer.render("detailsDontMatch.njk", json).map(Ok(_))
   }
 }

@@ -16,57 +16,60 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions._
-import models.{CheckMode, UserAnswers}
+import models.Referral.GovUK
+import models.requests.DataRequest
+import models.{Balance, NormalMode, Referral}
+import pages.ReferralPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
+import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import uk.gov.hmrc.viewmodels.NunjucksSupport
-import utils.CheckYourAnswersHelper
-import viewModels.Section
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class CheckYourAnswersController @Inject() (
+class BalanceConfirmationController @Inject() (
   override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
   val controllerComponents: MessagesControllerComponents,
-  renderer: Renderer
+  renderer: Renderer,
+  appConfig: FrontendAppConfig
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
-    with I18nSupport
-    with NunjucksSupport {
+    with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      val answers = createSections(request.userAnswers)
       val json = Json.obj(
-        "section" -> Json.toJson(answers)
+        "balance"                         -> Balance(8500).toString, // TODO - retrieve actual balance
+        "referral"                        -> referral,
+        "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
       )
 
-      renderer.render("checkYourAnswers.njk", json).map(Ok(_))
+      renderer.render("balanceConfirmation.njk", json).map(Ok(_))
   }
 
-  def onSubmit: Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def checkAnotherGuaranteeBalance: Action[AnyContent] =
+    clearUserAnswersAndRedirect(routes.EoriNumberController.onPageLoad(NormalMode).url)
+
+  def manageTransitMovements: Action[AnyContent] =
+    clearUserAnswersAndRedirect(appConfig.manageTransitMovementsUrl)
+
+  private def clearUserAnswersAndRedirect(url: String): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      // TODO - send answers to backend
-      Redirect(routes.BalanceConfirmationController.onPageLoad())
+      sessionRepository.set(request.userAnswers.clear) map {
+        _ =>
+          Redirect(url)
+      }
   }
 
-  private def createSections(userAnswers: UserAnswers): Section = {
-    val helper = new CheckYourAnswersHelper(userAnswers, CheckMode)
-
-    Section(
-      Seq(
-        helper.eoriNumber,
-        helper.guaranteeReferenceNumber,
-        helper.accessCode
-      ).flatten
-    )
-  }
+  private def referral(implicit request: DataRequest[AnyContent]): Referral =
+    request.userAnswers.get(ReferralPage).getOrElse(GovUK)
 }
