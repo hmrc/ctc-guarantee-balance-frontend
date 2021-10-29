@@ -16,16 +16,18 @@
 
 package connectors
 
+import java.util.UUID
+
 import base.SpecBase
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
-import models.backend.BalanceRequestSuccess
+import models.backend.{BalanceRequestPending, BalanceRequestSuccess}
 import models.requests.BalanceRequest
-import models.values.{AccessCode, CurrencyCode, GuaranteeReference, TaxIdentifier}
+import models.values._
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
-import play.api.http.HeaderNames
+import play.api.http.{ContentTypes, HeaderNames, Status}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
@@ -44,74 +46,91 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
 
   private lazy val connector = app.injector.instanceOf[GuaranteeBalanceConnector]
 
-  private val balanceRequestSuccessResponseJson: String =
-    """
-      | {
-      |   "response": {
-      |     "balance": 3.14,
-      |     "currency": "cc"
-      |   }
-      | }
-      |""".stripMargin
+  private val request = BalanceRequest(
+    TaxIdentifier("taxid"),
+    GuaranteeReference("guarref"),
+    AccessCode("1234")
+  )
+
+  private val requestAsJsonString: String = Json.stringify(Json.toJson(request))
 
   "GuaranteeBalanceConnector" - {
 
     "submitBalanceRequest" - {
 
-      "must return balance request wrapped in a Some for an Ok" in {
-        val request = BalanceRequest(
-          TaxIdentifier("taxid"),
-          GuaranteeReference("guarref"),
-          AccessCode("1234")
-        )
+      "must return balance success response for Ok" in {
+        val balanceRequestSuccessResponseJson: String =
+          """
+          | {
+          |   "response": {
+          |     "balance": 3.14,
+          |     "currency": "EUR"
+          |   }
+          | }
+          |""".stripMargin
 
         server.stubFor(
           post(urlEqualTo(submitBalanceRequestUrl))
             .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
-            .withRequestBody(equalToJson(Json.stringify(Json.toJson(request))))
+            .withRequestBody(equalToJson(requestAsJsonString))
             .willReturn(okJson(balanceRequestSuccessResponseJson))
         )
 
         val expectedResponse = BalanceRequestSuccess(BigDecimal(3.14), CurrencyCode("cc"))
 
         val result = connector.submitBalanceRequest(request).futureValue
-        result mustBe expectedResponse
+        result mustBe Right(expectedResponse)
       }
 
-//      "must return a None for a Not_Found Status" in {
-//        server.stubFor(
-//          get(urlEqualTo(customsOfficeUrl))
-//            .willReturn(
-//              aResponse()
-//                .withStatus(NOT_FOUND)
-//            )
-//        )
-//
-//        val result = connector.getCustomsOffice(customsOfficeId)
-//
-//        result.futureValue must not be defined
-//
-//      }
-//
-//      "must return a None when there is an unexpected response" in {
-//        val errorResponses = Gen.chooseNum(400, 599).suchThat(_ != NOT_FOUND)
-//
-//        forAll(errorResponses) {
-//          errorResponse =>
-//            server.stubFor(
-//              get(urlEqualTo(customsOfficeUrl))
-//                .willReturn(
-//                  aResponse()
-//                    .withStatus(errorResponse)
-//                )
-//            )
-//
-//            val result = connector.getCustomsOffice(customsOfficeId)
-//
-//            result.futureValue must not be defined
-//        }
-//      }
+      "must return balance pending for Accepted" in {
+        val expectedUuid = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
+        val balanceRequestPendingResponseJson: String =
+          s"""
+          | {
+          |   "balanceId": "22b9899e-24ee-48e6-a189-97d1f45391c4"
+          | }
+          |""".stripMargin
+
+        server.stubFor(
+          post(urlEqualTo(submitBalanceRequestUrl))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+            .withRequestBody(equalToJson(requestAsJsonString))
+            .willReturn(
+              aResponse()
+                .withStatus(Status.ACCEPTED)
+                .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
+                .withBody(balanceRequestPendingResponseJson)
+            )
+        )
+
+        val expectedResponse = BalanceRequestPending(BalanceId(expectedUuid))
+
+        val result = connector.submitBalanceRequest(request).futureValue
+        result mustBe Right(expectedResponse)
+      }
+
+      "must return the HttpResponse when there is an unexpected response" in {
+        val errorResponses = Gen.chooseNum(401, 599).suchThat(_ != Status.NOT_FOUND)
+
+        forAll(errorResponses) {
+          errorResponse =>
+            server.stubFor(
+              post(urlEqualTo(submitBalanceRequestUrl))
+                .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+                .withRequestBody(equalToJson(requestAsJsonString))
+                .willReturn(
+                  aResponse()
+                    .withStatus(errorResponse)
+                )
+            )
+
+            val result = connector.submitBalanceRequest(request).futureValue
+
+            val response = result.left.get
+
+            response.status mustBe errorResponse
+        }
+      }
     }
   }
-
 }

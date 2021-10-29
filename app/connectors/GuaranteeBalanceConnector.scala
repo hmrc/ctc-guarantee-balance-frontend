@@ -20,36 +20,37 @@ import config.FrontendAppConfig
 import javax.inject.Inject
 
 import scala.concurrent.{ExecutionContext, Future}
-import models.backend.{BalanceRequestResponse, PostBalanceRequestSuccessResponse, PostResponse}
+import models.backend.{BalanceRequestPending, BalanceRequestResponse, PostBalanceRequestPendingResponse, PostBalanceRequestSuccessResponse, PostResponse}
 import models.requests.BalanceRequest
 import models.values.BalanceId
 import play.api.http.{ContentTypes, HeaderNames, Status}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions, HttpReads, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 
 class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: FrontendAppConfig)(implicit
   ec: ExecutionContext
-) {
+) extends HttpErrorFunctions {
 
-  def submitBalanceRequest(request: BalanceRequest)(implicit hc: HeaderCarrier): Future[BalanceRequestResponse] = {
+  def submitBalanceRequest(request: BalanceRequest)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] = {
     val url = s"${appConfig.guaranteeBalanceUrl}/balances"
 
     val headers = Seq(
       HeaderNames.ACCEPT -> "application/vnd.hmrc.1.0+json"
     )
 
-    implicit val eitherBalanceIdOrResponseReads: HttpReads[BalanceRequestResponse] =
+    implicit val eitherBalanceIdOrResponseReads: HttpReads[Either[HttpResponse, BalanceRequestResponse]] =
       HttpReads[HttpResponse].map {
         response =>
           response.status match {
-//          case Status.ACCEPTED =>
-//            Left(response.json.as[BalanceId])
+            case Status.ACCEPTED =>
+              Right(BalanceRequestPending(response.json.as[PostBalanceRequestPendingResponse].balanceId))
             case Status.OK =>
-              response.json.as[PostBalanceRequestSuccessResponse].response
+              Right(response.json.as[PostBalanceRequestSuccessResponse].response)
+            case status if is4xx(status) || is5xx(status) => Left(response)
           }
       }
 
-    http.POST[BalanceRequest, BalanceRequestResponse](
+    http.POST[BalanceRequest, Either[HttpResponse, BalanceRequestResponse]](
       url.toString,
       request,
       headers

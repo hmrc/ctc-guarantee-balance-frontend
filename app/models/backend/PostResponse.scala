@@ -31,6 +31,8 @@ case class PostBalanceRequestFunctionalErrorResponse(
   response: BalanceRequestFunctionalError
 ) extends PostResponse
 
+case class GetBalanceRequestResponse(request: PendingBalanceRequest)
+
 object PostResponse {
 
   implicit lazy val balanceRequestSuccessFormat: OFormat[PostBalanceRequestSuccessResponse] =
