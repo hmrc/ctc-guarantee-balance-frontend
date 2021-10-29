@@ -37,3 +37,5 @@ POST       /check-your-answers                      controllers.CheckYourAnswers
 GET        /balance-confirmation                    controllers.BalanceConfirmationController.onPageLoad()
 GET        /check-another-guarantee-balance         controllers.BalanceConfirmationController.checkAnotherGuaranteeBalance()
 GET        /manage-transit-movements                controllers.BalanceConfirmationController.manageTransitMovements()
+
+GET        /details-do-not-match                    controllers.DetailsDontMatchController.onPageLoad()
