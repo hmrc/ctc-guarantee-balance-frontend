@@ -19,22 +19,26 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions.{DataRetrievalAction, IdentifierAction}
 import javax.inject.Inject
+import models.backend.{BalanceRequestFunctionalError, BalanceRequestPending, BalanceRequestSuccess}
 import models.values.BalanceId
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
-import services.{BalanceStatus, GuaranteeBalanceService}
+import services.GuaranteeBalanceService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
+import scala.concurrent.duration.DurationInt
 import scala.concurrent.{ExecutionContext, Future}
+import scala.language.postfixOps
 
 class WaitOnGuaranteeBalanceController @Inject() (cc: MessagesControllerComponents,
                                                   renderer: Renderer,
                                                   balanceService: GuaranteeBalanceService,
                                                   config: FrontendAppConfig,
                                                   identify: IdentifierAction,
-                                                  getData: DataRetrievalAction
+                                                  getData: DataRetrievalAction,
+                                                  appConfig: FrontendAppConfig
 )(implicit
   ec: ExecutionContext
 ) extends FrontendController(cc)
@@ -44,23 +48,26 @@ class WaitOnGuaranteeBalanceController @Inject() (cc: MessagesControllerComponen
     implicit request =>
       val json = Json.obj(
         "balanceId"         -> balanceId,
-        "waitTimeInSeconds" -> config.waitTimeInSeconds
+        "waitTimeInSeconds" -> config.guaranteeBalanceMaxTimeInSecond
       )
       renderer.render("waitOnGuaranteeBalance.njk", json).map(Ok(_))
   }
 
   def onSubmit(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
-      balanceService.getGuaranteeBalance(balanceId).flatMap {
-        case Some(BalanceStatus.PendingStatus) =>
-          renderer.render("waitOnGuaranteeBalance.njk").map(Ok(_))
-        case Some(BalanceStatus.DataReturned) =>
-          Future.successful(Redirect(routes.BalanceConfirmationController.onPageLoad()))
-        case Some(BalanceStatus.NoMatch) =>
-          Future.successful(Redirect(routes.DetailsDontMatchController.onPageLoad()))
-        case None =>
-          Future.successful(Redirect(routes.TryGuaranteeBalanceAgainController.onPageLoad(balanceId)))
-      }
+      balanceService
+        //.pollForGuaranteeBalance(balanceId, appConfig.guaranteeBalanceDelayInSecond seconds, appConfig.guaranteeBalanceMaxTimeInSecond seconds)
+        .testPoll(balanceId)
+        .flatMap {
+          case Right(BalanceRequestPending(_)) =>
+            renderer.render("waitOnGuaranteeBalance.njk").map(Ok(_))
+          case Right(BalanceRequestSuccess(balance, currency)) =>
+            Future.successful(Redirect(routes.BalanceConfirmationController.onPageLoad()))
+          case Right(BalanceRequestFunctionalError(_)) =>
+            Future.successful(Redirect(routes.DetailsDontMatchController.onPageLoad()))
+          case _ =>
+            Future.successful(Redirect(routes.TryGuaranteeBalanceAgainController.onPageLoad(balanceId)))
+        }
   }
 
 }

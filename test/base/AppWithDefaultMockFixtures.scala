@@ -31,6 +31,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers
 import play.twirl.api.Html
 import repositories.SessionRepository
+import services.GuaranteeBalanceService
 import uk.gov.hmrc.nunjucks.NunjucksRenderer
 
 import scala.concurrent.Future
@@ -40,6 +41,7 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
 
   override def beforeEach(): Unit = {
     Mockito.reset(
+      mockGuaranteeBalanceService,
       mockRenderer,
       mockDataRetrievalAction,
       mockSessionRepository
@@ -57,6 +59,8 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
 
   val mockSessionRepository: SessionRepository = mock[SessionRepository]
 
+  val mockGuaranteeBalanceService: GuaranteeBalanceService = mock[GuaranteeBalanceService]
+
   final override def fakeApplication(): Application =
     applicationBuilder()
       .build()
@@ -69,6 +73,7 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers)),
         bind[NunjucksRenderer].toInstance(mockRenderer),
         bind[MessagesApi].toInstance(Helpers.stubMessagesApi()),
-        bind[SessionRepository].toInstance(mockSessionRepository)
+        bind[SessionRepository].toInstance(mockSessionRepository),
+        bind[GuaranteeBalanceService].toInstance(mockGuaranteeBalanceService)
       )
 }

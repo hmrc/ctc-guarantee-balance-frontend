@@ -40,9 +40,10 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val userResearchUrl: String         = configuration.get[String]("urls.userResearch")
   val showUserResearchBanner: Boolean = configuration.get[Boolean]("banners.showUserResearch")
 
-  lazy val timeoutSeconds: String   = configuration.get[String]("session.timeoutSeconds")
-  lazy val countdownSeconds: String = configuration.get[String]("session.countdownSeconds")
-  lazy val waitTimeInSeconds: Int   = configuration.get[Int]("session.guaranteeBalance.waitTimeInSeconds")
+  lazy val timeoutSeconds: String               = configuration.get[String]("session.timeoutSeconds")
+  lazy val countdownSeconds: String             = configuration.get[String]("session.countdownSeconds")
+  lazy val guaranteeBalanceDelayInSecond: Int   = configuration.get[Int]("session.guaranteeBalance.waitTimeInSeconds")
+  lazy val guaranteeBalanceMaxTimeInSecond: Int = configuration.get[Int]("session.guaranteeBalance.maxTimeInSeconds")
 
   lazy val languageTranslationEnabled: Boolean = configuration.get[Boolean]("microservice.services.features.welsh-translation")
 

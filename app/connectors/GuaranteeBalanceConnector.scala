@@ -31,6 +31,9 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
   ec: ExecutionContext
 ) extends HttpErrorFunctions {
 
+  def pollBalanceRequest(balanceId: BalanceId): Future[Either[HttpResponse, BalanceRequestResponse]] =
+    Future.successful(Right(BalanceRequestPending(balanceId)))
+
   def submitBalanceRequest(request: BalanceRequest)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] = {
     val url = s"${appConfig.guaranteeBalanceUrl}/balances"
 
