@@ -16,15 +16,17 @@
 
 package services
 
-import java.util.UUID
-
+import akka.actor.ActorSystem
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import connectors.GuaranteeBalanceConnector
 import models.backend.BalanceRequestSuccess
 import models.values.{BalanceId, CurrencyCode}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{reset, when}
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
 
+import java.util.UUID
+import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
 
 class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
@@ -34,14 +36,25 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
 
   val successResponse = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
 
+  val mockGuaranteeBalanceConnector: GuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
+  val actorSystem: ActorSystem                                 = injector.instanceOf[ActorSystem]
+  val service                                                  = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector)
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockGuaranteeBalanceConnector)
+  }
+
   "return the relevant mocked response from getGuaranteeBalance" in {
-    val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-    val service     = application.injector.instanceOf[GuaranteeBalanceService]
 
     when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any())).thenReturn(Future.successful(successResponse))
 
     implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
-    service.queryPendingBalance(balanceId) mustEqual Future.successful(successResponse)
+
+    val result = service.queryPendingBalance(balanceId)
+    whenReady(result) {
+      _ mustEqual successResponse
+    }
   }
 
 }

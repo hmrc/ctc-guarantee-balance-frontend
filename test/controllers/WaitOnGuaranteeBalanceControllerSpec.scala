@@ -16,20 +16,22 @@
 
 package controllers
 
-import java.util.UUID
-
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import cats.data.NonEmptyList
-import models.values.{BalanceId, CurrencyCode, ErrorType}
+import models.UserAnswers
 import models.backend.{errors, BalanceRequestFunctionalError, BalanceRequestPending, BalanceRequestSuccess}
+import models.values.{BalanceId, CurrencyCode, ErrorType}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.Mockito.{reset, times, verify, when}
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.GuaranteeBalanceService
 import uk.gov.hmrc.http.HttpResponse
 
+import java.util.UUID
 import scala.concurrent.Future
 
 class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
@@ -42,6 +44,18 @@ class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with AppWithDefaultM
   val pendingResponse = Right(BalanceRequestPending(balanceId))
   val errorResponse   = Left(HttpResponse(404, ""))
 
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockGuaranteeBalanceService)
+  }
+
+  override def applicationBuilder(userAnswers: Option[UserAnswers]): GuiceApplicationBuilder =
+    super
+      .applicationBuilder(userAnswers)
+      .overrides(bind[GuaranteeBalanceService].toInstance(mockGuaranteeBalanceService))
+
+  val mockGuaranteeBalanceService: GuaranteeBalanceService = mock[GuaranteeBalanceService]
+
   "WaitOnGuaranteeBalanceController" - {
 
     "onLoad" - {
@@ -52,7 +66,7 @@ class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with AppWithDefaultM
 
         status(result) mustEqual OK
 
-        val templateCaptor = ArgumentCaptor.forClass(classOf[String])
+        val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
 
         verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
 

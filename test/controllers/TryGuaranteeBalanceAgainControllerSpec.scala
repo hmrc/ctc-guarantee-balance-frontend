@@ -47,7 +47,7 @@ class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaul
 
       status(result) mustEqual OK
 
-      val templateCaptor = ArgumentCaptor.forClass(classOf[String])
+      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
 
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
 
