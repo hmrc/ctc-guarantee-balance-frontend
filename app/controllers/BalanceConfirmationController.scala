@@ -48,7 +48,7 @@ class BalanceConfirmationController @Inject() (
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       val json = Json.obj(
-        "balance"                         -> Balance(8500).toString, // TODO - retrieve actual balance
+        "balance"                         -> Balance(8500).toString, // TODO - retrieve actual balance along with the currency
         "referral"                        -> referral,
         "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
       )
