@@ -27,6 +27,7 @@ import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import services.GuaranteeBalanceService
 import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
@@ -64,7 +65,9 @@ class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with AppWithDefaultM
         when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId), any(), any())).thenReturn(Future.successful(errorResponse))
 
         val request = FakeRequest(POST, routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url)
-        val result  = route(app, request).value
+
+        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+        val result      = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.TryGuaranteeBalanceAgainController.onPageLoad(balanceId).url

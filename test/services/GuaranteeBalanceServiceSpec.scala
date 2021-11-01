@@ -18,16 +18,11 @@ package services
 
 import java.util.UUID
 
-import akka.actor.ActorSystem
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import connectors.GuaranteeBalanceConnector
 import models.backend.BalanceRequestSuccess
 import models.values.{BalanceId, CurrencyCode}
-import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import play.api.inject.bind
 
 import scala.concurrent.Future
 
@@ -39,11 +34,11 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
   val successResponse = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
 
   "return the relevant mocked response from getGuaranteeBalance" in {
-    val mockConnector = mock[GuaranteeBalanceConnector]
-    when(mockConnector.pollBalanceRequest(any())).thenReturn(Future.successful(successResponse))
+    val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+    val service     = application.injector.instanceOf[GuaranteeBalanceService]
 
-    val service = app.injector.instanceOf[GuaranteeBalanceService]
-
+    when(mockGuaranteeBalanceConnector.pollBalanceRequest(any())).thenReturn(Future.successful(successResponse))
     service.getGuaranteeBalance(balanceId) mustEqual Future.successful(successResponse)
   }
+
 }
