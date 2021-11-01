@@ -37,9 +37,7 @@ case class BalanceRequestSuccess(
     try {
       val formatter = NumberFormat.getCurrencyInstance(Locale.getDefault)
       formatter.setCurrency(Currency.getInstance(currency.value))
-      println("***")
-      println(formatter.getCurrency.getDisplayName)
-      formatter.format(balance)
+      formatter.format(balance.toDouble)
     } catch {
       case _: Exception =>
         s"${currency.value}$balance"
