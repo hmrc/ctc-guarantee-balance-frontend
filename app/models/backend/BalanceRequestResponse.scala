@@ -33,11 +33,15 @@ case class BalanceRequestSuccess(
   currency: CurrencyCode
 ) extends BalanceRequestResponse {
 
-  override def toString: String = {
-    val formatter = NumberFormat.getCurrencyInstance
-    formatter.setCurrency(Currency.getInstance(currency.value))
-    formatter.format(balance)
-  }
+  override def toString: String =
+    try {
+      val formatter = NumberFormat.getCurrencyInstance
+      formatter.setCurrency(Currency.getInstance(currency.value))
+      formatter.format(balance)
+    } catch {
+      case _: IllegalArgumentException =>
+        s"${currency.value}$balance"
+    }
 }
 
 case class BalanceRequestPending(balanceId: BalanceId) extends BalanceRequestResponse

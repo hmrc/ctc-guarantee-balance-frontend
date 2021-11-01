@@ -18,6 +18,9 @@ package models.backend
 
 import base.SpecBase
 import models.values.CurrencyCode
+import org.scalacheck.Arbitrary.arbitrary
+
+import java.util.Currency
 
 // scalastyle:off magic.number
 class BalanceRequestResponseSpec extends SpecBase {
@@ -86,6 +89,19 @@ class BalanceRequestResponseSpec extends SpecBase {
             val balance = BalanceRequestSuccess(1000000, currency)
             balance.toString mustEqual "€1,000,000.00"
           }
+        }
+      }
+
+      "must prepend currency code to balance for invalid currency codes" in {
+
+        forAll(arbitrary[String].suchThat(
+                 x => !Currency.getAvailableCurrencies.contains(x)
+               ),
+               arbitrary[BigDecimal]
+        ) {
+          (invalidCurrencyCode, amount) =>
+            val balance = BalanceRequestSuccess(amount, CurrencyCode(invalidCurrencyCode))
+            balance.toString mustEqual s"$invalidCurrencyCode$amount"
         }
       }
     }
