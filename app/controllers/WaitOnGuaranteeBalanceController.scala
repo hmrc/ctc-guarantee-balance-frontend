@@ -55,7 +55,7 @@ class WaitOnGuaranteeBalanceController @Inject() (cc: MessagesControllerComponen
         case Some(BalanceStatus.PendingStatus) =>
           renderer.render("waitOnGuaranteeBalance.njk").map(Ok(_))
         case Some(BalanceStatus.DataReturned) =>
-          renderer.render("controlDecision.njk").map(Ok(_))
+          Future.successful(Redirect(routes.BalanceConfirmationController.onPageLoad()))
         case Some(BalanceStatus.NoMatch) =>
           Future.successful(Redirect(routes.DetailsDontMatchController.onPageLoad()))
         case None =>

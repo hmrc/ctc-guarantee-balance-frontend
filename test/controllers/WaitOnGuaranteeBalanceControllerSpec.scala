@@ -107,6 +107,22 @@ class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with AppWithDefaultM
         verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
         templateCaptor.getValue mustEqual "waitOnGuaranteeBalance.njk"
       }
+
+      "must Redirect to the Balance Confirmation Controller if the status is DataReturned " in {
+        when(mockRenderer.render(any(), any())(any())).thenReturn(Future.successful(Html("")))
+
+        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+          .overrides(
+            bind[GuaranteeBalanceService].toInstance(new TestGuaranteeBalanceService(Future.successful(Some(BalanceStatus.DataReturned))))
+          )
+          .build()
+
+        val request = FakeRequest(POST, routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url)
+        val result  = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
+      }
     }
   }
 
