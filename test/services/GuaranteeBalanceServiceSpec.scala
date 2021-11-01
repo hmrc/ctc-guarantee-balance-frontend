@@ -23,7 +23,9 @@ import base.{AppWithDefaultMockFixtures, SpecBase}
 import connectors.GuaranteeBalanceConnector
 import models.backend.BalanceRequestSuccess
 import models.values.{BalanceId, CurrencyCode}
-import org.mockito.Matchers.{any, eq => eqTo}
+import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.{times, verify, when}
 import org.mockito.Mockito.when
 import play.api.inject.bind
 

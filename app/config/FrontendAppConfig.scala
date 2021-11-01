@@ -42,8 +42,9 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   lazy val timeoutSeconds: String               = configuration.get[String]("session.timeoutSeconds")
   lazy val countdownSeconds: String             = configuration.get[String]("session.countdownSeconds")
-  lazy val guaranteeBalanceDelayInSecond: Int   = configuration.get[Int]("session.guaranteeBalance.waitTimeInSeconds")
-  lazy val guaranteeBalanceMaxTimeInSecond: Int = configuration.get[Int]("session.guaranteeBalance.maxTimeInSeconds")
+  lazy val rateLimitDuration: Int               = configuration.get[Int]("rateLimit.duration")
+  lazy val guaranteeBalanceDelayInSecond: Int   = configuration.get[Int]("guaranteeBalanceLookup.waitTimeInSeconds")
+  lazy val guaranteeBalanceMaxTimeInSecond: Int = configuration.get[Int]("guaranteeBalanceLookup.maxTimeInSeconds")
 
   lazy val languageTranslationEnabled: Boolean = configuration.get[Boolean]("microservice.services.features.welsh-translation")
 

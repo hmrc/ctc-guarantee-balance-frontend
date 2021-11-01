@@ -20,20 +20,16 @@ import java.util.UUID
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import cats.data.NonEmptyList
-import models.backend.{errors, BalanceRequestFunctionalError, BalanceRequestPending, BalanceRequestSuccess}
 import models.values.{BalanceId, CurrencyCode, ErrorType}
+import models.backend.{errors, BalanceRequestFunctionalError, BalanceRequestPending, BalanceRequestSuccess}
 import org.mockito.ArgumentCaptor
-import org.mockito.Matchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.api.inject.bind
-import play.twirl.api.Html
-import services.GuaranteeBalanceService
 import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
-import scala.concurrent.duration.FiniteDuration
 
 class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
@@ -49,10 +45,6 @@ class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with AppWithDefaultM
 
     "onLoad" - {
       "must return OK and the correct view for a GET" in {
-
-        when(mockRenderer.render(any(), any())(any()))
-          .thenReturn(Future.successful(Html("")))
-
         val request = FakeRequest(GET, routes.WaitOnGuaranteeBalanceController.onPageLoad(BalanceId(expectedUuid)).url)
 
         val result = route(app, request).value
@@ -63,13 +55,12 @@ class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with AppWithDefaultM
 
         verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
 
-        templateCaptor.getValue mustEqual "waitOnGuaranteeBalance.njk"
+        templateCaptor.getValue mustBe "waitOnGuaranteeBalance.njk"
       }
     }
 
     "onSubmit" - {
       "must Redirect to the TryAgain Controller if the status is empty " in {
-        when(mockRenderer.render(any(), any())(any())).thenReturn(Future.successful(Html("")))
         when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId), any(), any())).thenReturn(Future.successful(errorResponse))
 
         val request = FakeRequest(POST, routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url)

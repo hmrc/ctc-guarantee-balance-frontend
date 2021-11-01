@@ -16,13 +16,11 @@
 
 package controllers.actions
 
-import base.SpecBase
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import controllers.routes
 import models.UserAnswers
 import models.requests.{DataRequest, OptionalDataRequest}
 import org.scalatest.EitherValues
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.mvc.Result
 import play.api.test.Helpers._
 
@@ -30,7 +28,7 @@ import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class DataRequiredActionSpec extends SpecBase with MockitoSugar with ScalaFutures with EitherValues {
+class DataRequiredActionSpec extends SpecBase with EitherValues with AppWithDefaultMockFixtures {
 
   object Harness extends DataRequiredActionImpl {
     def callRefine[A](request: OptionalDataRequest[A]): Future[Either[Result, DataRequest[A]]] = refine(request)

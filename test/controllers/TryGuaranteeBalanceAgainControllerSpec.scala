@@ -21,7 +21,7 @@ import java.util.UUID
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import models.values.BalanceId
 import org.mockito.ArgumentCaptor
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -51,7 +51,7 @@ class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaul
 
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
 
-      templateCaptor.getValue mustEqual "tryGuaranteeBalanceAgain.njk"
+      templateCaptor.getValue mustBe "tryGuaranteeBalanceAgain.njk"
     }
   }
 }
