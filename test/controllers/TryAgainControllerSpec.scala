@@ -28,9 +28,9 @@ import play.twirl.api.Html
 
 import scala.concurrent.Future
 
-class TimedOutControllerSpec extends SpecBase with MockitoSugar with AppWithDefaultMockFixtures {
+class TryAgainControllerSpec extends SpecBase with MockitoSugar with AppWithDefaultMockFixtures {
 
-  "TimedOut Controller" - {
+  "TryAgain Controller" - {
 
     "return OK and the correct view for a GET" in {
 
@@ -38,7 +38,7 @@ class TimedOutControllerSpec extends SpecBase with MockitoSugar with AppWithDefa
         .thenReturn(Future.successful(Html("")))
 
       val application    = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-      val request        = FakeRequest(GET, routes.TimedOutController.onPageLoad().url)
+      val request        = FakeRequest(GET, routes.TryAgainController.onPageLoad().url)
       val templateCaptor = ArgumentCaptor.forClass(classOf[String])
 
       val result = route(application, request).value
@@ -47,7 +47,7 @@ class TimedOutControllerSpec extends SpecBase with MockitoSugar with AppWithDefa
 
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
 
-      templateCaptor.getValue mustEqual "timedOut.njk"
+      templateCaptor.getValue mustEqual "tryAgain.njk"
 
       application.stop()
     }

@@ -3,7 +3,7 @@
 {% from "macros/title.njk"                         import title %}
 
 {% block pageTitle %}
-  {{ title(messages("timedOut.title")) }}
+  {{ title(messages("tryAgain.title")) }}
 {% endblock %}
 
 {% block mainContent %}
@@ -13,15 +13,15 @@
       <div class="govuk-grid-column-two-thirds">
 
         <h1 class="govuk-heading-xl">
-          {{ messages("timedOut.heading") }}
+          {{ messages("tryAgain.heading") }}
         </h1>
 
         <p>
-            {{ messages("timedOut.paragraph1") }} <a href={{ redirectUrl }} target="_blank" rel="noopener noreferrer">{{ messages("timedOut.linkText") }}</a>.
+            {{ messages("tryAgain.paragraph1") }} <a href={{ redirectUrl }} target="_blank" rel="noopener noreferrer">{{ messages("tryAgain.linkText") }}</a>.
         </p>
 
         <p>
-         {{ messages("timedOut.heading") }}
+         {{ messages("tryAgain.heading") }}
         </p>
 
       </div>

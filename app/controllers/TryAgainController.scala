@@ -27,7 +27,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import scala.concurrent.ExecutionContext
 
-class TimedOutController @Inject() (
+class TryAgainController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
@@ -41,6 +41,6 @@ class TimedOutController @Inject() (
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       val json = Json.obj("redirectUrl" -> routes.CheckYourAnswersController.onPageLoad().url)
-      renderer.render("timedOut.njk", json).map(Ok(_))
+      renderer.render("tryAgain.njk", json).map(Ok(_))
   }
 }

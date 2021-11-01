@@ -42,4 +42,4 @@ GET        /manage-transit-movements                controllers.BalanceConfirmat
 
 GET        /details-do-not-match                    controllers.DetailsDontMatchController.onPageLoad()
 
-GET        /timed-out                               controllers.TimedOutController.onPageLoad()
+GET        /try-again                               controllers.TryAgainController.onPageLoad()
