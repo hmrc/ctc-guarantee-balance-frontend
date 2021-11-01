@@ -22,7 +22,7 @@ import java.util.UUID
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
-import models.backend.{BalanceRequestPending, BalanceRequestSuccess}
+import models.backend.{BalanceRequestPending, BalanceRequestPendingExpired, BalanceRequestSuccess}
 import models.requests.BalanceRequest
 import models.values._
 import org.scalacheck.Gen
@@ -135,6 +135,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
         }
       }
     }
+
     "queryPendingBalance" - {
       "must return balance success response for Ok with a returned response" in {
         val requestedAt = Instant.now().minusSeconds(300)
@@ -166,6 +167,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
         val result = connector.queryPendingBalance(BalanceId(testUuid)).futureValue
         result mustBe Right(expectedResponse)
       }
+
       "must return balance pending response for Ok with no returned response" in {
         val requestedAt = Instant.now().minusSeconds(300)
         val completedAt = Instant.now().minusSeconds(1)
@@ -192,6 +194,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
         val result = connector.queryPendingBalance(balanceId).futureValue
         result mustBe Right(BalanceRequestPending(balanceId))
       }
+
       "must return the HttpResponse when there is an unexpected response" in {
         val errorResponses = Gen.chooseNum(401, 599).suchThat(_ != Status.NOT_FOUND)
 
@@ -209,6 +212,20 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
 
             response.status mustBe errorResponse
         }
+      }
+
+      "must return pending expired when a NotFound is returned" in {
+        val balanceId = BalanceId(testUuid)
+
+        server.stubFor(
+          get(urlEqualTo(queryBalanceRequestUrlFor("22b9899e-24ee-48e6-a189-97d1f45391c4")))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+            .willReturn(aResponse().withStatus(Status.NOT_FOUND))
+        )
+
+        val result = connector.queryPendingBalance(balanceId).futureValue
+
+        result mustBe Right(BalanceRequestPendingExpired(balanceId))
       }
     }
   }
