@@ -20,13 +20,12 @@ import cats.data.NonEmptyList
 import models.backend.errors.FunctionalError
 import models.formats.CommonFormats
 import models.values.{BalanceId, CurrencyCode}
-import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.play.json.Union
+import play.api.libs.json.{Json, OFormat, Reads}
 
 import java.text.NumberFormat
 import java.util.{Currency, Locale}
 
-sealed abstract class BalanceRequestResponse extends Product with Serializable
+sealed abstract class BalanceRequestResponse
 
 case class BalanceRequestSuccess(
   balance: BigDecimal,
@@ -46,6 +45,10 @@ case class BalanceRequestSuccess(
 
 case class BalanceRequestPending(balanceId: BalanceId) extends BalanceRequestResponse
 
+object BalanceRequestNotMatched extends BalanceRequestResponse
+
+case class BalanceRequestPendingExpired(balanceId: BalanceId) extends BalanceRequestResponse
+
 case class BalanceRequestFunctionalError(
   errors: NonEmptyList[FunctionalError]
 ) extends BalanceRequestResponse
@@ -58,10 +61,9 @@ object BalanceRequestResponse extends CommonFormats {
   implicit lazy val balanceRequestFunctionalErrorFormat: OFormat[BalanceRequestFunctionalError] =
     Json.format[BalanceRequestFunctionalError]
 
-  implicit lazy val balanceRequestResponseFormat: OFormat[BalanceRequestResponse] =
-    Union
-      .from[BalanceRequestResponse](BalanceRequestResponseStatus.FieldName)
-      .and[BalanceRequestSuccess](BalanceRequestResponseStatus.Success)
-      .and[BalanceRequestFunctionalError](BalanceRequestResponseStatus.FunctionalError)
-      .format
+  implicit val reads: Reads[BalanceRequestResponse] = Reads[BalanceRequestResponse](
+    value =>
+      balanceRequestSuccessFormat.reads(value) orElse
+        balanceRequestFunctionalErrorFormat.reads(value)
+  )
 }

@@ -16,10 +16,13 @@
 
 package connectors
 
+import java.time.Instant
+import java.util.UUID
+
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
-import models.backend.{BalanceRequestPending, BalanceRequestSuccess}
+import models.backend.{BalanceRequestPending, BalanceRequestPendingExpired, BalanceRequestSuccess}
 import models.requests.BalanceRequest
 import models.values._
 import org.scalacheck.Gen
@@ -41,7 +44,8 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
 
   implicit private val hc: HeaderCarrier = HeaderCarrier()
 
-  private val submitBalanceRequestUrl = s"/balances"
+  private val submitBalanceRequestUrl                         = s"/balances"
+  private def queryBalanceRequestUrlFor(balanceId: BalanceId) = s"/balances/${balanceId.value}"
 
   private lazy val connector = app.injector.instanceOf[GuaranteeBalanceConnector]
 
@@ -53,6 +57,8 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
 
   private val requestAsJsonString: String = Json.stringify(Json.toJson(request))
 
+  private val testUuid = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
+
   "GuaranteeBalanceConnector" - {
 
     "submitBalanceRequest" - {
@@ -60,13 +66,13 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
       "must return balance success response for Ok" in {
         val balanceRequestSuccessResponseJson: String =
           """
-          | {
-          |   "response": {
-          |     "balance": 3.14,
-          |     "currency": "EUR"
-          |   }
-          | }
-          |""".stripMargin
+            | {
+            |   "response": {
+            |     "balance": 3.14,
+            |     "currency": "EUR"
+            |   }
+            | }
+            |""".stripMargin
 
         server.stubFor(
           post(urlEqualTo(submitBalanceRequestUrl))
@@ -82,13 +88,13 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
       }
 
       "must return balance pending for Accepted" in {
-        val expectedUuid = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
+        val expectedUuid = testUuid
         val balanceRequestPendingResponseJson: String =
           s"""
-          | {
-          |   "balanceId": "22b9899e-24ee-48e6-a189-97d1f45391c4"
-          | }
-          |""".stripMargin
+             | {
+             |   "balanceId": "22b9899e-24ee-48e6-a189-97d1f45391c4"
+             | }
+             |""".stripMargin
 
         server.stubFor(
           post(urlEqualTo(submitBalanceRequestUrl))
@@ -129,6 +135,101 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
 
             response.status mustBe errorResponse
         }
+      }
+    }
+
+    "queryPendingBalance" - {
+      "must return balance success response for Ok with a returned response" in {
+        val requestedAt = Instant.now().minusSeconds(300)
+        val completedAt = Instant.now().minusSeconds(1)
+        val balanceRequestSuccessResponseJson: String =
+          s"""
+            | {
+            |   "balanceId": "22b9899e-24ee-48e6-a189-97d1f45391c4",
+            |   "enrolmentId": "testEnrolmentId",
+            |   "taxIdentifier": "taxid",
+            |   "guaranteeReference": "guarref",
+            |   "requestedAt": "$requestedAt",
+            |   "completedAt": "$completedAt",
+            |   "response": {
+            |     "balance": 3.14,
+            |     "currency": "EUR"
+            |   }
+            | }
+            |""".stripMargin
+
+        val balanceId = BalanceId(testUuid)
+
+        server.stubFor(
+          get(urlEqualTo(queryBalanceRequestUrlFor(balanceId)))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+            .willReturn(okJson(balanceRequestSuccessResponseJson))
+        )
+
+        val expectedResponse = BalanceRequestSuccess(BigDecimal(3.14), CurrencyCode("EUR"))
+
+        val result = connector.queryPendingBalance(BalanceId(testUuid)).futureValue
+        result mustBe Right(expectedResponse)
+      }
+
+      "must return balance pending response for Ok with no returned response" in {
+        val balanceId   = BalanceId(testUuid)
+        val requestedAt = Instant.now().minusSeconds(300)
+        val completedAt = Instant.now().minusSeconds(1)
+        val balanceRequestSuccessResponseJson: String =
+          s"""
+             | {
+             |   "balanceId": "22b9899e-24ee-48e6-a189-97d1f45391c4",
+             |   "enrolmentId": "testEnrolmentId",
+             |   "taxIdentifier": "taxid",
+             |   "guaranteeReference": "guarref",
+             |   "requestedAt": "$requestedAt",
+             |   "completedAt": "$completedAt"
+             | }
+             |""".stripMargin
+
+        server.stubFor(
+          get(urlEqualTo(queryBalanceRequestUrlFor(balanceId)))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+            .willReturn(okJson(balanceRequestSuccessResponseJson))
+        )
+
+        val result = connector.queryPendingBalance(balanceId).futureValue
+        result mustBe Right(BalanceRequestPending(balanceId))
+      }
+
+      "must return the HttpResponse when there is an unexpected response" in {
+        val errorResponses = Gen.chooseNum(401, 599).suchThat(_ != Status.NOT_FOUND)
+        val balanceId      = BalanceId(testUuid)
+
+        forAll(errorResponses) {
+          errorResponse =>
+            server.stubFor(
+              get(urlEqualTo(queryBalanceRequestUrlFor(balanceId)))
+                .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+                .willReturn(aResponse().withStatus(errorResponse))
+            )
+
+            val result = connector.queryPendingBalance(BalanceId(testUuid)).futureValue
+
+            val response = result.left.get
+
+            response.status mustBe errorResponse
+        }
+      }
+
+      "must return pending expired when a NotFound is returned" in {
+        val balanceId = BalanceId(testUuid)
+
+        server.stubFor(
+          get(urlEqualTo(queryBalanceRequestUrlFor(balanceId)))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+            .willReturn(aResponse().withStatus(Status.NOT_FOUND))
+        )
+
+        val result = connector.queryPendingBalance(balanceId).futureValue
+
+        result mustBe Right(BalanceRequestPendingExpired(balanceId))
       }
     }
   }

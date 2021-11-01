@@ -19,7 +19,7 @@ package models.backend
 import java.time.Instant
 
 import models.values.{BalanceId, EnrolmentId, GuaranteeReference, TaxIdentifier}
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Json, Reads}
 
 case class PendingBalanceRequest(
   balanceId: BalanceId,
@@ -33,6 +33,6 @@ case class PendingBalanceRequest(
 
 object PendingBalanceRequest {
 
-  implicit val pendingBalanceRequestFormat: OFormat[PendingBalanceRequest] =
-    Json.format[PendingBalanceRequest]
+  implicit val pendingBalanceRequestFormat: Reads[PendingBalanceRequest] =
+    Json.reads[PendingBalanceRequest]
 }

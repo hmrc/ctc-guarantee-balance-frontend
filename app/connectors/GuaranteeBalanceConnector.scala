@@ -17,25 +17,26 @@
 package connectors
 
 import config.FrontendAppConfig
-import models.backend.{BalanceRequestPending, BalanceRequestResponse, PostBalanceRequestPendingResponse, PostBalanceRequestSuccessResponse}
+import models.backend._
 import models.requests.BalanceRequest
+import models.values.BalanceId
 import play.api.http.{HeaderNames, Status}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions, HttpReads, HttpResponse}
-
 import javax.inject.Inject
+
 import scala.concurrent.{ExecutionContext, Future}
 
 class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: FrontendAppConfig)(implicit
   ec: ExecutionContext
 ) extends HttpErrorFunctions {
 
+  private val headers = Seq(
+    HeaderNames.ACCEPT -> "application/vnd.hmrc.1.0+json"
+  )
+
   def submitBalanceRequest(request: BalanceRequest)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] = {
     val url = s"${appConfig.guaranteeBalanceUrl}/balances"
-
-    val headers = Seq(
-      HeaderNames.ACCEPT -> "application/vnd.hmrc.1.0+json"
-    )
 
     implicit val eitherBalanceIdOrResponseReads: HttpReads[Either[HttpResponse, BalanceRequestResponse]] =
       HttpReads[HttpResponse].map {
@@ -56,4 +57,27 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
     )
   }
 
+  def queryPendingBalance(balanceId: BalanceId)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] = {
+    val url = s"${appConfig.guaranteeBalanceUrl}/balances/${balanceId.value}"
+
+    implicit val eitherBalanceIdOrPendingResponseReads: HttpReads[Either[HttpResponse, BalanceRequestResponse]] =
+      HttpReads[HttpResponse].map {
+        response =>
+          response.status match {
+            case Status.OK =>
+              Right(response.json.as[PendingBalanceRequest].response match {
+                case Some(response) => response
+                case _              => BalanceRequestPending(balanceId)
+              })
+            case Status.NOT_FOUND                         => Right(BalanceRequestPendingExpired(balanceId))
+            case status if is4xx(status) || is5xx(status) => Left(response)
+          }
+      }
+
+    http.GET[Either[HttpResponse, BalanceRequestResponse]](
+      url.toString,
+      Seq.empty,
+      headers
+    )
+  }
 }
