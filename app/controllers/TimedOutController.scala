@@ -17,8 +17,10 @@
 package controllers
 
 import controllers.actions._
+
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -38,6 +40,7 @@ class TimedOutController @Inject() (
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      renderer.render("timedOut.njk").map(Ok(_))
+      val json = Json.obj("redirectUrl" -> routes.CheckYourAnswersController.onPageLoad().url)
+      renderer.render("timedOut.njk", json).map(Ok(_))
   }
 }

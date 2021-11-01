@@ -111,6 +111,6 @@ detailsDontMatch.checkYourAnswers = check your answers and try again
 timedOut.title = We have not been able to get your guarantee balance
 timedOut.heading = We have not been able to get your guarantee balance
 timedOut.paragraph1 = You can
-timedOut.linkText = check that your details are correct.
+timedOut.linkText = check that your details are correct
 timedOut.paragraph2 = If you are sure your details are correct, you can try again.
 timedOut.buttonText = Try again
