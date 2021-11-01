@@ -44,3 +44,5 @@ GET        /details-do-not-match                    controllers.DetailsDontMatch
 
 GET        /try-again                               controllers.TryAgainController.onPageLoad()
 POST       /try-again                               controllers.TryAgainController.onSubmit()
+
+GET        /please-wait                       controllers.PleaseWaitController.onPageLoad()

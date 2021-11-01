@@ -114,3 +114,7 @@ tryAgain.paragraph1 = You can
 tryAgain.linkText = check that your details are correct
 tryAgain.paragraph2 = If you are sure your details are correct, you can try again.
 tryAgain.buttonText = Try again
+
+pleaseWait.title = We are trying to get your guarantee balance
+pleaseWait.heading = We are trying to get your guarantee balance
+pleaseWait.paragraph = This may take up to 30 seconds.
