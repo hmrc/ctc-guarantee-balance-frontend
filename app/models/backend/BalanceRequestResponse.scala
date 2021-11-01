@@ -35,9 +35,9 @@ case class BalanceRequestSuccess(
 
   override def toString: String =
     try {
-      val formatter = NumberFormat.getCurrencyInstance(Locale.getDefault)
+      val formatter = NumberFormat.getCurrencyInstance(Locale.ENGLISH)
       formatter.setCurrency(Currency.getInstance(currency.value))
-      formatter.format(balance.toDouble)
+      formatter.format(balance)
     } catch {
       case _: Exception =>
         s"${currency.value}$balance"
