@@ -36,7 +36,7 @@ case class BalanceRequestSuccess(
   override def toString: String =
     try {
       println("DEFAULT LOCALE")
-      println(Locale.getDefault.getDisplayCountry)
+      println(Locale.getDefault)
       println("AVAILABLE LOCALES")
       Locale.getAvailableLocales.foreach(println)
       val formatter = NumberFormat.getCurrencyInstance(Locale.UK)
