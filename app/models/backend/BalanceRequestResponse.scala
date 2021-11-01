@@ -20,7 +20,7 @@ import cats.data.NonEmptyList
 import models.backend.errors.FunctionalError
 import models.formats.CommonFormats
 import models.values.{BalanceId, CurrencyCode}
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{JsObject, Json, OFormat, Reads}
 import uk.gov.hmrc.play.json.Union
 
 sealed abstract class BalanceRequestResponse extends Product with Serializable
@@ -44,10 +44,9 @@ object BalanceRequestResponse extends CommonFormats {
   implicit lazy val balanceRequestFunctionalErrorFormat: OFormat[BalanceRequestFunctionalError] =
     Json.format[BalanceRequestFunctionalError]
 
-  implicit lazy val balanceRequestResponseFormat: OFormat[BalanceRequestResponse] =
-    Union
-      .from[BalanceRequestResponse](BalanceRequestResponseStatus.FieldName)
-      .and[BalanceRequestSuccess](BalanceRequestResponseStatus.Success)
-      .and[BalanceRequestFunctionalError](BalanceRequestResponseStatus.FunctionalError)
-      .format
+  implicit val reads: Reads[BalanceRequestResponse] = Reads[BalanceRequestResponse](
+    value =>
+      balanceRequestSuccessFormat.reads(value) orElse
+        balanceRequestFunctionalErrorFormat.reads(value)
+  )
 }
