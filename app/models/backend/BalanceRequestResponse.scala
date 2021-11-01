@@ -22,7 +22,7 @@ import models.formats.CommonFormats
 import models.values.{BalanceId, CurrencyCode}
 import play.api.libs.json.{Json, OFormat, Reads}
 
-sealed abstract class BalanceRequestResponse extends Product with Serializable
+sealed abstract class BalanceRequestResponse
 
 case class BalanceRequestSuccess(
   balance: BigDecimal,
@@ -30,6 +30,8 @@ case class BalanceRequestSuccess(
 ) extends BalanceRequestResponse
 
 case class BalanceRequestPending(balanceId: BalanceId) extends BalanceRequestResponse
+
+object BalanceRequestNotMatched extends BalanceRequestResponse
 
 case class BalanceRequestPendingExpired(balanceId: BalanceId) extends BalanceRequestResponse
 
