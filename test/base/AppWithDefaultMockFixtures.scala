@@ -16,21 +16,24 @@
 
 package base
 
+import config.FrontendAppConfig
 import controllers.actions._
 import models.UserAnswers
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import org.mockito.Mockito.when
 import org.scalatest.{BeforeAndAfterEach, TestSuite}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.{GuiceFakeApplicationFactory, GuiceOneAppPerSuite}
 import play.api.Application
-import play.api.i18n.MessagesApi
-import play.api.inject.bind
+import play.api.i18n.{Messages, MessagesApi}
+import play.api.inject.{bind, Injector}
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.test.Helpers
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.{FakeRequest, Helpers}
 import play.twirl.api.Html
 import repositories.SessionRepository
+import uk.gov.hmrc.mongo.lock.MongoLockRepository
 import uk.gov.hmrc.nunjucks.NunjucksRenderer
 
 import scala.concurrent.Future
@@ -42,7 +45,8 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
     Mockito.reset(
       mockRenderer,
       mockDataRetrievalAction,
-      mockSessionRepository
+      mockSessionRepository,
+      mockMongoLockRepository
     )
 
     when(mockRenderer.render(any(), any())(any()))
@@ -51,11 +55,10 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
     when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
   }
 
-  val mockRenderer: NunjucksRenderer = mock[NunjucksRenderer]
-
+  val mockRenderer: NunjucksRenderer               = mock[NunjucksRenderer]
   val mockDataRetrievalAction: DataRetrievalAction = mock[DataRetrievalAction]
-
-  val mockSessionRepository: SessionRepository = mock[SessionRepository]
+  val mockSessionRepository: SessionRepository     = mock[SessionRepository]
+  val mockMongoLockRepository: MongoLockRepository = mock[MongoLockRepository]
 
   final override def fakeApplication(): Application =
     applicationBuilder()
@@ -69,6 +72,17 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
         bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers)),
         bind[NunjucksRenderer].toInstance(mockRenderer),
         bind[MessagesApi].toInstance(Helpers.stubMessagesApi()),
-        bind[SessionRepository].toInstance(mockSessionRepository)
+        bind[SessionRepository].toInstance(mockSessionRepository),
+        bind[MongoLockRepository].toInstance(mockMongoLockRepository)
       )
+
+  def injector: Injector = app.injector
+
+  def frontendAppConfig: FrontendAppConfig = injector.instanceOf[FrontendAppConfig]
+
+  def messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
+
+  def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")
+
+  implicit def messages: Messages = messagesApi.preferred(fakeRequest)
 }

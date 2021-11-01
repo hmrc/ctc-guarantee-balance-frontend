@@ -36,6 +36,8 @@ POST       /change-access-code                      controllers.AccessCodeContro
 GET        /check-your-answers                      controllers.CheckYourAnswersController.onPageLoad()
 POST       /check-your-answers                      controllers.CheckYourAnswersController.onSubmit()
 
+GET        /rate-limit                              controllers.RateLimitController.onPageLoad()
+
 GET        /balance-confirmation                    controllers.BalanceConfirmationController.onPageLoad()
 GET        /check-another-guarantee-balance         controllers.BalanceConfirmationController.checkAnotherGuaranteeBalance()
 GET        /manage-transit-movements                controllers.BalanceConfirmationController.manageTransitMovements()

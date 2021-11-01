@@ -21,7 +21,7 @@ import matchers.JsonMatchers.containJson
 import models.Referral._
 import models.{NormalMode, Referral, UserAnswers}
 import org.mockito.ArgumentCaptor
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.mockito.MockitoSugar
@@ -42,10 +42,10 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
 
         "ReferralPage undefined" in {
 
-          val application    = applicationBuilder(userAnswers = Some(baseAnswers)).build()
-          val request        = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
-          val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-          val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
+          val application                            = applicationBuilder(userAnswers = Some(baseAnswers)).build()
+          val request                                = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
+          val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+          val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
 
           val result = route(application, request).value
 
@@ -73,10 +73,10 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
 
               val userAnswers = baseAnswers.set(ReferralPage, referral).success.value
 
-              val application    = applicationBuilder(userAnswers = Some(userAnswers)).build()
-              val request        = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
-              val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-              val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
+              val application                            = applicationBuilder(userAnswers = Some(userAnswers)).build()
+              val request                                = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
+              val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+              val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
 
               val result = route(application, request).value
 
@@ -127,7 +127,7 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
 
         redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
 
-        val uaCaptor = ArgumentCaptor.forClass(classOf[UserAnswers])
+        val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
         verify(mockSessionRepository).set(uaCaptor.capture)
         uaCaptor.getValue.data mustEqual Json.obj()
 
@@ -149,7 +149,7 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
 
         redirectLocation(result).value mustEqual frontendAppConfig.manageTransitMovementsUrl
 
-        val uaCaptor = ArgumentCaptor.forClass(classOf[UserAnswers])
+        val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
         verify(mockSessionRepository).set(uaCaptor.capture)
         uaCaptor.getValue.data mustEqual Json.obj()
 
