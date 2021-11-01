@@ -69,7 +69,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
                 case Some(response) => response
                 case _              => BalanceRequestPending(balanceId)
               })
-//            case status if is4xx(status) || is5xx(status) => Left(response)
+            case status if is4xx(status) || is5xx(status) => Left(response)
           }
       }
 

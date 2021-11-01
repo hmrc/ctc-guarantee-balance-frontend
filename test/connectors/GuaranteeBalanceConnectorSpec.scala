@@ -192,6 +192,24 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
         val result = connector.queryPendingBalance(balanceId).futureValue
         result mustBe Right(BalanceRequestPending(balanceId))
       }
+      "must return the HttpResponse when there is an unexpected response" in {
+        val errorResponses = Gen.chooseNum(401, 599).suchThat(_ != Status.NOT_FOUND)
+
+        forAll(errorResponses) {
+          errorResponse =>
+            server.stubFor(
+              get(urlEqualTo(queryBalanceRequestUrlFor("22b9899e-24ee-48e6-a189-97d1f45391c4")))
+                .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+                .willReturn(aResponse().withStatus(errorResponse))
+            )
+
+            val result = connector.queryPendingBalance(BalanceId(testUuid)).futureValue
+
+            val response = result.left.get
+
+            response.status mustBe errorResponse
+        }
+      }
     }
   }
 }
