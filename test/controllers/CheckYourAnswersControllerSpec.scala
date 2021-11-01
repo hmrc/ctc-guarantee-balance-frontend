@@ -17,11 +17,14 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import models.UserAnswers
+import models.backend.BalanceRequestSuccess
+import models.values.CurrencyCode
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.GuaranteeReferenceNumberPage
+import pages.{BalancePage, GuaranteeReferenceNumberPage}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
@@ -30,6 +33,7 @@ import scala.concurrent.Future
 class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with AppWithDefaultMockFixtures {
 
   private val grn: String = "grn"
+  private val balance     = BalanceRequestSuccess(8500, CurrencyCode("GBP"))
 
   "CheckYourAnswers Controller" - {
 
@@ -76,6 +80,10 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
       val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
       verify(mockMongoLockRepository).takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())
+
+      val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+      verify(mockSessionRepository).set(uaCaptor.capture)
+      uaCaptor.getValue.get(BalancePage).get mustBe balance.formatForDisplay
     }
 
     "must redirect to Session Expired for a POST if no existing data is found" in {

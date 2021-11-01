@@ -16,12 +16,9 @@
 
 package connectors
 
-import java.util.UUID
-
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
-import models.UserAnswers
 import models.backend.{BalanceRequestPending, BalanceRequestSuccess}
 import models.requests.BalanceRequest
 import models.values._
@@ -29,9 +26,10 @@ import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
 import play.api.http.{ContentTypes, HeaderNames, Status}
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
+
+import java.util.UUID
 
 class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler with ScalaCheckPropertyChecks with AppWithDefaultMockFixtures {
 
