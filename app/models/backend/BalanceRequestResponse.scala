@@ -24,7 +24,7 @@ import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.play.json.Union
 
 import java.text.NumberFormat
-import java.util.Currency
+import java.util.{Currency, Locale}
 
 sealed abstract class BalanceRequestResponse extends Product with Serializable
 
@@ -35,7 +35,7 @@ case class BalanceRequestSuccess(
 
   override def toString: String =
     try {
-      val formatter = NumberFormat.getCurrencyInstance
+      val formatter = NumberFormat.getCurrencyInstance(Locale.getDefault)
       formatter.setCurrency(Currency.getInstance(currency.value))
       formatter.format(balance)
     } catch {
