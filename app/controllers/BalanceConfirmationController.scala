@@ -20,8 +20,8 @@ import config.FrontendAppConfig
 import controllers.actions._
 import models.Referral.GovUK
 import models.requests.DataRequest
-import models.{Balance, NormalMode, Referral}
-import pages.ReferralPage
+import models.{NormalMode, Referral}
+import pages.{BalancePage, ReferralPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -30,7 +30,7 @@ import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class BalanceConfirmationController @Inject() (
   override val messagesApi: MessagesApi,
@@ -47,13 +47,18 @@ class BalanceConfirmationController @Inject() (
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      val json = Json.obj(
-        "balance"                         -> Balance(8500).toString, // TODO - retrieve actual balance along with the currency
-        "referral"                        -> referral,
-        "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
-      )
+      request.userAnswers.get(BalancePage) match {
+        case Some(balance) =>
+          val json = Json.obj(
+            "balance"                         -> balance,
+            "referral"                        -> referral,
+            "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
+          )
 
-      renderer.render("balanceConfirmation.njk", json).map(Ok(_))
+          renderer.render("balanceConfirmation.njk", json).map(Ok(_))
+        case None =>
+          Future.successful(Redirect(routes.EoriNumberController.onPageLoad(NormalMode)))
+      }
   }
 
   def checkAnotherGuaranteeBalance: Action[AnyContent] =

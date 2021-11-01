@@ -17,13 +17,13 @@
 package connectors
 
 import config.FrontendAppConfig
-import javax.inject.Inject
 import models.backend._
 import models.requests.BalanceRequest
 import models.values.BalanceId
 import play.api.http.{HeaderNames, Status}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions, HttpReads, HttpResponse}
+import javax.inject.Inject
 
 import scala.concurrent.{ExecutionContext, Future}
 

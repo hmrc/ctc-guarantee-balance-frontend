@@ -32,6 +32,8 @@ import play.api.http.{ContentTypes, HeaderNames, Status}
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.util.UUID
+
 class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler with ScalaCheckPropertyChecks with AppWithDefaultMockFixtures {
 
   override lazy val app: Application = applicationBuilder()
