@@ -14,25 +14,18 @@
  * limitations under the License.
  */
 
-package models.backend
+package pages
 
-import java.time.Instant
+import pages.behaviours.PageBehaviours
 
-import models.values.{BalanceId, EnrolmentId, GuaranteeReference, TaxIdentifier}
-import play.api.libs.json.{Json, Reads}
+class BalancePageSpec extends PageBehaviours {
 
-case class PendingBalanceRequest(
-  balanceId: BalanceId,
-  enrolmentId: EnrolmentId,
-  taxIdentifier: TaxIdentifier,
-  guaranteeReference: GuaranteeReference,
-  requestedAt: Instant,
-  completedAt: Option[Instant],
-  response: Option[BalanceRequestResponse]
-)
+  "BalancePage" - {
 
-object PendingBalanceRequest {
+    beRetrievable[String](BalancePage)
 
-  implicit val pendingBalanceRequestFormat: Reads[PendingBalanceRequest] =
-    Json.reads[PendingBalanceRequest]
+    beSettable[String](BalancePage)
+
+    beRemovable[String](BalancePage)
+  }
 }

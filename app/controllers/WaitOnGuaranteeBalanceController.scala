@@ -56,8 +56,7 @@ class WaitOnGuaranteeBalanceController @Inject() (cc: MessagesControllerComponen
   def onSubmit(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
       balanceService
-        //.pollForGuaranteeBalance(balanceId, appConfig.guaranteeBalanceDelayInSecond seconds, appConfig.guaranteeBalanceMaxTimeInSecond seconds)
-        .testPoll(balanceId)
+        .pollForGuaranteeBalance(balanceId, appConfig.guaranteeBalanceDelayInSecond seconds, appConfig.guaranteeBalanceMaxTimeInSecond seconds)
         .flatMap {
           case Right(BalanceRequestPending(_)) =>
             renderer.render("waitOnGuaranteeBalance.njk").map(Ok(_))

@@ -62,7 +62,7 @@ class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with AppWithDefaultM
 
     "onSubmit" - {
       "must Redirect to the TryAgain Controller if the status is empty " in {
-        when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId), any(), any())).thenReturn(Future.successful(errorResponse))
+        when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId), any(), any())(any())).thenReturn(Future.successful(errorResponse))
 
         val request = FakeRequest(POST, routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url)
 

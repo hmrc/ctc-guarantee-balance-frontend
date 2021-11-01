@@ -23,6 +23,7 @@ import models.backend.BalanceRequestSuccess
 import models.values.{BalanceId, CurrencyCode}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
+import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
 
 import scala.concurrent.Future
 
@@ -37,8 +38,10 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
     val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
     val service     = application.injector.instanceOf[GuaranteeBalanceService]
 
-    when(mockGuaranteeBalanceConnector.pollBalanceRequest(any())).thenReturn(Future.successful(successResponse))
-    service.getGuaranteeBalance(balanceId) mustEqual Future.successful(successResponse)
+    when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any())).thenReturn(Future.successful(successResponse))
+
+    implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
+    service.queryPendingBalance(balanceId) mustEqual Future.successful(successResponse)
   }
 
 }

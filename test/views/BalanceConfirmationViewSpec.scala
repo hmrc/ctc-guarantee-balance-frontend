@@ -16,8 +16,9 @@
 
 package views
 
-import models.Balance
 import models.Referral._
+import models.backend.BalanceRequestSuccess
+import models.values.CurrencyCode
 import org.scalacheck.Arbitrary.arbitrary
 import play.api.libs.json.Json
 
@@ -26,7 +27,7 @@ class BalanceConfirmationViewSpec extends SingleViewSpec("balanceConfirmation.nj
   "must render balance confirmation" in {
     forAll(arbitrary[Int]) {
       balance =>
-        val balanceForDisplay = Balance(balance).toString
+        val balanceForDisplay = BalanceRequestSuccess(balance, CurrencyCode("GBP")).toString
 
         val json = Json.obj(
           "balance" -> balanceForDisplay

@@ -16,8 +16,6 @@
 
 package services
 
-import java.util.UUID
-
 import models.values.BalanceId
 import akka.actor.ActorSystem
 import javax.inject.Inject
@@ -28,33 +26,28 @@ import scala.concurrent.Future
 import akka.pattern.after
 import connectors.GuaranteeBalanceConnector
 import models.backend.{BalanceRequestPending, BalanceRequestResponse}
-import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 class GuaranteeBalanceService @Inject() (val actorSystem: ActorSystem, val connector: GuaranteeBalanceConnector)(implicit ec: ExecutionContext) {
 
-  def testPoll(balanceId: BalanceId): Future[Either[HttpResponse, BalanceRequestResponse]] = {
-    val startTimeMillis: Long = System.nanoTime()
-    retryGuaranteeBalance(balanceId, 2 seconds, 5 seconds, startTimeMillis)
-  }
-
-  def pollForGuaranteeBalance(balanceId: BalanceId, delay: FiniteDuration, maxTime: FiniteDuration): Future[Either[HttpResponse, BalanceRequestResponse]] = {
+  def pollForGuaranteeBalance(balanceId: BalanceId, delay: FiniteDuration, maxTime: FiniteDuration)(implicit
+    hc: HeaderCarrier
+  ): Future[Either[HttpResponse, BalanceRequestResponse]] = {
     val startTimeMillis: Long = System.nanoTime()
     retryGuaranteeBalance(balanceId, delay, maxTime, startTimeMillis)
   }
 
-  def retryGuaranteeBalance(balanceId: BalanceId,
-                            delay: FiniteDuration,
-                            maxTime: FiniteDuration,
-                            startTimeMillis: Long
+  def retryGuaranteeBalance(balanceId: BalanceId, delay: FiniteDuration, maxTime: FiniteDuration, startTimeMillis: Long)(implicit
+    hc: HeaderCarrier
   ): Future[Either[HttpResponse, BalanceRequestResponse]] =
-    getGuaranteeBalance(balanceId).flatMap {
+    queryPendingBalance(balanceId).flatMap {
       case Right(BalanceRequestPending(_)) if underMaxProcessingTime(startTimeMillis, maxTime) =>
         after(delay, actorSystem.scheduler)(retryGuaranteeBalance(balanceId, delay, maxTime, startTimeMillis))
       case result => Future.successful(result)
     }
 
-  def getGuaranteeBalance(balanceId: BalanceId): Future[Either[HttpResponse, BalanceRequestResponse]] =
-    connector.pollBalanceRequest(balanceId)
+  def queryPendingBalance(balanceId: BalanceId)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] =
+    connector.queryPendingBalance(balanceId)
 
   def underMaxProcessingTime(startTimeMillis: Long, maxTime: FiniteDuration): Boolean = {
     val currentTimeMillis: Long = System.nanoTime()
