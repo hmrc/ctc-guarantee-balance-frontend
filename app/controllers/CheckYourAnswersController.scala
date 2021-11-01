@@ -18,12 +18,15 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions._
+import models.backend.BalanceRequestSuccess
+import models.values.CurrencyCode
 import models.{CheckMode, UserAnswers}
-import pages.GuaranteeReferenceNumberPage
+import pages.{BalancePage, GuaranteeReferenceNumberPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
+import repositories.SessionRepository
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
@@ -36,6 +39,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class CheckYourAnswersController @Inject() (
   override val messagesApi: MessagesApi,
+  sessionRepository: SessionRepository,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
@@ -66,9 +70,11 @@ class CheckYourAnswersController @Inject() (
           checkRateLimit(request.eoriNumber, guaranteedReferenceNumber).flatMap {
             lockFree =>
               if (lockFree) {
-                Future.successful(
-                  Redirect(routes.BalanceConfirmationController.onPageLoad())
-                ) //todo this needs to be completed once the back end direction has been confirmed
+                val balance = BalanceRequestSuccess(8500, CurrencyCode("GBP")) // TODO - retrieve actual balance
+                for {
+                  updatedAnswers <- Future.fromTry(request.userAnswers.set(BalancePage, balance.toString))
+                  _              <- sessionRepository.set(updatedAnswers)
+                } yield Redirect(routes.BalanceConfirmationController.onPageLoad())
               } else {
                 Future.successful(Redirect(routes.RateLimitController.onPageLoad()))
               }

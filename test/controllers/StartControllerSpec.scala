@@ -56,7 +56,7 @@ class StartControllerSpec extends SpecBase with MockitoSugar with NunjucksSuppor
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
 
-          val uaCaptor = ArgumentCaptor.forClass(classOf[UserAnswers])
+          val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
           verify(mockSessionRepository).set(uaCaptor.capture)
 
           uaCaptor.getValue.lastUpdated mustBe time // check that user answers have been persisted
@@ -86,7 +86,7 @@ class StartControllerSpec extends SpecBase with MockitoSugar with NunjucksSuppor
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
 
-          val uaCaptor = ArgumentCaptor.forClass(classOf[UserAnswers])
+          val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
           verify(mockSessionRepository).set(uaCaptor.capture)
 
           uaCaptor.getValue.lastUpdated.isAfter(time) mustBe true // check that new user answers have been created
