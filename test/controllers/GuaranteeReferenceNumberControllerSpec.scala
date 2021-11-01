@@ -22,7 +22,7 @@ import matchers.JsonMatchers
 import models.{NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentCaptor
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.GuaranteeReferenceNumberPage
@@ -48,10 +48,10 @@ class GuaranteeReferenceNumberControllerSpec extends SpecBase with MockitoSugar 
 
     "must return OK and the correct view for a GET" in {
 
-      val application    = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-      val request        = FakeRequest(GET, guaranteeReferenceNumberRoute)
-      val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-      val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
+      val application                            = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val request                                = FakeRequest(GET, guaranteeReferenceNumberRoute)
+      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+      val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
 
       val result = route(application, request).value
 
@@ -72,11 +72,11 @@ class GuaranteeReferenceNumberControllerSpec extends SpecBase with MockitoSugar 
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers    = UserAnswers(userAnswersId).set(GuaranteeReferenceNumberPage, validAnswer).success.value
-      val application    = applicationBuilder(userAnswers = Some(userAnswers)).build()
-      val request        = FakeRequest(GET, guaranteeReferenceNumberRoute)
-      val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-      val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
+      val userAnswers                            = UserAnswers(userAnswersId).set(GuaranteeReferenceNumberPage, validAnswer).success.value
+      val application                            = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      val request                                = FakeRequest(GET, guaranteeReferenceNumberRoute)
+      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+      val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
 
       val result = route(application, request).value
 
@@ -120,11 +120,11 @@ class GuaranteeReferenceNumberControllerSpec extends SpecBase with MockitoSugar 
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application    = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-      val request        = FakeRequest(POST, guaranteeReferenceNumberRoute).withFormUrlEncodedBody(("value", ""))
-      val boundForm      = form.bind(Map("value" -> ""))
-      val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-      val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
+      val application                            = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val request                                = FakeRequest(POST, guaranteeReferenceNumberRoute).withFormUrlEncodedBody(("value", ""))
+      val boundForm                              = form.bind(Map("value" -> ""))
+      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+      val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
 
       val result = route(application, request).value
 
