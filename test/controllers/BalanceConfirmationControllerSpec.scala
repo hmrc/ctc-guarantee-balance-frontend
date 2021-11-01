@@ -34,44 +34,21 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
 
   "BalanceConfirmation Controller" - {
 
+    // format: off
     ".onPageLoad" - {
       "must return OK and the correct view for a GET" - {
 
-        val balance     = "£8,500.00"
-        val baseAnswers = emptyUserAnswers.set(BalancePage, balance).success.value
+        "when balance and referral found in user answers" in {
 
-        "ReferralPage undefined" in {
-
-          val application                            = applicationBuilder(userAnswers = Some(baseAnswers)).build()
-          val request                                = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
-          val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-          val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
-
-          val result = route(application, request).value
-
-          status(result) mustEqual OK
-
-          verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
-
-          val expectedJson = Json.obj(
-            "balance"                         -> balance,
-            "referral"                        -> GovUK,
-            "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
-          )
-
-          templateCaptor.getValue mustEqual "balanceConfirmation.njk"
-          jsonCaptor.getValue must containJson(expectedJson)
-
-          application.stop()
-        }
-
-        "ReferralPage defined" in {
+          val balance = "£8,500.00"
 
           forAll(arbitrary[Referral]) {
             referral =>
               beforeEach()
 
-              val userAnswers = baseAnswers.set(ReferralPage, referral).success.value
+              val userAnswers = emptyUserAnswers
+                .set(BalancePage, balance).success.value
+                .set(ReferralPage, referral).success.value
 
               val application                            = applicationBuilder(userAnswers = Some(userAnswers)).build()
               val request                                = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
@@ -98,20 +75,34 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
         }
       }
 
-      "must redirect to EORI Number page if balance not found in user answers" in {
+      "must redirect to start controller" - {
+        "when balance or referral not found in user answers" in {
 
-        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-        val request     = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
+          forAll(arbitrary[(Option[String], Option[Referral])] suchThat {
+            case (balance, referral) => !(balance.isDefined && referral.isDefined)
+          }) {
+            case (balance, referral) =>
+              beforeEach()
 
-        val result = route(application, request).value
+              val userAnswers = emptyUserAnswers
+                .set(BalancePage, balance).success.value
+                .set(ReferralPage, referral).success.value
 
-        status(result) mustEqual SEE_OTHER
+              val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+              val request     = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
 
-        redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
+              val result = route(application, request).value
 
-        application.stop()
+              status(result) mustEqual SEE_OTHER
+
+              redirectLocation(result).value mustEqual routes.StartController.start().url
+
+              application.stop()
+          }
+        }
       }
     }
+    // format: on
 
     ".checkAnotherGuaranteeBalance" - {
       "must clear user answers and redirect to EORI Number page" in {

@@ -18,9 +18,7 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions._
-import models.Referral.GovUK
-import models.requests.DataRequest
-import models.{NormalMode, Referral}
+import models.NormalMode
 import pages.{BalancePage, ReferralPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
@@ -47,8 +45,8 @@ class BalanceConfirmationController @Inject() (
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      request.userAnswers.get(BalancePage) match {
-        case Some(balance) =>
+      (request.userAnswers.get(BalancePage), request.userAnswers.get(ReferralPage)) match {
+        case (Some(balance), Some(referral)) =>
           val json = Json.obj(
             "balance"                         -> balance,
             "referral"                        -> referral,
@@ -56,8 +54,8 @@ class BalanceConfirmationController @Inject() (
           )
 
           renderer.render("balanceConfirmation.njk", json).map(Ok(_))
-        case None =>
-          Future.successful(Redirect(routes.EoriNumberController.onPageLoad(NormalMode)))
+        case _ =>
+          Future.successful(Redirect(routes.StartController.start()))
       }
   }
 
@@ -74,7 +72,4 @@ class BalanceConfirmationController @Inject() (
           Redirect(url)
       }
   }
-
-  private def referral(implicit request: DataRequest[AnyContent]): Referral =
-    request.userAnswers.get(ReferralPage).getOrElse(GovUK)
 }
