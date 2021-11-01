@@ -23,12 +23,22 @@ import models.values.{BalanceId, CurrencyCode}
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.play.json.Union
 
+import java.text.NumberFormat
+import java.util.Currency
+
 sealed abstract class BalanceRequestResponse extends Product with Serializable
 
 case class BalanceRequestSuccess(
   balance: BigDecimal,
   currency: CurrencyCode
-) extends BalanceRequestResponse
+) extends BalanceRequestResponse {
+
+  override def toString: String = {
+    val formatter = NumberFormat.getCurrencyInstance
+    formatter.setCurrency(Currency.getInstance(currency.value))
+    formatter.format(balance)
+  }
+}
 
 case class BalanceRequestPending(balanceId: BalanceId) extends BalanceRequestResponse
 

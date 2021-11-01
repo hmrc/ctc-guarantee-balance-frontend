@@ -19,8 +19,10 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions._
 import models.Referral.GovUK
+import models.backend.BalanceRequestSuccess
 import models.requests.DataRequest
-import models.{Balance, NormalMode, Referral}
+import models.values.CurrencyCode
+import models.{NormalMode, Referral}
 import pages.ReferralPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
@@ -48,7 +50,7 @@ class BalanceConfirmationController @Inject() (
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       val json = Json.obj(
-        "balance"                         -> Balance(8500).toString, // TODO - retrieve actual balance
+        "balance"                         -> BalanceRequestSuccess(8500, CurrencyCode("GBP")).toString, // TODO - retrieve actual balance
         "referral"                        -> referral,
         "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
       )

@@ -1,0 +1,95 @@
+/*
+ * Copyright 2021 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package models.backend
+
+import base.SpecBase
+import models.values.CurrencyCode
+
+// scalastyle:off magic.number
+class BalanceRequestResponseSpec extends SpecBase {
+
+  "BalanceRequestSuccess" - {
+
+    ".toString" - {
+
+      "must display currencies correctly for different currency codes" - {
+
+        "when pounds sterling" - {
+
+          val currency = CurrencyCode("GBP")
+
+          "when balance of 10" in {
+            val balance = BalanceRequestSuccess(10, currency)
+            balance.toString mustEqual "£10.00"
+          }
+
+          "when balance of 12.34" in {
+            val balance = BalanceRequestSuccess(12.34, currency)
+            balance.toString mustEqual "£12.34"
+          }
+
+          "when balance of 1000" in {
+            val balance = BalanceRequestSuccess(1000, currency)
+            balance.toString mustEqual "£1,000.00"
+          }
+
+          "when balance of 10000" in {
+            val balance = BalanceRequestSuccess(10000, currency)
+            balance.toString mustEqual "£10,000.00"
+          }
+
+          "when balance of 1000000" in {
+            val balance = BalanceRequestSuccess(1000000, currency)
+            balance.toString mustEqual "£1,000,000.00"
+          }
+        }
+
+        "when euros" - {
+
+          val currency = CurrencyCode("EUR")
+
+          "when balance of 10" in {
+            val balance = BalanceRequestSuccess(10, currency)
+            balance.toString mustEqual "€10.00"
+          }
+
+          "when balance of 12.34" in {
+            val balance = BalanceRequestSuccess(12.34, currency)
+            balance.toString mustEqual "€12.34"
+          }
+
+          "when balance of 1000" in {
+            val balance = BalanceRequestSuccess(1000, currency)
+            balance.toString mustEqual "€1,000.00"
+          }
+
+          "when balance of 10000" in {
+            val balance = BalanceRequestSuccess(10000, currency)
+            balance.toString mustEqual "€10,000.00"
+          }
+
+          "when balance of 1000000" in {
+            val balance = BalanceRequestSuccess(1000000, currency)
+            balance.toString mustEqual "€1,000,000.00"
+          }
+        }
+      }
+    }
+  }
+
+}
+// scalastyle:off magic.number

@@ -19,7 +19,9 @@ package controllers
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import matchers.JsonMatchers.containJson
 import models.Referral._
-import models.{Balance, NormalMode, Referral, UserAnswers}
+import models.backend.BalanceRequestSuccess
+import models.values.CurrencyCode
+import models.{NormalMode, Referral, UserAnswers}
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{times, verify}
@@ -51,7 +53,7 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
           verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
           val expectedJson = Json.obj(
-            "balance"                         -> Balance(8500).toString,
+            "balance"                         -> BalanceRequestSuccess(8500, CurrencyCode("GBP")).toString,
             "referral"                        -> GovUK,
             "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
           )
@@ -82,7 +84,7 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
               verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
               val expectedJson = Json.obj(
-                "balance"                         -> Balance(8500).toString,
+                "balance"                         -> BalanceRequestSuccess(8500, CurrencyCode("GBP")).toString,
                 "referral"                        -> referral,
                 "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
               )
