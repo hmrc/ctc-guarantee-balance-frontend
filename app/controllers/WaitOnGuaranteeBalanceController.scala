@@ -32,16 +32,16 @@ import scala.concurrent.duration.DurationInt
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 
-class WaitOnGuaranteeBalanceController @Inject() (cc: MessagesControllerComponents,
-                                                  renderer: Renderer,
-                                                  balanceService: GuaranteeBalanceService,
-                                                  config: FrontendAppConfig,
-                                                  identify: IdentifierAction,
-                                                  getData: DataRetrievalAction,
-                                                  appConfig: FrontendAppConfig
-)(implicit
-  ec: ExecutionContext
-) extends FrontendController(cc)
+class WaitOnGuaranteeBalanceController @Inject() (
+  cc: MessagesControllerComponents,
+  renderer: Renderer,
+  balanceService: GuaranteeBalanceService,
+  config: FrontendAppConfig,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction,
+  appConfig: FrontendAppConfig
+)(implicit ec: ExecutionContext)
+    extends FrontendController(cc)
     with I18nSupport {
 
   def onPageLoad(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData).async {

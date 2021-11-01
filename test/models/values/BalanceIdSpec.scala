@@ -21,18 +21,25 @@ import org.scalacheck.Arbitrary.arbitrary
 
 import java.util.UUID
 
-class BalanceIdSpec extends SpecBase {
+class a extends SpecBase {
 
   private val balanceIdKey: String = "balanceId"
 
-  "must bind correctly" in {
+  "must bind a UUID" in {
     forAll(arbitrary[UUID]) {
       uuid =>
         BalanceId.pathBinder.bind(balanceIdKey, uuid.toString) mustBe Right(BalanceId(uuid))
     }
   }
 
-  "must unbind correctly" in {
+  "must fail to bind a non-UUID" in {
+    forAll(arbitrary[String]) {
+      notAUuid =>
+        BalanceId.pathBinder.bind(balanceIdKey, notAUuid) mustBe 'left
+    }
+  }
+
+  "must unbind a UUID" in {
     forAll(arbitrary[UUID]) {
       uuid =>
         BalanceId.pathBinder.unbind(balanceIdKey, BalanceId(uuid)) mustBe uuid.toString

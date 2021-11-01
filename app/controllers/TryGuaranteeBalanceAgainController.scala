@@ -27,13 +27,13 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.ExecutionContext
 
-class TryGuaranteeBalanceAgainController @Inject() (cc: MessagesControllerComponents,
-                                                    renderer: Renderer,
-                                                    identify: IdentifierAction,
-                                                    getData: DataRetrievalAction
-)(implicit
-  ec: ExecutionContext
-) extends FrontendController(cc)
+class TryGuaranteeBalanceAgainController @Inject() (
+  cc: MessagesControllerComponents,
+  renderer: Renderer,
+  identify: IdentifierAction,
+  getData: DataRetrievalAction
+)(implicit ec: ExecutionContext)
+    extends FrontendController(cc)
     with I18nSupport {
 
   def onPageLoad(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData).async {

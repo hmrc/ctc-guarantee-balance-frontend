@@ -51,7 +51,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
       }
 
     http.POST[BalanceRequest, Either[HttpResponse, BalanceRequestResponse]](
-      url.toString,
+      url,
       request,
       headers
     )
@@ -75,7 +75,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
       }
 
     http.GET[Either[HttpResponse, BalanceRequestResponse]](
-      url.toString,
+      url,
       Seq.empty,
       headers
     )
