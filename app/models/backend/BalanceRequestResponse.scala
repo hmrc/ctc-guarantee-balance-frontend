@@ -39,7 +39,9 @@ case class BalanceRequestSuccess(
       formatter.setCurrency(Currency.getInstance(currency.value))
       formatter.format(balance)
     } catch {
-      case _: IllegalArgumentException =>
+      case e: IllegalArgumentException =>
+        println("***")
+        println(e.getMessage)
         s"${currency.value}$balance"
     }
 }
