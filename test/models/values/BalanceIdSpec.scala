@@ -21,7 +21,7 @@ import org.scalacheck.Arbitrary.arbitrary
 
 import java.util.UUID
 
-class a extends SpecBase {
+class BalanceIdSpec extends SpecBase {
 
   private val balanceIdKey: String = "balanceId"
 
