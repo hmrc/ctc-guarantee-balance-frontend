@@ -19,7 +19,7 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions.{DataRetrievalAction, IdentifierAction}
 import javax.inject.Inject
-import models.BalanceId
+import models.values.BalanceId
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}

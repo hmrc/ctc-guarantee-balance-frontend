@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package services
+package models.values
 
-import models.Enumerable
-import models.values.BalanceId
-import scala.concurrent.Future
+import play.api.libs.json.Format
+import play.api.libs.json.Json
 
-class GuaranteeBalanceService() {
-  def getGuaranteeBalance(balanceId: BalanceId): Future[Option[BalanceStatus]] = Future.successful(None)
-}
+case class ErrorType(value: Int) extends AnyVal
 
-sealed trait BalanceStatus
+object ErrorType {
 
-object BalanceStatus extends Enumerable.Implicits {
-  case object PendingStatus extends BalanceStatus
-  case object DataReturned extends BalanceStatus
-  case object NoMatch extends BalanceStatus
+  implicit val errorTypeFormat: Format[ErrorType] =
+    Json.valueFormat[ErrorType]
 }

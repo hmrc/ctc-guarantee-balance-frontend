@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-package services
+package models.backend
 
-import models.Enumerable
-import models.values.BalanceId
-import scala.concurrent.Future
-
-class GuaranteeBalanceService() {
-  def getGuaranteeBalance(balanceId: BalanceId): Future[Option[BalanceStatus]] = Future.successful(None)
-}
-
-sealed trait BalanceStatus
-
-object BalanceStatus extends Enumerable.Implicits {
-  case object PendingStatus extends BalanceStatus
-  case object DataReturned extends BalanceStatus
-  case object NoMatch extends BalanceStatus
+object BalanceRequestResponseStatus {
+  val FieldName       = "status"
+  val Success         = "SUCCESS"
+  val FunctionalError = "FUNCTIONAL_ERROR"
 }

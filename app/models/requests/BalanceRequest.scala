@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-package services
+package models.requests
 
-import models.Enumerable
-import models.values.BalanceId
-import scala.concurrent.Future
+import models.values._
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
 
-class GuaranteeBalanceService() {
-  def getGuaranteeBalance(balanceId: BalanceId): Future[Option[BalanceStatus]] = Future.successful(None)
-}
+case class BalanceRequest(
+  taxIdentifier: TaxIdentifier,
+  guaranteeReference: GuaranteeReference,
+  accessCode: AccessCode
+)
 
-sealed trait BalanceStatus
+object BalanceRequest {
 
-object BalanceStatus extends Enumerable.Implicits {
-  case object PendingStatus extends BalanceStatus
-  case object DataReturned extends BalanceStatus
-  case object NoMatch extends BalanceStatus
+  implicit val balanceRequestFormat: OFormat[BalanceRequest] = (
+    (__ \ "taxIdentifier").format[TaxIdentifier] and
+      (__ \ "guaranteeReference").format[GuaranteeReference] and
+      (__ \ "accessCode").format[AccessCode]
+  )(BalanceRequest.apply, unlift(BalanceRequest.unapply))
 }

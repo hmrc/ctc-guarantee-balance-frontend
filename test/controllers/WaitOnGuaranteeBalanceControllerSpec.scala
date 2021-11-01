@@ -16,15 +16,16 @@
 
 package controllers
 
+import java.util.UUID
+
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import models.{BalanceId, UserAnswers}
+import models.values.BalanceId
 import org.mockito.ArgumentCaptor
-import org.mockito.Matchers.{any, eq => eqTo}
-import org.mockito.Mockito.{reset, times, verify, when}
+import org.mockito.Matchers.any
+import org.mockito.Mockito.{times, verify, when}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.twirl.api.Html
 import services.{BalanceStatus, GuaranteeBalanceService}
 
@@ -32,7 +33,8 @@ import scala.concurrent.Future
 
 class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
-  val balanceId = BalanceId("1")
+  val expectedUuid = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
+  val balanceId    = BalanceId(expectedUuid)
 
   "WaitOnGuaranteeBalanceController" - {
 
@@ -42,7 +44,7 @@ class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with AppWithDefaultM
         when(mockRenderer.render(any(), any())(any()))
           .thenReturn(Future.successful(Html("")))
 
-        val request = FakeRequest(GET, routes.WaitOnGuaranteeBalanceController.onPageLoad(BalanceId("1")).url)
+        val request = FakeRequest(GET, routes.WaitOnGuaranteeBalanceController.onPageLoad(BalanceId(expectedUuid)).url)
 
         val result = route(app, request).value
 

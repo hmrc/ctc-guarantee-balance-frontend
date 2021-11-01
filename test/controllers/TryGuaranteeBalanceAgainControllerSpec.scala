@@ -16,8 +16,10 @@
 
 package controllers
 
+import java.util.UUID
+
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import models.BalanceId
+import models.values.BalanceId
 import org.mockito.ArgumentCaptor
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{times, verify, when}
@@ -29,6 +31,9 @@ import scala.concurrent.Future
 
 class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
+  val expectedUuid = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
+  val balanceId    = BalanceId(expectedUuid)
+
   "TryGuaranteeBalanceAgainController" - {
 
     "must return OK and the correct view for a GET" in {
@@ -36,7 +41,7 @@ class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaul
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
 
-      val request = FakeRequest(GET, routes.TryGuaranteeBalanceAgainController.onPageLoad(BalanceId("1")).url)
+      val request = FakeRequest(GET, routes.TryGuaranteeBalanceAgainController.onPageLoad(BalanceId(expectedUuid)).url)
 
       val result = route(app, request).value
 

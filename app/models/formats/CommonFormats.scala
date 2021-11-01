@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package services
+package models.formats
 
-import models.Enumerable
-import models.values.BalanceId
-import scala.concurrent.Future
+import cats.data.NonEmptyList
+import play.api.libs.functional.syntax._
+import play.api.libs.json.Format
 
-class GuaranteeBalanceService() {
-  def getGuaranteeBalance(balanceId: BalanceId): Future[Option[BalanceStatus]] = Future.successful(None)
-}
+object CommonFormats extends CommonFormats
 
-sealed trait BalanceStatus
+trait CommonFormats {
 
-object BalanceStatus extends Enumerable.Implicits {
-  case object PendingStatus extends BalanceStatus
-  case object DataReturned extends BalanceStatus
-  case object NoMatch extends BalanceStatus
+  implicit def nonEmptyListFormat[A: Format]: Format[NonEmptyList[A]] =
+    Format
+      .of[List[A]]
+      .inmap(
+        NonEmptyList.fromListUnsafe,
+        _.toList
+      )
 }

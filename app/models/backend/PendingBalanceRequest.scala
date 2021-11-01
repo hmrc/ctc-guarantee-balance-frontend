@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
-package services
+package models.backend
 
-import models.Enumerable
-import models.values.BalanceId
-import scala.concurrent.Future
+import java.time.Instant
 
-class GuaranteeBalanceService() {
-  def getGuaranteeBalance(balanceId: BalanceId): Future[Option[BalanceStatus]] = Future.successful(None)
-}
+import models.values.{BalanceId, EnrolmentId, GuaranteeReference, TaxIdentifier}
+import play.api.libs.json.{Json, OFormat}
 
-sealed trait BalanceStatus
+case class PendingBalanceRequest(
+  balanceId: BalanceId,
+  enrolmentId: EnrolmentId,
+  taxIdentifier: TaxIdentifier,
+  guaranteeReference: GuaranteeReference,
+  requestedAt: Instant,
+  completedAt: Option[Instant],
+  response: Option[BalanceRequestResponse]
+)
 
-object BalanceStatus extends Enumerable.Implicits {
-  case object PendingStatus extends BalanceStatus
-  case object DataReturned extends BalanceStatus
-  case object NoMatch extends BalanceStatus
+object PendingBalanceRequest {
+
+  implicit val pendingBalanceRequestFormat: OFormat[PendingBalanceRequest] =
+    Json.format[PendingBalanceRequest]
 }

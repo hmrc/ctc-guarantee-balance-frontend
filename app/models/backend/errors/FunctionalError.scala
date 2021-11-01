@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package services
+package models.backend.errors
 
-import models.Enumerable
-import models.values.BalanceId
-import scala.concurrent.Future
+import models.values.ErrorType
+import play.api.libs.json.{Json, OFormat}
 
-class GuaranteeBalanceService() {
-  def getGuaranteeBalance(balanceId: BalanceId): Future[Option[BalanceStatus]] = Future.successful(None)
-}
+case class FunctionalError(
+  errorType: ErrorType,
+  errorPointer: String,
+  errorReason: Option[String]
+)
 
-sealed trait BalanceStatus
+object FunctionalError {
 
-object BalanceStatus extends Enumerable.Implicits {
-  case object PendingStatus extends BalanceStatus
-  case object DataReturned extends BalanceStatus
-  case object NoMatch extends BalanceStatus
+  implicit lazy val functionalErrorFormat: OFormat[FunctionalError] =
+    Json.format[FunctionalError]
 }
