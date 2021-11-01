@@ -83,7 +83,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
       val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
       verify(mockSessionRepository).set(uaCaptor.capture)
-      uaCaptor.getValue.get(BalancePage).get mustBe balance.toString
+      uaCaptor.getValue.get(BalancePage).get mustBe balance.formatForDisplay
     }
 
     "must redirect to Session Expired for a POST if no existing data is found" in {

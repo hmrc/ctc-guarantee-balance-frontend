@@ -33,7 +33,7 @@ case class BalanceRequestSuccess(
   currency: CurrencyCode
 ) extends BalanceRequestResponse {
 
-  override def toString: String =
+  def formatForDisplay: String =
     try {
       val formatter = NumberFormat.getCurrencyInstance(Locale.UK)
       formatter.setCurrency(Currency.getInstance(currency.value))

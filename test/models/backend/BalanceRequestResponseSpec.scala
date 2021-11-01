@@ -27,7 +27,7 @@ class BalanceRequestResponseSpec extends SpecBase {
 
   "BalanceRequestSuccess" - {
 
-    ".toString" - {
+    ".formatForDisplay" - {
 
       "must display currencies correctly for different currency codes" - {
 
@@ -37,27 +37,27 @@ class BalanceRequestResponseSpec extends SpecBase {
 
           "when balance of 10" in {
             val balance = BalanceRequestSuccess(10, currency)
-            balance.toString mustEqual "£10.00"
+            balance.formatForDisplay mustEqual "£10.00"
           }
 
           "when balance of 12.34" in {
             val balance = BalanceRequestSuccess(12.34, currency)
-            balance.toString mustEqual "£12.34"
+            balance.formatForDisplay mustEqual "£12.34"
           }
 
           "when balance of 1000" in {
             val balance = BalanceRequestSuccess(1000, currency)
-            balance.toString mustEqual "£1,000.00"
+            balance.formatForDisplay mustEqual "£1,000.00"
           }
 
           "when balance of 10000" in {
             val balance = BalanceRequestSuccess(10000, currency)
-            balance.toString mustEqual "£10,000.00"
+            balance.formatForDisplay mustEqual "£10,000.00"
           }
 
           "when balance of 1000000" in {
             val balance = BalanceRequestSuccess(1000000, currency)
-            balance.toString mustEqual "£1,000,000.00"
+            balance.formatForDisplay mustEqual "£1,000,000.00"
           }
         }
 
@@ -67,27 +67,27 @@ class BalanceRequestResponseSpec extends SpecBase {
 
           "when balance of 10" in {
             val balance = BalanceRequestSuccess(10, currency)
-            balance.toString mustEqual "€10.00"
+            balance.formatForDisplay mustEqual "€10.00"
           }
 
           "when balance of 12.34" in {
             val balance = BalanceRequestSuccess(12.34, currency)
-            balance.toString mustEqual "€12.34"
+            balance.formatForDisplay mustEqual "€12.34"
           }
 
           "when balance of 1000" in {
             val balance = BalanceRequestSuccess(1000, currency)
-            balance.toString mustEqual "€1,000.00"
+            balance.formatForDisplay mustEqual "€1,000.00"
           }
 
           "when balance of 10000" in {
             val balance = BalanceRequestSuccess(10000, currency)
-            balance.toString mustEqual "€10,000.00"
+            balance.formatForDisplay mustEqual "€10,000.00"
           }
 
           "when balance of 1000000" in {
             val balance = BalanceRequestSuccess(1000000, currency)
-            balance.toString mustEqual "€1,000,000.00"
+            balance.formatForDisplay mustEqual "€1,000,000.00"
           }
         }
       }
@@ -101,7 +101,7 @@ class BalanceRequestResponseSpec extends SpecBase {
         ) {
           (invalidCurrencyCode, amount) =>
             val balance = BalanceRequestSuccess(amount, CurrencyCode(invalidCurrencyCode))
-            balance.toString mustEqual s"$invalidCurrencyCode$amount"
+            balance.formatForDisplay mustEqual s"$invalidCurrencyCode$amount"
         }
       }
     }

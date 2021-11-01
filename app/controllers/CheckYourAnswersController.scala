@@ -72,7 +72,7 @@ class CheckYourAnswersController @Inject() (
               if (lockFree) {
                 val balance = BalanceRequestSuccess(8500, CurrencyCode("GBP")) // TODO - retrieve actual balance
                 for {
-                  updatedAnswers <- Future.fromTry(request.userAnswers.set(BalancePage, balance.toString))
+                  updatedAnswers <- Future.fromTry(request.userAnswers.set(BalancePage, balance.formatForDisplay))
                   _              <- sessionRepository.set(updatedAnswers)
                 } yield Redirect(routes.BalanceConfirmationController.onPageLoad())
               } else {
