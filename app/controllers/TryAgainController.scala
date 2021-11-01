@@ -43,4 +43,11 @@ class TryAgainController @Inject() (
       val json = Json.obj("redirectUrl" -> routes.CheckYourAnswersController.onPageLoad().url)
       renderer.render("tryAgain.njk", json).map(Ok(_))
   }
+
+  def onSubmit: Action[AnyContent] = (identify andThen getData andThen requireData) {
+    implicit request =>
+      // TODO - send answers to backend
+      Redirect(routes.BalanceConfirmationController.onPageLoad())
+  }
+
 }

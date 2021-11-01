@@ -1,6 +1,8 @@
 {% extends "includes/layout.njk" %}
 
 {% from "macros/title.njk"                         import title %}
+{% from "govuk/components/button/macro.njk"        import govukButton %}
+
 
 {% block pageTitle %}
   {{ title(messages("tryAgain.title")) }}
@@ -16,6 +18,11 @@
           {{ messages("tryAgain.heading") }}
         </h1>
 
+        <form action="{{ routes.controllers.TryAgainController.onSubmit(mode).url }}" method="post">
+
+          {{ csrf() | safe }}
+
+
         <p>
             {{ messages("tryAgain.paragraph1") }} <a href={{ redirectUrl }} target="_blank" rel="noopener noreferrer">{{ messages("tryAgain.linkText") }}</a>.
         </p>
@@ -23,6 +30,15 @@
         <p>
          {{ messages("tryAgain.heading") }}
         </p>
+
+             {{ govukButton({
+                    text: messages("tryAgain.buttonText"),
+                    preventDoubleClick: true,
+                    attributes: {id: "submit"}
+              }) }}
+
+        </form>
+
 
       </div>
     </div>

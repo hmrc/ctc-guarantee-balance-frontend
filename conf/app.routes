@@ -43,3 +43,4 @@ GET        /manage-transit-movements                controllers.BalanceConfirmat
 GET        /details-do-not-match                    controllers.DetailsDontMatchController.onPageLoad()
 
 GET        /try-again                               controllers.TryAgainController.onPageLoad()
+POST       /try-again                               controllers.TryAgainController.onSubmit()
