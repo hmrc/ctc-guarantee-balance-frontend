@@ -20,6 +20,7 @@ import config.FrontendAppConfig
 import controllers.actions._
 import models.NormalMode
 import pages.{BalancePage, ReferralPage}
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -41,7 +42,8 @@ class BalanceConfirmationController @Inject() (
   appConfig: FrontendAppConfig
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
-    with I18nSupport {
+    with I18nSupport
+    with Logging {
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
@@ -55,6 +57,7 @@ class BalanceConfirmationController @Inject() (
 
           renderer.render("balanceConfirmation.njk", json).map(Ok(_))
         case _ =>
+          logger.warn("[BalanceConfirmationController][onPageLoad] Insufficient data in user answers. Redirecting to start of guarantee balance journey.")
           Future.successful(Redirect(routes.StartController.start()))
       }
   }

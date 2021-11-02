@@ -48,12 +48,6 @@ final case class UserAnswers(
     }
   }
 
-  def set[A](page: Settable[A], optionalValue: Option[A])(implicit writes: Writes[A]): Try[UserAnswers] =
-    optionalValue match {
-      case Some(value) => set(page, value)
-      case None        => Success(this)
-    }
-
   def remove[A](page: Settable[A]): Try[UserAnswers] = {
 
     val updatedData = data.removeObject(page.path) match {

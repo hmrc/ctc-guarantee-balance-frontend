@@ -85,8 +85,8 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
               beforeEach()
 
               val userAnswers = emptyUserAnswers
-                .set(BalancePage, balance).success.value
-                .set(ReferralPage, referral).success.value
+                .setOption(BalancePage, balance).success.value
+                .setOption(ReferralPage, referral).success.value
 
               val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
               val request     = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)

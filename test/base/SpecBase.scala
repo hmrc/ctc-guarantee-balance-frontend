@@ -24,7 +24,10 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Writes}
+import queries.Settable
+
+import scala.util.{Success, Try}
 
 trait SpecBase
     extends AnyFreeSpec
@@ -42,5 +45,14 @@ trait SpecBase
   val userAnswersId = "id"
 
   def emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId, Json.obj())
+
+  implicit class RichUserAnswers(userAnswers: UserAnswers) {
+
+    def setOption[A](page: Settable[A], optionalValue: Option[A])(implicit writes: Writes[A]): Try[UserAnswers] =
+      optionalValue match {
+        case Some(value) => userAnswers.set[A](page, value)
+        case None        => Success(userAnswers)
+      }
+  }
 
 }
