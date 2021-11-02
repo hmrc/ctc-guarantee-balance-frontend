@@ -107,9 +107,6 @@ class CheckYourAnswersController @Inject() (
       }
   }
 
-  private def processPending(balanceId: BalanceId)(implicit request: Request[_]): Future[Result] =
-    Future.successful(Redirect(controllers.routes.SessionExpiredController.onPageLoad()))
-
   private def checkRateLimit(eoriNumber: String, guaranteedReferenceNumber: String): Future[Boolean] = {
     val lockId   = (eoriNumber + guaranteedReferenceNumber.trim.toLowerCase).hashCode.toString
     val duration = config.rateLimitDuration.seconds
