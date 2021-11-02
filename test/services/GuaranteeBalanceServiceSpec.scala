@@ -18,42 +18,106 @@ package services
 
 import akka.actor.ActorSystem
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import connectors.GuaranteeBalanceConnector
-import models.backend.BalanceRequestSuccess
+import models.backend.{BalanceRequestPending, BalanceRequestPendingExpired, BalanceRequestSuccess}
 import models.values.{BalanceId, CurrencyCode}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{reset, when}
+import org.mockito.Mockito.{times, verify, when}
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
-
 import java.util.UUID
+import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
+
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
+import scala.language.postfixOps
 
 class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   val expectedUuid = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
   val balanceId    = BalanceId(expectedUuid)
 
-  val successResponse = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
+  val successResponse  = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
+  val pendingResponse  = Right(BalanceRequestPending(balanceId))
+  val tryAgainResponse = Right(BalanceRequestPendingExpired(balanceId))
 
-  val mockGuaranteeBalanceConnector: GuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
-  val actorSystem: ActorSystem                                 = injector.instanceOf[ActorSystem]
-  val service                                                  = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector)
+  val actorSystem: ActorSystem = injector.instanceOf[ActorSystem]
 
   implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
 
-  override def beforeEach(): Unit = {
-    super.beforeEach()
-    reset(mockGuaranteeBalanceConnector)
-  }
+  "pollForResponse" - {
+    "return successResponse first time with a single call" in {
+      when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any())).thenReturn(Future.successful(successResponse))
 
-  "return the relevant mocked response from getGuaranteeBalance" in {
+      val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector)
 
-    when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any())).thenReturn(Future.successful(successResponse))
+      val result = service.pollForGuaranteeBalance(balanceId, 1 seconds, 5 seconds)
+      whenReady(result) {
+        _ mustEqual successResponse
+      }
 
-    val result = service.queryPendingBalance(balanceId)
-    whenReady(result) {
-      _ mustEqual successResponse
+      verify(mockGuaranteeBalanceConnector, times(1)).queryPendingBalance(any())(any())
+    }
+
+    "return tryAgainResponse first time with a single call" in {
+      when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any())).thenReturn(Future.successful(tryAgainResponse))
+
+      val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector)
+
+      val result = service.pollForGuaranteeBalance(balanceId, 1 seconds, 5 seconds)
+      whenReady(result) {
+        _ mustEqual tryAgainResponse
+      }
+
+      verify(mockGuaranteeBalanceConnector, times(1)).queryPendingBalance(any())(any())
+    }
+
+    "first return a PendingResponse then a successResponse" in {
+      when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any()))
+        .thenReturn(Future.successful(pendingResponse))
+        .thenReturn(Future.successful(successResponse))
+
+      val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector)
+      val result  = service.pollForGuaranteeBalance(balanceId, 1 seconds, 5 seconds)
+
+      whenReady(result) {
+        _ mustEqual successResponse
+      }
+
+      verify(mockGuaranteeBalanceConnector, times(2)).queryPendingBalance(any())(any())
+    }
+
+    "return PendingResponse twice then a tryAgainResponse" in {
+      when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any()))
+        .thenReturn(Future.successful(pendingResponse))
+        .thenReturn(Future.successful(pendingResponse))
+        .thenReturn(Future.successful(tryAgainResponse))
+
+      val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector)
+
+      val result = service.pollForGuaranteeBalance(balanceId, 1 seconds, 5 seconds)
+
+      whenReady(result) {
+        _ mustEqual tryAgainResponse
+      }
+
+      verify(mockGuaranteeBalanceConnector, times(3)).queryPendingBalance(any())(any())
+    }
+
+    "keep returning pending until we time out, then return that status" in {
+      when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any()))
+        .thenReturn(Future.successful(pendingResponse))
+
+      val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector)
+
+      val result = service.pollForGuaranteeBalance(balanceId, 3 seconds, 5 seconds)
+
+      whenReady(result) {
+        _ mustEqual pendingResponse
+      }
+
+      //First call after 0 seconds
+      //Second after 3 seconds
+      //Third after 6 seoncds -- Timeout here
+      verify(mockGuaranteeBalanceConnector, times(3)).queryPendingBalance(any())(any())
     }
   }
 
