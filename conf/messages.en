@@ -102,7 +102,7 @@ detailsDontMatch.heading = Your details do not match our records
 detailsDontMatch.youMust = You must
 detailsDontMatch.checkYourAnswers = check your answers and try again
 
-rateLimit.title = You must try again
-rateLimit.heading = You must try again
+rateLimit.title = You can try again
+rateLimit.heading = You can try again
 rateLimit.paragraph = We were unable to get your details. You can try again and this may take up to 60 seconds.
 rateLimit.button = Try again
