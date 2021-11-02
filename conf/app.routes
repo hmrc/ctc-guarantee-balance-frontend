@@ -5,18 +5,9 @@ GET        /assets/*file                            controllers.Assets.versioned
 GET        /error/cannot-use-service-no-eori        controllers.UnauthorisedController.onPageLoad()
 GET        /keep-alive                              controllers.KeepAliveController.keepAlive()
 
-GET        /                                        controllers.RedirectController.onPageLoad()
-GET        /index                                   controllers.IndexController.onPageLoad()
-GET        /what-do-you-want-to-do                  controllers.WhatDoYouWantToDoController.onPageLoad()
-
 GET        /this-service-has-been-reset             controllers.SessionExpiredController.onPageLoad()
 
-GET        /testPage                                controllers.TestPageController.onPageLoad(mode: Mode = NormalMode)
-POST       /testPage                                controllers.TestPageController.onSubmit(mode: Mode = NormalMode)
-GET        /changeTestPage                          controllers.TestPageController.onPageLoad(mode: Mode = CheckMode)
-POST       /changeTestPage                          controllers.TestPageController.onSubmit(mode: Mode = CheckMode)
-
-GET        /start                                   controllers.StartController.start(referral: Referral ?= GovUK)
+GET        /start                                   controllers.StartController.start(referral: Referral ?= Referral.default)
 
 GET        /eori-number                             controllers.EoriNumberController.onPageLoad(mode: Mode = NormalMode)
 POST       /eori-number                             controllers.EoriNumberController.onSubmit(mode: Mode = NormalMode)

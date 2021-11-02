@@ -28,7 +28,7 @@ class Navigator @Inject() () {
 
   private val normalRoutes: Page => UserAnswers => Call = {
     commonRoutes(NormalMode) orElse {
-      case _ => _ => routes.IndexController.onPageLoad()
+      case _ => ua => routes.StartController.start(ua.get(ReferralPage).getOrElse(Referral.default))
     }
   }
 
