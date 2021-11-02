@@ -17,14 +17,16 @@
 package controllers
 
 import config.FrontendAppConfig
+import connectors.GuaranteeBalanceConnector
 import controllers.actions._
-import models.backend.BalanceRequestSuccess
-import models.values.CurrencyCode
+import models.backend.{BalanceRequestFunctionalError, BalanceRequestPending, BalanceRequestResponse, BalanceRequestSuccess}
+import models.requests.BalanceRequest
+import models.values.{AccessCode, BalanceId, CurrencyCode, GuaranteeReference, TaxIdentifier}
 import models.{CheckMode, UserAnswers}
-import pages.{BalancePage, GuaranteeReferenceNumberPage}
+import pages.{AccessCodePage, BalancePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import renderer.Renderer
 import repositories.SessionRepository
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
@@ -32,8 +34,8 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 import utils.CheckYourAnswersHelper
 import viewModels.Section
-
 import javax.inject.Inject
+
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -46,6 +48,7 @@ class CheckYourAnswersController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   renderer: Renderer,
   mongoLockRepository: MongoLockRepository,
+  guaranteeBalanceConnector: GuaranteeBalanceConnector,
   config: FrontendAppConfig
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
@@ -70,11 +73,33 @@ class CheckYourAnswersController @Inject() (
           checkRateLimit(request.eoriNumber, guaranteedReferenceNumber).flatMap {
             lockFree =>
               if (lockFree) {
-                val balance = BalanceRequestSuccess(8500, CurrencyCode("GBP")) // TODO - retrieve actual balance
-                for {
-                  updatedAnswers <- Future.fromTry(request.userAnswers.set(BalancePage, balance.formatForDisplay))
-                  _              <- sessionRepository.set(updatedAnswers)
-                } yield Redirect(routes.BalanceConfirmationController.onPageLoad())
+
+                val taxIdentifier: String = request.userAnswers.get(EoriNumberPage).getOrElse("") //toDO confirm that this is Eori!!!
+                val accessCode: String    = request.userAnswers.get(AccessCodePage).getOrElse("")
+
+                if (taxIdentifier.isEmpty || accessCode.isEmpty) {
+                  Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
+                } else {
+
+                  guaranteeBalanceConnector
+                    .submitBalanceRequest(BalanceRequest(TaxIdentifier(taxIdentifier), GuaranteeReference(guaranteedReferenceNumber), AccessCode(accessCode)))
+                    .flatMap {
+                      case Right(BalanceRequestSuccess(balance: BigDecimal, currency: CurrencyCode)) =>
+                        val thisBalance = BalanceRequestSuccess(balance, currency)
+                        for {
+                          updatedAnswers <- Future.fromTry(request.userAnswers.set(BalancePage, thisBalance.formatForDisplay))
+                          _              <- sessionRepository.set(updatedAnswers)
+                        } yield Redirect(routes.BalanceConfirmationController.onPageLoad())
+                      case Right(BalanceRequestPending(balanceId)) => ??? //TODO update once logic in for wait pages
+                      //                      Future.successful(Redirect(routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId)))
+                      case Right(BalanceRequestFunctionalError(_)) => ???
+                      //                      Future.successful(Redirect(routes.DetailsDontMatchController.onPageLoad()))
+                      case _ => ??? //todo update once logic in for try again pages
+                      //                      Future.successful(Redirect(routes.TryGuaranteeBalanceAgainController.onPageLoad(balanceId)))
+                    }
+
+                }
+
               } else {
                 Future.successful(Redirect(routes.RateLimitController.onPageLoad()))
               }
