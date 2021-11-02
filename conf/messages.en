@@ -76,11 +76,6 @@ waitOnGuaranteeBalance.title = We are trying to get your guarantee balance
 waitOnGuaranteeBalance.heading = We are trying to get your guarantee balance
 waitOnGuaranteeBalance.paragraph = This may take up to {0} seconds
 
-tryGuaranteeBalanceAgain.title = We have not been able to get your guarantee balance
-tryGuaranteeBalanceAgain.heading = We have not been able to get your guarantee balance
-tryGuaranteeBalanceAgain.checkDetails = You can
-tryGuaranteeBalanceAgain.checkDetails.link = check that your details are correct
-
 guaranteeReferenceNumber.title = What is the guarantee reference number?
 guaranteeReferenceNumber.heading = What is the guarantee reference number?
 guaranteeReferenceNumber.checkYourAnswersLabel = Guarantee reference number

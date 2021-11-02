@@ -18,18 +18,15 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
+import handlers.GuaranteeBalanceResponseHandler
 import javax.inject.Inject
-import models.backend.{BalanceRequestNotMatched, BalanceRequestPending, BalanceRequestPendingExpired, BalanceRequestResponse, BalanceRequestSuccess}
-import models.requests.DataRequest
+import models.backend.BalanceRequestResponse
 import models.values.BalanceId
-import pages.BalancePage
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import renderer.Renderer
-import repositories.SessionRepository
 import services.GuaranteeBalanceService
-import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import scala.concurrent.duration.DurationInt
@@ -38,7 +35,7 @@ import scala.language.postfixOps
 
 class WaitOnGuaranteeBalanceController @Inject() (
   balanceService: GuaranteeBalanceService,
-  sessionRepository: SessionRepository,
+  responeHandler: GuaranteeBalanceResponseHandler,
   val config: FrontendAppConfig,
   identify: IdentifierAction,
   val controllerComponents: MessagesControllerComponents,
@@ -60,30 +57,12 @@ class WaitOnGuaranteeBalanceController @Inject() (
     implicit request =>
       val response =
         balanceService.pollForGuaranteeBalance(balanceId, appConfig.guaranteeBalanceDelayInSecond seconds, appConfig.guaranteeBalanceMaxTimeInSecond seconds)
-      response.flatMap(processResponse(_, displayWaitPage))
+
+      response flatMap {
+        case Right(validResponse: BalanceRequestResponse) => responeHandler.processResponse(validResponse, displayWaitPage)
+        case _                                            => renderTechnicalDifficultiesPage
+      }
   }
-
-  def processResponse(response: Either[HttpResponse, BalanceRequestResponse], processPending: BalanceId => Future[Result])(implicit
-    request: DataRequest[_]
-  ): Future[Result] =
-    response match {
-      case Right(BalanceRequestPending(balanceId)) =>
-        processPending(balanceId)
-      case Right(balanceRequest: BalanceRequestSuccess) =>
-        processSuccessResponse(balanceRequest)
-      case Right(BalanceRequestNotMatched) =>
-        Future.successful(Redirect(routes.DetailsDontMatchController.onPageLoad()))
-      case Right(BalanceRequestPendingExpired(balanceId)) =>
-        Future.successful(Redirect(routes.TryGuaranteeBalanceAgainController.onPageLoad(balanceId)))
-      case _ =>
-        renderTechnicalDifficultiesPage
-    }
-
-  private def processSuccessResponse(balanceRequest: BalanceRequestSuccess)(implicit request: DataRequest[_]): Future[Result] =
-    for {
-      updatedAnswers <- Future.fromTry(request.userAnswers.set(BalancePage, balanceRequest.formatForDisplay))
-      _              <- sessionRepository.set(updatedAnswers)
-    } yield Redirect(routes.BalanceConfirmationController.onPageLoad())
 
   private def displayWaitPage(balanceId: BalanceId)(implicit request: Request[_]): Future[Result] = {
     val json = Json.obj(
