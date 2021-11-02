@@ -24,7 +24,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{BalancePage, GuaranteeReferenceNumberPage}
+import pages.{AccessCodePage, BalancePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
@@ -67,7 +67,16 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
     "must redirect to Balance Confirmation for a POST if no lock in mongo repository for that user and GRN" in {
 
-      val userAnswers = emptyUserAnswers.set(GuaranteeReferenceNumberPage, grn).success.value
+      val userAnswers = emptyUserAnswers
+        .set(GuaranteeReferenceNumberPage, grn)
+        .success
+        .value
+        .set(AccessCodePage, "1111")
+        .success
+        .value
+        .set(EoriNumberPage, "GB1234567")
+        .success
+        .value
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
       val request     = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
       when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
