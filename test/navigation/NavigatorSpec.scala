@@ -64,15 +64,29 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
         }
       }
 
-      "must go from a page that doesn't exist in the route map to Index" in {
+      "must go from a page that doesn't exist in the route map to Start" - {
 
         case object UnknownPage extends Page
 
-        forAll(arbitrary[UserAnswers]) {
-          answers =>
-            navigator
-              .nextPage(UnknownPage, NormalMode, answers)
-              .mustBe(routes.IndexController.onPageLoad())
+        "when referral exists in user answers" in {
+
+          forAll(arbitrary[UserAnswers], arbitrary[Referral]) {
+            (answers, referral) =>
+              val updatedAnswers = answers.set(ReferralPage, referral).success.value
+              navigator
+                .nextPage(UnknownPage, mode, updatedAnswers)
+                .mustBe(routes.StartController.start(referral))
+          }
+        }
+
+        "when referral doesn't exist in user answers" in {
+
+          forAll(arbitrary[UserAnswers]) {
+            answers =>
+              navigator
+                .nextPage(UnknownPage, mode, answers)
+                .mustBe(routes.StartController.start())
+          }
         }
       }
     }
@@ -118,7 +132,7 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
         forAll(arbitrary[UserAnswers]) {
           answers =>
             navigator
-              .nextPage(UnknownPage, CheckMode, answers)
+              .nextPage(UnknownPage, mode, answers)
               .mustBe(routes.CheckYourAnswersController.onPageLoad())
         }
       }

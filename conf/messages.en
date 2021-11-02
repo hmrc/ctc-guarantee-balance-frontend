@@ -62,12 +62,6 @@ technicalDifficulties.savedAnswers = We have not saved your answers.
 technicalDifficulties.contact = You can
 technicalDifficulties.contact.link = contact the New Computerised Transit System helpdesk if you need to speak to someone about your guarantee balance (opens in a new tab)
 
-testPage.title = testPage
-testPage.heading = testPage
-testPage.checkYourAnswersLabel = testPage
-testPage.error.required = Enter testPage
-testPage.error.length = TestPage must be 100 characters or less
-
 eoriNumber.title = What is your EORI number?
 eoriNumber.heading = What is your EORI number?
 eoriNumber.checkYourAnswersLabel = EORI number
