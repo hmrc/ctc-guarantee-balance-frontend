@@ -23,9 +23,11 @@ import models.values.BalanceId
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
+import pages.GuaranteeReferenceNumberPage
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.twirl.api.Html
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 
 import scala.concurrent.Future
 
@@ -52,6 +54,30 @@ class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaul
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
 
       templateCaptor.getValue mustBe "tryGuaranteeBalanceAgain.njk"
+    }
+
+    "must relesae lock if already owned by" in {
+
+      val userAnswers = emptyUserAnswers.set(GuaranteeReferenceNumberPage, "grn").success.value
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      val request     = FakeRequest(GET, routes.TryGuaranteeBalanceAgainController.onPageLoad(BalanceId(expectedUuid)).url)
+
+      when(mockRenderer.render(any(), any())(any()))
+        .thenReturn(Future.successful(Html("")))
+
+      val result = route(application, request).value
+
+      status(result) mustEqual OK
+
+      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+
+      verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
+
+      templateCaptor.getValue mustBe "tryGuaranteeBalanceAgain.njk"
+
+      val expectedLockId = (userAnswers.id + "grn".trim.toLowerCase).hashCode.toString
+      verify(mockMongoLockRepository).releaseLock(eqTo(expectedLockId), eqTo(userAnswers.id))
+
     }
   }
 }
