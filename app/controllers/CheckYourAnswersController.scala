@@ -73,29 +73,32 @@ class CheckYourAnswersController @Inject() (
           checkRateLimit(request.eoriNumber, guaranteedReferenceNumber).flatMap {
             lockFree =>
               if (lockFree) {
-                val taxIdentifier: String = request.userAnswers.get(EoriNumberPage).getOrElse("")
+
+                val taxIdentifier: String = request.userAnswers.get(EoriNumberPage).getOrElse("") //toDO confirm that this is Eori!!!
                 val accessCode: String    = request.userAnswers.get(AccessCodePage).getOrElse("")
 
                 if (taxIdentifier.isEmpty || accessCode.isEmpty) {
                   Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
-                }
+                } else {
 
-                guaranteeBalanceConnector
-                  .submitBalanceRequest(BalanceRequest(TaxIdentifier(taxIdentifier), GuaranteeReference(guaranteedReferenceNumber), AccessCode(accessCode)))
-                  .flatMap {
-                    case Right(BalanceRequestSuccess(balance: BigDecimal, currency: CurrencyCode)) =>
-                      val thisBalance = BalanceRequestSuccess(balance, currency)
-                      for {
-                        updatedAnswers <- Future.fromTry(request.userAnswers.set(BalancePage, thisBalance.formatForDisplay))
-                        _              <- sessionRepository.set(updatedAnswers)
-                      } yield Redirect(routes.BalanceConfirmationController.onPageLoad())
-                    case Right(BalanceRequestPending(balanceId)) => ??? //TODO update once logic in for wait pages
-//                      Future.successful(Redirect(routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId)))
-                    case Right(BalanceRequestFunctionalError(_)) => ???
-//                      Future.successful(Redirect(routes.DetailsDontMatchController.onPageLoad()))
-                    case _ => ???
-//                      Future.successful(Redirect(routes.TryGuaranteeBalanceAgainController.onPageLoad(balanceId)))
-                  }
+                  guaranteeBalanceConnector
+                    .submitBalanceRequest(BalanceRequest(TaxIdentifier(taxIdentifier), GuaranteeReference(guaranteedReferenceNumber), AccessCode(accessCode)))
+                    .flatMap {
+                      case Right(BalanceRequestSuccess(balance: BigDecimal, currency: CurrencyCode)) =>
+                        val thisBalance = BalanceRequestSuccess(balance, currency)
+                        for {
+                          updatedAnswers <- Future.fromTry(request.userAnswers.set(BalancePage, thisBalance.formatForDisplay))
+                          _              <- sessionRepository.set(updatedAnswers)
+                        } yield Redirect(routes.BalanceConfirmationController.onPageLoad())
+                      case Right(BalanceRequestPending(balanceId)) => ??? //TODO update once logic in for wait pages
+                      //                      Future.successful(Redirect(routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId)))
+                      case Right(BalanceRequestFunctionalError(_)) => ???
+                      //                      Future.successful(Redirect(routes.DetailsDontMatchController.onPageLoad()))
+                      case _ => ??? //todo update once logic in for try again pages
+                      //                      Future.successful(Redirect(routes.TryGuaranteeBalanceAgainController.onPageLoad(balanceId)))
+                    }
+
+                }
 
               } else {
                 Future.successful(Redirect(routes.RateLimitController.onPageLoad()))
