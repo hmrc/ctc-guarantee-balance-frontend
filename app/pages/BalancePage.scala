@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package models
+package pages
 
-class Balance(balance: Int) {
+import play.api.libs.json.JsPath
 
-  private val formatter         = java.text.NumberFormat.getIntegerInstance
-  override def toString: String = s"£${formatter.format(balance)}"
-}
+case object BalancePage extends QuestionPage[String] {
 
-object Balance {
-  def apply(balance: Int) = new Balance(balance)
+  override def path: JsPath = JsPath \ toString
+
+  override def toString: String = "balance"
 }

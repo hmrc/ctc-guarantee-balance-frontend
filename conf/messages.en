@@ -108,6 +108,11 @@ detailsDontMatch.heading = Your details do not match our records
 detailsDontMatch.youMust = You must
 detailsDontMatch.checkYourAnswers = check your answers and try again
 
+rateLimit.title = You must try again
+rateLimit.heading = You must try again
+rateLimit.paragraph = We were unable to get your details. You can try again and this may take up to 60 seconds.
+rateLimit.button = Try again
+
 tryAgain.title = We have not been able to get your guarantee balance
 tryAgain.heading = We have not been able to get your guarantee balance
 tryAgain.paragraph1 = You can

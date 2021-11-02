@@ -17,32 +17,30 @@
 package controllers
 
 import controllers.actions._
-import javax.inject.Inject
+import models.NormalMode
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class DetailsDontMatchController @Inject() (
+class RateLimitController @Inject() (
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
-  requireData: DataRequiredAction,
   val controllerComponents: MessagesControllerComponents,
   renderer: Renderer
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
-      val json = Json.obj(
-        "checkYourAnswersUrl" -> routes.CheckYourAnswersController.onPageLoad().url
-      )
+      val json = Json.obj("nextPageUrl" -> controllers.routes.EoriNumberController.onPageLoad(NormalMode).url)
 
-      renderer.render("detailsDontMatch.njk", json).map(Ok(_))
+      renderer.render("rateLimit.njk", json).map(Ok(_))
   }
 }

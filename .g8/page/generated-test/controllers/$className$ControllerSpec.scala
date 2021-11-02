@@ -3,7 +3,7 @@ package controllers
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import base.SpecBase
 import org.mockito.ArgumentCaptor
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.FakeRequest
@@ -23,7 +23,7 @@ class $className$ControllerSpec extends SpecBase with MockitoSugar with AppWithD
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
       val request = FakeRequest(GET, routes.$className$Controller.onPageLoad().url)
-      val templateCaptor = ArgumentCaptor.forClass(classOf[String])
+      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
 
       val result = route(application, request).value
 

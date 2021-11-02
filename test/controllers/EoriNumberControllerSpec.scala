@@ -22,7 +22,7 @@ import matchers.JsonMatchers
 import models.{Mode, NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentCaptor
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.mockito.MockitoSugar
@@ -53,10 +53,10 @@ class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksS
         mode =>
           beforeEach()
 
-          val application    = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-          val request        = FakeRequest(GET, eoriNumberRoute(mode))
-          val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-          val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
+          val application                            = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+          val request                                = FakeRequest(GET, eoriNumberRoute(mode))
+          val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+          val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
 
           val result = route(application, request).value
 
@@ -84,10 +84,10 @@ class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksS
 
           val userAnswers = UserAnswers(userAnswersId).set(EoriNumberPage, validAnswer).success.value
 
-          val application    = applicationBuilder(userAnswers = Some(userAnswers)).build()
-          val request        = FakeRequest(GET, eoriNumberRoute(mode))
-          val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-          val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
+          val application                            = applicationBuilder(userAnswers = Some(userAnswers)).build()
+          val request                                = FakeRequest(GET, eoriNumberRoute(mode))
+          val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+          val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
 
           val result = route(application, request).value
 
@@ -127,7 +127,7 @@ class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksS
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value mustEqual onwardRoute.url
 
-      val uaCaptor = ArgumentCaptor.forClass(classOf[UserAnswers])
+      val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
       verify(mockSessionRepository).set(uaCaptor.capture)
       uaCaptor.getValue.get(EoriNumberPage).get mustBe validAnswer
 
@@ -140,11 +140,11 @@ class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksS
         mode =>
           beforeEach()
 
-          val application    = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-          val request        = FakeRequest(POST, eoriNumberRoute(mode)).withFormUrlEncodedBody(("value", ""))
-          val boundForm      = form.bind(Map("value" -> ""))
-          val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-          val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
+          val application                            = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+          val request                                = FakeRequest(POST, eoriNumberRoute(mode)).withFormUrlEncodedBody(("value", ""))
+          val boundForm                              = form.bind(Map("value" -> ""))
+          val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+          val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
 
           val result = route(application, request).value
 

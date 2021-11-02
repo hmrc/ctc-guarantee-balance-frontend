@@ -16,11 +16,10 @@
 
 package views
 
-import base.SpecBase
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import config.FrontendAppConfig
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.Messages
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.RequestHeader
@@ -38,7 +37,7 @@ abstract class SingleViewSpec(protected val viewUnderTest: String, hasSignOutLin
     extends SpecBase
     with ViewSpecAssertions
     with NunjucksSupport
-    with GuiceOneAppPerSuite {
+    with AppWithDefaultMockFixtures {
 
   require(viewUnderTest.endsWith(".njk"), "Expected view with file extension of `.njk`")
 

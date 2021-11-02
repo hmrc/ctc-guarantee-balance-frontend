@@ -1,0 +1,35 @@
+{% extends "includes/layout.njk" %}
+
+{% from "macros/title.njk"                         import title %}
+{% from "govuk/components/button/macro.njk"        import govukButton %}
+
+{% block pageTitle %}
+  {{ title(messages("rateLimit.title")) }}
+{% endblock %}
+
+{% block mainContent %}
+
+  <div class="govuk-main-wrapper">
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+
+        <h1 class="govuk-heading-xl">
+          {{ messages("rateLimit.heading") }}
+        </h1>
+
+        <p class="govuk-body">
+          {{ messages("rateLimit.paragraph") }}
+        </p>
+
+        {{ govukButton({
+           text: messages("rateLimit.button"),
+           preventDoubleClick: true,
+           href: nextPageUrl,
+           isStartButton: false
+        }) }}
+
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

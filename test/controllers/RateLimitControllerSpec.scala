@@ -20,23 +20,29 @@ import base.{AppWithDefaultMockFixtures, SpecBase}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify}
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
-class SessionExpiredControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
+class RateLimitControllerSpec extends SpecBase with MockitoSugar with AppWithDefaultMockFixtures {
 
-  "must return OK and the correct view for a GET" in {
+  "RateLimit Controller" - {
 
-    val request = FakeRequest(GET, routes.SessionExpiredController.onPageLoad().url)
+    "return OK and the correct view for a GET" in {
 
-    val result = route(app, request).value
+      val application                            = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val request                                = FakeRequest(GET, routes.RateLimitController.onPageLoad().url)
+      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
 
-    status(result) mustEqual OK
+      val result = route(application, request).value
 
-    val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+      status(result) mustEqual OK
 
-    verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
+      verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
 
-    templateCaptor.getValue mustEqual "session-expired.njk"
+      templateCaptor.getValue mustEqual "rateLimit.njk"
+
+      application.stop()
+    }
   }
 }
