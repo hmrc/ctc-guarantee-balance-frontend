@@ -20,7 +20,6 @@ import config.FrontendAppConfig
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import handlers.GuaranteeBalanceResponseHandler
 import javax.inject.Inject
-import models.backend.BalanceRequestResponse
 import models.values.BalanceId
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json
@@ -35,18 +34,17 @@ import scala.language.postfixOps
 
 class WaitOnGuaranteeBalanceController @Inject() (
   balanceService: GuaranteeBalanceService,
-  responeHandler: GuaranteeBalanceResponseHandler,
-  val config: FrontendAppConfig,
-  identify: IdentifierAction,
   val controllerComponents: MessagesControllerComponents,
-  val renderer: Renderer,
+  responeHandler: GuaranteeBalanceResponseHandler,
+  config: FrontendAppConfig,
+  identify: IdentifierAction,
+  renderer: Renderer,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
   appConfig: FrontendAppConfig
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
-    with I18nSupport
-    with TechnicalDifficultiesPage {
+    with I18nSupport {
 
   def onPageLoad(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
@@ -57,11 +55,7 @@ class WaitOnGuaranteeBalanceController @Inject() (
     implicit request =>
       val response =
         balanceService.pollForGuaranteeBalance(balanceId, appConfig.guaranteeBalanceDelayInSecond seconds, appConfig.guaranteeBalanceMaxTimeInSecond seconds)
-
-      response flatMap {
-        case Right(validResponse: BalanceRequestResponse) => responeHandler.processResponse(validResponse, displayWaitPage)
-        case _                                            => renderTechnicalDifficultiesPage
-      }
+      response.flatMap(responeHandler.processResponse(_, displayWaitPage))
   }
 
   private def displayWaitPage(balanceId: BalanceId)(implicit request: Request[_]): Future[Result] = {
@@ -71,4 +65,5 @@ class WaitOnGuaranteeBalanceController @Inject() (
     )
     renderer.render("waitOnGuaranteeBalance.njk", json).map(Ok(_))
   }
+
 }

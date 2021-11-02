@@ -78,55 +78,6 @@ class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with JsonMatchers wi
     }
 
     "onSubmit" - {
-//      ToDo - Put Back in once we have this controller
-//      "must Redirect to the TryAgain Controller if the status is empty " in {
-//        when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId), any(), any())(any())).thenReturn(Future.successful(tryAgainResponse))
-//
-//        val request = FakeRequest(POST, routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url)
-//
-//        val application = applicationBuilder(userAnswers = Some(populatedUserAnswers)).build()
-//        val result      = route(application, request).value
-//
-//        status(result) mustEqual SEE_OTHER
-//        redirectLocation(result).value mustEqual routes.TryGuaranteeBalanceAgainController.onPageLoad(balanceId).url
-//      }
-
-      "must Redirect to the DetailsDontMatchController if the status is NoMatch " in {
-        when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId), any(), any())(any())).thenReturn(Future.successful(noMatchResponse))
-
-        val request     = FakeRequest(POST, routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url)
-        val application = applicationBuilder(userAnswers = Some(populatedUserAnswers)).build()
-        val result      = route(application, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.DetailsDontMatchController.onPageLoad().url
-      }
-
-      "must return back to the wait page if the status is still pending " in {
-        when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId), any(), any())(any())).thenReturn(Future.successful(pendingResponse))
-
-        val request = FakeRequest(POST, routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url)
-
-        val templateCaptor                       = ArgumentCaptor.forClass(classOf[String])
-        val jsonCaptor: ArgumentCaptor[JsObject] = ArgumentCaptor.forClass(classOf[JsObject])
-        val application                          = applicationBuilder(userAnswers = Some(populatedUserAnswers)).build()
-        val result                               = route(application, request).value
-
-        status(result) mustEqual OK
-
-        verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
-
-        val config = application.injector.instanceOf[FrontendAppConfig]
-
-        val expectedJson = Json.obj(
-          "balanceId"         -> balanceId,
-          "waitTimeInSeconds" -> config.guaranteeBalanceMaxTimeInSecond
-        )
-
-        jsonCaptor.getValue must containJson(expectedJson)
-        templateCaptor.getValue mustEqual "waitOnGuaranteeBalance.njk"
-      }
-
       "must Redirect to the Balance Confirmation Controller if the status is DataReturned " in {
         when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId), any(), any())(any())).thenReturn(Future.successful(successResponse))
 

@@ -27,9 +27,11 @@ POST       /change-access-code                      controllers.AccessCodeContro
 GET        /check-your-answers                      controllers.CheckYourAnswersController.onPageLoad()
 POST       /check-your-answers                      controllers.CheckYourAnswersController.onSubmit()
 
-
 GET        /:balanceId/wait-on-balance              controllers.WaitOnGuaranteeBalanceController.onPageLoad(balanceId: models.values.BalanceId)
 POST       /:balanceId/wait-on-balance              controllers.WaitOnGuaranteeBalanceController.onSubmit(balanceId: models.values.BalanceId)
+
+GET        /:balanceId/try-again                    controllers.TryGuaranteeBalanceAgainController.onPageLoad(balanceId: models.values.BalanceId)
+POST       /:balanceId/try-again                    controllers.TryGuaranteeBalanceAgainController.onSubmit(balanceId: models.values.BalanceId)
 
 GET        /rate-limit                              controllers.RateLimitController.onPageLoad()
 

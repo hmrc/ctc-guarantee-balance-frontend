@@ -16,36 +16,50 @@
 
 package handlers
 
+import config.FrontendAppConfig
 import javax.inject.Inject
-import models.backend.{BalanceRequestNotMatched, BalanceRequestPending, BalanceRequestResponse, BalanceRequestSuccess}
+import models.backend.{
+  BalanceRequestFunctionalError,
+  BalanceRequestNotMatched,
+  BalanceRequestPending,
+  BalanceRequestPendingExpired,
+  BalanceRequestResponse,
+  BalanceRequestSuccess
+}
 import models.requests.DataRequest
 import models.values.BalanceId
 import pages.BalancePage
-
-import play.api.mvc.Results.Redirect
+import play.api.libs.json.Json
+import play.api.mvc.Results.{InternalServerError, Redirect}
 import play.api.mvc._
-
+import renderer.Renderer
 import repositories.SessionRepository
+import uk.gov.hmrc.http.HttpResponse
+
 import scala.concurrent.{ExecutionContext, Future}
-import scala.language.postfixOps
 
 class GuaranteeBalanceResponseHandler @Inject() (
-  sessionRepository: SessionRepository
+  sessionRepository: SessionRepository,
+  renderer: Renderer,
+  appConfig: FrontendAppConfig
 )(implicit ec: ExecutionContext) {
 
-  def processResponse(response: BalanceRequestResponse, processPending: BalanceId => Future[Result])(implicit
+  def processResponse(response: Either[HttpResponse, BalanceRequestResponse], processPending: BalanceId => Future[Result])(implicit
     request: DataRequest[_]
   ): Future[Result] =
     response match {
-      case BalanceRequestPending(balanceId) =>
+      case Right(BalanceRequestPending(balanceId)) =>
         processPending(balanceId)
-      case successResponse: BalanceRequestSuccess =>
+      case Right(successResponse: BalanceRequestSuccess) =>
         processSuccessResponse(successResponse)
-      case BalanceRequestNotMatched =>
+      case Right(BalanceRequestNotMatched) =>
         Future.successful(Redirect(controllers.routes.DetailsDontMatchController.onPageLoad()))
-      //ToDo - Put Back in once we have this controller
-      //case BalanceRequestPendingExpired(balanceId) =>
-      //  Future.successful(Redirect(controllers.routes.TryAgainController.onPageLoad(balanceId)))
+      case Right(BalanceRequestPendingExpired(balanceId)) =>
+        Future.successful(Redirect(controllers.routes.TryGuaranteeBalanceAgainController.onPageLoad(balanceId)))
+      case Right(BalanceRequestFunctionalError(errors)) =>
+        technicalDifficulties()
+      case Left(_) =>
+        technicalDifficulties()
     }
 
   private def processSuccessResponse(balanceRequest: BalanceRequestSuccess)(implicit request: DataRequest[_]): Future[Result] =
@@ -54,4 +68,10 @@ class GuaranteeBalanceResponseHandler @Inject() (
       _              <- sessionRepository.set(updatedAnswers)
     } yield Redirect(controllers.routes.BalanceConfirmationController.onPageLoad())
 
+  private def technicalDifficulties()(implicit request: Request[_]): Future[Result] = {
+    val json = Json.obj(
+      "contactUrl" -> appConfig.nctsEnquiriesUrl
+    )
+    renderer.render("technicalDifficulties.njk", json).map(InternalServerError(_))
+  }
 }
