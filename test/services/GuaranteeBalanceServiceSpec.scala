@@ -40,6 +40,8 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
   val actorSystem: ActorSystem                                 = injector.instanceOf[ActorSystem]
   val service                                                  = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector)
 
+  implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
+
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockGuaranteeBalanceConnector)
@@ -48,8 +50,6 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
   "return the relevant mocked response from getGuaranteeBalance" in {
 
     when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any())).thenReturn(Future.successful(successResponse))
-
-    implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
 
     val result = service.queryPendingBalance(balanceId)
     whenReady(result) {

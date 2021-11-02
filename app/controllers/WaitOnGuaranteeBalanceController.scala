@@ -17,56 +17,79 @@
 package controllers
 
 import config.FrontendAppConfig
-import controllers.actions.{DataRetrievalAction, IdentifierAction}
+import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import javax.inject.Inject
-import models.backend.{BalanceRequestFunctionalError, BalanceRequestPending, BalanceRequestSuccess}
+import models.backend.{BalanceRequestNotMatched, BalanceRequestPending, BalanceRequestPendingExpired, BalanceRequestResponse, BalanceRequestSuccess}
+import models.requests.DataRequest
 import models.values.BalanceId
+import pages.BalancePage
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import renderer.Renderer
+import repositories.SessionRepository
 import services.GuaranteeBalanceService
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 
 class WaitOnGuaranteeBalanceController @Inject() (
-  cc: MessagesControllerComponents,
-  renderer: Renderer,
   balanceService: GuaranteeBalanceService,
-  config: FrontendAppConfig,
+  sessionRepository: SessionRepository,
+  val config: FrontendAppConfig,
   identify: IdentifierAction,
+  val controllerComponents: MessagesControllerComponents,
+  val renderer: Renderer,
   getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
   appConfig: FrontendAppConfig
 )(implicit ec: ExecutionContext)
-    extends FrontendController(cc)
-    with I18nSupport {
+    extends FrontendBaseController
+    with I18nSupport
+    with TechnicalDifficultiesPage {
 
-  def onPageLoad(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData).async {
+  def onPageLoad(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      val json = Json.obj(
-        "balanceId"         -> balanceId,
-        "waitTimeInSeconds" -> config.guaranteeBalanceMaxTimeInSecond
-      )
-      renderer.render("waitOnGuaranteeBalance.njk", json).map(Ok(_))
+      displayWaitPage(balanceId)
   }
 
-  def onSubmit(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData).async {
+  def onSubmit(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      balanceService
-        .pollForGuaranteeBalance(balanceId, appConfig.guaranteeBalanceDelayInSecond seconds, appConfig.guaranteeBalanceMaxTimeInSecond seconds)
-        .flatMap {
-          case Right(BalanceRequestPending(_)) =>
-            renderer.render("waitOnGuaranteeBalance.njk").map(Ok(_))
-          case Right(BalanceRequestSuccess(balance, currency)) =>
-            Future.successful(Redirect(routes.BalanceConfirmationController.onPageLoad()))
-          case Right(BalanceRequestFunctionalError(_)) =>
-            Future.successful(Redirect(routes.DetailsDontMatchController.onPageLoad()))
-          case _ =>
-            Future.successful(Redirect(routes.TryGuaranteeBalanceAgainController.onPageLoad(balanceId)))
-        }
+      val response =
+        balanceService.pollForGuaranteeBalance(balanceId, appConfig.guaranteeBalanceDelayInSecond seconds, appConfig.guaranteeBalanceMaxTimeInSecond seconds)
+      response.flatMap(processResponse(_, displayWaitPage))
   }
 
+  def processResponse(response: Either[HttpResponse, BalanceRequestResponse], processPending: BalanceId => Future[Result])(implicit
+    request: DataRequest[_]
+  ): Future[Result] =
+    response match {
+      case Right(BalanceRequestPending(balanceId)) =>
+        processPending(balanceId)
+      case Right(balanceRequest: BalanceRequestSuccess) =>
+        processSuccessResponse(balanceRequest)
+      case Right(BalanceRequestNotMatched) =>
+        Future.successful(Redirect(routes.DetailsDontMatchController.onPageLoad()))
+      case Right(BalanceRequestPendingExpired(balanceId)) =>
+        Future.successful(Redirect(routes.TryGuaranteeBalanceAgainController.onPageLoad(balanceId)))
+      case _ =>
+        renderTechnicalDifficultiesPage
+    }
+
+  private def processSuccessResponse(balanceRequest: BalanceRequestSuccess)(implicit request: DataRequest[_]): Future[Result] =
+    for {
+      updatedAnswers <- Future.fromTry(request.userAnswers.set(BalancePage, balanceRequest.formatForDisplay))
+      _              <- sessionRepository.set(updatedAnswers)
+    } yield Redirect(routes.BalanceConfirmationController.onPageLoad())
+
+  private def displayWaitPage(balanceId: BalanceId)(implicit request: Request[_]): Future[Result] = {
+    val json = Json.obj(
+      "balanceId"         -> balanceId,
+      "waitTimeInSeconds" -> config.guaranteeBalanceMaxTimeInSecond
+    )
+    renderer.render("waitOnGuaranteeBalance.njk", json).map(Ok(_))
+  }
 }
