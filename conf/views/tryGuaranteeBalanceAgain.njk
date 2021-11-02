@@ -5,7 +5,7 @@
 {% from "macros/title.njk"                         import title %}
 
 {% block pageTitle %}
-  {{ title(messages("tryAgain.title")) }}
+  {{ title(messages("tryGuaranteeBalanceAgain.title")) }}
 {% endblock %}
 
 {% block mainContent %}
@@ -14,10 +14,10 @@
 
       <h1 class="govuk-heading-xl">{{ messages("tryGuaranteeBalanceAgain.heading") }}</h1>
       <p class="govuk-body">{{ messages("tryGuaranteeBalanceAgain.checkDetails") }}
-        <a class="govuk-link" id="checkDetails-link" href="{{ routes.controllers.CheckYourAnswersController.onSubmit().url }}" target="_blank" rel="noopener noreferrer">{{ messages("tryGuaranteeBalanceAgain.checkDetails.link") }}</a>.
+        <a class="govuk-link" id="checkDetails-link" href="{{ routes.controllers.CheckYourAnswersController.onPageLoad().url }}" target="_blank" rel="noopener noreferrer">{{ messages("tryGuaranteeBalanceAgain.checkDetails.link") }}</a>.
       </p>
 
-      <form action="{{ routes.controllers.TryGuaranteeBalanceAgainController.onSubmit(balanceId).url }}" method="post">
+      <form action="{{ routes.controllers.TryGuaranteeBalanceAgainController.onSubmit().url }}" method="post">
          {{ csrf() | safe }}
 
          {{ govukButton({

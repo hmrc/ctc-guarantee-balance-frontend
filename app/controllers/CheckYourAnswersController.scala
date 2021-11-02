@@ -17,35 +17,37 @@
 package controllers
 
 import config.FrontendAppConfig
+import connectors.GuaranteeBalanceConnector
 import controllers.actions._
-import models.backend.BalanceRequestSuccess
-import models.values.CurrencyCode
+import handlers.GuaranteeBalanceResponseHandler
+import models.requests.BalanceRequest
+import models.values.{AccessCode, BalanceId, GuaranteeReference, TaxIdentifier}
 import models.{CheckMode, UserAnswers}
-import pages.{BalancePage, GuaranteeReferenceNumberPage}
+import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import renderer.Renderer
-import repositories.SessionRepository
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 import utils.CheckYourAnswersHelper
 import viewModels.Section
-
 import javax.inject.Inject
+
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{ExecutionContext, Future}
 
 class CheckYourAnswersController @Inject() (
   override val messagesApi: MessagesApi,
-  sessionRepository: SessionRepository,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
   val controllerComponents: MessagesControllerComponents,
   renderer: Renderer,
   mongoLockRepository: MongoLockRepository,
+  guaranteeBalanceConnector: GuaranteeBalanceConnector,
+  responeHandler: GuaranteeBalanceResponseHandler,
   config: FrontendAppConfig
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
@@ -70,11 +72,20 @@ class CheckYourAnswersController @Inject() (
           checkRateLimit(request.eoriNumber, guaranteedReferenceNumber).flatMap {
             lockFree =>
               if (lockFree) {
-                val balance = BalanceRequestSuccess(8500, CurrencyCode("GBP")) // TODO - retrieve actual balance
-                for {
-                  updatedAnswers <- Future.fromTry(request.userAnswers.set(BalancePage, balance.formatForDisplay))
-                  _              <- sessionRepository.set(updatedAnswers)
-                } yield Redirect(routes.BalanceConfirmationController.onPageLoad())
+
+                val taxIdentifier: String = request.userAnswers.get(EoriNumberPage).getOrElse("") //toDO confirm that this is Eori!!!
+                val accessCode: String    = request.userAnswers.get(AccessCodePage).getOrElse("")
+
+                if (taxIdentifier.isEmpty || accessCode.isEmpty) {
+                  Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
+                } else {
+
+                  val response =
+                    guaranteeBalanceConnector
+                      .submitBalanceRequest(BalanceRequest(TaxIdentifier(taxIdentifier), GuaranteeReference(guaranteedReferenceNumber), AccessCode(accessCode)))
+                  response.flatMap(responeHandler.processResponse(_, processPending))
+                }
+
               } else {
                 Future.successful(Redirect(routes.RateLimitController.onPageLoad()))
               }
@@ -100,4 +111,6 @@ class CheckYourAnswersController @Inject() (
     )
   }
 
+  private def processPending(balanceId: BalanceId): Future[Result] =
+    Future.successful(Redirect(controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId)))
 }

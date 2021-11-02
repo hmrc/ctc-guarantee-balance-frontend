@@ -16,10 +16,7 @@
 
 package controllers
 
-import java.util.UUID
-
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import models.values.BalanceId
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
@@ -33,9 +30,6 @@ import scala.concurrent.Future
 
 class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
-  val expectedUuid = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
-  val balanceId    = BalanceId(expectedUuid)
-
   "TryGuaranteeBalanceAgainController" - {
 
     "must return OK and the correct view for a GET" in {
@@ -43,7 +37,7 @@ class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaul
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
 
-      val request = FakeRequest(GET, routes.TryGuaranteeBalanceAgainController.onPageLoad(BalanceId(expectedUuid)).url)
+      val request = FakeRequest(GET, routes.TryGuaranteeBalanceAgainController.onPageLoad().url)
 
       val result = route(app, request).value
 
@@ -60,7 +54,7 @@ class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaul
 
       val userAnswers = emptyUserAnswers.set(GuaranteeReferenceNumberPage, "grn").success.value
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
-      val request     = FakeRequest(GET, routes.TryGuaranteeBalanceAgainController.onPageLoad(BalanceId(expectedUuid)).url)
+      val request     = FakeRequest(GET, routes.TryGuaranteeBalanceAgainController.onPageLoad().url)
 
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
@@ -78,6 +72,16 @@ class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaul
       val expectedLockId = (userAnswers.id + "grn".trim.toLowerCase).hashCode.toString
       verify(mockMongoLockRepository).releaseLock(eqTo(expectedLockId), eqTo(userAnswers.id))
 
+    }
+
+    "onSubmit" - {
+      "must Redirect to the Balance Confirmation Controller if the status is DataReturned " in {
+        val request = FakeRequest(POST, routes.TryGuaranteeBalanceAgainController.onSubmit().url)
+        val result  = route(app, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onSubmit().url
+      }
     }
   }
 }

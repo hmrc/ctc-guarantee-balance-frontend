@@ -17,6 +17,7 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import connectors.GuaranteeBalanceConnector
 import models.UserAnswers
 import models.backend.BalanceRequestSuccess
 import models.values.CurrencyCode
@@ -24,7 +25,8 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{BalancePage, GuaranteeReferenceNumberPage}
+import pages.{AccessCodePage, BalancePage, EoriNumberPage, GuaranteeReferenceNumberPage}
+import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
@@ -32,8 +34,11 @@ import scala.concurrent.Future
 
 class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with AppWithDefaultMockFixtures {
 
-  private val grn: String = "grn"
-  private val balance     = BalanceRequestSuccess(8500, CurrencyCode("GBP"))
+  private val grn: String    = "grn"
+  private val access: String = "access"
+  private val taxId: String  = "taxId"
+
+  private val balance = BalanceRequestSuccess(8500, CurrencyCode("GBP"))
 
   "CheckYourAnswers Controller" - {
 
@@ -67,10 +72,28 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
     "must redirect to Balance Confirmation for a POST if no lock in mongo repository for that user and GRN" in {
 
-      val userAnswers = emptyUserAnswers.set(GuaranteeReferenceNumberPage, grn).success.value
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
-      val request     = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+      val userAnswers = emptyUserAnswers
+        .set(GuaranteeReferenceNumberPage, grn)
+        .success
+        .value
+        .set(AccessCodePage, access)
+        .success
+        .value
+        .set(EoriNumberPage, taxId)
+        .success
+        .value
+
+      val mockGuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[GuaranteeBalanceConnector].toInstance(mockGuaranteeBalanceConnector))
+        .build()
+
+      val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
       when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
+
+      when(mockGuaranteeBalanceConnector.submitBalanceRequest(any())(any()))
+        .thenReturn(Future.successful(Right(balance)))
 
       val result = route(application, request).value
 
@@ -125,6 +148,33 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
       val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
       verify(mockMongoLockRepository).takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())
+
+    }
+
+    "must redirect to session timeout if no taxId or accessCode is found" in {
+      val userAnswers = emptyUserAnswers
+        .set(GuaranteeReferenceNumberPage, grn)
+        .success
+        .value
+
+      val mockGuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
+
+      val application = applicationBuilder(userAnswers = Some(userAnswers))
+        .overrides(bind[GuaranteeBalanceConnector].toInstance(mockGuaranteeBalanceConnector))
+        .build()
+
+      val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+
+      when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
+
+      when(mockGuaranteeBalanceConnector.submitBalanceRequest(any())(any()))
+        .thenReturn(Future.successful(Right(balance)))
+
+      val result = route(application, request).value
+
+      status(result) mustEqual SEE_OTHER
+
+      redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
 
     }
 

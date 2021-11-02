@@ -30,8 +30,8 @@ POST       /check-your-answers                      controllers.CheckYourAnswers
 GET        /:balanceId/wait-on-balance              controllers.WaitOnGuaranteeBalanceController.onPageLoad(balanceId: models.values.BalanceId)
 POST       /:balanceId/wait-on-balance              controllers.WaitOnGuaranteeBalanceController.onSubmit(balanceId: models.values.BalanceId)
 
-GET        /:balanceId/try-again                    controllers.TryGuaranteeBalanceAgainController.onPageLoad(balanceId: models.values.BalanceId)
-POST       /:balanceId/try-again                    controllers.TryGuaranteeBalanceAgainController.onSubmit(balanceId: models.values.BalanceId)
+GET        /try-again                               controllers.TryGuaranteeBalanceAgainController.onPageLoad()
+POST       /try-again                               controllers.TryGuaranteeBalanceAgainController.onSubmit()
 
 GET        /rate-limit                              controllers.RateLimitController.onPageLoad()
 

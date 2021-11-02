@@ -64,7 +64,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       val result: Future[Result] = handler.processResponse(tryAgainResponse, processPending)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.TryGuaranteeBalanceAgainController.onPageLoad(balanceId).url
+      redirectLocation(result).value mustEqual controllers.routes.TryGuaranteeBalanceAgainController.onPageLoad().url
     }
 
     "must Redirect to the DetailsDontMatchController if the status is NoMatch " in {
@@ -109,6 +109,6 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
     }
   }
 
-  private def processPending(balanceId: BalanceId)(implicit request: Request[_]): Future[Result] =
+  private def processPending(balanceId: BalanceId): Future[Result] =
     Future.successful(Redirect(controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId)))
 }

@@ -41,9 +41,8 @@ class TryGuaranteeBalanceAgainController @Inject() (
     extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData).async {
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
-      println(s"\n\n\n\n\n ${request.toString} \n\n\n\n\n\n")
       request.userAnswers match {
         case None =>
           Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
@@ -57,13 +56,10 @@ class TryGuaranteeBalanceAgainController @Inject() (
           }
       }
 
-      val json = Json.obj(
-        "balanceId" -> balanceId
-      )
-      renderer.render("tryGuaranteeBalanceAgain.njk", json).map(Ok(_))
+      renderer.render("tryGuaranteeBalanceAgain.njk").map(Ok(_))
   }
 
-  def onSubmit(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData) {
-    Redirect(routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId))
+  def onSubmit(): Action[AnyContent] = (identify andThen getData) {
+    Redirect(routes.CheckYourAnswersController.onSubmit())
   }
 }
