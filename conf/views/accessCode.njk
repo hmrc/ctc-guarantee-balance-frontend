@@ -32,6 +32,9 @@
           {{ csrf() | safe }}
 
           {{ govukInput({
+            hint: {
+                  text: messages('accessCode.error.hintText')
+                  },
             label: {
               text: messages('accessCode.heading'),
               isPageHeading: true,
