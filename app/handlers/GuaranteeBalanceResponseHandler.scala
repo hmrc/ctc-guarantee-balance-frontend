@@ -54,9 +54,9 @@ class GuaranteeBalanceResponseHandler @Inject() (
         processSuccessResponse(successResponse)
       case Right(BalanceRequestNotMatched) =>
         Future.successful(Redirect(controllers.routes.DetailsDontMatchController.onPageLoad()))
-      case Right(BalanceRequestPendingExpired(balanceId)) =>
-        Future.successful(Redirect(controllers.routes.TryGuaranteeBalanceAgainController.onPageLoad(balanceId)))
-      case Right(BalanceRequestFunctionalError(errors)) =>
+      case Right(BalanceRequestPendingExpired(_)) =>
+        Future.successful(Redirect(controllers.routes.TryGuaranteeBalanceAgainController.onPageLoad()))
+      case Right(BalanceRequestFunctionalError(_)) =>
         technicalDifficulties()
       case Left(_) =>
         technicalDifficulties()

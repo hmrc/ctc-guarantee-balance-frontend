@@ -18,9 +18,7 @@ package controllers
 
 import controllers.actions.{DataRetrievalAction, IdentifierAction}
 import javax.inject.Inject
-import models.values.BalanceId
 import play.api.i18n.I18nSupport
-import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -36,15 +34,12 @@ class TryGuaranteeBalanceAgainController @Inject() (
     extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData).async {
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
-      val json = Json.obj(
-        "balanceId" -> balanceId
-      )
-      renderer.render("tryGuaranteeBalanceAgain.njk", json).map(Ok(_))
+      renderer.render("tryGuaranteeBalanceAgain.njk").map(Ok(_))
   }
 
-  def onSubmit(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData) {
-    Redirect(routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId))
+  def onSubmit(): Action[AnyContent] = (identify andThen getData) {
+    Redirect(routes.CheckYourAnswersController.onSubmit())
   }
 }
