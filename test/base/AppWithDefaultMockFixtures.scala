@@ -17,7 +17,6 @@
 package base
 
 import config.FrontendAppConfig
-import connectors.GuaranteeBalanceConnector
 import controllers.actions._
 import models.UserAnswers
 import org.mockito.ArgumentMatchers.any
@@ -49,8 +48,7 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
       mockDataRetrievalAction,
       mockSessionRepository,
       mockMongoLockRepository,
-      mockGuaranteeBalanceService,
-      mockGuaranteeBalanceConnector
+      mockGuaranteeBalanceService
     )
 
     when(mockRenderer.render(any(), any())(any()))
@@ -59,12 +57,11 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
     when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
   }
 
-  val mockRenderer: NunjucksRenderer                           = mock[NunjucksRenderer]
-  val mockDataRetrievalAction: DataRetrievalAction             = mock[DataRetrievalAction]
-  val mockSessionRepository: SessionRepository                 = mock[SessionRepository]
-  val mockMongoLockRepository: MongoLockRepository             = mock[MongoLockRepository]
-  val mockGuaranteeBalanceService: GuaranteeBalanceService     = mock[GuaranteeBalanceService]
-  val mockGuaranteeBalanceConnector: GuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
+  val mockRenderer: NunjucksRenderer                       = mock[NunjucksRenderer]
+  val mockDataRetrievalAction: DataRetrievalAction         = mock[DataRetrievalAction]
+  val mockSessionRepository: SessionRepository             = mock[SessionRepository]
+  val mockMongoLockRepository: MongoLockRepository         = mock[MongoLockRepository]
+  val mockGuaranteeBalanceService: GuaranteeBalanceService = mock[GuaranteeBalanceService]
 
   final override def fakeApplication(): Application =
     applicationBuilder()
@@ -80,8 +77,7 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
         bind[MessagesApi].toInstance(Helpers.stubMessagesApi()),
         bind[SessionRepository].toInstance(mockSessionRepository),
         bind[MongoLockRepository].toInstance(mockMongoLockRepository),
-        bind[GuaranteeBalanceService].toInstance(mockGuaranteeBalanceService),
-        bind[GuaranteeBalanceConnector].toInstance(mockGuaranteeBalanceConnector)
+        bind[GuaranteeBalanceService].toInstance(mockGuaranteeBalanceService)
       )
 
   def injector: Injector = app.injector

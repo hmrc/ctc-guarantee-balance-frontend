@@ -24,6 +24,8 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
 import java.util.UUID
+
+import connectors.GuaranteeBalanceConnector
 import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
 
 import scala.concurrent.ExecutionContext.Implicits._
@@ -45,6 +47,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
 
   "pollForResponse" - {
     "return successResponse first time with a single call" in {
+      val mockGuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
       when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any())).thenReturn(Future.successful(successResponse))
 
       val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector)
@@ -58,6 +61,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
     }
 
     "return tryAgainResponse first time with a single call" in {
+      val mockGuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
       when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any())).thenReturn(Future.successful(tryAgainResponse))
 
       val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector)
@@ -71,6 +75,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
     }
 
     "first return a PendingResponse then a successResponse" in {
+      val mockGuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
       when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any()))
         .thenReturn(Future.successful(pendingResponse))
         .thenReturn(Future.successful(successResponse))
@@ -86,6 +91,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
     }
 
     "return PendingResponse twice then a tryAgainResponse" in {
+      val mockGuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
       when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any()))
         .thenReturn(Future.successful(pendingResponse))
         .thenReturn(Future.successful(pendingResponse))
@@ -103,6 +109,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
     }
 
     "keep returning pending until we time out, then return that status" in {
+      val mockGuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
       when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any()))
         .thenReturn(Future.successful(pendingResponse))
 

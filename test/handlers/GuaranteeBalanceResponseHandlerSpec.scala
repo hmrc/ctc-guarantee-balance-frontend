@@ -109,6 +109,6 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
     }
   }
 
-  private def processPending(balanceId: BalanceId)(implicit request: Request[_]): Future[Result] =
+  private def processPending(balanceId: BalanceId): Future[Result] =
     Future.successful(Redirect(controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId)))
 }

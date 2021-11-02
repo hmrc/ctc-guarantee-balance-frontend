@@ -19,16 +19,15 @@ package controllers
 import config.FrontendAppConfig
 import connectors.GuaranteeBalanceConnector
 import controllers.actions._
-import models.backend.{BalanceRequestFunctionalError, BalanceRequestPending, BalanceRequestResponse, BalanceRequestSuccess}
+import handlers.GuaranteeBalanceResponseHandler
 import models.requests.BalanceRequest
-import models.values.{AccessCode, BalanceId, CurrencyCode, GuaranteeReference, TaxIdentifier}
+import models.values.{AccessCode, BalanceId, GuaranteeReference, TaxIdentifier}
 import models.{CheckMode, UserAnswers}
-import pages.{AccessCodePage, BalancePage, EoriNumberPage, GuaranteeReferenceNumberPage}
+import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import renderer.Renderer
-import repositories.SessionRepository
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
@@ -41,7 +40,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class CheckYourAnswersController @Inject() (
   override val messagesApi: MessagesApi,
-  sessionRepository: SessionRepository,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
@@ -49,6 +47,7 @@ class CheckYourAnswersController @Inject() (
   renderer: Renderer,
   mongoLockRepository: MongoLockRepository,
   guaranteeBalanceConnector: GuaranteeBalanceConnector,
+  responeHandler: GuaranteeBalanceResponseHandler,
   config: FrontendAppConfig
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
@@ -81,23 +80,10 @@ class CheckYourAnswersController @Inject() (
                   Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
                 } else {
 
-                  guaranteeBalanceConnector
-                    .submitBalanceRequest(BalanceRequest(TaxIdentifier(taxIdentifier), GuaranteeReference(guaranteedReferenceNumber), AccessCode(accessCode)))
-                    .flatMap {
-                      case Right(BalanceRequestSuccess(balance: BigDecimal, currency: CurrencyCode)) =>
-                        val thisBalance = BalanceRequestSuccess(balance, currency)
-                        for {
-                          updatedAnswers <- Future.fromTry(request.userAnswers.set(BalancePage, thisBalance.formatForDisplay))
-                          _              <- sessionRepository.set(updatedAnswers)
-                        } yield Redirect(routes.BalanceConfirmationController.onPageLoad())
-                      case Right(BalanceRequestPending(balanceId)) => ??? //TODO update once logic in for wait pages
-                      //                      Future.successful(Redirect(routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId)))
-                      case Right(BalanceRequestFunctionalError(_)) => ???
-                      //                      Future.successful(Redirect(routes.DetailsDontMatchController.onPageLoad()))
-                      case _ => ??? //todo update once logic in for try again pages
-                      //                      Future.successful(Redirect(routes.TryGuaranteeBalanceAgainController.onPageLoad(balanceId)))
-                    }
-
+                  val response =
+                    guaranteeBalanceConnector
+                      .submitBalanceRequest(BalanceRequest(TaxIdentifier(taxIdentifier), GuaranteeReference(guaranteedReferenceNumber), AccessCode(accessCode)))
+                  response.flatMap(responeHandler.processResponse(_, processPending))
                 }
 
               } else {
@@ -125,4 +111,6 @@ class CheckYourAnswersController @Inject() (
     )
   }
 
+  private def processPending(balanceId: BalanceId): Future[Result] =
+    Future.successful(Redirect(controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId)))
 }
