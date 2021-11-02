@@ -50,7 +50,7 @@ trait SpecBase
 
     def setOption[A](page: Settable[A], optionalValue: Option[A])(implicit writes: Writes[A]): Try[UserAnswers] =
       optionalValue match {
-        case Some(value) => userAnswers.set[A](page, value)
+        case Some(value) => userAnswers.set(page, value)
         case None        => Success(userAnswers)
       }
   }

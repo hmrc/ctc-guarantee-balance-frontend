@@ -78,7 +78,7 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
       "must redirect to start controller" - {
         "when balance or referral not found in user answers" in {
 
-          forAll(arbitrary[(Option[String], Option[Referral])] suchThat {
+          forAll(arbitrary[(Option[String], Option[Referral])] retryUntil {
             case (balance, referral) => !(balance.isDefined && referral.isDefined)
           }) {
             case (balance, referral) =>
