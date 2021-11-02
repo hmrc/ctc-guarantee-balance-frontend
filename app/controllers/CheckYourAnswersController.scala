@@ -19,14 +19,14 @@ package controllers
 import config.FrontendAppConfig
 import connectors.GuaranteeBalanceConnector
 import controllers.actions._
-import models.backend.{BalanceRequestFunctionalError, BalanceRequestPending, BalanceRequestSuccess}
+import models.backend.{BalanceRequestFunctionalError, BalanceRequestPending, BalanceRequestResponse, BalanceRequestSuccess}
 import models.requests.BalanceRequest
-import models.values.{AccessCode, CurrencyCode, GuaranteeReference, TaxIdentifier}
+import models.values.{AccessCode, BalanceId, CurrencyCode, GuaranteeReference, TaxIdentifier}
 import models.{CheckMode, UserAnswers}
 import pages.{AccessCodePage, BalancePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import renderer.Renderer
 import repositories.SessionRepository
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
@@ -34,8 +34,8 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 import utils.CheckYourAnswersHelper
 import viewModels.Section
-
 import javax.inject.Inject
+
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -106,6 +106,9 @@ class CheckYourAnswersController @Inject() (
           }
       }
   }
+
+  private def processPending(balanceId: BalanceId)(implicit request: Request[_]): Future[Result] =
+    Future.successful(Redirect(controllers.routes.SessionExpiredController.onPageLoad()))
 
   private def checkRateLimit(eoriNumber: String, guaranteedReferenceNumber: String): Future[Boolean] = {
     val lockId   = (eoriNumber + guaranteedReferenceNumber.trim.toLowerCase).hashCode.toString
