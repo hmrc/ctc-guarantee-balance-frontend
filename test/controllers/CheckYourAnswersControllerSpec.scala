@@ -20,10 +20,12 @@ import base.{AppWithDefaultMockFixtures, SpecBase}
 import connectors.GuaranteeBalanceConnector
 import models.UserAnswers
 import models.backend.BalanceRequestSuccess
-import models.values.CurrencyCode
+import models.requests.BalanceRequest
+import models.values.{AccessCode, CurrencyCode, GuaranteeReference, TaxIdentifier}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
+import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{AccessCodePage, BalancePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.inject.bind
@@ -32,6 +34,7 @@ import play.api.test.Helpers._
 
 import scala.concurrent.Future
 
+// format: off
 class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with AppWithDefaultMockFixtures {
 
   private val grn: String    = "grn"
@@ -39,6 +42,11 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
   private val taxId: String  = "taxId"
 
   private val balance = BalanceRequestSuccess(8500, CurrencyCode("GBP"))
+
+  private val baseAnswers: UserAnswers = emptyUserAnswers
+    .set(GuaranteeReferenceNumberPage, grn).success.value
+    .set(AccessCodePage, access).success.value
+    .set(EoriNumberPage, taxId).success.value
 
   "CheckYourAnswers Controller" - {
 
@@ -72,16 +80,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
     "must redirect to Balance Confirmation for a POST if no lock in mongo repository for that user and GRN" in {
 
-      val userAnswers = emptyUserAnswers
-        .set(GuaranteeReferenceNumberPage, grn)
-        .success
-        .value
-        .set(AccessCodePage, access)
-        .success
-        .value
-        .set(EoriNumberPage, taxId)
-        .success
-        .value
+      val userAnswers = baseAnswers
 
       val mockGuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
 
@@ -107,6 +106,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
       val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
       verify(mockSessionRepository).set(uaCaptor.capture)
       uaCaptor.getValue.get(BalancePage).get mustBe balance.formatForDisplay
+
+      verify(mockGuaranteeBalanceConnector).submitBalanceRequest(eqTo(BalanceRequest(TaxIdentifier(taxId), GuaranteeReference(grn), AccessCode(access))))(any())
     }
 
     "must redirect to Session Expired for a POST if no existing data is found" in {
@@ -120,22 +121,9 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
       redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
     }
 
-    "must redirect to session expired if GRN is not found in user answer " in {
-
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-      val request     = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-
-      val result = route(application, request).value
-
-      status(result) mustEqual SEE_OTHER
-
-      redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
-
-    }
-
     "must redirect to rate limit if lock in mongo repository for that user and GRN" in {
 
-      val userAnswers = emptyUserAnswers.set(GuaranteeReferenceNumberPage, grn).success.value
+      val userAnswers = baseAnswers
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
       val request     = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
       when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(false))
@@ -148,35 +136,40 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
       val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
       verify(mockMongoLockRepository).takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())
-
     }
 
-    "must redirect to session timeout if no taxId or accessCode is found" in {
-      val userAnswers = emptyUserAnswers
-        .set(GuaranteeReferenceNumberPage, grn)
-        .success
-        .value
+    "must redirect to session timeout if at least one of EORI, GRN and access code are undefined" in {
 
-      val mockGuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
+      forAll(arbitrary[(Option[String], Option[String], Option[String])].retryUntil {
+        case (eoriNumber, grn, accessCode) => !(eoriNumber.isDefined && grn.isDefined && accessCode.isDefined)
+      }) {
+        case (eoriNumber, grn, accessCode) =>
+          val userAnswers = emptyUserAnswers
+            .setOption(EoriNumberPage, eoriNumber).success.value
+            .setOption(GuaranteeReferenceNumberPage, grn).success.value
+            .setOption(AccessCodePage, accessCode).success.value
 
-      val application = applicationBuilder(userAnswers = Some(userAnswers))
-        .overrides(bind[GuaranteeBalanceConnector].toInstance(mockGuaranteeBalanceConnector))
-        .build()
+          val mockGuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
 
-      val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+          val application = applicationBuilder(userAnswers = Some(userAnswers))
+            .overrides(bind[GuaranteeBalanceConnector].toInstance(mockGuaranteeBalanceConnector))
+            .build()
 
-      when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
+          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
 
-      when(mockGuaranteeBalanceConnector.submitBalanceRequest(any())(any()))
-        .thenReturn(Future.successful(Right(balance)))
+          when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
 
-      val result = route(application, request).value
+          when(mockGuaranteeBalanceConnector.submitBalanceRequest(any())(any()))
+            .thenReturn(Future.successful(Right(balance)))
 
-      status(result) mustEqual SEE_OTHER
+          val result = route(application, request).value
 
-      redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
+          status(result) mustEqual SEE_OTHER
 
+          redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
+      }
     }
 
   }
 }
+// format: on
