@@ -18,13 +18,12 @@ package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import pages.GuaranteeReferenceNumberPage
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.twirl.api.Html
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 
 import scala.concurrent.Future
 
@@ -33,13 +32,15 @@ class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaul
   "TryGuaranteeBalanceAgainController" - {
 
     "must return OK and the correct view for a GET" in {
+      val userAnswers = emptyUserAnswers.set(GuaranteeReferenceNumberPage, "grn").success.value
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
 
       val request = FakeRequest(GET, routes.TryGuaranteeBalanceAgainController.onPageLoad().url)
 
-      val result = route(app, request).value
+      val result = route(application, request).value
 
       status(result) mustEqual OK
 
@@ -50,7 +51,7 @@ class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaul
       templateCaptor.getValue mustBe "tryGuaranteeBalanceAgain.njk"
     }
 
-    "must relesae lock if already owned by" in {
+    "must release lock" in {
 
       val userAnswers = emptyUserAnswers.set(GuaranteeReferenceNumberPage, "grn").success.value
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
@@ -75,7 +76,7 @@ class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaul
     }
 
     "onSubmit" - {
-      "must Redirect to the Balance Confirmation Controller if the status is DataReturned " in {
+      "must Redirect to the Check Your Answers Controller if the status is DataReturned " in {
         val request = FakeRequest(POST, routes.TryGuaranteeBalanceAgainController.onSubmit().url)
         val result  = route(app, request).value
 
