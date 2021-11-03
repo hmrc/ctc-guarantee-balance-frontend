@@ -34,6 +34,7 @@ import uk.gov.hmrc.viewmodels.NunjucksSupport
 import utils.CheckYourAnswersHelper
 import viewModels.Section
 import javax.inject.Inject
+import play.api.Logging
 
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{ExecutionContext, Future}
@@ -52,7 +53,8 @@ class CheckYourAnswersController @Inject() (
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
-    with NunjucksSupport {
+    with NunjucksSupport
+    with Logging {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
@@ -77,6 +79,9 @@ class CheckYourAnswersController @Inject() (
                 val accessCode: String    = request.userAnswers.get(AccessCodePage).getOrElse("")
 
                 if (taxIdentifier.isEmpty || accessCode.isEmpty) {
+                  logger.warn(
+                    s"[CheckYourAnswersController][onSubmit]CheckYourAnswers doesn't contain one of taxIdentifier: $taxIdentifier or accessCode: $accessCode"
+                  )
                   Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
                 } else {
 
