@@ -70,8 +70,8 @@ class CheckYourAnswersController @Inject() (
     implicit request =>
       (for {
         guaranteeReferenceNumber <- request.userAnswers.get(GuaranteeReferenceNumberPage)
-        taxIdentifier             <- request.userAnswers.get(EoriNumberPage)
-        accessCode                <- request.userAnswers.get(AccessCodePage)
+        taxIdentifier            <- request.userAnswers.get(EoriNumberPage)
+        accessCode               <- request.userAnswers.get(AccessCodePage)
       } yield checkRateLimit(request.eoriNumber, guaranteeReferenceNumber).flatMap {
         lockFree =>
           if (lockFree) {
