@@ -17,7 +17,7 @@
         <a class="govuk-link" id="checkDetails-link" href="{{ routes.controllers.CheckYourAnswersController.onPageLoad().url }}" target="_blank" rel="noopener noreferrer">{{ messages("tryGuaranteeBalanceAgain.checkDetails.link") }}</a>.
       </p>
 
-      <form action="{{ routes.controllers.TryGuaranteeBalanceAgainController.onSubmit().url }}" method="post">
+      <form action="{{ routes.controllers.CheckYourAnswersController.onSubmit().url }}" method="post">
          {{ csrf() | safe }}
 
          {{ govukButton({

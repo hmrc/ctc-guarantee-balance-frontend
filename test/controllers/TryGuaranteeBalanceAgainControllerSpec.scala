@@ -18,7 +18,6 @@ package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
 import pages.GuaranteeReferenceNumberPage
 import play.api.test.FakeRequest
@@ -72,16 +71,6 @@ class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaul
       val expectedLockId = (userAnswers.id + "grn".trim.toLowerCase).hashCode.toString
       verify(mockMongoLockRepository).releaseLock(eqTo(expectedLockId), eqTo(userAnswers.id))
 
-    }
-
-    "onSubmit" - {
-      "must Redirect to the Balance Confirmation Controller if the status is DataReturned " in {
-        val request = FakeRequest(POST, routes.TryGuaranteeBalanceAgainController.onSubmit().url)
-        val result  = route(app, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onSubmit().url
-      }
     }
   }
 }

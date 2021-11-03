@@ -61,7 +61,7 @@ class WaitOnGuaranteeBalanceController @Inject() (
   private def displayWaitPage(balanceId: BalanceId)(implicit request: Request[_]): Future[Result] = {
     val json = Json.obj(
       "balanceId"         -> balanceId,
-      "waitTimeInSeconds" -> config.guaranteeBalanceMaxTimeInSecond
+      "waitTimeInSeconds" -> config.guaranteeBalanceDisplayDelay
     )
     renderer.render("waitOnGuaranteeBalance.njk", json).map(Ok(_))
   }

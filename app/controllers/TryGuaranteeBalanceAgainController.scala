@@ -19,11 +19,8 @@ package controllers
 import controllers.actions.{DataRetrievalAction, IdentifierAction}
 import javax.inject.Inject
 import models.UserAnswers
-import models.requests.DataRequest
-import models.values.BalanceId
 import pages.GuaranteeReferenceNumberPage
 import play.api.i18n.I18nSupport
-import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
@@ -57,9 +54,5 @@ class TryGuaranteeBalanceAgainController @Inject() (
       }
 
       renderer.render("tryGuaranteeBalanceAgain.njk").map(Ok(_))
-  }
-
-  def onSubmit(): Action[AnyContent] = (identify andThen getData) {
-    Redirect(routes.CheckYourAnswersController.onSubmit())
   }
 }
