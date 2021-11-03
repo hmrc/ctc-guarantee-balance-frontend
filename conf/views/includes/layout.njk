@@ -1,8 +1,8 @@
 {% extends "govuk/template.njk" %}
-{% from "macros/headingCaption.njk"               import headingCaption %}
-{% from "hmrc/components/header/macro.njk" import hmrcHeader %}
-{% from "hmrc/components/timeout-dialog/macro.njk"     import hmrcTimeoutDialog %}
-{% from "hmrc/components/report-technical-issue/macro.njk"  import hmrcReportTechnicalIssue %}
+{% from "macros/headingCaption.njk"                                 import headingCaption %}
+{% from "hmrc/components/header/macro.njk"                          import hmrcHeader %}
+{% from "hmrc/components/timeout-dialog/macro.njk"                  import hmrcTimeoutDialog %}
+{% from "hmrc/components/report-technical-issue/macro.njk"          import hmrcReportTechnicalIssue %}
 {%- set assetPath = "/assets/lib/govuk-frontend/govuk/assets" -%}
 {%- set htmlLang = request.language -%}
 
@@ -12,7 +12,7 @@
     timeout: config.timeoutSeconds,
     countdown: config.countdownSeconds,
     keepAliveUrl: routes.controllers.KeepAliveController.keepAlive(arrivalId).url,
-    signOutUrl:  config.signOutUrl
+    signOutUrl: config.signOutUrl
   }) }}
   {% include "includes/head.njk" %}
 {% endblock %}
@@ -30,7 +30,7 @@
     homepageUrl: "https://www.gov.uk",
     assetsPath: "/assets",
     serviceName: messages("site.service_name"),
-    serviceUrl: config.serviceUrl,
+    serviceUrl: config.manageTransitMovementsUrl,
     phaseBanner: phaseBanner,
     userResearchBanner: userResearchBanner,
     signOutHref: config.signOutUrl if not isSignedOut
