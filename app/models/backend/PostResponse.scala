@@ -17,7 +17,7 @@
 package models.backend
 
 import models.values.BalanceId
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Json, OFormat, Reads}
 
 sealed abstract class PostResponse
 
@@ -31,7 +31,7 @@ case class PostBalanceRequestFunctionalErrorResponse(
   response: BalanceRequestFunctionalError
 ) extends PostResponse
 
-case class GetBalanceRequestResponse(request: PendingBalanceRequest)
+case class GetBalanceRequestResponse(request: PendingBalanceRequest) extends PostResponse
 
 object PostResponse {
 
@@ -43,4 +43,8 @@ object PostResponse {
 
   implicit lazy val balanceRequestFunctionalErrorFormat: OFormat[PostBalanceRequestFunctionalErrorResponse] =
     Json.format[PostBalanceRequestFunctionalErrorResponse]
+
+  implicit lazy val balanceRequestResponselFormat: Reads[GetBalanceRequestResponse] =
+    Json.reads[GetBalanceRequestResponse]
+
 }

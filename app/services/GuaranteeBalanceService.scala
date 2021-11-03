@@ -25,7 +25,8 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import akka.pattern.after
 import connectors.GuaranteeBalanceConnector
-import models.backend.{BalanceRequestPending, BalanceRequestResponse}
+import models.backend.{BalanceRequestPending, BalanceRequestPendingExpired, BalanceRequestResponse}
+import play.api.mvc.Results.Redirect
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 class GuaranteeBalanceService @Inject() (val actorSystem: ActorSystem, val connector: GuaranteeBalanceConnector)(implicit ec: ExecutionContext) {

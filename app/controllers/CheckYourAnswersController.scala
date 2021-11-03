@@ -21,9 +21,10 @@ import connectors.GuaranteeBalanceConnector
 import controllers.actions._
 import handlers.GuaranteeBalanceResponseHandler
 import models.requests.BalanceRequest
-import models.values.{AccessCode, BalanceId, GuaranteeReference, TaxIdentifier}
+import models.values._
 import models.{CheckMode, UserAnswers}
 import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
@@ -33,8 +34,8 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 import utils.CheckYourAnswersHelper
 import viewModels.Section
-import javax.inject.Inject
 
+import javax.inject.Inject
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -47,18 +48,19 @@ class CheckYourAnswersController @Inject() (
   renderer: Renderer,
   mongoLockRepository: MongoLockRepository,
   guaranteeBalanceConnector: GuaranteeBalanceConnector,
-  responeHandler: GuaranteeBalanceResponseHandler,
+  responseHandler: GuaranteeBalanceResponseHandler,
   config: FrontendAppConfig
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
-    with NunjucksSupport {
+    with NunjucksSupport
+    with Logging {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      val answers = createSections(request.userAnswers)
+      val section = createSection(request.userAnswers)
       val json = Json.obj(
-        "section" -> Json.toJson(answers)
+        "section" -> Json.toJson(section)
       )
 
       renderer.render("checkYourAnswers.njk", json).map(Ok(_))
@@ -66,40 +68,38 @@ class CheckYourAnswersController @Inject() (
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      request.userAnswers.get(GuaranteeReferenceNumberPage) match {
-        case None => Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
-        case Some(guaranteedReferenceNumber: String) =>
-          checkRateLimit(request.eoriNumber, guaranteedReferenceNumber).flatMap {
-            lockFree =>
-              if (lockFree) {
-
-                val taxIdentifier: String = request.userAnswers.get(EoriNumberPage).getOrElse("") //toDO confirm that this is Eori!!!
-                val accessCode: String    = request.userAnswers.get(AccessCodePage).getOrElse("")
-
-                if (taxIdentifier.isEmpty || accessCode.isEmpty) {
-                  Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
-                } else {
-
-                  val response =
-                    guaranteeBalanceConnector
-                      .submitBalanceRequest(BalanceRequest(TaxIdentifier(taxIdentifier), GuaranteeReference(guaranteedReferenceNumber), AccessCode(accessCode)))
-                  response.flatMap(responeHandler.processResponse(_, processPending))
-                }
-
-              } else {
-                Future.successful(Redirect(routes.RateLimitController.onPageLoad()))
-              }
+      (for {
+        guaranteeReferenceNumber <- request.userAnswers.get(GuaranteeReferenceNumberPage)
+        taxIdentifier            <- request.userAnswers.get(EoriNumberPage)
+        accessCode               <- request.userAnswers.get(AccessCodePage)
+      } yield checkRateLimit(request.eoriNumber, guaranteeReferenceNumber).flatMap {
+        lockFree =>
+          if (lockFree) {
+            guaranteeBalanceConnector
+              .submitBalanceRequest(
+                BalanceRequest(
+                  TaxIdentifier(taxIdentifier),
+                  GuaranteeReference(guaranteeReferenceNumber),
+                  AccessCode(accessCode)
+                )
+              )
+              .flatMap(responseHandler.processResponse(_, processPending))
+          } else {
+            Future.successful(Redirect(routes.RateLimitController.onPageLoad()))
           }
+      }).getOrElse {
+        logger.warn("[CheckYourAnswersController][onSubmit] Insufficient data in user answers.")
+        Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
       }
   }
 
-  private def checkRateLimit(eoriNumber: String, guaranteedReferenceNumber: String): Future[Boolean] = {
-    val lockId   = (eoriNumber + guaranteedReferenceNumber.trim.toLowerCase).hashCode.toString
+  private def checkRateLimit(eoriNumber: String, guaranteeReferenceNumber: String): Future[Boolean] = {
+    val lockId   = LockId(eoriNumber, guaranteeReferenceNumber).toString
     val duration = config.rateLimitDuration.seconds
     mongoLockRepository.takeLock(lockId, eoriNumber, duration)
   }
 
-  private def createSections(userAnswers: UserAnswers): Section = {
+  private def createSection(userAnswers: UserAnswers): Section = {
     val helper = new CheckYourAnswersHelper(userAnswers, CheckMode)
 
     Section(

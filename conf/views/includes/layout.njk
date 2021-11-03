@@ -1,40 +1,39 @@
 {% extends "govuk/template.njk" %}
-{% from "macros/headingCaption.njk"               import headingCaption %}
-{% from "macros/hmrc-header/macro.njk"            import hmrcHeader %}
-{% from "hmrc/components/timeout-dialog/macro.njk"     import hmrcTimeoutDialog %}
-{% from "hmrc/components/report-technical-issue/macro.njk"  import hmrcReportTechnicalIssue %}
+{% from "macros/headingCaption.njk"                                 import headingCaption %}
+{% from "hmrc/components/header/macro.njk"                          import hmrcHeader %}
+{% from "hmrc/components/timeout-dialog/macro.njk"                  import hmrcTimeoutDialog %}
+{% from "hmrc/components/report-technical-issue/macro.njk"          import hmrcReportTechnicalIssue %}
 {%- set assetPath = "/assets/lib/govuk-frontend/govuk/assets" -%}
 {%- set htmlLang = request.language -%}
 
 {% block head %}
   {% block pageHead %}{% endblock %}
-   {{ hmrcTimeoutDialog({
-       timeout: config.timeoutSeconds,
-       countdown: config.countdownSeconds,
-       keepAliveUrl: routes.controllers.KeepAliveController.keepAlive(arrivalId).url,
-       signOutUrl:  config.signOutUrl
-     }) }}
+  {{ hmrcTimeoutDialog({
+    timeout: config.timeoutSeconds,
+    countdown: config.countdownSeconds,
+    keepAliveUrl: routes.controllers.KeepAliveController.keepAlive(arrivalId).url,
+    signOutUrl: config.signOutUrl
+  }) }}
   {% include "includes/head.njk" %}
 {% endblock %}
 
 {% block header %}
   {% macro phaseBanner() %}
-      {{ messages("phaseBanner.1") }} <a class="govuk-link" href="{{ config.betaFeedbackUnauthenticatedUrl }}">{{ messages("phaseBanner.2") }}</a> {{ messages("phaseBanner.3") }}
+    {{ messages("phaseBanner.1") }} <a class="govuk-link" href="{{ config.betaFeedbackUnauthenticatedUrl }}">{{ messages("phaseBanner.2") }}</a> {{ messages("phaseBanner.3") }}
   {% endmacro %}
 
+  {% set phaseBanner = {tag: {text: "beta"}, html: phaseBanner()} if config.showPhaseBanner %}
+  {% set userResearchBanner = {url: config.userResearchUrl} if config.showUserResearchBanner %}
+  {% set isSignedOut = signInUrl | length %}
+
   {{ hmrcHeader({
-    homepageUrl: "/ctc-guarantee-balance",
-    serviceName: messages("site.service_name"),
-    serviceUrl: config.serviceUrl,
-    containerClasses: "govuk-width-container",
+    homepageUrl: "https://www.gov.uk",
     assetsPath: "/assets",
-    phaseBanner: {
-      show: true,
-      text: 'beta',
-      html: phaseBanner()
-    },
-    signOutHref: config.signOutUrl,
-    signInUrl: signInUrl
+    serviceName: messages("site.service_name"),
+    serviceUrl: config.manageTransitMovementsUrl,
+    phaseBanner: phaseBanner,
+    userResearchBanner: userResearchBanner,
+    signOutHref: config.signOutUrl if not isSignedOut
   }) }}
 
 {% endblock %}
@@ -45,10 +44,10 @@
 {% block content %}
   {% block mainContent %}{% endblock %}
 
- {{ hmrcReportTechnicalIssue({
-      serviceCode: config.serviceIdentifier,
-      baseUrl: config.contactHost
-    }) }}
+  {{ hmrcReportTechnicalIssue({
+    serviceCode: config.serviceIdentifier,
+    baseUrl: config.contactHost
+  }) }}
 
 {% endblock %}
 

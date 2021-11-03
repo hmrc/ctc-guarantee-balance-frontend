@@ -29,6 +29,7 @@ import models.backend.{
 import models.requests.DataRequest
 import models.values.BalanceId
 import pages.BalancePage
+import play.api.Logging
 import play.api.libs.json.Json
 import play.api.mvc.Results.{InternalServerError, Redirect}
 import play.api.mvc._
@@ -42,7 +43,8 @@ class GuaranteeBalanceResponseHandler @Inject() (
   sessionRepository: SessionRepository,
   renderer: Renderer,
   appConfig: FrontendAppConfig
-)(implicit ec: ExecutionContext) {
+)(implicit ec: ExecutionContext)
+    extends Logging {
 
   def processResponse(response: Either[HttpResponse, BalanceRequestResponse], processPending: BalanceId => Future[Result])(implicit
     request: DataRequest[_]
@@ -56,9 +58,11 @@ class GuaranteeBalanceResponseHandler @Inject() (
         Future.successful(Redirect(controllers.routes.DetailsDontMatchController.onPageLoad()))
       case Right(BalanceRequestPendingExpired(_)) =>
         Future.successful(Redirect(controllers.routes.TryGuaranteeBalanceAgainController.onPageLoad()))
-      case Right(BalanceRequestFunctionalError(_)) =>
+      case Right(BalanceRequestFunctionalError(errors)) =>
+        logger.warn(s"[GuaranteeBalanceResponseHandler][processResponse]Failed to process Response. BalanceRequestFunctionalError: $errors")
         technicalDifficulties()
-      case Left(_) =>
+      case Left(failureResponse) =>
+        logger.warn(s"[GuaranteeBalanceResponseHandler][processResponse]Failed to process Response: $failureResponse")
         technicalDifficulties()
     }
 
