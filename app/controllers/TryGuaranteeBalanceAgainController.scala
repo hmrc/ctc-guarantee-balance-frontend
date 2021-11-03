@@ -16,9 +16,8 @@
 
 package controllers
 
-import controllers.actions.{DataRetrievalAction, IdentifierAction}
-import javax.inject.Inject
-import models.UserAnswers
+import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
+import models.values.LockId
 import pages.GuaranteeReferenceNumberPage
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -26,6 +25,7 @@ import renderer.Renderer
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class TryGuaranteeBalanceAgainController @Inject() (
@@ -33,26 +33,22 @@ class TryGuaranteeBalanceAgainController @Inject() (
   renderer: Renderer,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
+  requireData: DataRequiredAction,
   mongoLockRepository: MongoLockRepository
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = (identify andThen getData).async {
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      request.userAnswers match {
-        case None =>
-          Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
-        case Some(userAnswers: UserAnswers) =>
-          userAnswers.get(GuaranteeReferenceNumberPage) match {
-            case None => Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
-            case Some(guaranteedReferenceNumber: String) =>
-              val userId = request.eoriNumber
-              val lockId = (userId + guaranteedReferenceNumber.trim.toLowerCase).hashCode.toString
-              mongoLockRepository.releaseLock(lockId, userId)
+      request.userAnswers.get(GuaranteeReferenceNumberPage) match {
+        case Some(guaranteedReferenceNumber: String) =>
+          val userId = request.eoriNumber
+          val lockId = LockId(userId, guaranteedReferenceNumber).toString
+          mongoLockRepository.releaseLock(lockId, userId).flatMap {
+            _ => renderer.render("tryGuaranteeBalanceAgain.njk").map(Ok(_))
           }
+        case None => Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
       }
-
-      renderer.render("tryGuaranteeBalanceAgain.njk").map(Ok(_))
   }
 }

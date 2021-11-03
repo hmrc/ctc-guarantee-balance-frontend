@@ -18,27 +18,25 @@ package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import org.mockito.ArgumentCaptor
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.Mockito.{times, verify}
 import pages.GuaranteeReferenceNumberPage
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.twirl.api.Html
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-
-import scala.concurrent.Future
 
 class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
+
+  private val baseAnswers = emptyUserAnswers.set(GuaranteeReferenceNumberPage, "grn").success.value
 
   "TryGuaranteeBalanceAgainController" - {
 
     "must return OK and the correct view for a GET" in {
 
-      when(mockRenderer.render(any(), any())(any()))
-        .thenReturn(Future.successful(Html("")))
+      val application = applicationBuilder(userAnswers = Some(baseAnswers)).build()
 
       val request = FakeRequest(GET, routes.TryGuaranteeBalanceAgainController.onPageLoad().url)
 
-      val result = route(app, request).value
+      val result = route(application, request).value
 
       status(result) mustEqual OK
 
@@ -49,14 +47,25 @@ class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaul
       templateCaptor.getValue mustBe "tryGuaranteeBalanceAgain.njk"
     }
 
-    "must relesae lock if already owned by" in {
+    "must redirect to session expired if GRN undefined in user answers" in {
 
-      val userAnswers = emptyUserAnswers.set(GuaranteeReferenceNumberPage, "grn").success.value
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+
+      val request = FakeRequest(GET, routes.TryGuaranteeBalanceAgainController.onPageLoad().url)
+
+      val result = route(application, request).value
+
+      status(result) mustEqual SEE_OTHER
+
+      redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
+    }
+
+    "must release lock if already owned by" in {
+
+      val userAnswers = baseAnswers
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
-      val request     = FakeRequest(GET, routes.TryGuaranteeBalanceAgainController.onPageLoad().url)
 
-      when(mockRenderer.render(any(), any())(any()))
-        .thenReturn(Future.successful(Html("")))
+      val request = FakeRequest(GET, routes.TryGuaranteeBalanceAgainController.onPageLoad().url)
 
       val result = route(application, request).value
 

@@ -21,7 +21,7 @@ import connectors.GuaranteeBalanceConnector
 import controllers.actions._
 import handlers.GuaranteeBalanceResponseHandler
 import models.requests.BalanceRequest
-import models.values.{AccessCode, BalanceId, GuaranteeReference, TaxIdentifier}
+import models.values._
 import models.{CheckMode, UserAnswers}
 import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.Logging
@@ -58,9 +58,9 @@ class CheckYourAnswersController @Inject() (
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      val answers = createSections(request.userAnswers)
+      val section = createSection(request.userAnswers)
       val json = Json.obj(
-        "section" -> Json.toJson(answers)
+        "section" -> Json.toJson(section)
       )
 
       renderer.render("checkYourAnswers.njk", json).map(Ok(_))
@@ -94,12 +94,12 @@ class CheckYourAnswersController @Inject() (
   }
 
   private def checkRateLimit(eoriNumber: String, guaranteedReferenceNumber: String): Future[Boolean] = {
-    val lockId   = (eoriNumber + guaranteedReferenceNumber.trim.toLowerCase).hashCode.toString
+    val lockId   = LockId(eoriNumber, guaranteedReferenceNumber).toString
     val duration = config.rateLimitDuration.seconds
     mongoLockRepository.takeLock(lockId, eoriNumber, duration)
   }
 
-  private def createSections(userAnswers: UserAnswers): Section = {
+  private def createSection(userAnswers: UserAnswers): Section = {
     val helper = new CheckYourAnswersHelper(userAnswers, CheckMode)
 
     Section(
