@@ -16,25 +16,17 @@
 
 package controllers
 
-import controllers.actions.{DataRetrievalAction, IdentifierAction}
-import javax.inject.Inject
-import models.UserAnswers
-import models.requests.DataRequest
-import models.values.{BalanceId, LockId}
+import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
+import models.values.LockId
 import pages.GuaranteeReferenceNumberPage
 import play.api.i18n.I18nSupport
-import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
-import scala.concurrent.{ExecutionContext, Future}
-import controllers.actions.{DataRetrievalAction, IdentifierAction}
-import models.UserAnswers
-import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
-import models.values.LockId
 import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
 
 class TryGuaranteeBalanceAgainController @Inject() (
   val controllerComponents: MessagesControllerComponents,
@@ -61,7 +53,6 @@ class TryGuaranteeBalanceAgainController @Inject() (
   }
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData) {
-    implicit request =>
-      Redirect(routes.BalanceConfirmationController.onPageLoad())
+    Redirect(routes.BalanceConfirmationController.onPageLoad())
   }
 }

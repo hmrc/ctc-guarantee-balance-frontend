@@ -16,10 +16,10 @@
 
 package models.backend
 
-import java.time.Instant
-
-import models.values.{BalanceId, EnrolmentId, GuaranteeReference, TaxIdentifier}
+import models.values.{BalanceId, GuaranteeReference, TaxIdentifier}
 import play.api.libs.json.{Json, Reads}
+
+import java.time.Instant
 
 case class PendingBalanceRequest(
   balanceId: BalanceId,

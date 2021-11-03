@@ -18,15 +18,11 @@ package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import org.mockito.ArgumentCaptor
-import org.mockito.Mockito.{times, verify, when}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify}
 import pages.GuaranteeReferenceNumberPage
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.twirl.api.Html
-
-import scala.concurrent.Future
 
 class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
