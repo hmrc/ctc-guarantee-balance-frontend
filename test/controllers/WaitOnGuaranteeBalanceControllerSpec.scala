@@ -69,7 +69,7 @@ class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with JsonMatchers wi
         val config = application.injector.instanceOf[FrontendAppConfig]
         val expectedJson = Json.obj(
           "balanceId"         -> balanceId,
-          "waitTimeInSeconds" -> config.guaranteeBalanceMaxTimeInSecond
+          "waitTimeInSeconds" -> config.guaranteeBalanceDisplayDelay
         )
 
         jsonCaptor.getValue must containJson(expectedJson)

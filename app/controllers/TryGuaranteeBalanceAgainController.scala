@@ -56,6 +56,7 @@ class TryGuaranteeBalanceAgainController @Inject() (
   }
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData) {
-    Redirect(routes.CheckYourAnswersController.onSubmit())
+    implicit request =>
+      Redirect(routes.BalanceConfirmationController.onPageLoad())
   }
 }

@@ -75,14 +75,5 @@ class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaul
 
     }
 
-    "onSubmit" - {
-      "must Redirect to the Check Your Answers Controller if the status is DataReturned " in {
-        val request = FakeRequest(POST, routes.TryGuaranteeBalanceAgainController.onSubmit().url)
-        val result  = route(app, request).value
-
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onSubmit().url
-      }
-    }
   }
 }
