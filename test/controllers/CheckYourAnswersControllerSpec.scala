@@ -20,7 +20,8 @@ import base.{AppWithDefaultMockFixtures, SpecBase}
 import connectors.GuaranteeBalanceConnector
 import models.UserAnswers
 import models.backend.BalanceRequestSuccess
-import models.values.CurrencyCode
+import models.requests.BalanceRequest
+import models.values.{AccessCode, CurrencyCode, GuaranteeReference, TaxIdentifier}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
@@ -105,6 +106,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
       val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
       verify(mockSessionRepository).set(uaCaptor.capture)
       uaCaptor.getValue.get(BalancePage).get mustBe balance.formatForDisplay
+
+      verify(mockGuaranteeBalanceConnector).submitBalanceRequest(eqTo(BalanceRequest(TaxIdentifier(taxId), GuaranteeReference(grn), AccessCode(access))))(any())
     }
 
     "must redirect to Session Expired for a POST if no existing data is found" in {
@@ -133,7 +136,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
       val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
       verify(mockMongoLockRepository).takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())
-
     }
 
     "must redirect to session timeout if at least one of EORI, GRN and access code are undefined" in {
