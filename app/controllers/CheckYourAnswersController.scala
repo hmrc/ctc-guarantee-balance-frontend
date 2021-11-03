@@ -69,17 +69,17 @@ class CheckYourAnswersController @Inject() (
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       (for {
-        guaranteedReferenceNumber <- request.userAnswers.get(GuaranteeReferenceNumberPage)
+        guaranteeReferenceNumber <- request.userAnswers.get(GuaranteeReferenceNumberPage)
         taxIdentifier             <- request.userAnswers.get(EoriNumberPage)
         accessCode                <- request.userAnswers.get(AccessCodePage)
-      } yield checkRateLimit(request.eoriNumber, guaranteedReferenceNumber).flatMap {
+      } yield checkRateLimit(request.eoriNumber, guaranteeReferenceNumber).flatMap {
         lockFree =>
           if (lockFree) {
             guaranteeBalanceConnector
               .submitBalanceRequest(
                 BalanceRequest(
                   TaxIdentifier(taxIdentifier),
-                  GuaranteeReference(guaranteedReferenceNumber),
+                  GuaranteeReference(guaranteeReferenceNumber),
                   AccessCode(accessCode)
                 )
               )
@@ -93,8 +93,8 @@ class CheckYourAnswersController @Inject() (
       }
   }
 
-  private def checkRateLimit(eoriNumber: String, guaranteedReferenceNumber: String): Future[Boolean] = {
-    val lockId   = LockId(eoriNumber, guaranteedReferenceNumber).toString
+  private def checkRateLimit(eoriNumber: String, guaranteeReferenceNumber: String): Future[Boolean] = {
+    val lockId   = LockId(eoriNumber, guaranteeReferenceNumber).toString
     val duration = config.rateLimitDuration.seconds
     mongoLockRepository.takeLock(lockId, eoriNumber, duration)
   }

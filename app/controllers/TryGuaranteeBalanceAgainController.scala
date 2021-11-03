@@ -42,9 +42,9 @@ class TryGuaranteeBalanceAgainController @Inject() (
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       request.userAnswers.get(GuaranteeReferenceNumberPage) match {
-        case Some(guaranteedReferenceNumber: String) =>
+        case Some(guaranteeReferenceNumber: String) =>
           val userId = request.eoriNumber
-          val lockId = LockId(userId, guaranteedReferenceNumber).toString
+          val lockId = LockId(userId, guaranteeReferenceNumber).toString
           mongoLockRepository.releaseLock(lockId, userId).flatMap {
             _ => renderer.render("tryGuaranteeBalanceAgain.njk").map(Ok(_))
           }
