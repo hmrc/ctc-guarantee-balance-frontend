@@ -16,15 +16,26 @@
 
 package models.values
 
-import play.api.libs.json.Format
-import play.api.libs.json.Json
+import play.api.libs.json.{Format, Json}
+import play.api.mvc.PathBindable
 
 import java.util.UUID
 
-case class BalanceId(value: UUID) extends AnyVal
+case class BalanceId(value: UUID)
 
 object BalanceId {
 
   implicit val balanceIdFormat: Format[BalanceId] =
     Json.valueFormat[BalanceId]
+
+  implicit def pathBinder(implicit uuidBinder: PathBindable[UUID]): PathBindable[BalanceId] = new PathBindable[BalanceId] {
+
+    override def bind(key: String, value: String): Either[String, BalanceId] =
+      for {
+        uuid <- uuidBinder.bind(key, value).right
+      } yield BalanceId(uuid)
+
+    override def unbind(key: String, value: BalanceId): String =
+      uuidBinder.unbind(key, value.value)
+  }
 }

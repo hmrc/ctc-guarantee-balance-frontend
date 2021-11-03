@@ -16,9 +16,6 @@
 
 package connectors
 
-import java.time.Instant
-import java.util.UUID
-
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
@@ -32,6 +29,7 @@ import play.api.http.{ContentTypes, HeaderNames, Status}
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.Instant
 import java.util.UUID
 
 class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler with ScalaCheckPropertyChecks with AppWithDefaultMockFixtures {

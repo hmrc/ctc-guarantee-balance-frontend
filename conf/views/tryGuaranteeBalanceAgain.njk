@@ -1,0 +1,29 @@
+{% extends 'error.njk' %}
+{% extends "includes/layout.njk" %}
+
+{% from "govuk/components/button/macro.njk"        import govukButton %}
+{% from "macros/title.njk"                         import title %}
+
+{% block pageTitle %}
+  {{ title(messages("tryGuaranteeBalanceAgain.title")) }}
+{% endblock %}
+
+{% block mainContent %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      <h1 class="govuk-heading-xl">{{ messages("tryGuaranteeBalanceAgain.heading") }}</h1>
+      <p class="govuk-body">{{ messages("tryGuaranteeBalanceAgain.checkDetails") }}
+        <a class="govuk-link" id="checkDetails-link" href="{{ routes.controllers.CheckYourAnswersController.onPageLoad().url }}" target="_blank" rel="noopener noreferrer">{{ messages("tryGuaranteeBalanceAgain.checkDetails.link") }}</a>.
+      </p>
+
+      <form action="{{ routes.controllers.CheckYourAnswersController.onSubmit().url }}" method="post">
+         {{ csrf() | safe }}
+
+         {{ govukButton({
+            text: messages("site.tryAgain")
+         }) }}
+      </form>
+   </div>
+  </div>
+{% endblock %}

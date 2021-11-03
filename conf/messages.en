@@ -10,6 +10,8 @@ site.edit.hidden = Change {0}
 site.no = No
 site.yes = Yes
 site.continue = Continue
+site.continueWaiting = Continue waiting
+site.tryAgain = Try again
 site.confirmAndSend = Confirm and send
 site.service_name = Check your guarantee balance
 site.textarea.char_limit = (Limit is {0} characters)
@@ -70,6 +72,10 @@ eoriNumber.error.length = Your EORI number must be 17 characters or less
 eoriNumber.error.invalidCharacters = Your EORI number must only include letters a to z without accents and numbers 0 to 9
 eoriNumber.error.invalidFormat = Enter your EORI number in the right format, like GB123456123456
 
+waitOnGuaranteeBalance.title = We are trying to get your guarantee balance
+waitOnGuaranteeBalance.heading = We are trying to get your guarantee balance
+waitOnGuaranteeBalance.paragraph = This may take up to {0} seconds
+
 guaranteeReferenceNumber.title = What is the guarantee reference number?
 guaranteeReferenceNumber.heading = What is the guarantee reference number?
 guaranteeReferenceNumber.checkYourAnswersLabel = Guarantee reference number
@@ -77,6 +83,11 @@ guaranteeReferenceNumber.paragraph = You must make sure this reference is up to 
 guaranteeReferenceNumber.error.required = Enter the guarantee reference number
 guaranteeReferenceNumber.error.length = The guarantee reference number must be 24 characters or less
 guaranteeReferenceNumber.error.invalid = The guarantee reference number must only include letters a to z without accents and numbers 0 to 9
+
+tryGuaranteeBalanceAgain.title = We have not been able to get your guarantee balance
+tryGuaranteeBalanceAgain.heading = We have not been able to get your guarantee balance
+tryGuaranteeBalanceAgain.checkDetails = You can
+tryGuaranteeBalanceAgain.checkDetails.link = check that your details are correct
 
 accessCode.title = What is the access code?
 accessCode.heading = What is the access code?
