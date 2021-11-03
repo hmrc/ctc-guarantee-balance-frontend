@@ -35,7 +35,7 @@ import scala.language.postfixOps
 class WaitOnGuaranteeBalanceController @Inject() (
   balanceService: GuaranteeBalanceService,
   val controllerComponents: MessagesControllerComponents,
-  responeHandler: GuaranteeBalanceResponseHandler,
+  responseHandler: GuaranteeBalanceResponseHandler,
   config: FrontendAppConfig,
   identify: IdentifierAction,
   renderer: Renderer,
@@ -55,7 +55,7 @@ class WaitOnGuaranteeBalanceController @Inject() (
     implicit request =>
       val response =
         balanceService.pollForGuaranteeBalance(balanceId, appConfig.guaranteeBalanceDelayInSecond seconds, appConfig.guaranteeBalanceMaxTimeInSecond seconds)
-      response.flatMap(responeHandler.processResponse(_, displayWaitPage))
+      response.flatMap(responseHandler.processResponse(_, displayWaitPage))
   }
 
   private def displayWaitPage(balanceId: BalanceId)(implicit request: Request[_]): Future[Result] = {

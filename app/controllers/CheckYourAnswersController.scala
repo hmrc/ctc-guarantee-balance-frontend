@@ -24,6 +24,7 @@ import models.requests.BalanceRequest
 import models.values.{AccessCode, BalanceId, GuaranteeReference, TaxIdentifier}
 import models.{CheckMode, UserAnswers}
 import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
@@ -33,9 +34,8 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 import utils.CheckYourAnswersHelper
 import viewModels.Section
-import javax.inject.Inject
-import play.api.Logging
 
+import javax.inject.Inject
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -48,7 +48,7 @@ class CheckYourAnswersController @Inject() (
   renderer: Renderer,
   mongoLockRepository: MongoLockRepository,
   guaranteeBalanceConnector: GuaranteeBalanceConnector,
-  responeHandler: GuaranteeBalanceResponseHandler,
+  responseHandler: GuaranteeBalanceResponseHandler,
   config: FrontendAppConfig
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
@@ -68,33 +68,28 @@ class CheckYourAnswersController @Inject() (
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      request.userAnswers.get(GuaranteeReferenceNumberPage) match {
-        case None => Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
-        case Some(guaranteedReferenceNumber: String) =>
-          checkRateLimit(request.eoriNumber, guaranteedReferenceNumber).flatMap {
-            lockFree =>
-              if (lockFree) {
-
-                val taxIdentifier: String = request.userAnswers.get(EoriNumberPage).getOrElse("") //toDO confirm that this is Eori!!!
-                val accessCode: String    = request.userAnswers.get(AccessCodePage).getOrElse("")
-
-                if (taxIdentifier.isEmpty || accessCode.isEmpty) {
-                  logger.warn(
-                    s"[CheckYourAnswersController][onSubmit]CheckYourAnswers doesn't contain one of taxIdentifier: $taxIdentifier or accessCode: $accessCode"
-                  )
-                  Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
-                } else {
-
-                  val response =
-                    guaranteeBalanceConnector
-                      .submitBalanceRequest(BalanceRequest(TaxIdentifier(taxIdentifier), GuaranteeReference(guaranteedReferenceNumber), AccessCode(accessCode)))
-                  response.flatMap(responeHandler.processResponse(_, processPending))
-                }
-
-              } else {
-                Future.successful(Redirect(routes.RateLimitController.onPageLoad()))
-              }
+      (for {
+        guaranteedReferenceNumber <- request.userAnswers.get(GuaranteeReferenceNumberPage)
+        taxIdentifier             <- request.userAnswers.get(EoriNumberPage)
+        accessCode                <- request.userAnswers.get(AccessCodePage)
+      } yield checkRateLimit(request.eoriNumber, guaranteedReferenceNumber).flatMap {
+        lockFree =>
+          if (lockFree) {
+            guaranteeBalanceConnector
+              .submitBalanceRequest(
+                BalanceRequest(
+                  TaxIdentifier(taxIdentifier),
+                  GuaranteeReference(guaranteedReferenceNumber),
+                  AccessCode(accessCode)
+                )
+              )
+              .flatMap(responseHandler.processResponse(_, processPending))
+          } else {
+            Future.successful(Redirect(routes.RateLimitController.onPageLoad()))
           }
+      }).getOrElse {
+        logger.warn("[CheckYourAnswersController][onSubmit] Insufficient data in user answers.")
+        Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
       }
   }
 
