@@ -27,7 +27,7 @@ class CheckYourAnswersHelper(userAnswers: UserAnswers, mode: Mode) {
   def eoriNumber: Option[Row] = userAnswers.get(EoriNumberPage) map {
     answer =>
       Row(
-        key = Key(msg"eoriNumber.checkYourAnswersLabel", classes = Seq("govuk-!-width-one-half")),
+        key = Key(msg"eoriNumber.checkYourAnswersLabel"),
         value = Value(lit"$answer"),
         actions = List(
           Action(
@@ -42,7 +42,7 @@ class CheckYourAnswersHelper(userAnswers: UserAnswers, mode: Mode) {
   def guaranteeReferenceNumber: Option[Row] = userAnswers.get(GuaranteeReferenceNumberPage) map {
     answer =>
       Row(
-        key = Key(msg"guaranteeReferenceNumber.checkYourAnswersLabel", classes = Seq("govuk-!-width-one-half")),
+        key = Key(msg"guaranteeReferenceNumber.checkYourAnswersLabel"),
         value = Value(lit"$answer"),
         actions = List(
           Action(
@@ -57,7 +57,7 @@ class CheckYourAnswersHelper(userAnswers: UserAnswers, mode: Mode) {
   def accessCode: Option[Row] = userAnswers.get(AccessCodePage) map {
     answer =>
       Row(
-        key = Key(msg"accessCode.checkYourAnswersLabel", classes = Seq("govuk-!-width-one-half")),
+        key = Key(msg"accessCode.checkYourAnswersLabel"),
         value = Value(lit"${"•" * answer.length}"),
         actions = List(
           Action(
