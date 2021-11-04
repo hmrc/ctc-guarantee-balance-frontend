@@ -21,6 +21,7 @@ import models.backend._
 import models.requests.BalanceRequest
 import models.values.BalanceId
 import models.values.ErrorType.NotMatchedErrorType
+import play.api.Logging
 import play.api.http.{HeaderNames, Status}
 import play.api.libs.json.JsSuccess
 import uk.gov.hmrc.http.HttpReads.Implicits._
@@ -31,7 +32,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: FrontendAppConfig)(implicit
   ec: ExecutionContext
-) extends HttpErrorFunctions {
+) extends HttpErrorFunctions
+    with Logging {
 
   private val headers = Seq(
     HeaderNames.ACCEPT -> "application/vnd.hmrc.1.0+json"
@@ -49,10 +51,11 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
             case Status.OK =>
               Right(response.json.as[PostBalanceRequestSuccessResponse].response)
             case status if is4xx(status) || is5xx(status) =>
-              response.json.validate[PostBalanceRequestFunctionalErrorResponse] match {
+              try response.json.validate[PostBalanceRequestFunctionalErrorResponse] match {
                 case JsSuccess(functionalError, _) if functionalError.containsErrorType(NotMatchedErrorType) =>
                   Right(BalanceRequestNotMatched)
-                case _ =>
+              } catch {
+                case _: Exception =>
                   Left(response)
               }
           }
