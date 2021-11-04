@@ -19,7 +19,7 @@ package connectors
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
-import models.backend.{BalanceRequestPending, BalanceRequestPendingExpired, BalanceRequestSuccess}
+import models.backend.{BalanceRequestNotMatched, BalanceRequestPending, BalanceRequestPendingExpired, BalanceRequestSuccess}
 import models.requests.BalanceRequest
 import models.values._
 import org.scalacheck.Gen
@@ -112,8 +112,43 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
         result mustBe Right(expectedResponse)
       }
 
+      "must return balance request not matched for a BadRequest with errorType 12" in {
+        val balanceRequestNotMatchedJson: String =
+          s"""
+             | {
+             |   "code": "FUNCTIONAL_ERROR",
+             |    "message": "The request was rejected by the guarantee management system",
+             |    "response": {
+             |        "errors": [
+             |            {
+             |                "errorType": 12,
+             |                "errorPointer": "Foo.Bar(1).Baz"
+             |            }
+             |        ]
+             |    }
+             | }
+             |""".stripMargin
+
+        server.stubFor(
+          post(urlEqualTo(submitBalanceRequestUrl))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+            .withRequestBody(equalToJson(requestAsJsonString))
+            .willReturn(
+              aResponse()
+                .withStatus(Status.BAD_REQUEST)
+                .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
+                .withBody(balanceRequestNotMatchedJson)
+            )
+        )
+
+        val expectedResponse = BalanceRequestNotMatched
+
+        val result = connector.submitBalanceRequest(request).futureValue
+        result mustBe Right(expectedResponse)
+      }
+
       "must return the HttpResponse when there is an unexpected response" in {
-        val errorResponses = Gen.chooseNum(401, 599).suchThat(_ != Status.NOT_FOUND)
+        val errorResponses = Gen.chooseNum(400, 599).suchThat(_ != Status.NOT_FOUND)
 
         forAll(errorResponses) {
           errorResponse =>

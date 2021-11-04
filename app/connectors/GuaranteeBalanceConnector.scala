@@ -20,11 +20,13 @@ import config.FrontendAppConfig
 import models.backend._
 import models.requests.BalanceRequest
 import models.values.BalanceId
+import models.values.ErrorType.NotMatchedErrorType
 import play.api.http.{HeaderNames, Status}
+import play.api.libs.json.JsSuccess
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions, HttpReads, HttpResponse}
-import javax.inject.Inject
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: FrontendAppConfig)(implicit
@@ -41,12 +43,18 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
     implicit val eitherBalanceIdOrResponseReads: HttpReads[Either[HttpResponse, BalanceRequestResponse]] =
       HttpReads[HttpResponse].map {
         response =>
-          response.status match {
-            case Status.ACCEPTED =>
-              Right(BalanceRequestPending(response.json.as[PostBalanceRequestPendingResponse].balanceId))
-            case Status.OK =>
-              Right(response.json.as[PostBalanceRequestSuccessResponse].response)
-            case status if is4xx(status) || is5xx(status) => Left(response)
+          response.json.validate[PostBalanceRequestFunctionalErrorResponse] match {
+            case JsSuccess(functionalError, _) if functionalError.response.containsErrorType(NotMatchedErrorType) =>
+              Right(BalanceRequestNotMatched)
+            case _ =>
+              response.status match {
+                case Status.ACCEPTED =>
+                  Right(BalanceRequestPending(response.json.as[PostBalanceRequestPendingResponse].balanceId))
+                case Status.OK =>
+                  Right(response.json.as[PostBalanceRequestSuccessResponse].response)
+                case status if is4xx(status) || is5xx(status) =>
+                  Left(response)
+              }
           }
       }
 
