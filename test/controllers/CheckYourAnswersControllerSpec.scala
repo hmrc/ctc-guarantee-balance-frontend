@@ -17,7 +17,6 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import connectors.GuaranteeBalanceConnector
 import models.UserAnswers
 import models.backend.BalanceRequestSuccess
 import models.requests.BalanceRequest
@@ -28,7 +27,6 @@ import org.mockito.Mockito.{times, verify, when}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{AccessCodePage, BalancePage, EoriNumberPage, GuaranteeReferenceNumberPage}
-import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
@@ -82,16 +80,13 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
       val userAnswers = baseAnswers
 
-      val mockGuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
-
       val application = applicationBuilder(userAnswers = Some(userAnswers))
-        .overrides(bind[GuaranteeBalanceConnector].toInstance(mockGuaranteeBalanceConnector))
         .build()
 
       val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
       when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
 
-      when(mockGuaranteeBalanceConnector.submitBalanceRequest(any())(any()))
+      when(mockGuaranteeBalanceService.submitBalanceRequest(any())(any()))
         .thenReturn(Future.successful(Right(balance)))
 
       val result = route(application, request).value
@@ -107,7 +102,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
       verify(mockSessionRepository).set(uaCaptor.capture)
       uaCaptor.getValue.get(BalancePage).get mustBe balance.formatForDisplay
 
-      verify(mockGuaranteeBalanceConnector).submitBalanceRequest(eqTo(BalanceRequest(TaxIdentifier(taxId), GuaranteeReference(grn), AccessCode(access))))(any())
+      verify(mockGuaranteeBalanceService).submitBalanceRequest(eqTo(BalanceRequest(TaxIdentifier(taxId), GuaranteeReference(grn), AccessCode(access))))(any())
     }
 
     "must redirect to Session Expired for a POST if no existing data is found" in {
@@ -149,17 +144,14 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
             .setOption(GuaranteeReferenceNumberPage, grn).success.value
             .setOption(AccessCodePage, accessCode).success.value
 
-          val mockGuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
-
           val application = applicationBuilder(userAnswers = Some(userAnswers))
-            .overrides(bind[GuaranteeBalanceConnector].toInstance(mockGuaranteeBalanceConnector))
             .build()
 
           val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
 
           when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
 
-          when(mockGuaranteeBalanceConnector.submitBalanceRequest(any())(any()))
+          when(mockGuaranteeBalanceService.submitBalanceRequest(any())(any()))
             .thenReturn(Future.successful(Right(balance)))
 
           val result = route(application, request).value

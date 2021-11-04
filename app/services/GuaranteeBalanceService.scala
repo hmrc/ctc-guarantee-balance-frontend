@@ -22,12 +22,16 @@ import connectors.GuaranteeBalanceConnector
 import models.backend.{BalanceRequestPending, BalanceRequestResponse}
 import models.values.BalanceId
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-
 import javax.inject.Inject
+import models.requests.BalanceRequest
+
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
 class GuaranteeBalanceService @Inject() (val actorSystem: ActorSystem, val connector: GuaranteeBalanceConnector)(implicit ec: ExecutionContext) {
+
+  def submitBalanceRequest(balanceRequest: BalanceRequest)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] =
+    connector.submitBalanceRequest(balanceRequest)
 
   def pollForGuaranteeBalance(balanceId: BalanceId, delay: FiniteDuration, maxTime: FiniteDuration)(implicit
     hc: HeaderCarrier
