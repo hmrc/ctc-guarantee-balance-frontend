@@ -44,11 +44,12 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
   private val grn: String  = "grn"
   val populatedUserAnswers = emptyUserAnswers.set(GuaranteeReferenceNumberPage, grn).success.value
 
-  val noMatchResponse   = Right(BalanceRequestNotMatched)
-  val successResponse   = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
-  val pendingResponse   = Right(BalanceRequestPending(balanceId))
-  val tryAgainResponse  = Right(BalanceRequestPendingExpired(balanceId))
-  val httpErrorResponse = Left(HttpResponse(404, ""))
+  val noMatchResponse         = Right(BalanceRequestNotMatched)
+  val successResponse         = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
+  val pendingResponse         = Right(BalanceRequestPending(balanceId))
+  val tryAgainResponse        = Right(BalanceRequestPendingExpired(balanceId))
+  val httpErrorResponse       = Left(HttpResponse(404, ""))
+  val tooManyRequestsResponse = Left(HttpResponse(429, ""))
 
   val functionalError      = FunctionalError(ErrorType(1), "", None)
   val balanceErrorResponse = Right(BalanceRequestFunctionalError(NonEmptyList(functionalError, Nil)))
@@ -96,6 +97,13 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
 
       status(result) mustEqual INTERNAL_SERVER_ERROR
       templateCaptor.getValue mustBe "technicalDifficulties.njk"
+    }
+
+    "must Redirect to the rate limit page if there are too many requests" in {
+      val result: Future[Result] = handler.processResponse(tooManyRequestsResponse, processPending)
+
+      status(result) mustEqual SEE_OTHER
+      redirectLocation(result).value mustEqual controllers.routes.RateLimitController.onPageLoad().url
     }
 
     "must Redirect show the technical difficulties page if it has a httpResponseError " in {
