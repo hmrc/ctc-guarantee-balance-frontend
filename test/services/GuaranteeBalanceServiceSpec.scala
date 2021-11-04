@@ -19,13 +19,14 @@ package services
 import akka.actor.ActorSystem
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import models.backend.{BalanceRequestPending, BalanceRequestPendingExpired, BalanceRequestSuccess}
-import models.values.{BalanceId, CurrencyCode}
+import models.values.{AccessCode, BalanceId, CurrencyCode, GuaranteeReference, TaxIdentifier}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
 import java.util.UUID
 
 import connectors.GuaranteeBalanceConnector
+import models.requests.BalanceRequest
 import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
 
 import scala.concurrent.ExecutionContext.Implicits._
@@ -44,6 +45,23 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
   val actorSystem: ActorSystem = injector.instanceOf[ActorSystem]
 
   implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
+
+  "submitBalanceRequest" - {
+    val request = BalanceRequest(TaxIdentifier(""), GuaranteeReference(""), AccessCode(""))
+    "return successResponse when the connector returns sucessResponse" in {
+      val mockGuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
+      when(mockGuaranteeBalanceConnector.submitBalanceRequest(any())(any())).thenReturn(Future.successful(successResponse))
+
+      val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector)
+
+      val result = service.submitBalanceRequest(request)
+      whenReady(result) {
+        _ mustEqual successResponse
+      }
+
+      verify(mockGuaranteeBalanceConnector, times(1)).submitBalanceRequest(any())(any())
+    }
+  }
 
   "pollForResponse" - {
     "return successResponse first time with a single call" in {
