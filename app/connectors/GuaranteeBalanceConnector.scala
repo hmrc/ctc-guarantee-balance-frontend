@@ -43,16 +43,16 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
     implicit val eitherBalanceIdOrResponseReads: HttpReads[Either[HttpResponse, BalanceRequestResponse]] =
       HttpReads[HttpResponse].map {
         response =>
-          response.json.validate[PostBalanceRequestFunctionalErrorResponse] match {
-            case JsSuccess(functionalError, _) if functionalError.containsErrorType(NotMatchedErrorType) =>
-              Right(BalanceRequestNotMatched)
-            case _ =>
-              response.status match {
-                case Status.ACCEPTED =>
-                  Right(BalanceRequestPending(response.json.as[PostBalanceRequestPendingResponse].balanceId))
-                case Status.OK =>
-                  Right(response.json.as[PostBalanceRequestSuccessResponse].response)
-                case status if is4xx(status) || is5xx(status) =>
+          response.status match {
+            case Status.ACCEPTED =>
+              Right(BalanceRequestPending(response.json.as[PostBalanceRequestPendingResponse].balanceId))
+            case Status.OK =>
+              Right(response.json.as[PostBalanceRequestSuccessResponse].response)
+            case status if is4xx(status) || is5xx(status) =>
+              response.json.validate[PostBalanceRequestFunctionalErrorResponse] match {
+                case JsSuccess(functionalError, _) if functionalError.containsErrorType(NotMatchedErrorType) =>
+                  Right(BalanceRequestNotMatched)
+                case _ =>
                   Left(response)
               }
           }

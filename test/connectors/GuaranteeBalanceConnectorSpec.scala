@@ -148,7 +148,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
       }
 
       "must return the HttpResponse when there is an unexpected response" in {
-        val errorResponses = Gen.chooseNum(401, 599).suchThat(_ != Status.NOT_FOUND)
+        val errorResponses = Gen.chooseNum(400, 599).suchThat(_ != Status.NOT_FOUND)
 
         forAll(errorResponses) {
           errorResponse =>
@@ -159,6 +159,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
                 .willReturn(
                   aResponse()
                     .withStatus(errorResponse)
+                    .withBody(Json.stringify(Json.obj()))
                 )
             )
 
