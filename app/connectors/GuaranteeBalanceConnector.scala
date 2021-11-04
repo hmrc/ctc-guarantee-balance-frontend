@@ -65,7 +65,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
         response =>
           response.status match {
             case Status.OK =>
-              Right(response.json.as[PendingBalanceRequest].response match {
+              Right(response.json.as[GetBalanceRequestResponse].request.response match {
                 case Some(response) => response
                 case _              => BalanceRequestPending(balanceId)
               })

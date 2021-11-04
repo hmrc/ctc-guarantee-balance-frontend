@@ -51,4 +51,8 @@ class TryGuaranteeBalanceAgainController @Inject() (
         case None => Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
       }
   }
+
+  def onSubmit(): Action[AnyContent] = (identify andThen getData) {
+    Redirect(routes.BalanceConfirmationController.onPageLoad())
+  }
 }

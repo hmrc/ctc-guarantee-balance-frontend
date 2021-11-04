@@ -17,7 +17,6 @@
 package controllers
 
 import config.FrontendAppConfig
-import connectors.GuaranteeBalanceConnector
 import controllers.actions._
 import handlers.GuaranteeBalanceResponseHandler
 import models.requests.BalanceRequest
@@ -34,8 +33,9 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 import utils.CheckYourAnswersHelper
 import viewModels.Section
-
 import javax.inject.Inject
+import services.GuaranteeBalanceService
+
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -47,7 +47,7 @@ class CheckYourAnswersController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   renderer: Renderer,
   mongoLockRepository: MongoLockRepository,
-  guaranteeBalanceConnector: GuaranteeBalanceConnector,
+  guaranteeBalanceService: GuaranteeBalanceService,
   responseHandler: GuaranteeBalanceResponseHandler,
   config: FrontendAppConfig
 )(implicit ec: ExecutionContext)
@@ -75,7 +75,7 @@ class CheckYourAnswersController @Inject() (
       } yield checkRateLimit(request.eoriNumber, guaranteeReferenceNumber).flatMap {
         lockFree =>
           if (lockFree) {
-            guaranteeBalanceConnector
+            guaranteeBalanceService
               .submitBalanceRequest(
                 BalanceRequest(
                   TaxIdentifier(taxIdentifier),

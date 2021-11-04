@@ -143,15 +143,16 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
         val balanceRequestSuccessResponseJson: String =
           s"""
             | {
-            |   "balanceId": "22b9899e-24ee-48e6-a189-97d1f45391c4",
-            |   "enrolmentId": "testEnrolmentId",
-            |   "taxIdentifier": "taxid",
-            |   "guaranteeReference": "guarref",
-            |   "requestedAt": "$requestedAt",
-            |   "completedAt": "$completedAt",
-            |   "response": {
-            |     "balance": 3.14,
-            |     "currency": "EUR"
+            |   "request" : {
+            |     "balanceId": "22b9899e-24ee-48e6-a189-97d1f45391c4",
+            |     "taxIdentifier": "taxid",
+            |     "guaranteeReference": "guarref",
+            |     "requestedAt": "$requestedAt",
+            |     "completedAt": "$completedAt",
+            |     "response": {
+            |       "balance": 3.14,
+            |       "currency": "EUR"
+            |     }
             |   }
             | }
             |""".stripMargin
@@ -177,12 +178,13 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
         val balanceRequestSuccessResponseJson: String =
           s"""
              | {
-             |   "balanceId": "22b9899e-24ee-48e6-a189-97d1f45391c4",
-             |   "enrolmentId": "testEnrolmentId",
-             |   "taxIdentifier": "taxid",
-             |   "guaranteeReference": "guarref",
-             |   "requestedAt": "$requestedAt",
-             |   "completedAt": "$completedAt"
+             |  "request": {
+             |    "balanceId": "22b9899e-24ee-48e6-a189-97d1f45391c4",
+             |    "taxIdentifier": "taxid",
+             |    "guaranteeReference": "guarref",
+             |    "requestedAt": "$requestedAt",
+             |    "completedAt": "$completedAt"
+             |  }
              | }
              |""".stripMargin
 

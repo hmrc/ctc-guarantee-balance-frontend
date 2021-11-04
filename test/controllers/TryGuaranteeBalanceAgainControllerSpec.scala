@@ -60,7 +60,7 @@ class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaul
       redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
     }
 
-    "must release lock if already owned by" in {
+    "must release lock" in {
 
       val userAnswers = baseAnswers
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
@@ -81,5 +81,6 @@ class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaul
       verify(mockMongoLockRepository).releaseLock(eqTo(expectedLockId), eqTo(userAnswers.id))
 
     }
+
   }
 }
