@@ -119,15 +119,15 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
           """
              | {
              |   "code": "FUNCTIONAL_ERROR",
-             |    "message": "The request was rejected by the guarantee management system",
-             |    "response": {
-             |        "errors": [
-             |            {
-             |                "errorType": 12,
-             |                "errorPointer": "Foo.Bar(1).Baz"
-             |            }
-             |        ]
-             |    }
+             |   "message": "The request was rejected by the guarantee management system",
+             |   "response": {
+             |     "errors": [
+             |       {
+             |         "errorType": 12,
+             |         "errorPointer": "Foo.Bar(1).Baz"
+             |       }
+             |     ]
+             |   }
              | }
              |""".stripMargin
 
@@ -143,10 +143,8 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
             )
         )
 
-        val expectedResponse = BalanceRequestNotMatched
-
         val result = connector.submitBalanceRequest(request).futureValue
-        result mustBe Right(expectedResponse)
+        result mustBe Right(BalanceRequestNotMatched)
       }
 
       "must return the HttpResponse for a functional error with inconsequential error type" in {
@@ -158,19 +156,19 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
           )
         ) {
           errorType =>
-            val balanceRequestNotMatchedJson: String =
+            val json: String =
               s"""
                  | {
                  |   "code": "FUNCTIONAL_ERROR",
-                 |    "message": "The request was rejected by the guarantee management system",
-                 |    "response": {
-                 |        "errors": [
-                 |            {
-                 |                "errorType": $errorType,
-                 |                "errorPointer": "Foo.Bar(1).Baz"
-                 |            }
-                 |        ]
-                 |    }
+                 |   "message": "The request was rejected by the guarantee management system",
+                 |   "response": {
+                 |     "errors": [
+                 |       {
+                 |         "errorType": $errorType,
+                 |         "errorPointer": "Foo.Bar(1).Baz"
+                 |       }
+                 |     ]
+                 |   }
                  | }
                  |""".stripMargin
 
@@ -182,7 +180,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
                   aResponse()
                     .withStatus(Status.BAD_REQUEST)
                     .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
-                    .withBody(balanceRequestNotMatchedJson)
+                    .withBody(json)
                 )
             )
 
