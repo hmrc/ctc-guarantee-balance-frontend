@@ -44,7 +44,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
       HttpReads[HttpResponse].map {
         response =>
           response.json.validate[PostBalanceRequestFunctionalErrorResponse] match {
-            case JsSuccess(functionalError, _) if functionalError.response.containsErrorType(NotMatchedErrorType) =>
+            case JsSuccess(functionalError, _) if functionalError.containsErrorType(NotMatchedErrorType) =>
               Right(BalanceRequestNotMatched)
             case _ =>
               response.status match {

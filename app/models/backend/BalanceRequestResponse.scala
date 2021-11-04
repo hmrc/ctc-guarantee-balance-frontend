@@ -19,7 +19,7 @@ package models.backend
 import cats.data.NonEmptyList
 import models.backend.errors.FunctionalError
 import models.formats.CommonFormats
-import models.values.{BalanceId, CurrencyCode, ErrorType}
+import models.values.{BalanceId, CurrencyCode}
 import play.api.libs.json.{Json, OFormat, Reads}
 
 import java.text.NumberFormat
@@ -51,9 +51,7 @@ case class BalanceRequestPendingExpired(balanceId: BalanceId) extends BalanceReq
 
 case class BalanceRequestFunctionalError(
   errors: NonEmptyList[FunctionalError]
-) extends BalanceRequestResponse {
-  def containsErrorType(errorType: ErrorType): Boolean = errors.exists(_.errorType == errorType)
-}
+) extends BalanceRequestResponse
 
 object BalanceRequestResponse extends CommonFormats {
 
