@@ -55,7 +55,7 @@ class CheckYourAnswersHelperSpec extends SpecBase {
 
             result mustBe Some(
               Row(
-                key = Key(label, classes = Seq("govuk-!-width-one-half")),
+                key = Key(label),
                 value = Value(lit"$answer"),
                 actions = List(
                   Action(
@@ -99,7 +99,7 @@ class CheckYourAnswersHelperSpec extends SpecBase {
 
             result mustBe Some(
               Row(
-                key = Key(label, classes = Seq("govuk-!-width-one-half")),
+                key = Key(label),
                 value = Value(lit"$answer"),
                 actions = List(
                   Action(
@@ -143,7 +143,7 @@ class CheckYourAnswersHelperSpec extends SpecBase {
 
             result mustBe Some(
               Row(
-                key = Key(label, classes = Seq("govuk-!-width-one-half")),
+                key = Key(label),
                 value = Value(lit"••••"),
                 actions = List(
                   Action(

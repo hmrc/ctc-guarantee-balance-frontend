@@ -18,7 +18,7 @@ object AppDependencies {
     "com.typesafe.play"          %% "play-iteratees"                  % "2.6.1",
     "com.typesafe.play"          %% "play-iteratees-reactive-streams" % "2.6.1",
     "org.webjars.npm"            % "govuk-frontend"                   % "3.13.0",
-    "org.webjars.npm"            % "hmrc-frontend"                    % "1.22.0",
+    "org.webjars.npm"            % "hmrc-frontend"                    % "1.35.2",
     "com.lucidchart"             %% "xtract"                          % "2.2.1"
   )
 

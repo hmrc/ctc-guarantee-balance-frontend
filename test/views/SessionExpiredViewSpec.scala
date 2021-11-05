@@ -14,24 +14,6 @@
  * limitations under the License.
  */
 
-package models.backend
+package views
 
-import models.values.{BalanceId, GuaranteeReference, TaxIdentifier}
-import play.api.libs.json.{Json, Reads}
-
-import java.time.Instant
-
-case class PendingBalanceRequest(
-  balanceId: BalanceId,
-  taxIdentifier: TaxIdentifier,
-  guaranteeReference: GuaranteeReference,
-  requestedAt: Instant,
-  completedAt: Option[Instant],
-  response: Option[BalanceRequestResponse]
-)
-
-object PendingBalanceRequest {
-
-  implicit val pendingBalanceRequestFormat: Reads[PendingBalanceRequest] =
-    Json.reads[PendingBalanceRequest]
-}
+class SessionExpiredViewSpec extends SingleViewSpec("session-expired.njk", hasSignOutLink = false)

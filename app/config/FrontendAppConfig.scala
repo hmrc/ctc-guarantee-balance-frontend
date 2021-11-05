@@ -40,9 +40,12 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val userResearchUrl: String         = configuration.get[String]("urls.userResearch")
   val showUserResearchBanner: Boolean = configuration.get[Boolean]("banners.showUserResearch")
 
-  lazy val timeoutSeconds: String   = configuration.get[String]("session.timeoutSeconds")
-  lazy val countdownSeconds: String = configuration.get[String]("session.countdownSeconds")
-  lazy val rateLimitDuration: Int   = configuration.get[Int]("rateLimit.duration")
+  lazy val timeoutSeconds: String               = configuration.get[String]("session.timeoutSeconds")
+  lazy val countdownSeconds: String             = configuration.get[String]("session.countdownSeconds")
+  lazy val rateLimitDuration: Int               = configuration.get[Int]("rateLimit.duration")
+  lazy val guaranteeBalanceDelayInSecond: Int   = configuration.get[Int]("guaranteeBalanceLookup.waitTimeInSeconds")
+  lazy val guaranteeBalanceMaxTimeInSecond: Int = configuration.get[Int]("guaranteeBalanceLookup.maxTimeInSeconds")
+  lazy val guaranteeBalanceDisplayDelay: Int    = configuration.get[Int]("guaranteeBalanceLookup.displayDelayInSeconds")
 
   lazy val languageTranslationEnabled: Boolean = configuration.get[Boolean]("microservice.services.features.welsh-translation")
 
@@ -53,4 +56,5 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   lazy val guaranteeBalanceUrl: String       = configuration.get[Service]("microservice.services.common-transit-convention-guarantee-balance").baseUrl
   lazy val nctsEnquiriesUrl: String          = configuration.get[String]("urls.nctsEnquiries")
   lazy val manageTransitMovementsUrl: String = configuration.get[String]("urls.manageTransitMovements")
+
 }

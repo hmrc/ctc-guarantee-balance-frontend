@@ -16,13 +16,16 @@
 
 package models.values
 
-import play.api.libs.json.Format
-import play.api.libs.json.Json
+import play.api.libs.json.{Format, Json}
 
 case class ErrorType(value: Int) extends AnyVal
 
+// scalastyle:off magic.number
 object ErrorType {
 
   implicit val errorTypeFormat: Format[ErrorType] =
     Json.valueFormat[ErrorType]
+
+  val NotMatchedErrorType: ErrorType = ErrorType(12)
 }
+// scalastyle:on magic.number

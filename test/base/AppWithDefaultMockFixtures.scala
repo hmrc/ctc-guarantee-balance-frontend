@@ -27,12 +27,13 @@ import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.{GuiceFakeApplicationFactory, GuiceOneAppPerSuite}
 import play.api.Application
 import play.api.i18n.{Messages, MessagesApi}
-import play.api.inject.{bind, Injector}
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.inject.{bind, Injector}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, Helpers}
 import play.twirl.api.Html
 import repositories.SessionRepository
+import services.GuaranteeBalanceService
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
 import uk.gov.hmrc.nunjucks.NunjucksRenderer
 
@@ -46,19 +47,25 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
       mockRenderer,
       mockDataRetrievalAction,
       mockSessionRepository,
-      mockMongoLockRepository
+      mockMongoLockRepository,
+      mockGuaranteeBalanceService
     )
 
     when(mockRenderer.render(any(), any())(any()))
       .thenReturn(Future.successful(Html("")))
 
-    when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+    when(mockSessionRepository.set(any()))
+      .thenReturn(Future.successful(true))
+
+    when(mockMongoLockRepository.releaseLock(any(), any()))
+      .thenReturn(Future.successful(()))
   }
 
-  val mockRenderer: NunjucksRenderer               = mock[NunjucksRenderer]
-  val mockDataRetrievalAction: DataRetrievalAction = mock[DataRetrievalAction]
-  val mockSessionRepository: SessionRepository     = mock[SessionRepository]
-  val mockMongoLockRepository: MongoLockRepository = mock[MongoLockRepository]
+  val mockRenderer: NunjucksRenderer                       = mock[NunjucksRenderer]
+  val mockDataRetrievalAction: DataRetrievalAction         = mock[DataRetrievalAction]
+  val mockSessionRepository: SessionRepository             = mock[SessionRepository]
+  val mockMongoLockRepository: MongoLockRepository         = mock[MongoLockRepository]
+  val mockGuaranteeBalanceService: GuaranteeBalanceService = mock[GuaranteeBalanceService]
 
   final override def fakeApplication(): Application =
     applicationBuilder()
@@ -73,7 +80,8 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
         bind[NunjucksRenderer].toInstance(mockRenderer),
         bind[MessagesApi].toInstance(Helpers.stubMessagesApi()),
         bind[SessionRepository].toInstance(mockSessionRepository),
-        bind[MongoLockRepository].toInstance(mockMongoLockRepository)
+        bind[MongoLockRepository].toInstance(mockMongoLockRepository),
+        bind[GuaranteeBalanceService].toInstance(mockGuaranteeBalanceService)
       )
 
   def injector: Injector = app.injector

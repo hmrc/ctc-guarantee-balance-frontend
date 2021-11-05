@@ -14,24 +14,20 @@
  * limitations under the License.
  */
 
-package models.backend
+package views
 
-import models.values.{BalanceId, GuaranteeReference, TaxIdentifier}
-import play.api.libs.json.{Json, Reads}
+class AccessCodeViewSpec extends SingleViewSpec("accessCode.njk") {
 
-import java.time.Instant
+  "must have password-type input" in {
+    val doc   = renderDocument().futureValue
+    val input = doc.getElementsByClass("govuk-input").first()
+    input.attr("type") mustEqual "password"
+  }
 
-case class PendingBalanceRequest(
-  balanceId: BalanceId,
-  taxIdentifier: TaxIdentifier,
-  guaranteeReference: GuaranteeReference,
-  requestedAt: Instant,
-  completedAt: Option[Instant],
-  response: Option[BalanceRequestResponse]
-)
+  "must render hint text" in {
+    val doc  = renderDocument().futureValue
+    val hint = doc.getElementsByClass("govuk-hint").first()
+    hint.text() mustEqual "accessCode.hintText"
+  }
 
-object PendingBalanceRequest {
-
-  implicit val pendingBalanceRequestFormat: Reads[PendingBalanceRequest] =
-    Json.reads[PendingBalanceRequest]
 }

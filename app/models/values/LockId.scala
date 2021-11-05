@@ -14,24 +14,10 @@
  * limitations under the License.
  */
 
-package models.backend
+package models.values
 
-import models.values.{BalanceId, GuaranteeReference, TaxIdentifier}
-import play.api.libs.json.{Json, Reads}
+case class LockId(eoriNumber: String, grn: String) {
 
-import java.time.Instant
+  override def toString: String = (eoriNumber + grn.trim.toLowerCase).hashCode.toString
 
-case class PendingBalanceRequest(
-  balanceId: BalanceId,
-  taxIdentifier: TaxIdentifier,
-  guaranteeReference: GuaranteeReference,
-  requestedAt: Instant,
-  completedAt: Option[Instant],
-  response: Option[BalanceRequestResponse]
-)
-
-object PendingBalanceRequest {
-
-  implicit val pendingBalanceRequestFormat: Reads[PendingBalanceRequest] =
-    Json.reads[PendingBalanceRequest]
 }
