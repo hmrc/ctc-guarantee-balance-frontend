@@ -19,15 +19,15 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import handlers.GuaranteeBalanceResponseHandler
-import javax.inject.Inject
 import models.values.BalanceId
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
+import play.api.mvc._
 import renderer.Renderer
 import services.GuaranteeBalanceService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
+import javax.inject.Inject
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
@@ -53,9 +53,13 @@ class WaitOnGuaranteeBalanceController @Inject() (
 
   def onSubmit(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      val response =
-        balanceService.pollForGuaranteeBalance(balanceId, appConfig.guaranteeBalanceDelayInSecond seconds, appConfig.guaranteeBalanceMaxTimeInSecond seconds)
-      response.flatMap(responseHandler.processResponse(_, displayWaitPage))
+      balanceService
+        .pollForGuaranteeBalance(
+          balanceId = balanceId,
+          delay = appConfig.guaranteeBalanceDelayInSecond seconds,
+          maxTime = appConfig.guaranteeBalanceMaxTimeInSecond seconds
+        )
+        .flatMap(responseHandler.processResponse(_, displayWaitPage))
   }
 
   private def displayWaitPage(balanceId: BalanceId)(implicit request: Request[_]): Future[Result] = {
