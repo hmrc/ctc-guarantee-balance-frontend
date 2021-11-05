@@ -41,7 +41,7 @@
               classes: "govuk-label--xl govuk-!-padding-bottom-5"
             },
             type: "password",
-            id: "value",
+            id: "accessCode",
             classes: "govuk-input--width-5",
             name: "value",
             value: form.value.value,
@@ -49,7 +49,8 @@
           }) }}
 
           {{ govukButton({
-            text: messages("site.continue")
+            text: messages("site.continue"),
+            attributes: {id: "continue"}
           }) }}
 
         </form>
