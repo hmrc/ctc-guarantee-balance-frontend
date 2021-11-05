@@ -311,6 +311,39 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
 
         result mustBe Right(BalanceRequestPendingExpired(balanceId))
       }
+
+      "must return balance request not matched for a functional error with error type 12" in {
+        val balanceId = BalanceId(testUuid)
+        val balanceRequestNotMatchedJson: String =
+          """
+            | {
+            |   "code": "FUNCTIONAL_ERROR",
+            |   "message": "The request was rejected by the guarantee management system",
+            |   "response": {
+            |     "errors": [
+            |       {
+            |         "errorType": 12,
+            |         "errorPointer": "Foo.Bar(1).Baz"
+            |       }
+            |     ]
+            |   }
+            | }
+            |""".stripMargin
+
+        server.stubFor(
+          get(urlEqualTo(queryBalanceRequestUrlFor(balanceId)))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+            .willReturn(
+              aResponse()
+                .withStatus(Status.OK)
+                .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
+                .withBody(balanceRequestNotMatchedJson)
+            )
+        )
+
+        val result = connector.queryPendingBalance(balanceId).futureValue
+        result mustBe Right(BalanceRequestNotMatched)
+      }
     }
   }
 }

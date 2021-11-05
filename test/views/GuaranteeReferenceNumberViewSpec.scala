@@ -16,8 +16,6 @@
 
 package views
 
-import play.api.libs.json.Json
-
 class GuaranteeReferenceNumberViewSpec extends SingleViewSpec("guaranteeReferenceNumber.njk") {
 
   "must render paragraph text" in {
