@@ -16,8 +16,8 @@
 
 package connectors
 
-import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import config.FrontendAppConfig
+import models.RichHttpResponse
 import models.backend._
 import models.requests.BalanceRequest
 import models.values.BalanceId
@@ -53,17 +53,13 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
             case Status.OK =>
               Right(response.json.as[PostBalanceRequestSuccessResponse].response)
             case Status.BAD_REQUEST =>
-              try response.json.validate[PostBalanceRequestFunctionalErrorResponse] match {
+              response.validateJson[PostBalanceRequestFunctionalErrorResponse] match {
                 case JsSuccess(fe, _) if fe.containsErrorType(NotMatchedErrorType) =>
                   Right(BalanceRequestNotMatched)
                 case jsResult =>
                   jsResult.map(
                     fe => logger.info(s"[GuaranteeBalanceConnector][submitBalanceRequest] Response contains functional error type(s) ${fe.errorTypes}")
                   )
-                  Left(response)
-              } catch {
-                case e: MismatchedInputException =>
-                  logger.warn(s"[GuaranteeBalanceConnector][submitBalanceRequest] Unable to parse response body as JSON: ${e.getMessage}")
                   Left(response)
               }
             case status if is4xx(status) || is5xx(status) =>

@@ -47,7 +47,7 @@ object PostResponse {
   implicit lazy val balanceRequestFunctionalErrorFormat: OFormat[PostBalanceRequestFunctionalErrorResponse] =
     Json.format[PostBalanceRequestFunctionalErrorResponse]
 
-  implicit lazy val balanceRequestResponselFormat: Reads[GetBalanceRequestResponse] =
+  implicit lazy val balanceRequestResponseFormat: Reads[GetBalanceRequestResponse] =
     Json.reads[GetBalanceRequestResponse]
 
 }
