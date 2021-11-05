@@ -50,23 +50,18 @@
          {% endif %}
 
 
-         <input class="govuk-input {%- if form.value.error %} govuk-input--error{% endif %}"
+         <input class="govuk-input govuk-input--width-4 {%- if form.value.error %} govuk-input--error{% endif %}"
             id="accessCode"
             name="value"
-            type="text"
+            type="password"
             aria-describedby="accessCode.hintText"
             {%- if form.value.value %} value="{{ form.value.value}}"{% endif %}>
          </div>
 
 
-
-
-
-
-
-
           {{ govukButton({
-            text: messages("site.continue")
+            text: messages("site.continue"),
+            attributes: {id: "continue"}
           }) }}
 
         </form>
