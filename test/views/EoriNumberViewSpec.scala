@@ -16,30 +16,18 @@
 
 package views
 
-class AccessCodeViewSpec extends SingleViewSpec("accessCode.njk") {
-
-  "must have password-type input" in {
-    val doc   = renderDocument().futureValue
-    val input = doc.getElementsByClass("govuk-input").first()
-    input.attr("type") mustEqual "password"
-  }
+class EoriNumberViewSpec extends SingleViewSpec("eoriNumber.njk") {
 
   "must have correct width class" in {
     val doc   = renderDocument().futureValue
     val input = doc.getElementsByClass("govuk-input").first()
-    input.hasClass("govuk-input--width-5") mustBe true
+    input.hasClass("govuk-input--width-20") mustBe true
   }
 
   "must have correct ID" in {
     val doc   = renderDocument().futureValue
     val input = doc.getElementsByClass("govuk-input").first()
-    input.id() mustEqual "accessCode"
-  }
-
-  "must render hint text" in {
-    val doc  = renderDocument().futureValue
-    val hint = doc.getElementsByClass("govuk-hint").first()
-    hint.text() mustEqual "accessCode.hintText"
+    input.id() mustEqual "eoriNumber"
   }
 
 }
