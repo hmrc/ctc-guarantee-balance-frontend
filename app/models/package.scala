@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import play.api.libs.json.{IdxPathNode, JsArray, JsError, JsObject, JsPath, JsResult, JsSuccess, JsValue, Json, KeyPathNode, Reads, RecursiveSearch}
+import com.fasterxml.jackson.databind.exc.MismatchedInputException
+import play.api.libs.json._
+import uk.gov.hmrc.http.HttpResponse
 
 package object models {
 
@@ -151,6 +153,15 @@ package object models {
   implicit class RichString(string: String) {
 
     def removeSpaces(): String = string.replaceAll(" ", "")
+  }
+
+  implicit class RichHttpResponse(response: HttpResponse) {
+
+    def validateJson[A](implicit rds: Reads[A]): JsResult[A] = try response.json.validate[A]
+    catch {
+      case e: MismatchedInputException =>
+        JsError(s"Failed to parse response body as JSON: ${e.getMessage}")
+    }
   }
 
 }

@@ -19,9 +19,11 @@ package connectors
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
-import models.backend.{BalanceRequestPending, BalanceRequestPendingExpired, BalanceRequestSuccess}
+import models.backend.{BalanceRequestNotMatched, BalanceRequestPending, BalanceRequestPendingExpired, BalanceRequestSuccess}
 import models.requests.BalanceRequest
+import models.values.ErrorType.NotMatchedErrorType
 import models.values._
+import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
@@ -112,8 +114,86 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
         result mustBe Right(expectedResponse)
       }
 
+      "must return balance request not matched for a functional error with error type 12" in {
+        val balanceRequestNotMatchedJson: String =
+          """
+             | {
+             |   "code": "FUNCTIONAL_ERROR",
+             |   "message": "The request was rejected by the guarantee management system",
+             |   "response": {
+             |     "errors": [
+             |       {
+             |         "errorType": 12,
+             |         "errorPointer": "Foo.Bar(1).Baz"
+             |       }
+             |     ]
+             |   }
+             | }
+             |""".stripMargin
+
+        server.stubFor(
+          post(urlEqualTo(submitBalanceRequestUrl))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+            .withRequestBody(equalToJson(requestAsJsonString))
+            .willReturn(
+              aResponse()
+                .withStatus(Status.BAD_REQUEST)
+                .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
+                .withBody(balanceRequestNotMatchedJson)
+            )
+        )
+
+        val result = connector.submitBalanceRequest(request).futureValue
+        result mustBe Right(BalanceRequestNotMatched)
+      }
+
+      "must return the HttpResponse for a functional error with inconsequential error type" in {
+        val knownErrorTypes = Seq(NotMatchedErrorType)
+
+        forAll(
+          arbitrary[Int].suchThat(
+            x => !knownErrorTypes.contains(ErrorType(x))
+          )
+        ) {
+          errorType =>
+            val json: String =
+              s"""
+                 | {
+                 |   "code": "FUNCTIONAL_ERROR",
+                 |   "message": "The request was rejected by the guarantee management system",
+                 |   "response": {
+                 |     "errors": [
+                 |       {
+                 |         "errorType": $errorType,
+                 |         "errorPointer": "Foo.Bar(1).Baz"
+                 |       }
+                 |     ]
+                 |   }
+                 | }
+                 |""".stripMargin
+
+            server.stubFor(
+              post(urlEqualTo(submitBalanceRequestUrl))
+                .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+                .withRequestBody(equalToJson(requestAsJsonString))
+                .willReturn(
+                  aResponse()
+                    .withStatus(Status.BAD_REQUEST)
+                    .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
+                    .withBody(json)
+                )
+            )
+
+            val result = connector.submitBalanceRequest(request).futureValue
+
+            val response = result.left.get
+
+            response.status mustBe Status.BAD_REQUEST
+        }
+      }
+
       "must return the HttpResponse when there is an unexpected response" in {
-        val errorResponses = Gen.chooseNum(401, 599).suchThat(_ != Status.NOT_FOUND)
+        val errorResponses = Gen.chooseNum(400, 599).suchThat(_ != Status.NOT_FOUND)
 
         forAll(errorResponses) {
           errorResponse =>

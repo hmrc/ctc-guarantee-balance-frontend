@@ -17,24 +17,30 @@
 package connectors
 
 import config.FrontendAppConfig
+import models.RichHttpResponse
 import models.backend._
 import models.requests.BalanceRequest
 import models.values.BalanceId
+import models.values.ErrorType.NotMatchedErrorType
+import play.api.Logging
 import play.api.http.{HeaderNames, Status}
+import play.api.libs.json.JsSuccess
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions, HttpReads, HttpResponse}
-import javax.inject.Inject
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: FrontendAppConfig)(implicit
   ec: ExecutionContext
-) extends HttpErrorFunctions {
+) extends HttpErrorFunctions
+    with Logging {
 
   private val headers = Seq(
     HeaderNames.ACCEPT -> "application/vnd.hmrc.1.0+json"
   )
 
+  // scalastyle:off cyclomatic.complexity
   def submitBalanceRequest(request: BalanceRequest)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] = {
     val url = s"${appConfig.guaranteeBalanceUrl}/balances"
 
@@ -46,7 +52,19 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
               Right(BalanceRequestPending(response.json.as[PostBalanceRequestPendingResponse].balanceId))
             case Status.OK =>
               Right(response.json.as[PostBalanceRequestSuccessResponse].response)
-            case status if is4xx(status) || is5xx(status) => Left(response)
+            case Status.BAD_REQUEST =>
+              response.validateJson[PostBalanceRequestFunctionalErrorResponse] match {
+                case JsSuccess(fe, _) if fe.containsErrorType(NotMatchedErrorType) =>
+                  Right(BalanceRequestNotMatched)
+                case jsResult =>
+                  logger.info(s"[GuaranteeBalanceConnector][submitBalanceRequest] ${jsResult.fold(
+                    _.toString(),
+                    fe => s"Response contains functional error type(s) ${fe.errorTypes}"
+                  )}")
+                  Left(response)
+              }
+            case status if is4xx(status) || is5xx(status) =>
+              Left(response)
           }
       }
 
@@ -56,6 +74,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
       headers
     )
   }
+  // scalastyle:on cyclomatic.complexity
 
   def queryPendingBalance(balanceId: BalanceId)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] = {
     val url = s"${appConfig.guaranteeBalanceUrl}/balances/${balanceId.value}"
