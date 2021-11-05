@@ -58,7 +58,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
                   Right(BalanceRequestNotMatched)
                 case jsResult =>
                   jsResult.map(
-                    fe => logger.info(s"[GuaranteeBalanceConnector][submitBalanceRequest] Returning HTTP response for functional error type ${fe.errorType}")
+                    fe => logger.info(s"[GuaranteeBalanceConnector][submitBalanceRequest] Response contains functional error type(s) ${fe.errorTypes}")
                   )
                   Left(response)
               } catch {
