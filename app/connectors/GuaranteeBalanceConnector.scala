@@ -16,6 +16,7 @@
 
 package connectors
 
+import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import config.FrontendAppConfig
 import models.backend._
 import models.requests.BalanceRequest
@@ -39,6 +40,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
     HeaderNames.ACCEPT -> "application/vnd.hmrc.1.0+json"
   )
 
+  // scalastyle:off cyclomatic.complexity
   def submitBalanceRequest(request: BalanceRequest)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] = {
     val url = s"${appConfig.guaranteeBalanceUrl}/balances"
 
@@ -50,14 +52,22 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
               Right(BalanceRequestPending(response.json.as[PostBalanceRequestPendingResponse].balanceId))
             case Status.OK =>
               Right(response.json.as[PostBalanceRequestSuccessResponse].response)
-            case status if is4xx(status) || is5xx(status) =>
+            case Status.BAD_REQUEST =>
               try response.json.validate[PostBalanceRequestFunctionalErrorResponse] match {
-                case JsSuccess(functionalError, _) if functionalError.containsErrorType(NotMatchedErrorType) =>
+                case JsSuccess(fe, _) if fe.containsErrorType(NotMatchedErrorType) =>
                   Right(BalanceRequestNotMatched)
+                case jsResult =>
+                  jsResult.map(
+                    fe => logger.info(s"[GuaranteeBalanceConnector][submitBalanceRequest] Returning HTTP response for functional error type ${fe.errorType}")
+                  )
+                  Left(response)
               } catch {
-                case _: Exception =>
+                case e: MismatchedInputException =>
+                  logger.warn(s"[GuaranteeBalanceConnector][submitBalanceRequest] Unable to parse response body as JSON: ${e.getMessage}")
                   Left(response)
               }
+            case status if is4xx(status) || is5xx(status) =>
+              Left(response)
           }
       }
 
@@ -67,6 +77,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
       headers
     )
   }
+  // scalastyle:on cyclomatic.complexity
 
   def queryPendingBalance(balanceId: BalanceId)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] = {
     val url = s"${appConfig.guaranteeBalanceUrl}/balances/${balanceId.value}"
