@@ -31,22 +31,39 @@
 
           {{ csrf() | safe }}
 
-          {{ govukInput({
-            hint: {
-                  text: messages('accessCode.hintText')
-                  },
-            label: {
-              text: messages('accessCode.heading'),
-              isPageHeading: true,
-              classes: "govuk-label--xl govuk-!-padding-bottom-5"
-            },
-            type: "password",
-            id: "value",
-            classes: "govuk-input--width-5",
-            name: "value",
-            value: form.value.value,
-            errorMessage: form.value.error
-          }) }}
+        <div class="govuk-form-group {%- if form.value.error %} govuk-form-group--error{% endif %} ">
+
+           <h1 class="govuk-label-wrapper">
+              <label class="govuk-label govuk-label--xl" for="accessCode">
+                    {{ messages("accessCode.heading") }}
+              </label>
+          </h1>
+
+        <div id="accessCode-hint" class="govuk-hint">
+                {{ messages('accessCode.hintText') }}
+        </div>
+
+         {%- if form.value.error %}
+              <span id="declaration-place-error" class="govuk-error-message">
+                  <span class="govuk-visually-hidden">{{ messages('error.title.prefix') }}</span> {{ form.value.error.text }}
+                  </span>
+         {% endif %}
+
+
+         <input class="govuk-input {%- if form.value.error %} govuk-input--error{% endif %}"
+            id="accessCode"
+            name="value"
+            type="text"
+            aria-describedby="accessCode.hintText"
+            {%- if form.value.value %} value="{{ form.value.value}}"{% endif %}>
+         </div>
+
+
+
+
+
+
+
 
           {{ govukButton({
             text: messages("site.continue")
