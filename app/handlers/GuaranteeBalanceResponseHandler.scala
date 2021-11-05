@@ -62,14 +62,11 @@ class GuaranteeBalanceResponseHandler @Inject() (
       case Right(BalanceRequestFunctionalError(errors)) =>
         logger.warn(s"[GuaranteeBalanceResponseHandler][processResponse]Failed to process Response. BalanceRequestFunctionalError: $errors")
         technicalDifficulties()
-      case Left(failureResponse) =>
-        if (failureResponse.status.equals(TOO_MANY_REQUESTS)) {
+      case Left(failureResponse) if failureResponse.status.equals(TOO_MANY_REQUESTS) =>
           Future.successful(Redirect(controllers.routes.RateLimitController.onPageLoad()))
-        } else {
-          logger.warn(s"[GuaranteeBalanceResponseHandler][processResponse]Failed to process Response: $failureResponse")
-          technicalDifficulties()
-        }
-
+      case Left (failureResponse) =>
+        logger.warn(s"[GuaranteeBalanceResponseHandler][processResponse]Failed to process Response: $failureResponse")
+         technicalDifficulties()
     }
 
   private def processSuccessResponse(balanceRequest: BalanceRequestSuccess)(implicit request: DataRequest[_]): Future[Result] =
