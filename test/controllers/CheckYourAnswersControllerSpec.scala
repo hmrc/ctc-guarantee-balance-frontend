@@ -50,8 +50,8 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
     "return OK and the correct view for a GET" in {
 
-      val application                            = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-      val request                                = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
       val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
 
       val result = route(application, request).value
@@ -120,7 +120,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
       val userAnswers = baseAnswers
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
-      val request     = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+      val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
       when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(false))
 
       val result = route(application, request).value

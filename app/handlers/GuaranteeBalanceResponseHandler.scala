@@ -36,6 +36,7 @@ import play.api.mvc._
 import renderer.Renderer
 import repositories.SessionRepository
 import uk.gov.hmrc.http.HttpResponse
+import play.api.http.Status.TOO_MANY_REQUESTS
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -61,6 +62,8 @@ class GuaranteeBalanceResponseHandler @Inject() (
       case Right(BalanceRequestFunctionalError(errors)) =>
         logger.warn(s"[GuaranteeBalanceResponseHandler][processResponse]Failed to process Response. BalanceRequestFunctionalError: $errors")
         technicalDifficulties()
+      case Left(failureResponse) if failureResponse.status.equals(TOO_MANY_REQUESTS) =>
+        Future.successful(Redirect(controllers.routes.RateLimitController.onPageLoad()))
       case Left(failureResponse) =>
         logger.warn(s"[GuaranteeBalanceResponseHandler][processResponse]Failed to process Response: $failureResponse")
         technicalDifficulties()
