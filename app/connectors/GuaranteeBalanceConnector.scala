@@ -57,9 +57,10 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
                 case JsSuccess(fe, _) if fe.containsErrorType(NotMatchedErrorType) =>
                   Right(BalanceRequestNotMatched)
                 case jsResult =>
-                  jsResult.map(
-                    fe => logger.info(s"[GuaranteeBalanceConnector][submitBalanceRequest] Response contains functional error type(s) ${fe.errorTypes}")
-                  )
+                  logger.info(s"[GuaranteeBalanceConnector][submitBalanceRequest] ${jsResult.fold(
+                    _.toString(),
+                    fe => s"Response contains functional error type(s) ${fe.errorTypes}"
+                  )}")
                   Left(response)
               }
             case status if is4xx(status) || is5xx(status) =>
