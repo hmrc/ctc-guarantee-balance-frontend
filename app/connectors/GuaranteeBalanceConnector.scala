@@ -83,11 +83,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
       HttpReads[HttpResponse].map {
         response =>
           response.status match {
-            case Status.OK =>
-              Right(response.json.as[GetBalanceRequestResponse].request.response match {
-                case Some(response) => response
-                case _              => BalanceRequestPending(balanceId)
-              })
+            case Status.OK                                => Right(processQuerySuccessResponse(balanceId, response))
             case Status.NOT_FOUND                         => Right(BalanceRequestPendingExpired(balanceId))
             case status if is4xx(status) || is5xx(status) => Left(response)
           }
@@ -98,5 +94,18 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
       Seq.empty,
       headers
     )
+  }
+
+  private def processQuerySuccessResponse(balanceId: BalanceId, response: HttpResponse): BalanceRequestResponse = {
+    val requestResponse = response.json.as[GetBalanceRequestResponse].request.response
+    requestResponse match {
+      case Some(response) =>
+        response match {
+          case BalanceRequestFunctionalError(errors) if errors.toList.map(_.errorType).contains(NotMatchedErrorType) =>
+            BalanceRequestNotMatched
+          case _ => response
+        }
+      case _ => BalanceRequestPending(balanceId)
+    }
   }
 }
