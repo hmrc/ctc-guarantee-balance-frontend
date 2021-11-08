@@ -123,4 +123,9 @@ trait ViewSpecAssertions extends Matchers {
 
   def assertPageHasNoSignOutLink(doc: Document): Assertion =
     doc.getElementsByClass("hmrc-sign-out-nav__link").isEmpty mustBe true
+
+  def assertPageHasCaption(doc: Document, expectedText: String): Assertion = {
+    val caption = doc.getElementsByClass("govuk-caption-xl").first()
+    caption.text() mustBe expectedText
+  }
 }

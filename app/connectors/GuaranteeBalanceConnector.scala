@@ -101,7 +101,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
     requestResponse match {
       case Some(response) =>
         response match {
-          case BalanceRequestFunctionalError(errors) if errors.toList.map(_.errorType).contains(NotMatchedErrorType) =>
+          case fe: BalanceRequestFunctionalError if fe.containsErrorType(NotMatchedErrorType) =>
             BalanceRequestNotMatched
           case _ => response
         }

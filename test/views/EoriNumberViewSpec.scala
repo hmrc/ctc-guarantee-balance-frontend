@@ -16,18 +16,22 @@
 
 package views
 
+import org.jsoup.nodes.Element
+
 class EoriNumberViewSpec extends SingleViewSpec("eoriNumber.njk") {
 
+  val input: Element = doc.getElementsByClass("govuk-input").first()
+
   "must have correct width class" in {
-    val doc   = renderDocument().futureValue
-    val input = doc.getElementsByClass("govuk-input").first()
     input.hasClass("govuk-input--width-20") mustBe true
   }
 
   "must have correct ID" in {
-    val doc   = renderDocument().futureValue
-    val input = doc.getElementsByClass("govuk-input").first()
     input.id() mustEqual "eoriNumber"
+  }
+
+  "must render a continue button" in {
+    assertPageHasButton(doc, "site.continue")
   }
 
 }

@@ -41,7 +41,7 @@ abstract class SingleViewSpec(protected val viewUnderTest: String, hasSignOutLin
 
   require(viewUnderTest.endsWith(".njk"), "Expected view with file extension of `.njk`")
 
-  override val messages: Messages = Helpers.stubMessages()
+  implicit override def messages: Messages = Helpers.stubMessages()
 
   private def asDocument(html: Html): Document = Jsoup.parse(html.toString())
 
@@ -76,8 +76,6 @@ abstract class SingleViewSpec(protected val viewUnderTest: String, hasSignOutLin
 
   if (hasSignOutLink) {
     "must render sign out link in header" in {
-      val doc: Document = renderDocument().futureValue
-
       assertPageHasSignOutLink(
         doc = doc,
         expectedText = "Sign out",
@@ -93,5 +91,7 @@ abstract class SingleViewSpec(protected val viewUnderTest: String, hasSignOutLin
       assertPageHasNoSignOutLink(doc)
     }
   }
+
+  lazy val doc: Document = renderDocument().futureValue
 
 }

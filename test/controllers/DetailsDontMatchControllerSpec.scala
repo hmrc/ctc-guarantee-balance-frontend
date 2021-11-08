@@ -21,7 +21,6 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify}
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
@@ -34,20 +33,14 @@ class DetailsDontMatchControllerSpec extends SpecBase with MockitoSugar with App
       val application                            = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
       val request                                = FakeRequest(GET, routes.DetailsDontMatchController.onPageLoad().url)
       val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-      val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
 
       val result = route(application, request).value
 
       status(result) mustEqual OK
 
-      verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
-
-      val expectedJson = Json.obj("checkYourAnswersUrl" -> routes.CheckYourAnswersController.onPageLoad().url)
-
-      val jsonCaptorWithoutConfig: JsObject = jsonCaptor.getValue - configKey
+      verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
 
       templateCaptor.getValue mustEqual "detailsDontMatch.njk"
-      jsonCaptorWithoutConfig mustEqual expectedJson
 
       application.stop()
     }

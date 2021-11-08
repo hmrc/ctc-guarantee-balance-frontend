@@ -16,26 +16,17 @@
 
 package views
 
-import org.jsoup.nodes.Element
+class RateLimitViewSpec extends SingleViewSpec("rateLimit.njk") {
 
-class GuaranteeReferenceNumberViewSpec extends SingleViewSpec("guaranteeReferenceNumber.njk") {
-
-  val input: Element = doc.getElementsByClass("govuk-input").first()
-
-  "must render paragraph text" in {
-    assertContainsText(doc, "guaranteeReferenceNumber.paragraph")
+  "must render correct heading" in {
+    assertPageTitleEqualsMessage(doc, "rateLimit.heading")
   }
 
-  "must have correct width class" in {
-    input.hasClass("govuk-input--width-20") mustBe true
+  "must render paragraph" in {
+    assertContainsText(doc, "rateLimit.paragraph")
   }
 
-  "must have correct ID" in {
-    input.id() mustEqual "guaranteeReferenceNumber"
+  "behave like a page with a submit button" in {
+    assertPageHasButton(doc, "rateLimit.button")
   }
-
-  "must render a continue button" in {
-    assertPageHasButton(doc, "site.continue")
-  }
-
 }

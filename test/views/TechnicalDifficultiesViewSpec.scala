@@ -21,25 +21,20 @@ import play.api.libs.json.Json
 class TechnicalDifficultiesViewSpec extends SingleViewSpec("technicalDifficulties.njk") {
 
   "must render tryAgain text" in {
-    val json = Json.obj()
-    val doc  = renderDocument(json).futureValue
-
     assertContainsText(doc, "technicalDifficulties.tryAgain")
   }
 
   "must render savedAnswers text" in {
-    val json = Json.obj()
-    val doc  = renderDocument(json).futureValue
-
     assertContainsText(doc, "technicalDifficulties.savedAnswers")
   }
 
   "display link with id contact-link" in {
+    val url = frontendAppConfig.nctsEnquiriesUrl
     val json = Json.obj(
-      "contactUrl" -> frontendAppConfig.nctsEnquiriesUrl
+      "contactUrl" -> url
     )
     val doc = renderDocument(json).futureValue
 
-    assertPageHasLink(doc, "contact-link", "technicalDifficulties.contact.link", frontendAppConfig.nctsEnquiriesUrl)
+    assertPageHasLink(doc, "contact-link", "technicalDifficulties.contact.link", url)
   }
 }

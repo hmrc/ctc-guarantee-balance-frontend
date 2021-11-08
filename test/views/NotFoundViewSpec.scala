@@ -16,4 +16,18 @@
 
 package views
 
-class NotFoundViewSpec extends SingleViewSpec("notFound.njk", hasSignOutLink = true)
+class NotFoundViewSpec extends SingleViewSpec("notFound.njk") {
+
+  "must render correct heading" in {
+    assertPageTitleEqualsMessage(doc, "pageNotFound.heading")
+  }
+
+  "must render correct content" in {
+    assertContainsText(doc, "pageNotFound.paragraph1")
+
+    assertContainsText(doc, "pageNotFound.paragraph2")
+
+    assertContainsText(doc, "pageNotFound.paragraph3Start")
+    assertPageHasLink(doc, "contact", "pageNotFound.contactLink", frontendAppConfig.nctsUrl)
+  }
+}

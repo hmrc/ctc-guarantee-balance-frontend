@@ -16,26 +16,13 @@
 
 package views
 
-import org.jsoup.nodes.Element
+class UnauthorisedViewSpec extends SingleViewSpec("unauthorised.njk") {
 
-class GuaranteeReferenceNumberViewSpec extends SingleViewSpec("guaranteeReferenceNumber.njk") {
-
-  val input: Element = doc.getElementsByClass("govuk-input").first()
-
-  "must render paragraph text" in {
-    assertContainsText(doc, "guaranteeReferenceNumber.paragraph")
+  "must render correct heading" in {
+    assertPageTitleEqualsMessage(doc, "unauthorised.heading")
   }
 
-  "must have correct width class" in {
-    input.hasClass("govuk-input--width-20") mustBe true
+  "must render paragraph" in {
+    assertContainsText(doc, "unauthorised.paragraph1")
   }
-
-  "must have correct ID" in {
-    input.id() mustEqual "guaranteeReferenceNumber"
-  }
-
-  "must render a continue button" in {
-    assertPageHasButton(doc, "site.continue")
-  }
-
 }
