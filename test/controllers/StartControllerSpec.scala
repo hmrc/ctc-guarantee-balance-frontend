@@ -33,6 +33,7 @@ import java.time.LocalDateTime
 class StartControllerSpec extends SpecBase with MockitoSugar with NunjucksSupport with JsonMatchers with AppWithDefaultMockFixtures {
 
   def startRoute(referral: Referral): String = routes.StartController.start(referral).url
+  def returnToStartRoute(): String           = routes.StartController.returnToStart().url
 
   "Start Controller" - {
 
@@ -96,5 +97,20 @@ class StartControllerSpec extends SpecBase with MockitoSugar with NunjucksSuppor
       }
     }
 
+    "must return to the start page" in {
+      val application =
+        applicationBuilder(userAnswers = None)
+          .build()
+
+      val request =
+        FakeRequest(GET, returnToStartRoute())
+
+      val result = route(application, request).value
+
+      status(result) mustEqual SEE_OTHER
+      redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
+
+      application.stop()
+    }
   }
 }

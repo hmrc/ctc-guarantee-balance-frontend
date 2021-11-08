@@ -39,6 +39,10 @@ class StartController @Inject() (
     with I18nSupport
     with NunjucksSupport {
 
+  def returnToStart(): Action[AnyContent] = (identify andThen getData) {
+    Redirect(routes.EoriNumberController.onPageLoad(NormalMode))
+  }
+
   def start(referral: Referral): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
       val userAnswers = UserAnswers(id = request.internalId)

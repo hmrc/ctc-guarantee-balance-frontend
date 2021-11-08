@@ -7,6 +7,7 @@ GET        /keep-alive                              controllers.KeepAliveControl
 
 GET        /this-service-has-been-reset             controllers.SessionExpiredController.onPageLoad()
 
+GET        /return-to-start                         controllers.StartController.returnToStart()
 GET        /start                                   controllers.StartController.start(referral: Referral ?= Referral.default)
 
 GET        /eori-number                             controllers.EoriNumberController.onPageLoad(mode: Mode = NormalMode)
