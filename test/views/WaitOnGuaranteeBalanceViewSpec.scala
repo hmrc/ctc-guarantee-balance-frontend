@@ -16,27 +16,17 @@
 
 package views
 
-import play.api.libs.json.Json
-
 class WaitOnGuaranteeBalanceViewSpec extends SingleViewSpec("waitOnGuaranteeBalance.njk", hasSignOutLink = true) {
 
   "must render correct heading" in {
-    val json = Json.obj()
-    val doc  = renderDocument(json).futureValue
-
     assertPageTitleEqualsMessage(doc, "waitOnGuaranteeBalance.heading")
   }
 
   "must render waitOnGuaranteeBalance text" in {
-    val json = Json.obj()
-    val doc  = renderDocument(json).futureValue
-
     assertContainsText(doc, "waitOnGuaranteeBalance.paragraph")
   }
 
   "behave like a page with a submit button" in {
-    val json = Json.obj()
-    val doc  = renderDocument(json).futureValue
     assertPageHasButton(doc, "site.continueWaiting")
   }
 }

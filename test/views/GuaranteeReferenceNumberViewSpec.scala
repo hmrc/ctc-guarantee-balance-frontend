@@ -16,22 +16,21 @@
 
 package views
 
+import org.jsoup.nodes.Element
+
 class GuaranteeReferenceNumberViewSpec extends SingleViewSpec("guaranteeReferenceNumber.njk") {
 
+  val input: Element = doc.getElementsByClass("govuk-input").first()
+
   "must render paragraph text" in {
-    val doc = renderDocument().futureValue
     assertContainsText(doc, "guaranteeReferenceNumber.paragraph")
   }
 
   "must have correct width class" in {
-    val doc   = renderDocument().futureValue
-    val input = doc.getElementsByClass("govuk-input").first()
     input.hasClass("govuk-input--width-20") mustBe true
   }
 
   "must have correct ID" in {
-    val doc   = renderDocument().futureValue
-    val input = doc.getElementsByClass("govuk-input").first()
     input.id() mustEqual "guaranteeReferenceNumber"
   }
 

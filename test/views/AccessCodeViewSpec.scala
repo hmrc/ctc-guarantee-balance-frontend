@@ -16,30 +16,31 @@
 
 package views
 
+import org.jsoup.nodes.Element
+
 class AccessCodeViewSpec extends SingleViewSpec("accessCode.njk") {
 
+  val input: Element = doc.getElementsByClass("govuk-input").first()
+
   "must have password-type input" in {
-    val doc   = renderDocument().futureValue
-    val input = doc.getElementsByClass("govuk-input").first()
     input.attr("type") mustEqual "password"
   }
 
   "must have correct width class" in {
-    val doc   = renderDocument().futureValue
-    val input = doc.getElementsByClass("govuk-input").first()
     input.hasClass("govuk-input--width-5") mustBe true
   }
 
   "must have correct ID" in {
-    val doc   = renderDocument().futureValue
-    val input = doc.getElementsByClass("govuk-input").first()
     input.id() mustEqual "accessCode"
   }
 
   "must render hint text" in {
-    val doc  = renderDocument().futureValue
     val hint = doc.getElementsByClass("govuk-hint").first()
     hint.text() mustEqual "accessCode.hintText"
+  }
+
+  "must have autocomplete off" in {
+    input.attr("autocomplete") mustBe "off"
   }
 
 }

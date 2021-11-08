@@ -30,7 +30,7 @@ case class PostBalanceRequestFunctionalErrorResponse(
   message: String,
   response: BalanceRequestFunctionalError
 ) extends PostResponse {
-  def containsErrorType(errorType: ErrorType): Boolean = response.errors.exists(_.errorType == errorType)
+  def containsErrorType(errorType: ErrorType): Boolean = response.containsErrorType(errorType)
   def errorTypes: String                               = response.errors.map(_.errorType.value).toList.mkString(",")
 }
 

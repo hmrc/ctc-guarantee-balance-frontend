@@ -76,8 +76,6 @@ abstract class SingleViewSpec(protected val viewUnderTest: String, hasSignOutLin
 
   if (hasSignOutLink) {
     "must render sign out link in header" in {
-      val doc: Document = renderDocument().futureValue
-
       assertPageHasSignOutLink(
         doc = doc,
         expectedText = "Sign out",
@@ -93,5 +91,7 @@ abstract class SingleViewSpec(protected val viewUnderTest: String, hasSignOutLin
       assertPageHasNoSignOutLink(doc)
     }
   }
+
+  lazy val doc: Document = renderDocument().futureValue
 
 }
