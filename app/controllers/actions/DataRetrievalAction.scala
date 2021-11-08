@@ -29,11 +29,11 @@ class DataRetrievalActionImpl @Inject() (
     extends DataRetrievalAction {
 
   override protected def transform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] =
-    sessionRepository.get(request.eoriNumber).map {
+    sessionRepository.get(request.internalId).map {
       case None =>
-        OptionalDataRequest(request.request, request.eoriNumber, None)
+        OptionalDataRequest(request.request, request.internalId, None)
       case Some(userAnswers) =>
-        OptionalDataRequest(request.request, request.eoriNumber, Some(userAnswers))
+        OptionalDataRequest(request.request, request.internalId, Some(userAnswers))
     }
 }
 

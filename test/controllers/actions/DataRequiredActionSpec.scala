@@ -60,7 +60,7 @@ class DataRequiredActionSpec extends SpecBase with EitherValues with AppWithDefa
         whenReady(result) {
           result =>
             result.value.userAnswers mustBe UserAnswers("eoriNumber", lastUpdated = dateTime)
-            result.value.eoriNumber mustBe "id"
+            result.value.internalId mustBe "id"
         }
       }
     }

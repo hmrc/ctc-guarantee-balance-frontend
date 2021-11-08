@@ -72,7 +72,7 @@ class CheckYourAnswersController @Inject() (
         guaranteeReferenceNumber <- request.userAnswers.get(GuaranteeReferenceNumberPage)
         taxIdentifier            <- request.userAnswers.get(EoriNumberPage)
         accessCode               <- request.userAnswers.get(AccessCodePage)
-      } yield checkRateLimit(request.eoriNumber, guaranteeReferenceNumber).flatMap {
+      } yield checkRateLimit(request.internalId, guaranteeReferenceNumber).flatMap {
         lockFree =>
           if (lockFree) {
             guaranteeBalanceService

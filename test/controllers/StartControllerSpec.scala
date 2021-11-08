@@ -59,7 +59,7 @@ class StartControllerSpec extends SpecBase with MockitoSugar with NunjucksSuppor
           val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
           verify(mockSessionRepository).set(uaCaptor.capture)
 
-          uaCaptor.getValue.lastUpdated mustBe time // check that user answers have been persisted
+          uaCaptor.getValue.lastUpdated.isAfter(time) mustBe true // check that new user answers have been created
           uaCaptor.getValue.get(ReferralPage).get mustBe referral
 
           application.stop()
