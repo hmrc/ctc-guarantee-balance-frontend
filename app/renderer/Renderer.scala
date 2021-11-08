@@ -51,6 +51,7 @@ class Renderer @Inject() (appConfig: FrontendAppConfig, renderer: NunjucksRender
     "userResearchUrl"                -> appConfig.userResearchUrl,
     "showPhaseBanner"                -> appConfig.showPhaseBanner,
     "showUserResearchBanner"         -> appConfig.showUserResearchBanner,
-    "manageTransitMovementsUrl"      -> appConfig.manageTransitMovementsUrl
+    "manageTransitMovementsUrl"      -> appConfig.manageTransitMovementsUrl,
+    "nctsUrl"                        -> appConfig.nctsUrl
   )
 }

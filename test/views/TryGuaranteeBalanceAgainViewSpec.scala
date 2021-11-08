@@ -18,7 +18,7 @@ package views
 
 import controllers.routes
 
-class TryGuaranteeBalanceAgainViewSpec extends SingleViewSpec("tryGuaranteeBalanceAgain.njk", hasSignOutLink = true) {
+class TryGuaranteeBalanceAgainViewSpec extends SingleViewSpec("tryGuaranteeBalanceAgain.njk") {
 
   "must render correct heading" in {
     assertPageTitleEqualsMessage(doc, "tryGuaranteeBalanceAgain.heading")

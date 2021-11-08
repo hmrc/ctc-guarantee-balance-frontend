@@ -16,7 +16,7 @@
 
 package views
 
-class WaitOnGuaranteeBalanceViewSpec extends SingleViewSpec("waitOnGuaranteeBalance.njk", hasSignOutLink = true) {
+class WaitOnGuaranteeBalanceViewSpec extends SingleViewSpec("waitOnGuaranteeBalance.njk") {
 
   "must render correct heading" in {
     assertPageTitleEqualsMessage(doc, "waitOnGuaranteeBalance.heading")

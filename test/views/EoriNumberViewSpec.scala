@@ -30,4 +30,8 @@ class EoriNumberViewSpec extends SingleViewSpec("eoriNumber.njk") {
     input.id() mustEqual "eoriNumber"
   }
 
+  "must render a continue button" in {
+    assertPageHasButton(doc, "site.continue")
+  }
+
 }

@@ -41,7 +41,7 @@ abstract class SingleViewSpec(protected val viewUnderTest: String, hasSignOutLin
 
   require(viewUnderTest.endsWith(".njk"), "Expected view with file extension of `.njk`")
 
-  override val messages: Messages = Helpers.stubMessages()
+  implicit override def messages: Messages = Helpers.stubMessages()
 
   private def asDocument(html: Html): Document = Jsoup.parse(html.toString())
 

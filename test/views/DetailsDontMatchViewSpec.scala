@@ -16,26 +16,21 @@
 
 package views
 
-import org.jsoup.nodes.Element
+class DetailsDontMatchViewSpec extends SingleViewSpec("detailsDontMatch.njk") {
 
-class GuaranteeReferenceNumberViewSpec extends SingleViewSpec("guaranteeReferenceNumber.njk") {
-
-  val input: Element = doc.getElementsByClass("govuk-input").first()
-
-  "must render paragraph text" in {
-    assertContainsText(doc, "guaranteeReferenceNumber.paragraph")
+  "must have correct heading" in {
+    assertPageTitleEqualsMessage(doc, "detailsDontMatch.heading")
   }
 
-  "must have correct width class" in {
-    input.hasClass("govuk-input--width-20") mustBe true
-  }
+  "must have paragraph text and link" in {
+    assertContainsText(doc, "detailsDontMatch.youMust")
 
-  "must have correct ID" in {
-    input.id() mustEqual "guaranteeReferenceNumber"
-  }
-
-  "must render a continue button" in {
-    assertPageHasButton(doc, "site.continue")
+    assertPageHasLink(
+      doc = doc,
+      id = "try-again",
+      expectedText = "detailsDontMatch.checkYourAnswers",
+      expectedHref = controllers.routes.CheckYourAnswersController.onPageLoad().url
+    )
   }
 
 }

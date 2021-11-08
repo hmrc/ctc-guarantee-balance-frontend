@@ -17,13 +17,12 @@
 package controllers
 
 import controllers.actions._
-import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class DetailsDontMatchController @Inject() (
@@ -39,10 +38,6 @@ class DetailsDontMatchController @Inject() (
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      val json = Json.obj(
-        "checkYourAnswersUrl" -> routes.CheckYourAnswersController.onPageLoad().url
-      )
-
-      renderer.render("detailsDontMatch.njk", json).map(Ok(_))
+      renderer.render("detailsDontMatch.njk").map(Ok(_))
   }
 }

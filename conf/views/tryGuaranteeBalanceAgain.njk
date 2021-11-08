@@ -18,15 +18,16 @@
       </p>
 
       <form action="{{ routes.controllers.CheckYourAnswersController.onSubmit().url }}" method="post">
-         {{ csrf() | safe }}
 
-         {{ govukButton({
-            text: messages("site.tryAgain"),
-            preventDoubleClick: true,
-            attributes: {id: "submit"}
+        {{ csrf() | safe }}
 
-         }) }}
+        {{ govukButton({
+          text: messages("site.tryAgain"),
+          preventDoubleClick: true,
+          attributes: {id: "submit"}
+        }) }}
+
       </form>
-   </div>
+    </div>
   </div>
 {% endblock %}

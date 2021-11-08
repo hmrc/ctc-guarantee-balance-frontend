@@ -54,6 +54,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   lazy val loginContinueUrl: String = configuration.get[String]("urls.loginContinue")
 
   lazy val guaranteeBalanceUrl: String       = configuration.get[Service]("microservice.services.common-transit-convention-guarantee-balance").baseUrl
+  lazy val nctsUrl: String                   = configuration.get[String]("urls.ncts")
   lazy val nctsEnquiriesUrl: String          = configuration.get[String]("urls.nctsEnquiries")
   lazy val manageTransitMovementsUrl: String = configuration.get[String]("urls.manageTransitMovements")
 

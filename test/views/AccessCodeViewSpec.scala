@@ -43,4 +43,8 @@ class AccessCodeViewSpec extends SingleViewSpec("accessCode.njk") {
     input.attr("autocomplete") mustBe "off"
   }
 
+  "must render a continue button" in {
+    assertPageHasButton(doc, "site.continue")
+  }
+
 }
