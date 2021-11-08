@@ -26,8 +26,6 @@ object Referral extends Enumerable.Implicits {
 
   case object NCTS extends WithName("ncts") with Referral
 
-  val default: Referral = GovUK
-
   implicit val jsLiteral: JavascriptLiteral[Referral] = (referral: Referral) => s""""$referral""""
 
   val values: Set[Referral] = Set(

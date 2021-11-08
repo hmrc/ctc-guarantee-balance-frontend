@@ -75,7 +75,7 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
               val updatedAnswers = answers.set(ReferralPage, referral).success.value
               navigator
                 .nextPage(UnknownPage, mode, updatedAnswers)
-                .mustBe(routes.StartController.start(referral))
+                .mustBe(routes.StartController.start())
           }
         }
 

@@ -19,15 +19,16 @@ package controllers
 import controllers.actions._
 import models.{NormalMode, Referral, UserAnswers}
 import pages.ReferralPage
+import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Success
+import scala.util.{Success, Try}
 
 class StartController @Inject() (
   override val messagesApi: MessagesApi,
@@ -38,18 +39,27 @@ class StartController @Inject() (
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
-    with NunjucksSupport {
+    with NunjucksSupport
+    with Logging {
 
-  def start(referral: Referral): Action[AnyContent] = (identify andThen getData).async {
+  def start(referral: Option[Referral]): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
-      val userAnswers = request.userAnswers match {
-        case Some(userAnswers) => Success(userAnswers.clear)
-        case None              => UserAnswers(id = request.internalId).set(ReferralPage, referral)
-      }
+      def storeUserAnswersAndRedirect(userAnswers: Try[UserAnswers]): Future[Result] =
+        for {
+          updatedAnswers <- Future.fromTry(userAnswers)
+          _              <- sessionRepository.set(updatedAnswers)
+        } yield Redirect(routes.EoriNumberController.onPageLoad(NormalMode))
 
-      for {
-        updatedAnswers <- Future.fromTry(userAnswers)
-        _              <- sessionRepository.set(updatedAnswers)
-      } yield Redirect(routes.EoriNumberController.onPageLoad(NormalMode))
+      (request.userAnswers, referral) match {
+        case (Some(userAnswers), None) =>
+          logger.info("[StartController][start] User has come from within this service. Preserving session.")
+          storeUserAnswersAndRedirect(Success(userAnswers))
+        case (_, Some(referral)) =>
+          logger.info(s"[StartController][start] User has come from $referral. Creating new user answers.")
+          storeUserAnswersAndRedirect(UserAnswers(id = request.internalId).set(ReferralPage, referral))
+        case (None, None) =>
+          logger.info(s"[StartController][start] Cannot determine where user has come from. Redirecting to session expired.")
+          Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
+      }
   }
 }
