@@ -313,32 +313,27 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
       }
 
       "must return balance request not matched for a functional error with error type 12" in {
-        val balanceId = BalanceId(testUuid)
+        val balanceId   = BalanceId(testUuid)
+        val requestedAt = Instant.now().minusSeconds(300)
+        val completedAt = Instant.now().minusSeconds(1)
         val balanceRequestNotMatchedJson: String =
-          """
-            | {
-            |   "code": "FUNCTIONAL_ERROR",
-            |   "message": "The request was rejected by the guarantee management system",
-            |   "response": {
-            |     "errors": [
-            |       {
-            |         "errorType": 12,
-            |         "errorPointer": "Foo.Bar(1).Baz"
-            |       }
-            |     ]
-            |   }
-            | }
-            |""".stripMargin
+          s"""
+             | {
+             |   "request" : {
+             |     "balanceId": "22b9899e-24ee-48e6-a189-97d1f45391c4",
+             |     "taxIdentifier": "taxid",
+             |     "guaranteeReference": "guarref",
+             |     "requestedAt": "$requestedAt",
+             |     "completedAt": "$completedAt",
+             |     "response":{"errors":[{"errorType":12,"errorPointer":"Foo.Bar(1).Baz"}],"status":"FUNCTIONAL_ERROR"}
+             |   }
+             | }
+             |""".stripMargin
 
         server.stubFor(
           get(urlEqualTo(queryBalanceRequestUrlFor(balanceId)))
             .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
-            .willReturn(
-              aResponse()
-                .withStatus(Status.OK)
-                .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
-                .withBody(balanceRequestNotMatchedJson)
-            )
+            .willReturn(okJson(balanceRequestNotMatchedJson))
         )
 
         val result = connector.queryPendingBalance(balanceId).futureValue
