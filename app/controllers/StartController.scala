@@ -42,8 +42,8 @@ class StartController @Inject() (
 
   def start(referral: Referral): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
-      val userAnswers = request.userAnswers.map(_.clear) match {
-        case Some(userAnswers) => Success(userAnswers)
+      val userAnswers = request.userAnswers match {
+        case Some(userAnswers) => Success(userAnswers.clear)
         case None              => UserAnswers(id = request.internalId).set(ReferralPage, referral)
       }
 
