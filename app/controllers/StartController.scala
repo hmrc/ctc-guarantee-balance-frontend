@@ -27,6 +27,7 @@ import uk.gov.hmrc.viewmodels.NunjucksSupport
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Success
 
 class StartController @Inject() (
   override val messagesApi: MessagesApi,
@@ -41,10 +42,13 @@ class StartController @Inject() (
 
   def start(referral: Referral): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
-      val userAnswers = UserAnswers(id = request.internalId)
+      val userAnswers = request.userAnswers.map(_.clear) match {
+        case Some(userAnswers) => Success(userAnswers)
+        case None              => UserAnswers(id = request.internalId).set(ReferralPage, referral)
+      }
 
       for {
-        updatedAnswers <- Future.fromTry(userAnswers.set(ReferralPage, referral))
+        updatedAnswers <- Future.fromTry(userAnswers)
         _              <- sessionRepository.set(updatedAnswers)
       } yield Redirect(routes.EoriNumberController.onPageLoad(NormalMode))
   }
