@@ -52,7 +52,7 @@ class StartController @Inject() (
 
       (request.userAnswers, referral) match {
         case (Some(userAnswers), None) =>
-          logger.info("[StartController][start] User has come from within this service. Preserving session.")
+          logger.info("[StartController][start] User has come from within this service. Preserving user answers.")
           storeUserAnswersAndRedirect(Success(userAnswers))
         case (_, Some(referral)) =>
           logger.info(s"[StartController][start] User has come from $referral. Creating new user answers.")

@@ -101,7 +101,7 @@ class StartControllerSpec extends SpecBase with MockitoSugar with NunjucksSuppor
     }
     // format: on
 
-    "must redirect to session expired if user has come from this service but there are no existing user answers" in {
+    "must redirect to session expired if no referral and no existing user answers" in {
 
       val application =
         applicationBuilder(userAnswers = None)
