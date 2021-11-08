@@ -41,7 +41,7 @@ class StartController @Inject() (
 
   def start(referral: Referral): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
-      val userAnswers = request.userAnswers getOrElse UserAnswers(id = request.eoriNumber)
+      val userAnswers = UserAnswers(id = request.internalId)
 
       for {
         updatedAnswers <- Future.fromTry(userAnswers.set(ReferralPage, referral))
