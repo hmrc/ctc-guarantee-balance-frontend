@@ -51,11 +51,6 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
     }
   }
 
-  val LEGACY_ENROLMENT_KEY    = "HMCE-NCTS-ORG"
-  val LEGACY_ENROLMENT_ID_KEY = "VATRegNoTURN"
-  val NEW_ENROLMENT_KEY       = "HMRC-CTC-ORG"
-  val NEW_ENROLMENT_ID_KEY    = "EORINumber"
-
   def createEnrolment(key: String, identifierKey: Option[String], id: String, state: String): Enrolment =
     Enrolment(
       key = key,
@@ -96,14 +91,13 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           "when new enrolment" in {
 
-            val enrolment  = createEnrolment(NEW_ENROLMENT_KEY, Some(NEW_ENROLMENT_ID_KEY), "123", "Activated")
+            val enrolment  = createEnrolment(frontendAppConfig.newEnrolmentKey, None, "123", "Activated")
             val enrolments = Enrolments(Set(enrolment))
 
             when(mockAuthConnector.authorise[Enrolments ~ Option[String]](any(), any())(any(), any()))
               .thenReturn(Future.successful(enrolments ~ Some("internalId")))
 
-            val bodyParsers       = app.injector.instanceOf[BodyParsers.Default]
-            val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
+            val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
             val authAction = new AuthenticatedIdentifierAction(mockAuthConnector, frontendAppConfig, bodyParsers)
 
@@ -117,14 +111,13 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           "when legacy enrolment" in {
 
-            val enrolment  = createEnrolment(LEGACY_ENROLMENT_KEY, Some(LEGACY_ENROLMENT_ID_KEY), "123", "Activated")
+            val enrolment  = createEnrolment(frontendAppConfig.legacyEnrolmentKey, None, "123", "Activated")
             val enrolments = Enrolments(Set(enrolment))
 
             when(mockAuthConnector.authorise[Enrolments ~ Option[String]](any(), any())(any(), any()))
               .thenReturn(Future.successful(enrolments ~ Some("internalId")))
 
-            val bodyParsers       = app.injector.instanceOf[BodyParsers.Default]
-            val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
+            val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
             val authAction = new AuthenticatedIdentifierAction(mockAuthConnector, frontendAppConfig, bodyParsers)
 
@@ -143,8 +136,7 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
         when(mockAuthConnector.authorise[Enrolments ~ Option[String]](any(), any())(any(), any()))
           .thenReturn(Future.successful(emptyEnrolments ~ None))
 
-        val bodyParsers       = app.injector.instanceOf[BodyParsers.Default]
-        val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
+        val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
         val authAction = new AuthenticatedIdentifierAction(mockAuthConnector, frontendAppConfig, bodyParsers)
 

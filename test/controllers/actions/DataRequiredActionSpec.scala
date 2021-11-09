@@ -20,6 +20,7 @@ import base.{AppWithDefaultMockFixtures, SpecBase}
 import controllers.routes
 import models.UserAnswers
 import models.requests.{DataRequest, OptionalDataRequest}
+import org.scalacheck.Arbitrary.arbitrary
 import org.scalatest.EitherValues
 import play.api.mvc.Result
 import play.api.test.Helpers._
@@ -40,12 +41,15 @@ class DataRequiredActionSpec extends SpecBase with EitherValues with AppWithDefa
 
       "must return Left and redirect to session expired" in {
 
-        val harness = Harness.callRefine(OptionalDataRequest(fakeRequest, "id", None))
+        forAll(arbitrary[String], arbitrary[Boolean]) {
+          case (id, isEnrolled) =>
+            val harness = Harness.callRefine(OptionalDataRequest(fakeRequest, id, None, isEnrolled))
 
-        val result = harness.map(_.left.value)
+            val result = harness.map(_.left.value)
 
-        status(result) mustBe 303
-        redirectLocation(result).value mustBe routes.SessionExpiredController.onPageLoad().url
+            status(result) mustBe 303
+            redirectLocation(result).value mustBe routes.SessionExpiredController.onPageLoad().url
+        }
       }
     }
 
@@ -55,12 +59,16 @@ class DataRequiredActionSpec extends SpecBase with EitherValues with AppWithDefa
 
         val dateTime = LocalDateTime.now()
 
-        val result = Harness.callRefine(OptionalDataRequest(fakeRequest, "id", Some(UserAnswers("eoriNumber", lastUpdated = dateTime))))
+        forAll(arbitrary[String], arbitrary[Boolean]) {
+          case (id, isEnrolled) =>
+            val result = Harness.callRefine(OptionalDataRequest(fakeRequest, id, Some(UserAnswers(id, lastUpdated = dateTime)), isEnrolled))
 
-        whenReady(result) {
-          result =>
-            result.value.userAnswers mustBe UserAnswers("eoriNumber", lastUpdated = dateTime)
-            result.value.internalId mustBe "id"
+            whenReady(result) {
+              result =>
+                result.value.userAnswers mustBe UserAnswers(id, lastUpdated = dateTime)
+                result.value.internalId mustBe id
+                result.value.isEnrolled mustBe isEnrolled
+            }
         }
       }
     }

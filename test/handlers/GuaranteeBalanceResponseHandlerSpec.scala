@@ -57,7 +57,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
   implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
 
   val mockRequest      = mock[Request[AnyContent]]
-  implicit val request = DataRequest(mockRequest, "eoriNumber", populatedUserAnswers)
+  implicit val request = DataRequest(mockRequest, "eoriNumber", populatedUserAnswers, isEnrolled = false)
 
   private lazy val handler: GuaranteeBalanceResponseHandler = app.injector.instanceOf[GuaranteeBalanceResponseHandler]
   "GuaranteeBalanceResponseHandlerSpec" - {
