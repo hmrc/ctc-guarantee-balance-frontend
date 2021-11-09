@@ -49,7 +49,7 @@ class AuthenticatedIdentifierAction @Inject() (
     authorised(EmptyPredicate)
       .retrieve(Retrievals.allEnrolments and Retrievals.internalId) {
         case enrolments ~ Some(internalId) =>
-          def lookForEnrolment(key: String)      = enrolments.enrolments.filter(_.isActivated).find(_.key.equals(key))
+          def lookForEnrolment(key: String)           = enrolments.enrolments.filter(_.isActivated).find(_.key.equals(key))
           lazy val newEnrolment: Option[Enrolment]    = lookForEnrolment(config.newEnrolmentKey)
           lazy val legacyEnrolment: Option[Enrolment] = lookForEnrolment(config.legacyEnrolmentKey)
 
