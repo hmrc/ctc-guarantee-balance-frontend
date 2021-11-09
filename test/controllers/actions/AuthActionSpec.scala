@@ -19,14 +19,16 @@ package controllers.actions
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import com.google.inject.Inject
 import config.FrontendAppConfig
+import controllers.actions.AuthActionSpec._
 import controllers.routes
+import models.requests.IdentifierRequest
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import play.api.mvc.{BodyParsers, Results}
+import play.api.mvc.{Action, AnyContent, BodyParsers, Results}
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve.Retrieval
+import uk.gov.hmrc.auth.core.retrieve.{~, Retrieval}
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -38,43 +40,116 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   class Harness(authAction: IdentifierAction) {
 
-    def onPageLoad() = authAction {
-      _ => Results.Ok
+    def test(expectedIdentifierRequest: Option[IdentifierRequest[AnyContent]] = None): Action[AnyContent] = authAction {
+      request =>
+        expectedIdentifierRequest.map {
+          expected =>
+            request.internalId mustEqual expected.internalId
+            request.isEnrolled mustEqual expected.isEnrolled
+        }
+        Results.Ok
     }
   }
+
+  val LEGACY_ENROLMENT_KEY    = "HMCE-NCTS-ORG"
+  val LEGACY_ENROLMENT_ID_KEY = "VATRegNoTURN"
+  val NEW_ENROLMENT_KEY       = "HMRC-CTC-ORG"
+  val NEW_ENROLMENT_ID_KEY    = "EORINumber"
+
+  def createEnrolment(key: String, identifierKey: Option[String], id: String, state: String): Enrolment =
+    Enrolment(
+      key = key,
+      identifiers = identifierKey match {
+        case Some(idKey) => Seq(EnrolmentIdentifier(idKey, id))
+        case None        => Seq.empty
+      },
+      state = state
+    )
+
+  val emptyEnrolments: Enrolments = Enrolments(Set())
 
   "Auth Action" - {
 
     "when the user has logged in" - {
 
-      "must return OK when internal id is available" in {
+      "must return OK when internal id is available" - {
 
-        when(mockAuthConnector.authorise[Option[String]](any(), any())(any(), any()))
-          .thenReturn(Future.successful(Some("internalId")))
+        "with isEnrolled false when not enrolled" in {
 
-        val bodyParsers       = app.injector.instanceOf[BodyParsers.Default]
-        val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
+          when(mockAuthConnector.authorise[Enrolments ~ Option[String]](any(), any())(any(), any()))
+            .thenReturn(Future.successful(emptyEnrolments ~ Some("internalId")))
 
-        val authAction = new AuthenticatedIdentifierAction(mockAuthConnector, frontendAppConfig, bodyParsers)
+          val bodyParsers       = app.injector.instanceOf[BodyParsers.Default]
+          val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
 
-        val controller = new Harness(authAction)
-        val result     = controller.onPageLoad()(fakeRequest)
+          val authAction = new AuthenticatedIdentifierAction(mockAuthConnector, frontendAppConfig, bodyParsers)
 
-        status(result) mustBe OK
+          val expectedIdentifierRequest: IdentifierRequest[AnyContent] = IdentifierRequest(fakeRequest, "internalId", isEnrolled = false)
+
+          val harness = new Harness(authAction)
+          val result  = harness.test(Some(expectedIdentifierRequest))(fakeRequest)
+
+          status(result) mustBe OK
+        }
+
+        "with isEnrolled true when enrolled" - {
+
+          "when new enrolment" in {
+
+            val enrolment  = createEnrolment(NEW_ENROLMENT_KEY, Some(NEW_ENROLMENT_ID_KEY), "123", "Activated")
+            val enrolments = Enrolments(Set(enrolment))
+
+            when(mockAuthConnector.authorise[Enrolments ~ Option[String]](any(), any())(any(), any()))
+              .thenReturn(Future.successful(enrolments ~ Some("internalId")))
+
+            val bodyParsers       = app.injector.instanceOf[BodyParsers.Default]
+            val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
+
+            val authAction = new AuthenticatedIdentifierAction(mockAuthConnector, frontendAppConfig, bodyParsers)
+
+            val expectedIdentifierRequest: IdentifierRequest[AnyContent] = IdentifierRequest(fakeRequest, "internalId", isEnrolled = true)
+
+            val harness = new Harness(authAction)
+            val result  = harness.test(Some(expectedIdentifierRequest))(fakeRequest)
+
+            status(result) mustBe OK
+          }
+
+          "when legacy enrolment" in {
+
+            val enrolment  = createEnrolment(LEGACY_ENROLMENT_KEY, Some(LEGACY_ENROLMENT_ID_KEY), "123", "Activated")
+            val enrolments = Enrolments(Set(enrolment))
+
+            when(mockAuthConnector.authorise[Enrolments ~ Option[String]](any(), any())(any(), any()))
+              .thenReturn(Future.successful(enrolments ~ Some("internalId")))
+
+            val bodyParsers       = app.injector.instanceOf[BodyParsers.Default]
+            val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
+
+            val authAction = new AuthenticatedIdentifierAction(mockAuthConnector, frontendAppConfig, bodyParsers)
+
+            val expectedIdentifierRequest: IdentifierRequest[AnyContent] = IdentifierRequest(fakeRequest, "internalId", isEnrolled = true)
+
+            val harness = new Harness(authAction)
+            val result  = harness.test(Some(expectedIdentifierRequest))(fakeRequest)
+
+            status(result) mustBe OK
+          }
+        }
       }
 
       "must return exception when internalId is unavailable " in {
 
-        when(mockAuthConnector.authorise[Option[String]](any(), any())(any(), any()))
-          .thenReturn(Future.successful(None))
+        when(mockAuthConnector.authorise[Enrolments ~ Option[String]](any(), any())(any(), any()))
+          .thenReturn(Future.successful(emptyEnrolments ~ None))
 
         val bodyParsers       = app.injector.instanceOf[BodyParsers.Default]
         val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
 
         val authAction = new AuthenticatedIdentifierAction(mockAuthConnector, frontendAppConfig, bodyParsers)
 
-        val controller = new Harness(authAction)
-        val result     = controller.onPageLoad()(fakeRequest)
+        val harness = new Harness(authAction)
+        val result  = harness.test()(fakeRequest)
 
         whenReady(result.failed) {
           result =>
@@ -90,8 +165,8 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
         val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
         val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new MissingBearerToken), frontendAppConfig, bodyParsers)
-        val controller = new Harness(authAction)
-        val result     = controller.onPageLoad()(fakeRequest)
+        val harness    = new Harness(authAction)
+        val result     = harness.test()(fakeRequest)
 
         status(result) mustBe SEE_OTHER
 
@@ -106,8 +181,8 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
         val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
         val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new BearerTokenExpired), frontendAppConfig, bodyParsers)
-        val controller = new Harness(authAction)
-        val result     = controller.onPageLoad()(fakeRequest)
+        val harness    = new Harness(authAction)
+        val result     = harness.test()(fakeRequest)
 
         status(result) mustBe SEE_OTHER
 
@@ -122,8 +197,8 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
         val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
         val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new InsufficientConfidenceLevel), frontendAppConfig, bodyParsers)
-        val controller = new Harness(authAction)
-        val result     = controller.onPageLoad()(fakeRequest)
+        val harness    = new Harness(authAction)
+        val result     = harness.test()(fakeRequest)
 
         status(result) mustBe SEE_OTHER
 
@@ -138,8 +213,8 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
         val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
         val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new UnsupportedAuthProvider), frontendAppConfig, bodyParsers)
-        val controller = new Harness(authAction)
-        val result     = controller.onPageLoad()(fakeRequest)
+        val harness    = new Harness(authAction)
+        val result     = harness.test()(fakeRequest)
 
         status(result) mustBe SEE_OTHER
 
@@ -154,8 +229,8 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
         val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
         val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new UnsupportedAffinityGroup), frontendAppConfig, bodyParsers)
-        val controller = new Harness(authAction)
-        val result     = controller.onPageLoad()(fakeRequest)
+        val harness    = new Harness(authAction)
+        val result     = harness.test()(fakeRequest)
 
         status(result) mustBe SEE_OTHER
 
@@ -170,8 +245,8 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
         val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
         val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole), frontendAppConfig, bodyParsers)
-        val controller = new Harness(authAction)
-        val result     = controller.onPageLoad()(fakeRequest)
+        val harness    = new Harness(authAction)
+        val result     = harness.test()(fakeRequest)
 
         status(result) mustBe SEE_OTHER
 
@@ -179,6 +254,14 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
       }
     }
   }
+}
+
+object AuthActionSpec {
+
+  implicit class RetrievalsUtil[A](val retrieval: A) extends AnyVal {
+    def `~`[B](anotherRetrieval: B): A ~ B = retrieve.~(retrieval, anotherRetrieval)
+  }
+
 }
 
 class FakeFailingAuthConnector @Inject() (exceptionToReturn: Throwable) extends AuthConnector {
