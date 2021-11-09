@@ -18,12 +18,12 @@ package controllers.actions
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import com.google.inject.Inject
-import config.FrontendAppConfig
 import controllers.actions.AuthActionSpec._
 import controllers.routes
 import models.requests.IdentifierRequest
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
+import org.scalacheck.Arbitrary.arbitrary
 import play.api.mvc.{Action, AnyContent, BodyParsers, Results}
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
@@ -74,8 +74,7 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
           when(mockAuthConnector.authorise[Enrolments ~ Option[String]](any(), any())(any(), any()))
             .thenReturn(Future.successful(emptyEnrolments ~ Some("internalId")))
 
-          val bodyParsers       = app.injector.instanceOf[BodyParsers.Default]
-          val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
+          val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
           val authAction = new AuthenticatedIdentifierAction(mockAuthConnector, frontendAppConfig, bodyParsers)
 
@@ -87,7 +86,30 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
           status(result) mustBe OK
         }
 
-        "with isEnrolled true when enrolled" - {
+        "with isEnrolled false when enrolment is not active" in {
+
+          forAll(arbitrary[String].suchThat(_.toLowerCase != "activated")) {
+            state =>
+              val enrolment  = createEnrolment(frontendAppConfig.newEnrolmentKey, None, "123", state)
+              val enrolments = Enrolments(Set(enrolment))
+
+              when(mockAuthConnector.authorise[Enrolments ~ Option[String]](any(), any())(any(), any()))
+                .thenReturn(Future.successful(enrolments ~ Some("internalId")))
+
+              val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+
+              val authAction = new AuthenticatedIdentifierAction(mockAuthConnector, frontendAppConfig, bodyParsers)
+
+              val expectedIdentifierRequest: IdentifierRequest[AnyContent] = IdentifierRequest(fakeRequest, "internalId", isEnrolled = false)
+
+              val harness = new Harness(authAction)
+              val result  = harness.test(Some(expectedIdentifierRequest))(fakeRequest)
+
+              status(result) mustBe OK
+          }
+        }
+
+        "with isEnrolled true when enrolled with active enrolment" - {
 
           "when new enrolment" in {
 
