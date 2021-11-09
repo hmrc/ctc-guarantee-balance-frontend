@@ -49,11 +49,17 @@ class AuthenticatedIdentifierAction @Inject() (
     authorised(EmptyPredicate)
       .retrieve(Retrievals.allEnrolments and Retrievals.internalId) {
         case enrolments ~ Some(internalId) =>
-          def lookForEnrolment(key: String)           = enrolments.enrolments.filter(_.isActivated).find(_.key.equals(key))
-          lazy val newEnrolment: Option[Enrolment]    = lookForEnrolment(config.newEnrolmentKey)
-          lazy val legacyEnrolment: Option[Enrolment] = lookForEnrolment(config.legacyEnrolmentKey)
+          def hasEnrolment(enrolmentKey: String, identifierKey: String): Boolean =
+            enrolments.enrolments
+              .filter(_.isActivated)
+              .find(_.key == enrolmentKey)
+              .flatMap(_.getIdentifier(identifierKey))
+              .isDefined
 
-          block(IdentifierRequest(request, internalId, isEnrolled = (newEnrolment orElse legacyEnrolment).isDefined))
+          lazy val hasNewEnrolment    = hasEnrolment(config.newEnrolmentKey, config.newEnrolmentIdentifierKey)
+          lazy val hasLegacyEnrolment = hasEnrolment(config.legacyEnrolmentKey, config.legacyEnrolmentIdentifierKey)
+
+          block(IdentifierRequest(request, internalId, isEnrolled = hasNewEnrolment || hasLegacyEnrolment))
         case _ ~ None =>
           throw new UnauthorizedException("Unable to retrieve internal Id")
       }

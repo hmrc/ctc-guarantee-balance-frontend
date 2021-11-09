@@ -63,92 +63,175 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   val emptyEnrolments: Enrolments = Enrolments(Set())
 
+  val internalId = "internalId"
+
   "Auth Action" - {
 
     "when the user has logged in" - {
 
       "must return OK when internal id is available" - {
 
-        "with isEnrolled false when not enrolled" in {
+        "with isEnrolled false" - {
 
-          when(mockAuthConnector.authorise[Enrolments ~ Option[String]](any(), any())(any(), any()))
-            .thenReturn(Future.successful(emptyEnrolments ~ Some("internalId")))
+          "when not enrolled" in {
 
-          val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+            when(mockAuthConnector.authorise[Enrolments ~ Option[String]](any(), any())(any(), any()))
+              .thenReturn(Future.successful(emptyEnrolments ~ Some(internalId)))
 
-          val authAction = new AuthenticatedIdentifierAction(mockAuthConnector, frontendAppConfig, bodyParsers)
+            val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
-          val expectedIdentifierRequest: IdentifierRequest[AnyContent] = IdentifierRequest(fakeRequest, "internalId", isEnrolled = false)
+            val authAction = new AuthenticatedIdentifierAction(mockAuthConnector, frontendAppConfig, bodyParsers)
 
-          val harness = new Harness(authAction)
-          val result  = harness.test(Some(expectedIdentifierRequest))(fakeRequest)
+            val expectedIdentifierRequest: IdentifierRequest[AnyContent] = IdentifierRequest(fakeRequest, internalId, isEnrolled = false)
 
-          status(result) mustBe OK
+            val harness = new Harness(authAction)
+            val result  = harness.test(Some(expectedIdentifierRequest))(fakeRequest)
+
+            status(result) mustBe OK
+          }
+
+          "when incorrect identifier key" - {
+
+            "when new enrolment" in {
+
+              forAll(arbitrary[Option[String]].suchThat(!_.contains(frontendAppConfig.newEnrolmentIdentifierKey))) {
+                identifierKey =>
+                  val enrolment  = createEnrolment(frontendAppConfig.newEnrolmentKey, identifierKey, "123", "Activated")
+                  val enrolments = Enrolments(Set(enrolment))
+
+                  when(mockAuthConnector.authorise[Enrolments ~ Option[String]](any(), any())(any(), any()))
+                    .thenReturn(Future.successful(enrolments ~ Some(internalId)))
+
+                  val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+
+                  val authAction = new AuthenticatedIdentifierAction(mockAuthConnector, frontendAppConfig, bodyParsers)
+
+                  val expectedIdentifierRequest: IdentifierRequest[AnyContent] = IdentifierRequest(fakeRequest, internalId, isEnrolled = false)
+
+                  val harness = new Harness(authAction)
+                  val result  = harness.test(Some(expectedIdentifierRequest))(fakeRequest)
+
+                  status(result) mustBe OK
+              }
+            }
+
+            "when legacy enrolment" in {
+
+              forAll(arbitrary[Option[String]].suchThat(!_.contains(frontendAppConfig.legacyEnrolmentIdentifierKey))) {
+                identifierKey =>
+                  val enrolment  = createEnrolment(frontendAppConfig.legacyEnrolmentKey, identifierKey, "123", "Activated")
+                  val enrolments = Enrolments(Set(enrolment))
+
+                  when(mockAuthConnector.authorise[Enrolments ~ Option[String]](any(), any())(any(), any()))
+                    .thenReturn(Future.successful(enrolments ~ Some(internalId)))
+
+                  val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+
+                  val authAction = new AuthenticatedIdentifierAction(mockAuthConnector, frontendAppConfig, bodyParsers)
+
+                  val expectedIdentifierRequest: IdentifierRequest[AnyContent] = IdentifierRequest(fakeRequest, internalId, isEnrolled = false)
+
+                  val harness = new Harness(authAction)
+                  val result  = harness.test(Some(expectedIdentifierRequest))(fakeRequest)
+
+                  status(result) mustBe OK
+              }
+            }
+          }
+
+          "when enrolment is not active" - {
+
+            "when new enrolment" in {
+
+              forAll(arbitrary[String].suchThat(_.toLowerCase != "activated")) {
+                state =>
+                  val enrolment  = createEnrolment(frontendAppConfig.newEnrolmentKey, Some(frontendAppConfig.newEnrolmentIdentifierKey), "123", state)
+                  val enrolments = Enrolments(Set(enrolment))
+
+                  when(mockAuthConnector.authorise[Enrolments ~ Option[String]](any(), any())(any(), any()))
+                    .thenReturn(Future.successful(enrolments ~ Some(internalId)))
+
+                  val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+
+                  val authAction = new AuthenticatedIdentifierAction(mockAuthConnector, frontendAppConfig, bodyParsers)
+
+                  val expectedIdentifierRequest: IdentifierRequest[AnyContent] = IdentifierRequest(fakeRequest, internalId, isEnrolled = false)
+
+                  val harness = new Harness(authAction)
+                  val result  = harness.test(Some(expectedIdentifierRequest))(fakeRequest)
+
+                  status(result) mustBe OK
+              }
+            }
+
+            "when legacy enrolment" in {
+
+              forAll(arbitrary[String].suchThat(_.toLowerCase != "activated")) {
+                state =>
+                  val enrolment  = createEnrolment(frontendAppConfig.legacyEnrolmentKey, Some(frontendAppConfig.legacyEnrolmentIdentifierKey), "123", state)
+                  val enrolments = Enrolments(Set(enrolment))
+
+                  when(mockAuthConnector.authorise[Enrolments ~ Option[String]](any(), any())(any(), any()))
+                    .thenReturn(Future.successful(enrolments ~ Some(internalId)))
+
+                  val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+
+                  val authAction = new AuthenticatedIdentifierAction(mockAuthConnector, frontendAppConfig, bodyParsers)
+
+                  val expectedIdentifierRequest: IdentifierRequest[AnyContent] = IdentifierRequest(fakeRequest, internalId, isEnrolled = false)
+
+                  val harness = new Harness(authAction)
+                  val result  = harness.test(Some(expectedIdentifierRequest))(fakeRequest)
+
+                  status(result) mustBe OK
+              }
+            }
+          }
         }
 
-        "with isEnrolled false when enrolment is not active" in {
+        "with isEnrolled true" - {
 
-          forAll(arbitrary[String].suchThat(_.toLowerCase != "activated")) {
-            state =>
-              val enrolment  = createEnrolment(frontendAppConfig.newEnrolmentKey, None, "123", state)
+          "when enrolled with active enrolment" - {
+
+            "when new enrolment" in {
+
+              val enrolment  = createEnrolment(frontendAppConfig.newEnrolmentKey, Some(frontendAppConfig.newEnrolmentIdentifierKey), "123", "Activated")
               val enrolments = Enrolments(Set(enrolment))
 
               when(mockAuthConnector.authorise[Enrolments ~ Option[String]](any(), any())(any(), any()))
-                .thenReturn(Future.successful(enrolments ~ Some("internalId")))
+                .thenReturn(Future.successful(enrolments ~ Some(internalId)))
 
               val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
               val authAction = new AuthenticatedIdentifierAction(mockAuthConnector, frontendAppConfig, bodyParsers)
 
-              val expectedIdentifierRequest: IdentifierRequest[AnyContent] = IdentifierRequest(fakeRequest, "internalId", isEnrolled = false)
+              val expectedIdentifierRequest: IdentifierRequest[AnyContent] = IdentifierRequest(fakeRequest, internalId, isEnrolled = true)
 
               val harness = new Harness(authAction)
               val result  = harness.test(Some(expectedIdentifierRequest))(fakeRequest)
 
               status(result) mustBe OK
-          }
-        }
+            }
 
-        "with isEnrolled true when enrolled with active enrolment" - {
+            "when legacy enrolment" in {
 
-          "when new enrolment" in {
+              val enrolment  = createEnrolment(frontendAppConfig.legacyEnrolmentKey, Some(frontendAppConfig.legacyEnrolmentIdentifierKey), "123", "Activated")
+              val enrolments = Enrolments(Set(enrolment))
 
-            val enrolment  = createEnrolment(frontendAppConfig.newEnrolmentKey, None, "123", "Activated")
-            val enrolments = Enrolments(Set(enrolment))
+              when(mockAuthConnector.authorise[Enrolments ~ Option[String]](any(), any())(any(), any()))
+                .thenReturn(Future.successful(enrolments ~ Some(internalId)))
 
-            when(mockAuthConnector.authorise[Enrolments ~ Option[String]](any(), any())(any(), any()))
-              .thenReturn(Future.successful(enrolments ~ Some("internalId")))
+              val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
-            val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+              val authAction = new AuthenticatedIdentifierAction(mockAuthConnector, frontendAppConfig, bodyParsers)
 
-            val authAction = new AuthenticatedIdentifierAction(mockAuthConnector, frontendAppConfig, bodyParsers)
+              val expectedIdentifierRequest: IdentifierRequest[AnyContent] = IdentifierRequest(fakeRequest, internalId, isEnrolled = true)
 
-            val expectedIdentifierRequest: IdentifierRequest[AnyContent] = IdentifierRequest(fakeRequest, "internalId", isEnrolled = true)
+              val harness = new Harness(authAction)
+              val result  = harness.test(Some(expectedIdentifierRequest))(fakeRequest)
 
-            val harness = new Harness(authAction)
-            val result  = harness.test(Some(expectedIdentifierRequest))(fakeRequest)
-
-            status(result) mustBe OK
-          }
-
-          "when legacy enrolment" in {
-
-            val enrolment  = createEnrolment(frontendAppConfig.legacyEnrolmentKey, None, "123", "Activated")
-            val enrolments = Enrolments(Set(enrolment))
-
-            when(mockAuthConnector.authorise[Enrolments ~ Option[String]](any(), any())(any(), any()))
-              .thenReturn(Future.successful(enrolments ~ Some("internalId")))
-
-            val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
-
-            val authAction = new AuthenticatedIdentifierAction(mockAuthConnector, frontendAppConfig, bodyParsers)
-
-            val expectedIdentifierRequest: IdentifierRequest[AnyContent] = IdentifierRequest(fakeRequest, "internalId", isEnrolled = true)
-
-            val harness = new Harness(authAction)
-            val result  = harness.test(Some(expectedIdentifierRequest))(fakeRequest)
-
-            status(result) mustBe OK
+              status(result) mustBe OK
+            }
           }
         }
       }
