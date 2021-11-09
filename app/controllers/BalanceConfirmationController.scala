@@ -19,7 +19,7 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions._
 import models.NormalMode
-import pages.{BalancePage, ReferralPage}
+import pages.BalancePage
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
@@ -47,11 +47,11 @@ class BalanceConfirmationController @Inject() (
 
   def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      (request.userAnswers.get(BalancePage), request.userAnswers.get(ReferralPage)) match {
-        case (Some(balance), Some(referral)) =>
+      request.userAnswers.get(BalancePage) match {
+        case Some(balance) =>
           val json = Json.obj(
             "balance"                         -> balance,
-            "referral"                        -> referral,
+            "isEnrolled"                      -> request.isEnrolled,
             "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
           )
 

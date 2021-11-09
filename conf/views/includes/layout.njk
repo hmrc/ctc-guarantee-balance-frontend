@@ -30,7 +30,7 @@
     homepageUrl: "https://www.gov.uk",
     assetsPath: "/assets",
     serviceName: messages("site.service_name"),
-    serviceUrl: config.manageTransitMovementsUrl,
+    serviceUrl: routes.controllers.StartController.start().url,
     phaseBanner: phaseBanner,
     userResearchBanner: userResearchBanner,
     signOutHref: config.signOutUrl if not isSignedOut

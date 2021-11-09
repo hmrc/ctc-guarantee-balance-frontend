@@ -18,12 +18,11 @@ package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import matchers.JsonMatchers
-import models.{NormalMode, Referral, UserAnswers}
+import models.{NormalMode, UserAnswers}
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.verify
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.mockito.MockitoSugar
-import pages.ReferralPage
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.viewmodels.NunjucksSupport
@@ -32,24 +31,24 @@ import java.time.LocalDateTime
 
 class StartControllerSpec extends SpecBase with MockitoSugar with NunjucksSupport with JsonMatchers with AppWithDefaultMockFixtures {
 
-  def startRoute(referral: Referral): String = routes.StartController.start(referral).url
+  def startRoute(): String = routes.StartController.start().url
 
   "Start Controller" - {
 
-    "must redirect to the next page when there are existing user answers" in {
+    "must redirect to the next page and create new user answers" in {
 
-      forAll(arbitrary[Referral]) {
-        referral =>
+      forAll(arbitrary[Option[UserAnswers]]) {
+        userAnswers =>
           beforeEach()
 
           val time = LocalDateTime.now()
 
           val application =
-            applicationBuilder(userAnswers = Some(emptyUserAnswers.copy(lastUpdated = time)))
+            applicationBuilder(userAnswers = userAnswers.map(_.copy(lastUpdated = time)))
               .build()
 
           val request =
-            FakeRequest(GET, startRoute(referral))
+            FakeRequest(GET, startRoute())
 
           val result = route(application, request).value
 
@@ -60,37 +59,6 @@ class StartControllerSpec extends SpecBase with MockitoSugar with NunjucksSuppor
           verify(mockSessionRepository).set(uaCaptor.capture)
 
           uaCaptor.getValue.lastUpdated.isAfter(time) mustBe true // check that new user answers have been created
-          uaCaptor.getValue.get(ReferralPage).get mustBe referral
-
-          application.stop()
-      }
-    }
-
-    "must redirect to the next page when there are no existing user answers" in {
-
-      forAll(arbitrary[Referral]) {
-        referral =>
-          beforeEach()
-
-          val time = LocalDateTime.now()
-
-          val application =
-            applicationBuilder(userAnswers = None)
-              .build()
-
-          val request =
-            FakeRequest(GET, startRoute(referral))
-
-          val result = route(application, request).value
-
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
-
-          val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
-          verify(mockSessionRepository).set(uaCaptor.capture)
-
-          uaCaptor.getValue.lastUpdated.isAfter(time) mustBe true // check that new user answers have been created
-          uaCaptor.getValue.get(ReferralPage).get mustBe referral
 
           application.stop()
       }

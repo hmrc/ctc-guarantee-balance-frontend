@@ -17,8 +17,7 @@
 package controllers
 
 import controllers.actions._
-import models.{NormalMode, Referral, UserAnswers}
-import pages.ReferralPage
+import models.{NormalMode, UserAnswers}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
@@ -26,7 +25,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class StartController @Inject() (
   override val messagesApi: MessagesApi,
@@ -39,13 +38,10 @@ class StartController @Inject() (
     with I18nSupport
     with NunjucksSupport {
 
-  def start(referral: Referral): Action[AnyContent] = (identify andThen getData).async {
+  def start(): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
-      val userAnswers = UserAnswers(id = request.internalId)
-
-      for {
-        updatedAnswers <- Future.fromTry(userAnswers.set(ReferralPage, referral))
-        _              <- sessionRepository.set(updatedAnswers)
-      } yield Redirect(routes.EoriNumberController.onPageLoad(NormalMode))
+      sessionRepository.set(UserAnswers(id = request.internalId)) map {
+        _ => Redirect(routes.EoriNumberController.onPageLoad(NormalMode))
+      }
   }
 }

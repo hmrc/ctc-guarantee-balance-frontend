@@ -18,14 +18,13 @@ package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import matchers.JsonMatchers.containJson
-import models.Referral._
-import models.{NormalMode, Referral, UserAnswers}
+import models.{NormalMode, UserAnswers}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{BalancePage, EoriNumberPage, ReferralPage}
+import pages.{BalancePage, EoriNumberPage}
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -38,19 +37,18 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
     ".onPageLoad" - {
       "must return OK and the correct view for a GET" - {
 
-        "when balance and referral found in user answers" in {
+        "when balance found in user answers" in {
 
           val balance = "£8,500.00"
 
-          forAll(arbitrary[Referral]) {
-            referral =>
+          forAll(arbitrary[Boolean]) {
+            isEnrolled =>
               beforeEach()
 
               val userAnswers = emptyUserAnswers
                 .set(BalancePage, balance).success.value
-                .set(ReferralPage, referral).success.value
 
-              val application                            = applicationBuilder(userAnswers = Some(userAnswers)).build()
+              val application                            = applicationBuilder(userAnswers = Some(userAnswers), isEnrolled).build()
               val request                                = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
               val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
               val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
@@ -63,7 +61,7 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
 
               val expectedJson = Json.obj(
                 "balance"                         -> balance,
-                "referral"                        -> referral,
+                "isEnrolled"                        -> isEnrolled,
                 "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
               )
 
@@ -76,19 +74,13 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
       }
 
       "must redirect to start controller" - {
-        "when balance or referral not found in user answers" in {
+        "when balance not found in user answers" in {
 
-          forAll(arbitrary[(Option[String], Option[Referral])] retryUntil {
-            case (balance, referral) => !(balance.isDefined && referral.isDefined)
-          }) {
-            case (balance, referral) =>
+          forAll(arbitrary[Boolean]) {
+            isEnrolled =>
               beforeEach()
 
-              val userAnswers = emptyUserAnswers
-                .setOption(BalancePage, balance).success.value
-                .setOption(ReferralPage, referral).success.value
-
-              val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+              val application = applicationBuilder(userAnswers = Some(emptyUserAnswers), isEnrolled).build()
               val request     = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
 
               val result = route(application, request).value

@@ -25,9 +25,4 @@ trait ModelGenerators {
     Arbitrary {
       Gen.oneOf(NormalMode, CheckMode)
     }
-
-  implicit lazy val arbitraryReferral: Arbitrary[Referral] =
-    Arbitrary {
-      Gen.oneOf(Referral.values)
-    }
 }

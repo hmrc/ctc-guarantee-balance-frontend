@@ -16,7 +16,6 @@
 
 package views
 
-import models.Referral._
 import models.backend.BalanceRequestSuccess
 import models.values.CurrencyCode
 import org.scalacheck.Arbitrary.arbitrary
@@ -49,7 +48,7 @@ class BalanceConfirmationViewSpec extends SingleViewSpec("balanceConfirmation.nj
     "when user has come from GOV.UK" in {
 
       val json = Json.obj(
-        "referral"                        -> GovUK,
+        "isEnrolled"                      -> false,
         "checkAnotherGuaranteeBalanceUrl" -> fakeUrl
       )
 
@@ -68,7 +67,7 @@ class BalanceConfirmationViewSpec extends SingleViewSpec("balanceConfirmation.nj
     "when user has come from NCTS" in {
 
       val json = Json.obj(
-        "referral"                        -> NCTS,
+        "isEnrolled"                      -> true,
         "checkAnotherGuaranteeBalanceUrl" -> fakeUrl
       )
 

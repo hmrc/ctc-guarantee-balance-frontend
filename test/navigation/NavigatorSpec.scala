@@ -70,12 +70,11 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
 
         "when referral exists in user answers" in {
 
-          forAll(arbitrary[UserAnswers], arbitrary[Referral]) {
-            (answers, referral) =>
-              val updatedAnswers = answers.set(ReferralPage, referral).success.value
+          forAll(arbitrary[UserAnswers]) {
+            answers =>
               navigator
-                .nextPage(UnknownPage, mode, updatedAnswers)
-                .mustBe(routes.StartController.start(referral))
+                .nextPage(UnknownPage, mode, answers)
+                .mustBe(routes.StartController.start())
           }
         }
 
