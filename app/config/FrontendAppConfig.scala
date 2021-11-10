@@ -46,6 +46,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   lazy val guaranteeBalanceDelayInSecond: Int   = configuration.get[Int]("guaranteeBalanceLookup.waitTimeInSeconds")
   lazy val guaranteeBalanceMaxTimeInSecond: Int = configuration.get[Int]("guaranteeBalanceLookup.maxTimeInSeconds")
   lazy val guaranteeBalanceDisplayDelay: Int    = configuration.get[Int]("guaranteeBalanceLookup.displayDelayInSeconds")
+  lazy val guaranteeBalanceExpiryTime: Int      = configuration.get[Int]("guaranteeBalanceLookup.expiryTimeInSeconds")
 
   lazy val languageTranslationEnabled: Boolean = configuration.get[Boolean]("microservice.services.features.welsh-translation")
 

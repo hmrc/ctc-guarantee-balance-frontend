@@ -27,8 +27,9 @@ import play.api.http.{HeaderNames, Status}
 import play.api.libs.json.JsSuccess
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions, HttpReads, HttpResponse}
-
 import javax.inject.Inject
+import java.time.Instant
+
 import scala.concurrent.{ExecutionContext, Future}
 
 class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: FrontendAppConfig)(implicit
@@ -97,15 +98,18 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
   }
 
   private def processQuerySuccessResponse(balanceId: BalanceId, response: HttpResponse): BalanceRequestResponse = {
-    val requestResponse = response.json.as[GetBalanceRequestResponse].request.response
-    requestResponse match {
+    val balanceRequestResponse = response.json.as[GetBalanceRequestResponse].request
+    balanceRequestResponse.response match {
       case Some(response) =>
         response match {
           case fe: BalanceRequestFunctionalError if fe.containsErrorType(NotMatchedErrorType) =>
             BalanceRequestNotMatched
           case _ => response
         }
-      case _ => BalanceRequestPending(balanceId)
+      case _ =>
+        val currentTime        = Instant.now()
+        val timeRequestExpires = balanceRequestResponse.requestedAt.plusSeconds(appConfig.guaranteeBalanceExpiryTime)
+        if (currentTime.isBefore(timeRequestExpires)) BalanceRequestPending(balanceId) else BalanceRequestPendingExpired(balanceId)
     }
   }
 }

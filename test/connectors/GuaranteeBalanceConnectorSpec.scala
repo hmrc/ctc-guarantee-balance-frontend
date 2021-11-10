@@ -253,7 +253,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
 
       "must return balance pending response for Ok with no returned response" in {
         val balanceId   = BalanceId(testUuid)
-        val requestedAt = Instant.now().minusSeconds(300)
+        val requestedAt = Instant.now().minusSeconds(59)
         val completedAt = Instant.now().minusSeconds(1)
         val balanceRequestSuccessResponseJson: String =
           s"""
@@ -276,6 +276,33 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
 
         val result = connector.queryPendingBalance(balanceId).futureValue
         result mustBe Right(BalanceRequestPending(balanceId))
+      }
+
+      "must return balance pending expired if we get a pending response that's too old" in {
+        val balanceId   = BalanceId(testUuid)
+        val requestedAt = Instant.now().minusSeconds(61)
+        val completedAt = Instant.now().minusSeconds(1)
+        val balanceRequestSuccessResponseJson: String =
+          s"""
+             | {
+             |  "request": {
+             |    "balanceId": "22b9899e-24ee-48e6-a189-97d1f45391c4",
+             |    "taxIdentifier": "taxid",
+             |    "guaranteeReference": "guarref",
+             |    "requestedAt": "$requestedAt",
+             |    "completedAt": "$completedAt"
+             |  }
+             | }
+             |""".stripMargin
+
+        server.stubFor(
+          get(urlEqualTo(queryBalanceRequestUrlFor(balanceId)))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+            .willReturn(okJson(balanceRequestSuccessResponseJson))
+        )
+
+        val result = connector.queryPendingBalance(balanceId).futureValue
+        result mustBe Right(BalanceRequestPendingExpired(balanceId))
       }
 
       "must return the HttpResponse when there is an unexpected response" in {
@@ -314,7 +341,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
 
       "must return balance request not matched for a functional error with error type 12" in {
         val balanceId   = BalanceId(testUuid)
-        val requestedAt = Instant.now().minusSeconds(300)
+        val requestedAt = Instant.now().minusSeconds(30)
         val completedAt = Instant.now().minusSeconds(1)
         val balanceRequestNotMatchedJson: String =
           s"""
