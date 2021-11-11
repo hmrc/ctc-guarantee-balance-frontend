@@ -25,37 +25,58 @@ class CheckYourAnswersViewModelSpec extends SpecBase with AppWithDefaultMockFixt
   val viewModelProvider: CheckYourAnswersViewModelProvider = injector.instanceOf[CheckYourAnswersViewModelProvider]
 
   "when user answers are empty" - {
-    "must return section with no rows" in {
 
-      val result = viewModelProvider(emptyUserAnswers)
+    val result = viewModelProvider(emptyUserAnswers)
+
+    "must have no section title" in {
       result.section.sectionTitle mustNot be(defined)
+    }
+
+    "must have no rows" in {
       result.section.rows mustBe empty
     }
   }
 
   "when user answers are not empty" - {
-    "must return section with rows" in {
 
-      val eori = "eori"
-      val grn  = "grn"
-      val code = "••••"
+    val eori = "eori"
+    val grn  = "grn"
+    val code = "••••"
 
-      // format: off
-        val userAnswers = emptyUserAnswers
-          .set(EoriNumberPage, eori).success.value
-          .set(GuaranteeReferenceNumberPage, grn).success.value
-          .set(AccessCodePage, code).success.value
-        // format: on
+    // format: off
+    val userAnswers = emptyUserAnswers
+      .set(EoriNumberPage, eori).success.value
+      .set(GuaranteeReferenceNumberPage, grn).success.value
+      .set(AccessCodePage, code).success.value
+    // format: on
 
-      val result = viewModelProvider(userAnswers)
+    val result = viewModelProvider(userAnswers)
 
-      result.section.rows.size mustBe 3
+    "must have no section title" in {
       result.section.sectionTitle mustNot be(defined)
+    }
 
-      Seq(eori, grn, code).zipWithIndex.foreach {
-        case (value, index) =>
-          result.section.rows(index).value.content mustEqual Literal(value)
-      }
+    "must have 3 rows" in {
+      result.section.rows.size mustBe 3
+    }
+
+    Seq(eori, grn, code).zipWithIndex.foreach {
+      case (value, index) =>
+        s"when row ${index + 1}" - {
+          val row = result.section.rows(index)
+
+          "must correspond to the correct value" in {
+            row.value.content mustEqual Literal(value)
+          }
+
+          "must have 1 action" in {
+            row.actions.size mustBe 1
+          }
+
+          "must be using CheckMode" in {
+            row.actions.head.href must include("change")
+          }
+        }
     }
   }
 
