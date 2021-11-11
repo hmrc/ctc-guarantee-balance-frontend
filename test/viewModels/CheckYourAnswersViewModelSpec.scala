@@ -35,18 +35,19 @@ class CheckYourAnswersViewModelSpec extends SpecBase with AppWithDefaultMockFixt
       }
     }
 
-    // format: off
     "when user answers are not empty" - {
       "must return section with rows" in {
 
         val eori = "eori"
-        val grn = "grn"
+        val grn  = "grn"
         val code = "••••"
 
+        // format: off
         val userAnswers = emptyUserAnswers
           .set(EoriNumberPage, eori).success.value
           .set(GuaranteeReferenceNumberPage, grn).success.value
           .set(AccessCodePage, code).success.value
+        // format: on
 
         val result = viewModelProvider(userAnswers)
 
@@ -59,7 +60,6 @@ class CheckYourAnswersViewModelSpec extends SpecBase with AppWithDefaultMockFixt
         }
       }
     }
-    // format: on
   }
 
 }

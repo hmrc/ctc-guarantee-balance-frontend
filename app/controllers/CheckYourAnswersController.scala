@@ -58,6 +58,7 @@ class CheckYourAnswersController @Inject() (
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       val viewModel = viewModelProvider(request.userAnswers)
+
       val json = Json.obj(
         "section" -> Json.toJson(viewModel.section)
       )
