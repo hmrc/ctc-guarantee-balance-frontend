@@ -21,21 +21,19 @@ import controllers.actions._
 import handlers.GuaranteeBalanceResponseHandler
 import models.requests.BalanceRequest
 import models.values._
-import models.{CheckMode, UserAnswers}
 import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import renderer.Renderer
+import services.GuaranteeBalanceService
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
-import utils.CheckYourAnswersHelper
-import viewModels.Section
-import javax.inject.Inject
-import services.GuaranteeBalanceService
+import viewModels.CheckYourAnswersViewModelProvider
 
+import javax.inject.Inject
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -49,7 +47,8 @@ class CheckYourAnswersController @Inject() (
   mongoLockRepository: MongoLockRepository,
   guaranteeBalanceService: GuaranteeBalanceService,
   responseHandler: GuaranteeBalanceResponseHandler,
-  config: FrontendAppConfig
+  config: FrontendAppConfig,
+  viewModelProvider: CheckYourAnswersViewModelProvider
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -58,9 +57,9 @@ class CheckYourAnswersController @Inject() (
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      val section = createSection(request.userAnswers)
+      val viewModel = viewModelProvider(request.userAnswers)
       val json = Json.obj(
-        "section" -> Json.toJson(section)
+        "section" -> Json.toJson(viewModel.section)
       )
 
       renderer.render("checkYourAnswers.njk", json).map(Ok(_))
@@ -97,18 +96,6 @@ class CheckYourAnswersController @Inject() (
     val lockId   = LockId(eoriNumber, guaranteeReferenceNumber).toString
     val duration = config.rateLimitDuration.seconds
     mongoLockRepository.takeLock(lockId, eoriNumber, duration)
-  }
-
-  private def createSection(userAnswers: UserAnswers): Section = {
-    val helper = new CheckYourAnswersHelper(userAnswers, CheckMode)
-
-    Section(
-      Seq(
-        helper.eoriNumber,
-        helper.guaranteeReferenceNumber,
-        helper.accessCode
-      ).flatten
-    )
   }
 
   private def processPending(balanceId: BalanceId): Future[Result] =
