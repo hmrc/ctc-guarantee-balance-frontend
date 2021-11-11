@@ -24,40 +24,37 @@ class CheckYourAnswersViewModelSpec extends SpecBase with AppWithDefaultMockFixt
 
   val viewModelProvider: CheckYourAnswersViewModelProvider = injector.instanceOf[CheckYourAnswersViewModelProvider]
 
-  "section" - {
+  "when user answers are empty" - {
+    "must return section with no rows" in {
 
-    "when user answers are empty" - {
-      "must return section with no rows" in {
-
-        val result = viewModelProvider(emptyUserAnswers)
-        result.section.sectionTitle mustNot be(defined)
-        result.section.rows mustBe empty
-      }
+      val result = viewModelProvider(emptyUserAnswers)
+      result.section.sectionTitle mustNot be(defined)
+      result.section.rows mustBe empty
     }
+  }
 
-    "when user answers are not empty" - {
-      "must return section with rows" in {
+  "when user answers are not empty" - {
+    "must return section with rows" in {
 
-        val eori = "eori"
-        val grn  = "grn"
-        val code = "••••"
+      val eori = "eori"
+      val grn  = "grn"
+      val code = "••••"
 
-        // format: off
+      // format: off
         val userAnswers = emptyUserAnswers
           .set(EoriNumberPage, eori).success.value
           .set(GuaranteeReferenceNumberPage, grn).success.value
           .set(AccessCodePage, code).success.value
         // format: on
 
-        val result = viewModelProvider(userAnswers)
+      val result = viewModelProvider(userAnswers)
 
-        result.section.rows.size mustBe 3
-        result.section.sectionTitle mustNot be(defined)
+      result.section.rows.size mustBe 3
+      result.section.sectionTitle mustNot be(defined)
 
-        Seq(eori, grn, code).zipWithIndex.foreach {
-          case (value, index) =>
-            result.section.rows(index).value.content mustEqual Literal(value)
-        }
+      Seq(eori, grn, code).zipWithIndex.foreach {
+        case (value, index) =>
+          result.section.rows(index).value.content mustEqual Literal(value)
       }
     }
   }
