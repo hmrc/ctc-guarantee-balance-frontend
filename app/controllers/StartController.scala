@@ -31,6 +31,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class StartController @Inject() (
   override val messagesApi: MessagesApi,
   sessionRepository: SessionRepository,
+  setCookie: ReferralActionProvider,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   val controllerComponents: MessagesControllerComponents
@@ -39,7 +40,7 @@ class StartController @Inject() (
     with I18nSupport
     with NunjucksSupport {
 
-  def start(referral: Referral): Action[AnyContent] = (identify andThen getData).async {
+  def start(referral: Referral): Action[AnyContent] = (setCookie(referral) andThen identify andThen getData).async {
     implicit request =>
       val userAnswers = UserAnswers(id = request.internalId)
 
