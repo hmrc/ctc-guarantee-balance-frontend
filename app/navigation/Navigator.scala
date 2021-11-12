@@ -28,7 +28,7 @@ class Navigator @Inject() () {
 
   private val normalRoutes: Page => UserAnswers => Call = {
     commonRoutes(NormalMode) orElse {
-      case _ => ua => routes.EoriNumberController.onPageLoad(NormalMode)
+      case _ => _ => routes.StartController.startAgain()
     }
   }
 

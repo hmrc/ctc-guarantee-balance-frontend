@@ -72,7 +72,7 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
           answers =>
             navigator
               .nextPage(UnknownPage, mode, answers)
-              .mustBe(routes.EoriNumberController.onPageLoad(NormalMode))
+              .mustBe(routes.StartController.startAgain())
         }
       }
     }
