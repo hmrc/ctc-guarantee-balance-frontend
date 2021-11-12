@@ -23,7 +23,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.verify
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.mockito.MockitoSugar
-import pages.ReferralPage
+import play.api.mvc.Cookie
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.viewmodels.NunjucksSupport
@@ -32,69 +32,68 @@ import java.time.LocalDateTime
 
 class StartControllerSpec extends SpecBase with MockitoSugar with NunjucksSupport with JsonMatchers with AppWithDefaultMockFixtures {
 
-  def startRoute(referral: Referral): String = routes.StartController.start(referral).url
-
   "Start Controller" - {
 
-    "must redirect to the next page when there are existing user answers" in {
+    ".start" - {
 
-      forAll(arbitrary[Referral]) {
-        referral =>
-          beforeEach()
+      def startRoute(referral: Referral): String = routes.StartController.start(referral).url
 
-          val time = LocalDateTime.now()
+      "must create new user answers and redirect to the next page" in {
 
-          val application =
-            applicationBuilder(userAnswers = Some(emptyUserAnswers.copy(lastUpdated = time)))
-              .build()
+        forAll(arbitrary[Option[UserAnswers]], arbitrary[Referral]) {
+          (userAnswers, referral) =>
+            beforeEach()
 
-          val request =
-            FakeRequest(GET, startRoute(referral))
+            val time        = LocalDateTime.now()
+            val application = applicationBuilder(userAnswers = userAnswers.map(_.copy(lastUpdated = time))).build()
+            val request     = FakeRequest(GET, startRoute(referral))
+            val result      = route(application, request).value
 
-          val result = route(application, request).value
+            status(result) mustEqual SEE_OTHER
+            redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
+            cookies(result) must contain(Cookie(Referral.cookieName, referral.toString))
+
+            val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+            verify(mockSessionRepository).set(uaCaptor.capture)
+
+            uaCaptor.getValue.lastUpdated.isAfter(time) mustBe true // check that new user answers have been created
+
+            application.stop()
+        }
+      }
+    }
+
+    ".startAgain" - {
+
+      lazy val startAgainRoute: String = routes.StartController.startAgain().url
+
+      "when session exists" - {
+        "must redirect to EORI page" in {
+
+          val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+          val request     = FakeRequest(GET, startAgainRoute)
+          val result      = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
 
-          val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
-          verify(mockSessionRepository).set(uaCaptor.capture)
-
-          uaCaptor.getValue.lastUpdated.isAfter(time) mustBe true // check that new user answers have been created
-          uaCaptor.getValue.get(ReferralPage).get mustBe referral
-
           application.stop()
+        }
       }
-    }
 
-    "must redirect to the next page when there are no existing user answers" in {
+      "when no session exists" - {
+        "must redirect to session expired" in {
 
-      forAll(arbitrary[Referral]) {
-        referral =>
-          beforeEach()
-
-          val time = LocalDateTime.now()
-
-          val application =
-            applicationBuilder(userAnswers = None)
-              .build()
-
-          val request =
-            FakeRequest(GET, startRoute(referral))
-
-          val result = route(application, request).value
+          val application = applicationBuilder(userAnswers = None).build()
+          val request     = FakeRequest(GET, startAgainRoute)
+          val result      = route(application, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
-
-          val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
-          verify(mockSessionRepository).set(uaCaptor.capture)
-
-          uaCaptor.getValue.lastUpdated.isAfter(time) mustBe true // check that new user answers have been created
-          uaCaptor.getValue.get(ReferralPage).get mustBe referral
+          redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
 
           application.stop()
+        }
       }
     }
-
   }
 }

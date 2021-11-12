@@ -64,29 +64,15 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
         }
       }
 
-      "must go from a page that doesn't exist in the route map to Start" - {
+      "must go from a page that doesn't exist in the route map to start of journey (i.e. EORI page)" in {
 
         case object UnknownPage extends Page
 
-        "when referral exists in user answers" in {
-
-          forAll(arbitrary[UserAnswers], arbitrary[Referral]) {
-            (answers, referral) =>
-              val updatedAnswers = answers.set(ReferralPage, referral).success.value
-              navigator
-                .nextPage(UnknownPage, mode, updatedAnswers)
-                .mustBe(routes.StartController.start(referral))
-          }
-        }
-
-        "when referral doesn't exist in user answers" in {
-
-          forAll(arbitrary[UserAnswers]) {
-            answers =>
-              navigator
-                .nextPage(UnknownPage, mode, answers)
-                .mustBe(routes.StartController.start())
-          }
+        forAll(arbitrary[UserAnswers]) {
+          answers =>
+            navigator
+              .nextPage(UnknownPage, mode, answers)
+              .mustBe(routes.EoriNumberController.onPageLoad(NormalMode))
         }
       }
     }
