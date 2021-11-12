@@ -19,6 +19,7 @@ package controllers.actions
 import com.google.inject.Inject
 import config.FrontendAppConfig
 import controllers.routes
+import models.Referral
 import models.requests.IdentifierRequest
 import play.api.mvc.Results._
 import play.api.mvc._
@@ -51,7 +52,11 @@ class AuthenticatedIdentifierAction @Inject() (
       }.getOrElse(throw new UnauthorizedException("Unable to retrieve internal Id"))
     } recover {
       case _: NoActiveSession =>
-        Redirect(config.loginUrl, Map("continue" -> Seq(config.loginContinueUrl)))
+        val referral = request.cookies.get(Referral.cookieName).map(_.value)
+        val loginContinueUrl = config.loginContinueUrl + referral.fold("")(
+          r => s"?referral=$r"
+        )
+        Redirect(config.loginUrl, Map("continue" -> Seq(loginContinueUrl)))
       case _: AuthorisationException =>
         Redirect(routes.UnauthorisedController.onPageLoad())
     }

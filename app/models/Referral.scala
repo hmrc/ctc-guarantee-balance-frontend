@@ -26,8 +26,6 @@ object Referral extends Enumerable.Implicits {
 
   case object NCTS extends WithName("ncts") with Referral
 
-  lazy val default: Referral = GovUK
-
   lazy val cookieName: String = "referral"
 
   implicit val jsLiteral: JavascriptLiteral[Referral] = (referral: Referral) => s""""$referral""""

@@ -91,10 +91,7 @@ class BalanceConfirmationViewSpec extends SingleViewSpec("balanceConfirmation.nj
       )
     }
 
-  }
-
-  "must not render links" - {
-    "when referral is None (i.e. cookie not set)" in {
+    "when referral is undefined (i.e. cookie not set)" in {
 
       val json = Json.obj(
         "referral"                        -> None,
@@ -103,19 +100,16 @@ class BalanceConfirmationViewSpec extends SingleViewSpec("balanceConfirmation.nj
 
       val doc = renderDocument(json).futureValue
 
-      doc.text() mustNot include("balanceConfirmation.fromGovUk.p")
-      doc.text() mustNot include("balanceConfirmation.fromNcts.p")
+      doc.text() must include("balanceConfirmation.fromGovUk.p")
 
-      assertPageDoesNotHaveLink(
+      assertPageHasLink(
         doc = doc,
-        id = "check-another-guarantee-balance"
-      )
-
-      assertPageDoesNotHaveLink(
-        doc = doc,
-        id = "manage-transit-movements"
+        id = "check-another-guarantee-balance",
+        expectedText = "balanceConfirmation.fromGovUk.link",
+        expectedHref = fakeUrl
       )
     }
+
   }
 
 }

@@ -19,7 +19,7 @@ package controllers
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import matchers.JsonMatchers.containJson
 import models.Referral._
-import models.{NormalMode, Referral, UserAnswers}
+import models.{Referral, UserAnswers}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify}
@@ -118,7 +118,7 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
 
           status(result) mustEqual SEE_OTHER
 
-          redirectLocation(result).value mustEqual routes.StartController.start().url
+          redirectLocation(result).value mustEqual routes.StartController.startAgain().url
 
           application.stop()
         }
@@ -137,7 +137,7 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
 
         status(result) mustEqual SEE_OTHER
 
-        redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
+        redirectLocation(result).value mustEqual routes.StartController.startAgain().url
 
         val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
         verify(mockSessionRepository).set(uaCaptor.capture)

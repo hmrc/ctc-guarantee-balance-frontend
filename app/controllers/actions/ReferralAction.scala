@@ -24,17 +24,20 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait ReferralActionProvider {
 
-  def apply(referral: Referral): ReferralAction
+  def apply(referral: Option[Referral]): ReferralAction
 }
 
 class ReferralActionProviderImpl @Inject() (implicit executionContext: ExecutionContext, parser: BodyParsers.Default) extends ReferralActionProvider {
 
-  override def apply(referral: Referral): ReferralAction = new ReferralAction(referral)
+  override def apply(referral: Option[Referral]): ReferralAction = new ReferralAction(referral)
 }
 
-class ReferralAction(referral: Referral)(implicit val executionContext: ExecutionContext, val parser: BodyParsers.Default)
+class ReferralAction(referral: Option[Referral])(implicit val executionContext: ExecutionContext, val parser: BodyParsers.Default)
     extends ActionBuilder[Request, AnyContent] {
 
   override def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] =
-    block(request).map(_.withCookies(Cookie(Referral.cookieName, referral.toString)))
+    referral match {
+      case Some(value) => block(request).map(_.withCookies(Cookie(Referral.cookieName, value.toString)))
+      case None        => block(request)
+    }
 }

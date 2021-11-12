@@ -36,29 +36,55 @@ class StartControllerSpec extends SpecBase with MockitoSugar with NunjucksSuppor
 
     ".start" - {
 
-      def startRoute(referral: Referral): String = routes.StartController.start(referral).url
+      def startRoute(referral: Option[Referral]): String = routes.StartController.start(referral).url
 
-      "must create new user answers and redirect to the next page" in {
+      "must create new user answers and redirect to the next page" - {
+        "when referral defined" in {
 
-        forAll(arbitrary[Option[UserAnswers]], arbitrary[Referral]) {
-          (userAnswers, referral) =>
-            beforeEach()
+          forAll(arbitrary[Option[UserAnswers]], arbitrary[Referral]) {
+            (userAnswers, referral) =>
+              beforeEach()
 
-            val time        = LocalDateTime.now()
-            val application = applicationBuilder(userAnswers = userAnswers.map(_.copy(lastUpdated = time))).build()
-            val request     = FakeRequest(GET, startRoute(referral))
-            val result      = route(application, request).value
+              val time        = LocalDateTime.now()
+              val application = applicationBuilder(userAnswers = userAnswers.map(_.copy(lastUpdated = time))).build()
+              val request     = FakeRequest(GET, startRoute(Some(referral)))
+              val result      = route(application, request).value
 
-            status(result) mustEqual SEE_OTHER
-            redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
-            cookies(result) must contain(Cookie(Referral.cookieName, referral.toString))
+              status(result) mustEqual SEE_OTHER
+              redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
+              cookies(result) must contain(Cookie(Referral.cookieName, referral.toString))
 
-            val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
-            verify(mockSessionRepository).set(uaCaptor.capture)
+              val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+              verify(mockSessionRepository).set(uaCaptor.capture)
 
-            uaCaptor.getValue.lastUpdated.isAfter(time) mustBe true // check that new user answers have been created
+              uaCaptor.getValue.lastUpdated.isAfter(time) mustBe true // check that new user answers have been created
 
-            application.stop()
+              application.stop()
+          }
+        }
+
+        "when referral not defined" in {
+
+          forAll(arbitrary[Option[UserAnswers]]) {
+            userAnswers =>
+              beforeEach()
+
+              val time        = LocalDateTime.now()
+              val application = applicationBuilder(userAnswers = userAnswers.map(_.copy(lastUpdated = time))).build()
+              val request     = FakeRequest(GET, startRoute(None))
+              val result      = route(application, request).value
+
+              status(result) mustEqual SEE_OTHER
+              redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
+              cookies(result).map(_.name) mustNot contain(Referral.cookieName)
+
+              val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+              verify(mockSessionRepository).set(uaCaptor.capture)
+
+              uaCaptor.getValue.lastUpdated.isAfter(time) mustBe true // check that new user answers have been created
+
+              application.stop()
+          }
         }
       }
     }

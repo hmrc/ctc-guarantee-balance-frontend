@@ -18,7 +18,7 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions._
-import models.{NormalMode, Referral}
+import models.Referral
 import pages.BalancePage
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -58,12 +58,12 @@ class BalanceConfirmationController @Inject() (
           renderer.render("balanceConfirmation.njk", json).map(Ok(_))
         case _ =>
           logger.warn("[BalanceConfirmationController][onPageLoad] Insufficient data in user answers. Redirecting to start of guarantee balance journey.")
-          Future.successful(Redirect(routes.StartController.start()))
+          Future.successful(Redirect(routes.StartController.startAgain()))
       }
   }
 
   def checkAnotherGuaranteeBalance: Action[AnyContent] =
-    clearUserAnswersAndRedirect(routes.EoriNumberController.onPageLoad(NormalMode).url)
+    clearUserAnswersAndRedirect(routes.StartController.startAgain().url)
 
   def manageTransitMovements: Action[AnyContent] =
     clearUserAnswersAndRedirect(appConfig.manageTransitMovementsUrl)

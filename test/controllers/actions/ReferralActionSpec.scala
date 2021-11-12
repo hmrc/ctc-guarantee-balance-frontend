@@ -36,17 +36,33 @@ class ReferralActionSpec extends SpecBase with AppWithDefaultMockFixtures {
   implicit val bodyParsers: BodyParsers.Default = injector.instanceOf[BodyParsers.Default]
 
   "Referral Action" - {
-    "must store referral in a cookie" in {
 
-      forAll(arbitrary[Referral]) {
-        referral =>
-          val referralAction = new ReferralAction(referral)
+    "when referral provided" - {
+      "must store referral in a cookie" in {
 
-          val harness = new Harness(referralAction)
-          val result  = harness.test()(fakeRequest)
+        forAll(arbitrary[Referral]) {
+          referral =>
+            val referralAction = new ReferralAction(Some(referral))
 
-          status(result) mustBe OK
-          cookies(result).toList must contain(Cookie(Referral.cookieName, referral.toString))
+            val harness = new Harness(referralAction)
+            val result  = harness.test()(fakeRequest)
+
+            status(result) mustBe OK
+            cookies(result) must contain(Cookie(Referral.cookieName, referral.toString))
+        }
+      }
+    }
+
+    "when referral not provided" - {
+      "must not store referral in a cookie" in {
+
+        val referralAction = new ReferralAction(None)
+
+        val harness = new Harness(referralAction)
+        val result  = harness.test()(fakeRequest)
+
+        status(result) mustBe OK
+        cookies(result).map(_.name) mustNot contain(Referral.cookieName)
       }
     }
   }
