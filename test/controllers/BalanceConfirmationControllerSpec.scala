@@ -25,8 +25,9 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{BalancePage, EoriNumberPage, ReferralPage}
+import pages.{BalancePage, EoriNumberPage}
 import play.api.libs.json.{JsObject, Json}
+import play.api.mvc.Cookie
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
@@ -34,75 +35,95 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
 
   "BalanceConfirmation Controller" - {
 
-    // format: off
     ".onPageLoad" - {
       "must return OK and the correct view for a GET" - {
 
-        "when balance and referral found in user answers" in {
+        "when balance found in user answers" - {
 
           val balance = "£8,500.00"
 
-          forAll(arbitrary[Referral]) {
-            referral =>
-              beforeEach()
+          "when cookie set" in {
 
-              val userAnswers = emptyUserAnswers
-                .set(BalancePage, balance).success.value
-                .set(ReferralPage, referral).success.value
+            forAll(arbitrary[Referral]) {
+              referral =>
+                beforeEach()
 
-              val application                            = applicationBuilder(userAnswers = Some(userAnswers)).build()
-              val request                                = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
-              val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-              val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
+                val userAnswers = emptyUserAnswers.set(BalancePage, balance).success.value
 
-              val result = route(application, request).value
+                val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
-              status(result) mustEqual OK
+                val request = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
+                  .withCookies(Cookie(Referral.cookieName, referral.toString))
 
-              verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
+                val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+                val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
 
-              val expectedJson = Json.obj(
-                "balance"                         -> balance,
-                "referral"                        -> referral,
-                "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
-              )
+                val result = route(application, request).value
 
-              templateCaptor.getValue mustEqual "balanceConfirmation.njk"
-              jsonCaptor.getValue must containJson(expectedJson)
+                status(result) mustEqual OK
 
-              application.stop()
+                verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
+
+                val expectedJson = Json.obj(
+                  "balance"                         -> balance,
+                  "referral"                        -> referral,
+                  "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
+                )
+
+                templateCaptor.getValue mustEqual "balanceConfirmation.njk"
+                jsonCaptor.getValue must containJson(expectedJson)
+
+                application.stop()
+            }
+          }
+
+          "when cookie not set" in {
+
+            val userAnswers = emptyUserAnswers.set(BalancePage, balance).success.value
+
+            val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+            val request = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
+
+            val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+            val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
+
+            val result = route(application, request).value
+
+            status(result) mustEqual OK
+
+            verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
+
+            val expectedJson = Json.obj(
+              "balance"                         -> balance,
+              "referral"                        -> None,
+              "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
+            )
+
+            templateCaptor.getValue mustEqual "balanceConfirmation.njk"
+            jsonCaptor.getValue must containJson(expectedJson)
+
+            application.stop()
           }
         }
       }
 
       "must redirect to start controller" - {
-        "when balance or referral not found in user answers" in {
+        "when balance not found in user answers" in {
 
-          forAll(arbitrary[(Option[String], Option[Referral])] retryUntil {
-            case (balance, referral) => !(balance.isDefined && referral.isDefined)
-          }) {
-            case (balance, referral) =>
-              beforeEach()
+          val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+          val request     = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
 
-              val userAnswers = emptyUserAnswers
-                .setOption(BalancePage, balance).success.value
-                .setOption(ReferralPage, referral).success.value
+          val result = route(application, request).value
 
-              val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
-              val request     = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
+          status(result) mustEqual SEE_OTHER
 
-              val result = route(application, request).value
+          redirectLocation(result).value mustEqual routes.StartController.start().url
 
-              status(result) mustEqual SEE_OTHER
-
-              redirectLocation(result).value mustEqual routes.StartController.start().url
-
-              application.stop()
-          }
+          application.stop()
         }
       }
     }
-    // format: on
 
     ".checkAnotherGuaranteeBalance" - {
       "must clear user answers and redirect to EORI Number page" in {

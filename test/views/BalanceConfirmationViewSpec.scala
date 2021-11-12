@@ -42,9 +42,9 @@ class BalanceConfirmationViewSpec extends SingleViewSpec("balanceConfirmation.nj
     }
   }
 
-  "must render links" - {
+  private val fakeUrl = "/fake-url"
 
-    val fakeUrl = "/fake-url"
+  "must render links" - {
 
     "when user has come from GOV.UK" in {
 
@@ -91,6 +91,31 @@ class BalanceConfirmationViewSpec extends SingleViewSpec("balanceConfirmation.nj
       )
     }
 
+  }
+
+  "must not render links" - {
+    "when referral is None (i.e. cookie not set)" in {
+
+      val json = Json.obj(
+        "referral"                        -> None,
+        "checkAnotherGuaranteeBalanceUrl" -> fakeUrl
+      )
+
+      val doc = renderDocument(json).futureValue
+
+      doc.text() mustNot include("balanceConfirmation.fromGovUk.p")
+      doc.text() mustNot include("balanceConfirmation.fromNcts.p")
+
+      assertPageDoesNotHaveLink(
+        doc = doc,
+        id = "check-another-guarantee-balance"
+      )
+
+      assertPageDoesNotHaveLink(
+        doc = doc,
+        id = "manage-transit-movements"
+      )
+    }
   }
 
 }

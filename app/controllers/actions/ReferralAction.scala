@@ -36,5 +36,5 @@ class ReferralAction(referral: Referral)(implicit val executionContext: Executio
     extends ActionBuilder[Request, AnyContent] {
 
   override def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] =
-    block(request).map(_.withCookies(Cookie("referral", referral.toString)))
+    block(request).map(_.withCookies(Cookie(Referral.cookieName, referral.toString)))
 }

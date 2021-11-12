@@ -46,7 +46,7 @@ class ReferralActionSpec extends SpecBase with AppWithDefaultMockFixtures {
           val result  = harness.test()(fakeRequest)
 
           status(result) mustBe OK
-          cookies(result).toList must contain(Cookie("referral", referral.toString))
+          cookies(result).toList must contain(Cookie(Referral.cookieName, referral.toString))
       }
     }
   }
