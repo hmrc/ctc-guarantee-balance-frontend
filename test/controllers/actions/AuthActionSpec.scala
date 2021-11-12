@@ -31,6 +31,7 @@ import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
 
+import java.net.URLEncoder
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -102,9 +103,8 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
               status(result) mustBe SEE_OTHER
 
-              val redirect = redirectLocation(result).get
-              redirect must startWith(frontendAppConfig.loginUrl)
-              redirect must endWith(s"$referral")
+              redirectLocation(result).get mustEqual
+                s"${frontendAppConfig.loginUrl}?continue=${URLEncoder.encode(s"${frontendAppConfig.loginContinueUrl}?referral=$referral", "utf-8")}"
           }
         }
 
@@ -118,9 +118,8 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           status(result) mustBe SEE_OTHER
 
-          val redirect = redirectLocation(result).get
-          redirect must startWith(frontendAppConfig.loginUrl)
-          redirect must endWith(s"start")
+          redirectLocation(result).get mustEqual
+            s"${frontendAppConfig.loginUrl}?continue=${URLEncoder.encode(frontendAppConfig.loginContinueUrl, "utf-8")}"
         }
       }
     }
