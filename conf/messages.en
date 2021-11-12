@@ -12,6 +12,7 @@ site.yes = Yes
 site.continue = Continue
 site.continueWaiting = Continue waiting
 site.tryAgain = Try again
+site.startAgain = Start again
 site.confirmAndSend = Confirm and send
 site.service_name = Check your guarantee balance
 site.textarea.char_limit = (Limit is {0} characters)
@@ -88,6 +89,13 @@ tryGuaranteeBalanceAgain.title = We have not been able to get your guarantee bal
 tryGuaranteeBalanceAgain.heading = We have not been able to get your guarantee balance
 tryGuaranteeBalanceAgain.checkDetails = You can
 tryGuaranteeBalanceAgain.checkDetails.link = check that your details are correct
+
+unsupportedGuaranteeType.title = We cannot get the balance for this type of guarantee
+unsupportedGuaranteeType.heading = We cannot get the balance for this type of guarantee
+unsupportedGuaranteeType.checkDetails = You can
+unsupportedGuaranteeType.checkDetails.link = change the reference for the guarantee you check the balance
+unsupportedGuaranteeType.checkDetails.postLink = or you can start again.
+
 
 accessCode.title = What is the access code?
 accessCode.heading = What is the access code?

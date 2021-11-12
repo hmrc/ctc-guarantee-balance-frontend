@@ -39,3 +39,4 @@ GET        /check-another-guarantee-balance         controllers.BalanceConfirmat
 GET        /manage-transit-movements                controllers.BalanceConfirmationController.manageTransitMovements()
 
 GET        /details-do-not-match                    controllers.DetailsDontMatchController.onPageLoad()
+GET        /unsupported-guatantee-type              controllers.UnsupportedGuaranteeTypeController.onPageLoad()
