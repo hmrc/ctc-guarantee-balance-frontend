@@ -24,6 +24,22 @@ class UnsupportedGuaranteeTypeViewSpec extends SingleViewSpec("unsupportedGuaran
     assertPageTitleEqualsMessage(doc, "unsupportedGuaranteeType.heading")
   }
 
+  "must render paragraph" in {
+    assertContainsText(doc, "unsupportedGuaranteeType.paragraph")
+  }
+
+  "must render paragraph.bullet1" in {
+    assertContainsText(doc, "unsupportedGuaranteeType.paragraph.bullet1")
+  }
+
+  "must render paragraph.bullet2" in {
+    assertContainsText(doc, "unsupportedGuaranteeType.paragraph.bullet2")
+  }
+
+  "must render paragrap.bullet3" in {
+    assertContainsText(doc, "unsupportedGuaranteeType.paragraph.bullet3")
+  }
+
   "display link with id checkDetails-link" in {
     assertPageHasLink(doc, "checkDetails-link", "unsupportedGuaranteeType.checkDetails.link", routes.CheckYourAnswersController.onPageLoad().url)
   }

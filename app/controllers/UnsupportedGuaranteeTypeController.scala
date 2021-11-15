@@ -23,7 +23,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class UnsupportedGuaranteeTypeController @Inject() (
   override val messagesApi: MessagesApi,
@@ -40,4 +40,10 @@ class UnsupportedGuaranteeTypeController @Inject() (
     implicit request =>
       renderer.render("unsupportedGuaranteeType.njk").map(Ok(_))
   }
+
+  def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+    implicit request =>
+      Future.successful(Redirect(routes.StartController.startAgain()))
+  }
+
 }

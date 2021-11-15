@@ -19,30 +19,45 @@ package controllers
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{times, verify}
+import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+
+import scala.concurrent.Future
 
 class UnsupportedGuaranteeTypeControllerSpec extends SpecBase with MockitoSugar with AppWithDefaultMockFixtures {
 
   "UnsupportedGuaranteeType Controller" - {
 
-    "return OK and the correct view for a GET" in {
+    "onPageLoad" - {
+      "return OK and the correct view for a GET" in {
 
-      val application                            = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-      val request                                = FakeRequest(GET, routes.UnsupportedGuaranteeTypeController.onPageLoad().url)
-      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+        val application                            = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+        val request                                = FakeRequest(GET, routes.UnsupportedGuaranteeTypeController.onPageLoad().url)
+        val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
 
-      val result = route(application, request).value
+        val result = route(application, request).value
 
-      status(result) mustEqual OK
+        status(result) mustEqual OK
 
-      verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
+        verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
 
-      templateCaptor.getValue mustEqual "unsupportedGuaranteeType.njk"
+        templateCaptor.getValue mustEqual "unsupportedGuaranteeType.njk"
 
-      application.stop()
+        application.stop()
+      }
+    }
+
+    "onSubmit" - {
+      "must Redirect to the StartController DataReturned " in {
+        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+        val request     = FakeRequest(POST, routes.UnsupportedGuaranteeTypeController.onSubmit().url)
+        val result      = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.StartController.startAgain().url
+      }
     }
   }
 }

@@ -29,7 +29,7 @@
         </a> {{ messages("unsupportedGuaranteeType.checkDetails.postLink") }}
       </p>
 
-      <form action="{{ routes.controllers.StartController.start().url }}" method="post">
+      <form action="{{ routes.controllers.UnsupportedGuaranteeTypeController.onSubmit().url }}" method="post">
 
         {{ csrf() | safe }}
 
