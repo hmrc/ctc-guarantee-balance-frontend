@@ -71,7 +71,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
       case fe: BalanceRequestFunctionalError if fe.containsErrorType(UnsupportedGuaranteeTypeErrorType) =>
         Future.successful(Redirect(controllers.routes.UnsupportedGuaranteeTypeController.onPageLoad()))
       case fe: BalanceRequestFunctionalError =>
-        logger.warn(s"[GuaranteeBalanceResponseHandler][processResponse]Failed to process Response: ${fe.errors}")
+        logger.warn(s"[GuaranteeBalanceResponseHandler][processBalanceRequestResponse]Failed to process Response: ${fe.errors}")
         technicalDifficulties()
     }
 
@@ -80,7 +80,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
       case failureResponse if failureResponse.status.equals(TOO_MANY_REQUESTS) =>
         Future.successful(Redirect(controllers.routes.RateLimitController.onPageLoad()))
       case failureResponse =>
-        logger.warn(s"[GuaranteeBalanceResponseHandler][processResponse]Failed to process Response: $failureResponse")
+        logger.warn(s"[GuaranteeBalanceResponseHandler][processHttpResponse]Failed to process Response: $failureResponse")
         technicalDifficulties()
     }
 
