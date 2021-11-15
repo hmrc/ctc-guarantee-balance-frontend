@@ -28,6 +28,7 @@ import models.backend.{
 }
 import models.requests.DataRequest
 import models.values.BalanceId
+import models.values.ErrorType.UnsupportedGuaranteeTypeErrorType
 import pages.BalancePage
 import play.api.Logging
 import play.api.libs.json.Json
@@ -51,27 +52,41 @@ class GuaranteeBalanceResponseHandler @Inject() (
     request: DataRequest[_]
   ): Future[Result] =
     response match {
-      case Right(BalanceRequestPending(balanceId)) =>
+      case Right(balanceRequestResponse) => processBalanceRequestResponse(balanceRequestResponse, processPending)
+      case Left(failureResponse)         => processHttpResponse(failureResponse)
+    }
+
+  def processBalanceRequestResponse(response: BalanceRequestResponse, processPending: BalanceId => Future[Result])(implicit
+    request: DataRequest[_]
+  ): Future[Result] =
+    response match {
+      case BalanceRequestPending(balanceId) =>
         processPending(balanceId)
-      case Right(successResponse: BalanceRequestSuccess) =>
+      case successResponse: BalanceRequestSuccess =>
         processSuccessResponse(successResponse)
-      case Right(BalanceRequestNotMatched) =>
+      case BalanceRequestNotMatched =>
         Future.successful(Redirect(controllers.routes.DetailsDontMatchController.onPageLoad()))
-      case Right(BalanceRequestPendingExpired(_)) =>
+      case BalanceRequestPendingExpired(_) =>
         Future.successful(Redirect(controllers.routes.TryGuaranteeBalanceAgainController.onPageLoad()))
-      case Right(BalanceRequestFunctionalError(errors)) =>
-        logger.warn(s"[GuaranteeBalanceResponseHandler][processResponse]Failed to process Response. BalanceRequestFunctionalError: $errors")
+      case fe: BalanceRequestFunctionalError if fe.containsErrorType(UnsupportedGuaranteeTypeErrorType) =>
+        Future.successful(Redirect(controllers.routes.UnsupportedGuaranteeTypeController.onPageLoad()))
+      case fe: BalanceRequestFunctionalError =>
+        logger.warn(s"[GuaranteeBalanceResponseHandler][processResponse]Failed to process Response: ${fe.errors}")
         technicalDifficulties()
-      case Left(failureResponse) if failureResponse.status.equals(TOO_MANY_REQUESTS) =>
+    }
+
+  private def processHttpResponse(response: HttpResponse)(implicit request: DataRequest[_]): Future[Result] =
+    response match {
+      case failureResponse if failureResponse.status.equals(TOO_MANY_REQUESTS) =>
         Future.successful(Redirect(controllers.routes.RateLimitController.onPageLoad()))
-      case Left(failureResponse) =>
+      case failureResponse =>
         logger.warn(s"[GuaranteeBalanceResponseHandler][processResponse]Failed to process Response: $failureResponse")
         technicalDifficulties()
     }
 
-  private def processSuccessResponse(balanceRequest: BalanceRequestSuccess)(implicit request: DataRequest[_]): Future[Result] =
+  private def processSuccessResponse(balanceResponse: BalanceRequestSuccess)(implicit request: DataRequest[_]): Future[Result] =
     for {
-      updatedAnswers <- Future.fromTry(request.userAnswers.set(BalancePage, balanceRequest.formatForDisplay))
+      updatedAnswers <- Future.fromTry(request.userAnswers.set(BalancePage, balanceResponse.formatForDisplay))
       _              <- sessionRepository.set(updatedAnswers)
     } yield Redirect(controllers.routes.BalanceConfirmationController.onPageLoad())
 
