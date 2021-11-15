@@ -20,15 +20,18 @@ import config.FrontendAppConfig
 import models.RichHttpResponse
 import models.backend._
 import models.requests.BalanceRequest
-import models.values.BalanceId
-import models.values.ErrorType.{NotMatchedErrorType, UnsupportedGuaranteeTypeErrorType}
+import models.values.{BalanceId, ErrorType}
 import play.api.Logging
 import play.api.http.{HeaderNames, Status}
-import play.api.libs.json.JsSuccess
+import play.api.libs.json.JsResult
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions, HttpReads, HttpResponse}
 import javax.inject.Inject
 import java.time.Instant
+
+import cats.data.NonEmptyList
+import models.backend.errors.FunctionalError
+import models.values.ErrorType.{NotMatchedErrorType, UnsupportedGuaranteeTypeErrorType}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -39,6 +42,11 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
 
   private val headers = Seq(
     HeaderNames.ACCEPT -> "application/vnd.hmrc.1.0+json"
+  )
+
+  private val errorResponseMap = Map[ErrorType, BalanceRequestResponse](
+    NotMatchedErrorType               -> BalanceRequestNotMatched,
+    UnsupportedGuaranteeTypeErrorType -> BalanceRequestUnsupportedGuaranteeType
   )
 
   // scalastyle:off cyclomatic.complexity
@@ -54,18 +62,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
             case Status.OK =>
               Right(response.json.as[PostBalanceRequestSuccessResponse].response)
             case Status.BAD_REQUEST =>
-              response.validateJson[PostBalanceRequestFunctionalErrorResponse] match {
-                case JsSuccess(fe, _) if fe.containsErrorType(NotMatchedErrorType) =>
-                  Right(BalanceRequestNotMatched)
-                case JsSuccess(fe, _) if fe.containsErrorType(UnsupportedGuaranteeTypeErrorType) =>
-                  Right(BalanceRequestUnsupportedGuaranteeType)
-                case jsResult =>
-                  logger.info(s"[GuaranteeBalanceConnector][submitBalanceRequest] ${jsResult.fold(
-                    _.toString(),
-                    fe => s"Response contains functional error type(s) ${fe.errorTypes}"
-                  )}")
-                  Left(response)
-              }
+              processSubmitErrorResponse(response)
             case status if is4xx(status) || is5xx(status) =>
               Left(response)
           }
@@ -77,6 +74,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
       headers
     )
   }
+
   // scalastyle:on cyclomatic.complexity
 
   def queryPendingBalance(balanceId: BalanceId)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] = {
@@ -99,16 +97,25 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
     )
   }
 
+  private def processSubmitErrorResponse(response: HttpResponse): Either[HttpResponse, BalanceRequestResponse] = {
+    val json: JsResult[PostBalanceRequestFunctionalErrorResponse] = response.validateJson[PostBalanceRequestFunctionalErrorResponse]
+    (for {
+      fe                     <- json.asOpt
+      balanceRequestResponse <- convertErrorTypeToBalanceRequestResponse(fe.response.errors)
+    } yield Right(balanceRequestResponse)).getOrElse {
+      val outputErrorMsg = json.fold(_.toString(), fe => s"Response contains functional error type(s) ${fe.errorTypes}")
+      logger.info(s"[GuaranteeBalanceConnector][processSubmitErrorResponse] $outputErrorMsg")
+      Left(response)
+    }
+  }
+
   private def processQuerySuccessResponse(balanceId: BalanceId, response: HttpResponse): BalanceRequestResponse = {
     val balanceRequestResponse = response.json.as[GetBalanceRequestResponse].request
     balanceRequestResponse.response match {
       case Some(response) =>
         response match {
-          case fe: BalanceRequestFunctionalError if fe.containsErrorType(NotMatchedErrorType) =>
-            BalanceRequestNotMatched
-          case fe: BalanceRequestFunctionalError if fe.containsErrorType(UnsupportedGuaranteeTypeErrorType) =>
-            BalanceRequestUnsupportedGuaranteeType
-          case _ => response
+          case fe: BalanceRequestFunctionalError => convertErrorTypeToBalanceRequestResponse(fe.errors).getOrElse(response)
+          case _                                 => response
         }
       case _ =>
         val currentTime        = Instant.now()
@@ -116,4 +123,11 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
         if (currentTime.isBefore(timeRequestExpires)) BalanceRequestPending(balanceId) else BalanceRequestPendingExpired(balanceId)
     }
   }
+
+  private def convertErrorTypeToBalanceRequestResponse(errorTypes: NonEmptyList[FunctionalError]): Option[BalanceRequestResponse] =
+    errorTypes.toList
+      .flatMap(
+        errorType => errorResponseMap.get(errorType.errorType)
+      )
+      .headOption
 }
