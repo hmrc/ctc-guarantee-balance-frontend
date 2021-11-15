@@ -23,7 +23,7 @@ import models.requests.BalanceRequest
 import models.values.{BalanceId, ErrorType}
 import play.api.Logging
 import play.api.http.{HeaderNames, Status}
-import play.api.libs.json.JsSuccess
+import play.api.libs.json.JsResult
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions, HttpReads, HttpResponse}
 import javax.inject.Inject
@@ -98,20 +98,15 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
   }
 
   private def processSubmitErrorResponse(response: HttpResponse): Either[HttpResponse, BalanceRequestResponse] = {
-    val json = response.validateJson[PostBalanceRequestFunctionalErrorResponse]
-    val balanceRequestResponse = json match {
-      case JsSuccess(fe, _) => convertErrorTypeToBalanceRequestResponse(fe.response.errors)
-      case _                => None
-    }
+    val json: JsResult[PostBalanceRequestFunctionalErrorResponse] = response.validateJson[PostBalanceRequestFunctionalErrorResponse]
 
-    balanceRequestResponse match {
-      case Some(brResponse) => Right(brResponse)
-      case None =>
-        logger.info(s"[GuaranteeBalanceConnector][processSubmitErrorResponse] ${json.fold(
-          _.toString(),
-          fe => s"Response contains functional error type(s) ${fe.errorTypes}"
-        )}")
-        Left(response)
+    (for {
+      fe                     <- json.asOpt
+      balanceRequestResponse <- convertErrorTypeToBalanceRequestResponse(fe.response.errors)
+    } yield Right(balanceRequestResponse)).getOrElse {
+      val outputErrorMsg = json.fold(_.toString(), fe => s"Response contains functional error type(s) ${fe.errorTypes}")
+      logger.info(s"[GuaranteeBalanceConnector][processSubmitErrorResponse] $outputErrorMsg")
+      Left(response)
     }
   }
 
@@ -130,10 +125,10 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
     }
   }
 
-  private def convertErrorTypeToBalanceRequestResponse(errorTypes: NonEmptyList[FunctionalError]): Option[BalanceRequestResponse] = {
-    val errorValues: List[BalanceRequestResponse] = errorTypes.toList.flatMap(
-      errorType => errorResponseMap.get(errorType.errorType)
-    )
-    errorValues.headOption
-  }
+  private def convertErrorTypeToBalanceRequestResponse(errorTypes: NonEmptyList[FunctionalError]): Option[BalanceRequestResponse] =
+    errorTypes.toList
+      .flatMap(
+        errorType => errorResponseMap.get(errorType.errorType)
+      )
+      .headOption
 }
