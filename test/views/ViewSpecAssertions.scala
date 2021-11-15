@@ -105,6 +105,9 @@ trait ViewSpecAssertions extends Matchers {
     assertLinkHasExpectedAttributes(link, expectedText, expectedHref)
   }
 
+  def assertPageDoesNotHaveLink(doc: Document, id: String): Assertion =
+    doc.select(s"a[id=$id]") mustBe empty
+
   private def assertLinkHasExpectedAttributes(link: Element, expectedText: String, expectedHref: String): Assertion = {
     link.text() mustBe expectedText
     link.attr("href") mustBe expectedHref
