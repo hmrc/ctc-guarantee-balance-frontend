@@ -24,11 +24,11 @@ import models.backend.{
   BalanceRequestPending,
   BalanceRequestPendingExpired,
   BalanceRequestResponse,
-  BalanceRequestSuccess
+  BalanceRequestSuccess,
+  BalanceRequestUnsupportedGuaranteeType
 }
 import models.requests.DataRequest
 import models.values.BalanceId
-import models.values.ErrorType.UnsupportedGuaranteeTypeErrorType
 import pages.BalancePage
 import play.api.Logging
 import play.api.libs.json.Json
@@ -68,7 +68,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
         Future.successful(Redirect(controllers.routes.DetailsDontMatchController.onPageLoad()))
       case BalanceRequestPendingExpired(_) =>
         Future.successful(Redirect(controllers.routes.TryGuaranteeBalanceAgainController.onPageLoad()))
-      case fe: BalanceRequestFunctionalError if fe.containsErrorType(UnsupportedGuaranteeTypeErrorType) =>
+      case BalanceRequestUnsupportedGuaranteeType =>
         Future.successful(Redirect(controllers.routes.UnsupportedGuaranteeTypeController.onPageLoad()))
       case fe: BalanceRequestFunctionalError =>
         logger.warn(s"[GuaranteeBalanceResponseHandler][processBalanceRequestResponse]Failed to process Response: ${fe.errors}")

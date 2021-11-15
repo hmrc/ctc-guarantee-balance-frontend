@@ -19,7 +19,13 @@ package connectors
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
-import models.backend.{BalanceRequestNotMatched, BalanceRequestPending, BalanceRequestPendingExpired, BalanceRequestSuccess}
+import models.backend.{
+  BalanceRequestNotMatched,
+  BalanceRequestPending,
+  BalanceRequestPendingExpired,
+  BalanceRequestSuccess,
+  BalanceRequestUnsupportedGuaranteeType
+}
 import models.requests.BalanceRequest
 import models.values.ErrorType.NotMatchedErrorType
 import models.values._
@@ -30,7 +36,6 @@ import play.api.Application
 import play.api.http.{ContentTypes, HeaderNames, Status}
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
-
 import java.time.Instant
 import java.util.UUID
 
@@ -145,6 +150,39 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
 
         val result = connector.submitBalanceRequest(request).futureValue
         result mustBe Right(BalanceRequestNotMatched)
+      }
+
+      "must return unsupported guarantee balance type for a functional error with error type 14" in {
+        val balanceRequestNotMatchedJson: String =
+          """
+            | {
+            |   "code": "FUNCTIONAL_ERROR",
+            |   "message": "The request was rejected by the guarantee management system",
+            |   "response": {
+            |     "errors": [
+            |       {
+            |         "errorType": 14,
+            |         "errorPointer": "Foo.Bar(1).Baz"
+            |       }
+            |     ]
+            |   }
+            | }
+            |""".stripMargin
+
+        server.stubFor(
+          post(urlEqualTo(submitBalanceRequestUrl))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+            .withRequestBody(equalToJson(requestAsJsonString))
+            .willReturn(
+              aResponse()
+                .withStatus(Status.BAD_REQUEST)
+                .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
+                .withBody(balanceRequestNotMatchedJson)
+            )
+        )
+
+        val result = connector.submitBalanceRequest(request).futureValue
+        result mustBe Right(BalanceRequestUnsupportedGuaranteeType)
       }
 
       "must return the HttpResponse for a functional error with inconsequential error type" in {
@@ -365,6 +403,34 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
 
         val result = connector.queryPendingBalance(balanceId).futureValue
         result mustBe Right(BalanceRequestNotMatched)
+      }
+
+      "must return unsupported guaranteee balance type for a functional error with error type 14" in {
+        val balanceId   = BalanceId(testUuid)
+        val requestedAt = Instant.now().minusSeconds(30)
+        val completedAt = Instant.now().minusSeconds(1)
+        val balanceRequestNotMatchedJson: String =
+          s"""
+             | {
+             |   "request" : {
+             |     "balanceId": "22b9899e-24ee-48e6-a189-97d1f45391c4",
+             |     "taxIdentifier": "taxid",
+             |     "guaranteeReference": "guarref",
+             |     "requestedAt": "$requestedAt",
+             |     "completedAt": "$completedAt",
+             |     "response":{"errors":[{"errorType":14,"errorPointer":"Foo.Bar(1).Baz"}],"status":"FUNCTIONAL_ERROR"}
+             |   }
+             | }
+             |""".stripMargin
+
+        server.stubFor(
+          get(urlEqualTo(queryBalanceRequestUrlFor(balanceId)))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+            .willReturn(okJson(balanceRequestNotMatchedJson))
+        )
+
+        val result = connector.queryPendingBalance(balanceId).futureValue
+        result mustBe Right(BalanceRequestUnsupportedGuaranteeType)
       }
     }
   }

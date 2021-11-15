@@ -21,7 +21,7 @@ import models.RichHttpResponse
 import models.backend._
 import models.requests.BalanceRequest
 import models.values.BalanceId
-import models.values.ErrorType.NotMatchedErrorType
+import models.values.ErrorType.{NotMatchedErrorType, UnsupportedGuaranteeTypeErrorType}
 import play.api.Logging
 import play.api.http.{HeaderNames, Status}
 import play.api.libs.json.JsSuccess
@@ -57,6 +57,8 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
               response.validateJson[PostBalanceRequestFunctionalErrorResponse] match {
                 case JsSuccess(fe, _) if fe.containsErrorType(NotMatchedErrorType) =>
                   Right(BalanceRequestNotMatched)
+                case JsSuccess(fe, _) if fe.containsErrorType(UnsupportedGuaranteeTypeErrorType) =>
+                  Right(BalanceRequestUnsupportedGuaranteeType)
                 case jsResult =>
                   logger.info(s"[GuaranteeBalanceConnector][submitBalanceRequest] ${jsResult.fold(
                     _.toString(),
@@ -104,6 +106,8 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
         response match {
           case fe: BalanceRequestFunctionalError if fe.containsErrorType(NotMatchedErrorType) =>
             BalanceRequestNotMatched
+          case fe: BalanceRequestFunctionalError if fe.containsErrorType(UnsupportedGuaranteeTypeErrorType) =>
+            BalanceRequestUnsupportedGuaranteeType
           case _ => response
         }
       case _ =>

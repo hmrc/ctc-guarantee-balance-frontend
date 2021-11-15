@@ -22,9 +22,15 @@ import base.{AppWithDefaultMockFixtures, SpecBase}
 import cats.data.NonEmptyList
 import matchers.JsonMatchers
 import models.backend.errors.FunctionalError
-import models.backend.{BalanceRequestFunctionalError, BalanceRequestNotMatched, BalanceRequestPending, BalanceRequestPendingExpired, BalanceRequestSuccess}
+import models.backend.{
+  BalanceRequestFunctionalError,
+  BalanceRequestNotMatched,
+  BalanceRequestPending,
+  BalanceRequestPendingExpired,
+  BalanceRequestSuccess,
+  BalanceRequestUnsupportedGuaranteeType
+}
 import models.requests.DataRequest
-import models.values.ErrorType.UnsupportedGuaranteeTypeErrorType
 import models.values.{BalanceId, CurrencyCode, ErrorType}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
@@ -46,16 +52,15 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
   val populatedUserAnswers = emptyUserAnswers.set(GuaranteeReferenceNumberPage, grn).success.value
 
   val noMatchResponse         = Right(BalanceRequestNotMatched)
+  val unsupportedTypeResponse = Right(BalanceRequestUnsupportedGuaranteeType)
   val successResponse         = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
   val pendingResponse         = Right(BalanceRequestPending(balanceId))
   val tryAgainResponse        = Right(BalanceRequestPendingExpired(balanceId))
   val httpErrorResponse       = Left(HttpResponse(404, ""))
   val tooManyRequestsResponse = Left(HttpResponse(429, ""))
 
-  val unsupportedTypeError    = FunctionalError(UnsupportedGuaranteeTypeErrorType, "", None)
-  val unsupportedTypeResponse = Right(BalanceRequestFunctionalError(NonEmptyList(unsupportedTypeError, Nil)))
-  val functionalError         = FunctionalError(ErrorType(1), "", None)
-  val balanceErrorResponse    = Right(BalanceRequestFunctionalError(NonEmptyList(functionalError, Nil)))
+  val functionalError      = FunctionalError(ErrorType(1), "", None)
+  val balanceErrorResponse = Right(BalanceRequestFunctionalError(NonEmptyList(functionalError, Nil)))
 
   implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
 
