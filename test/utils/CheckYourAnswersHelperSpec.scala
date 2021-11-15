@@ -62,7 +62,7 @@ class CheckYourAnswersHelperSpec extends SpecBase {
                     content = msg"site.edit",
                     href = routes.EoriNumberController.onPageLoad(mode).url,
                     visuallyHiddenText = Some(label),
-                    attributes = Map("id" -> "change-eori-number-link")
+                    attributes = Map("id" -> "change-eori-number")
                   )
                 )
               )
@@ -107,7 +107,7 @@ class CheckYourAnswersHelperSpec extends SpecBase {
                     content = msg"site.edit",
                     href = routes.GuaranteeReferenceNumberController.onPageLoad(mode).url,
                     visuallyHiddenText = Some(label),
-                    attributes = Map("id" -> "change-guarantee-reference-number-link")
+                    attributes = Map("id" -> "change-guarantee-reference-number")
                   )
                 )
               )
@@ -152,7 +152,7 @@ class CheckYourAnswersHelperSpec extends SpecBase {
                     content = msg"site.edit",
                     href = routes.AccessCodeController.onPageLoad(mode).url,
                     visuallyHiddenText = Some(label),
-                    attributes = Map("id" -> "change-access-code-link")
+                    attributes = Map("id" -> "change-access-code")
                   )
                 )
               )

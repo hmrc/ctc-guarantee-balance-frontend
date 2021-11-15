@@ -34,7 +34,7 @@ class CheckYourAnswersHelper(userAnswers: UserAnswers, mode: Mode) {
             content = msg"site.edit",
             href = routes.EoriNumberController.onPageLoad(mode).url,
             visuallyHiddenText = Some(msg"eoriNumber.checkYourAnswersLabel"),
-            attributes = Map("id" -> "change-eori-number-link")
+            attributes = Map("id" -> "change-eori-number")
           )
         )
       )
@@ -50,7 +50,7 @@ class CheckYourAnswersHelper(userAnswers: UserAnswers, mode: Mode) {
             content = msg"site.edit",
             href = routes.GuaranteeReferenceNumberController.onPageLoad(mode).url,
             visuallyHiddenText = Some(msg"guaranteeReferenceNumber.checkYourAnswersLabel"),
-            attributes = Map("id" -> "change-guarantee-reference-number-link")
+            attributes = Map("id" -> "change-guarantee-reference-number")
           )
         )
       )
@@ -66,7 +66,7 @@ class CheckYourAnswersHelper(userAnswers: UserAnswers, mode: Mode) {
             content = msg"site.edit",
             href = routes.AccessCodeController.onPageLoad(mode).url,
             visuallyHiddenText = Some(msg"accessCode.checkYourAnswersLabel"),
-            attributes = Map("id" -> "change-access-code-link")
+            attributes = Map("id" -> "change-access-code")
           )
         )
       )
