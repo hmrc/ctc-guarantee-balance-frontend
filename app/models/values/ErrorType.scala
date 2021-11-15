@@ -26,6 +26,7 @@ object ErrorType {
   implicit val errorTypeFormat: Format[ErrorType] =
     Json.valueFormat[ErrorType]
 
-  val NotMatchedErrorType: ErrorType = ErrorType(12)
+  val NotMatchedErrorType: ErrorType               = ErrorType(12)
+  val UnsupportedGuaranteeTypeErrorType: ErrorType = ErrorType(14)
 }
 // scalastyle:on magic.number

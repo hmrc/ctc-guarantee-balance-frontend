@@ -22,7 +22,14 @@ import base.{AppWithDefaultMockFixtures, SpecBase}
 import cats.data.NonEmptyList
 import matchers.JsonMatchers
 import models.backend.errors.FunctionalError
-import models.backend.{BalanceRequestFunctionalError, BalanceRequestNotMatched, BalanceRequestPending, BalanceRequestPendingExpired, BalanceRequestSuccess}
+import models.backend.{
+  BalanceRequestFunctionalError,
+  BalanceRequestNotMatched,
+  BalanceRequestPending,
+  BalanceRequestPendingExpired,
+  BalanceRequestSuccess,
+  BalanceRequestUnsupportedGuaranteeType
+}
 import models.requests.DataRequest
 import models.values.{BalanceId, CurrencyCode, ErrorType}
 import org.mockito.ArgumentCaptor
@@ -45,6 +52,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
   val populatedUserAnswers = emptyUserAnswers.set(GuaranteeReferenceNumberPage, grn).success.value
 
   val noMatchResponse         = Right(BalanceRequestNotMatched)
+  val unsupportedTypeResponse = Right(BalanceRequestUnsupportedGuaranteeType)
   val successResponse         = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
   val pendingResponse         = Right(BalanceRequestPending(balanceId))
   val tryAgainResponse        = Right(BalanceRequestPendingExpired(balanceId))
@@ -75,11 +83,18 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
     }
 
-    "must return back to the wait page if the status is still pending " in {
-      val result: Future[Result] = handler.processResponse(noMatchResponse, processPending)
+    "must Redirect to the UnsupportedGuaranteeTypeController if the status is Unsupported Type " in {
+      val result: Future[Result] = handler.processResponse(unsupportedTypeResponse, processPending)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
+      redirectLocation(result).value mustEqual controllers.routes.UnsupportedGuaranteeTypeController.onPageLoad().url
+    }
+
+    "must return back to the wait page if the status is still pending " in {
+      val result: Future[Result] = handler.processResponse(pendingResponse, processPending)
+
+      status(result) mustEqual SEE_OTHER
+      redirectLocation(result).value mustEqual controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId).url
     }
 
     "must Redirect to the Balance Confirmation Controller if the status is DataReturned " in {

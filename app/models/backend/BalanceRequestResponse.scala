@@ -46,6 +46,7 @@ case class BalanceRequestSuccess(
 case class BalanceRequestPending(balanceId: BalanceId) extends BalanceRequestResponse
 
 object BalanceRequestNotMatched extends BalanceRequestResponse
+object BalanceRequestUnsupportedGuaranteeType extends BalanceRequestResponse
 
 case class BalanceRequestPendingExpired(balanceId: BalanceId) extends BalanceRequestResponse
 
