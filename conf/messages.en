@@ -92,9 +92,14 @@ tryGuaranteeBalanceAgain.checkDetails.link = check that your details are correct
 
 unsupportedGuaranteeType.title = We cannot get the balance for this type of guarantee
 unsupportedGuaranteeType.heading = We cannot get the balance for this type of guarantee
+unsupportedGuaranteeType.paragraph = We can only get the balance for:
+unsupportedGuaranteeType.paragraph.bullet1 = Comprehensive guarantee
+unsupportedGuaranteeType.paragraph.bullet2 = Guarantee waiver
+unsupportedGuaranteeType.paragraph.bullet3 = Individual guarantee with multiple usage
 unsupportedGuaranteeType.checkDetails = You can
 unsupportedGuaranteeType.checkDetails.link = change the reference for the guarantee you check the balance
 unsupportedGuaranteeType.checkDetails.postLink = or you can start again.
+
 
 
 accessCode.title = What is the access code?
