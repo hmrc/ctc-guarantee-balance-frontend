@@ -41,5 +41,5 @@ GET        /manage-transit-movements                controllers.BalanceConfirmat
 
 GET        /details-do-not-match                    controllers.DetailsDontMatchController.onPageLoad()
 
-GET        /unsupported-guatantee-type              controllers.UnsupportedGuaranteeTypeController.onPageLoad()
-POST       /unsupported-guatantee-type              controllers.UnsupportedGuaranteeTypeController.onSubmit()
+GET        /unsupported-guarantee-type              controllers.UnsupportedGuaranteeTypeController.onPageLoad()
+POST       /unsupported-guarantee-type              controllers.UnsupportedGuaranteeTypeController.onSubmit()
