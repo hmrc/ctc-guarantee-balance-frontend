@@ -99,7 +99,6 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
 
   private def processSubmitErrorResponse(response: HttpResponse): Either[HttpResponse, BalanceRequestResponse] = {
     val json: JsResult[PostBalanceRequestFunctionalErrorResponse] = response.validateJson[PostBalanceRequestFunctionalErrorResponse]
-
     (for {
       fe                     <- json.asOpt
       balanceRequestResponse <- convertErrorTypeToBalanceRequestResponse(fe.response.errors)
