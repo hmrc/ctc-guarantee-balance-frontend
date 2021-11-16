@@ -17,12 +17,10 @@
 package controllers
 
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
-import models.values.LockId
 import pages.GuaranteeReferenceNumberPage
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
-import uk.gov.hmrc.mongo.lock.MongoLockRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.Inject
@@ -33,8 +31,7 @@ class TryGuaranteeBalanceAgainController @Inject() (
   renderer: Renderer,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
-  requireData: DataRequiredAction,
-  mongoLockRepository: MongoLockRepository
+  requireData: DataRequiredAction
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
@@ -42,13 +39,8 @@ class TryGuaranteeBalanceAgainController @Inject() (
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       request.userAnswers.get(GuaranteeReferenceNumberPage) match {
-        case Some(guaranteeReferenceNumber: String) =>
-          val userId = request.internalId
-          val lockId = LockId(userId, guaranteeReferenceNumber).toString
-          mongoLockRepository.releaseLock(lockId, userId).flatMap {
-            _ => renderer.render("tryGuaranteeBalanceAgain.njk").map(Ok(_))
-          }
-        case None => Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
+        case Some(guaranteeReferenceNumber: String) => renderer.render("tryGuaranteeBalanceAgain.njk").map(Ok(_))
+        case None                                   => Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
       }
   }
 

@@ -18,7 +18,7 @@ package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify}
 import pages.GuaranteeReferenceNumberPage
 import play.api.test.FakeRequest
@@ -58,28 +58,6 @@ class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaul
       status(result) mustEqual SEE_OTHER
 
       redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
-    }
-
-    "must release lock" in {
-
-      val userAnswers = baseAnswers
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
-
-      val request = FakeRequest(GET, routes.TryGuaranteeBalanceAgainController.onPageLoad().url)
-
-      val result = route(application, request).value
-
-      status(result) mustEqual OK
-
-      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-
-      verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
-
-      templateCaptor.getValue mustBe "tryGuaranteeBalanceAgain.njk"
-
-      val expectedLockId = (userAnswers.id + "grn".trim.toLowerCase).hashCode.toString
-      verify(mockMongoLockRepository).releaseLock(eqTo(expectedLockId), eqTo(userAnswers.id))
-
     }
 
   }
