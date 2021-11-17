@@ -75,7 +75,7 @@ eoriNumber.error.invalidFormat = Enter your EORI number in the right format, lik
 
 waitOnGuaranteeBalance.title = We are trying to get your guarantee balance
 waitOnGuaranteeBalance.heading = We are trying to get your guarantee balance
-waitOnGuaranteeBalance.paragraph = This may take up to {0} seconds
+waitOnGuaranteeBalance.paragraph = This may take up to {0} seconds.
 
 guaranteeReferenceNumber.title = What is the guarantee reference number?
 guaranteeReferenceNumber.heading = What is the guarantee reference number?
