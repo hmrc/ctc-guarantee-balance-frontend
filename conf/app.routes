@@ -35,11 +35,11 @@ GET        /try-again                               controllers.TryGuaranteeBala
 
 GET        /rate-limit                              controllers.RateLimitController.onPageLoad()
 
-GET        /balance-confirmation                    controllers.BalanceConfirmationController.onPageLoad()
+GET        /balance                                 controllers.BalanceConfirmationController.onPageLoad()
 GET        /check-another-guarantee-balance         controllers.BalanceConfirmationController.checkAnotherGuaranteeBalance()
 GET        /manage-transit-movements                controllers.BalanceConfirmationController.manageTransitMovements()
 
 GET        /details-do-not-match                    controllers.DetailsDontMatchController.onPageLoad()
 
-GET        /unsupported-guarantee-type              controllers.UnsupportedGuaranteeTypeController.onPageLoad()
-POST       /unsupported-guarantee-type              controllers.UnsupportedGuaranteeTypeController.onSubmit()
+GET        /guarantee-not-supported                 controllers.UnsupportedGuaranteeTypeController.onPageLoad()
+POST       /guarantee-not-supported                 controllers.UnsupportedGuaranteeTypeController.onSubmit()
