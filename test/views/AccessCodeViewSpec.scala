@@ -31,7 +31,7 @@ class AccessCodeViewSpec extends SingleViewSpec("accessCode.njk") {
   }
 
   "must have correct ID" in {
-    input.id() mustEqual "accessCode"
+    input.id() mustEqual "value"
   }
 
   "must render hint text" in {

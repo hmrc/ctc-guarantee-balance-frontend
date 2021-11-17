@@ -31,7 +31,7 @@ class GuaranteeReferenceNumberViewSpec extends SingleViewSpec("guaranteeReferenc
   }
 
   "must have correct ID" in {
-    input.id() mustEqual "guaranteeReferenceNumber"
+    input.id() mustEqual "value"
   }
 
   "must render a continue button" in {

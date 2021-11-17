@@ -27,7 +27,7 @@ class EoriNumberViewSpec extends SingleViewSpec("eoriNumber.njk") {
   }
 
   "must have correct ID" in {
-    input.id() mustEqual "eoriNumber"
+    input.id() mustEqual "value"
   }
 
   "must render a continue button" in {
