@@ -10,13 +10,16 @@
   {{ title(messages("guaranteeReferenceNumber.title"), form.errors) }}
 {% endblock %}
 
-{% block mainContent %}
+{% block beforeContent %}
 
   {{ govukBackLink({
     text: messages("site.back")
   }) }}
 
-  <div class="govuk-main-wrapper">
+{% endblock %}
+
+{% block mainContent %}
+
     <div class="govuk-grid-row">
       <div class="govuk-grid-column-two-thirds">
 
@@ -55,7 +58,6 @@
         </form>
 
       </div>
-    </div>
   </div>
 
 {% endblock %}
