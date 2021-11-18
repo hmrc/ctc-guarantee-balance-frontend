@@ -79,13 +79,13 @@ abstract class SingleViewSpec(protected val viewUnderTest: String, hasSignOutLin
       assertPageHasSignOutLink(
         doc = doc,
         expectedText = "Sign out",
-        expectedHref = "http://localhost:9553/bas-gateway/sign-out-without-state?continue=http://localhost:9514/feedback/ctc-guarantee-balance"
+        expectedHref = "http://localhost:9553/bas-gateway/sign-out-without-state?continue=http://localhost:9514/feedback/check-guarantee-balance"
       )
     }
   } else {
     "must not render sign out link in header" in {
       val doc: Document = renderDocument(
-        Json.obj("signInUrl" -> "/ctc-guarantee-balance/what-do-you-want-to-do")
+        Json.obj("signInUrl" -> "/check-guarantee-balance/what-do-you-want-to-do")
       ).futureValue
 
       assertPageHasNoSignOutLink(doc)
