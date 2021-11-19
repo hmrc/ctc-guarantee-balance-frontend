@@ -42,7 +42,7 @@ class GuaranteeReferenceNumberControllerSpec extends SpecBase with MockitoSugar 
 
   lazy val guaranteeReferenceNumberRoute = routes.GuaranteeReferenceNumberController.onPageLoad(NormalMode).url
 
-  val validAnswer: String = "guaranteeRef1234567890"
+  val validAnswer: String = "guaranteeRef12345"
 
   "GuaranteeReferenceNumber Controller" - {
 

@@ -19,12 +19,10 @@ package controllers
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.Mockito.{times, verify}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-
-import scala.concurrent.Future
 
 class UnsupportedGuaranteeTypeControllerSpec extends SpecBase with MockitoSugar with AppWithDefaultMockFixtures {
 

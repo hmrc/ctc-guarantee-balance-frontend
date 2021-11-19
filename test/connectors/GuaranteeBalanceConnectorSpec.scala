@@ -20,6 +20,7 @@ import base.{AppWithDefaultMockFixtures, SpecBase}
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
 import models.backend.{
+  BalanceRequestFunctionalError,
   BalanceRequestNotMatched,
   BalanceRequestPending,
   BalanceRequestPendingExpired,
@@ -38,6 +39,10 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 import java.time.Instant
 import java.util.UUID
+
+import cats.data.NonEmptyList
+import models.backend.errors.FunctionalError
+import models.values.ErrorType.InvalidDataErrorType
 
 class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler with ScalaCheckPropertyChecks with AppWithDefaultMockFixtures {
 
@@ -152,8 +157,42 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
         result mustBe Right(BalanceRequestNotMatched)
       }
 
-      "must return unsupported guarantee balance type for a functional error with error type 14" in {
+      "must return unsupported guarantee balance type for a functional error with error type 14 and Pointer GRR(1).GQY(1).Query identifier" in {
         val balanceRequestNotMatchedJson: String =
+          """
+            | {
+            |   "code": "FUNCTIONAL_ERROR",
+            |   "message": "The request was rejected by the guarantee management system",
+            |   "response": {
+            |     "errors": [
+            |       {
+            |         "errorType": 14,
+            |         "errorPointer": "GRR(1).GQY(1).Query identifier",
+            |         "errorReason": "R261"
+            |       }
+            |     ]
+            |   }
+            | }
+            |""".stripMargin
+
+        server.stubFor(
+          post(urlEqualTo(submitBalanceRequestUrl))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+            .withRequestBody(equalToJson(requestAsJsonString))
+            .willReturn(
+              aResponse()
+                .withStatus(Status.BAD_REQUEST)
+                .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
+                .withBody(balanceRequestNotMatchedJson)
+            )
+        )
+
+        val result = connector.submitBalanceRequest(request).futureValue
+        result mustBe Right(BalanceRequestUnsupportedGuaranteeType)
+      }
+
+      "must return an Httpe error when we get a response with error type 14 and other Pointer" in {
+        val functionErrorJson: String =
           """
             | {
             |   "code": "FUNCTIONAL_ERROR",
@@ -177,12 +216,13 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
               aResponse()
                 .withStatus(Status.BAD_REQUEST)
                 .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
-                .withBody(balanceRequestNotMatchedJson)
+                .withBody(functionErrorJson)
             )
         )
 
-        val result = connector.submitBalanceRequest(request).futureValue
-        result mustBe Right(BalanceRequestUnsupportedGuaranteeType)
+        val result   = connector.submitBalanceRequest(request).futureValue
+        val response = result.left.get
+        response.status mustBe Status.BAD_REQUEST
       }
 
       "must return the HttpResponse for a functional error with inconsequential error type" in {
@@ -405,7 +445,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
         result mustBe Right(BalanceRequestNotMatched)
       }
 
-      "must return unsupported guaranteee balance type for a functional error with error type 14" in {
+      "must return unsupported guaranteebalance type for a functional error with error type 14" in {
         val balanceId   = BalanceId(testUuid)
         val requestedAt = Instant.now().minusSeconds(30)
         val completedAt = Instant.now().minusSeconds(1)
@@ -418,7 +458,10 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
              |     "guaranteeReference": "guarref",
              |     "requestedAt": "$requestedAt",
              |     "completedAt": "$completedAt",
-             |     "response":{"errors":[{"errorType":14,"errorPointer":"Foo.Bar(1).Baz"}],"status":"FUNCTIONAL_ERROR"}
+             |     "response":{
+             |        "errors":[{"errorType":14,"errorPointer":"GRR(1).GQY(1).Query identifier", "errorReason": "R261"}],
+             |        "status":"FUNCTIONAL_ERROR"
+             |     }
              |   }
              | }
              |""".stripMargin
@@ -431,6 +474,35 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
 
         val result = connector.queryPendingBalance(balanceId).futureValue
         result mustBe Right(BalanceRequestUnsupportedGuaranteeType)
+      }
+
+      "must return an functional error response with error type 14 and other Pointer" in {
+        val balanceId   = BalanceId(testUuid)
+        val requestedAt = Instant.now().minusSeconds(30)
+        val completedAt = Instant.now().minusSeconds(1)
+        val functionErrorJson: String =
+          s"""
+             | {
+             |   "request" : {
+             |     "balanceId": "22b9899e-24ee-48e6-a189-97d1f45391c4",
+             |     "taxIdentifier": "taxid",
+             |     "guaranteeReference": "guarref",
+             |     "requestedAt": "$requestedAt",
+             |     "completedAt": "$completedAt",
+             |     "response":{"errors":[{"errorType":14,"errorPointer":"GRR(1).GQY(1).Query identifier"}],"status":"FUNCTIONAL_ERROR"}
+             |   }
+             | }
+             |""".stripMargin
+
+        server.stubFor(
+          get(urlEqualTo(queryBalanceRequestUrlFor(balanceId)))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+            .willReturn(okJson(functionErrorJson))
+        )
+
+        val result          = connector.queryPendingBalance(balanceId).futureValue
+        val functionalError = FunctionalError(InvalidDataErrorType, "GRR(1).GQY(1).Query identifier", None)
+        result mustBe Right(BalanceRequestFunctionalError(NonEmptyList[FunctionalError](functionalError, Nil)))
       }
     }
   }
