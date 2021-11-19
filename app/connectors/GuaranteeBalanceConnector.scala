@@ -120,9 +120,9 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
   }
 
   private def convertErrorTypeToBalanceRequestResponse(errorTypes: NonEmptyList[FunctionalError]): Option[BalanceRequestResponse] =
-    errorTypes.toList.flatMap(getErrorResponse(_)).headOption
+    errorTypes.toList.flatMap(getProcessableErrorResponses(_)).headOption
 
-  private def getErrorResponse(errorType: FunctionalError): Option[BalanceRequestResponse] =
+  private def getProcessableErrorResponses(errorType: FunctionalError): Option[BalanceRequestResponse] =
     errorType match {
       case FunctionalError(NotMatchedErrorType, _, _) =>
         Some(BalanceRequestNotMatched)
