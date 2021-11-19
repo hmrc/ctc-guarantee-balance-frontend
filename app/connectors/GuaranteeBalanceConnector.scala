@@ -20,7 +20,7 @@ import config.FrontendAppConfig
 import models.RichHttpResponse
 import models.backend._
 import models.requests.BalanceRequest
-import models.values.{BalanceId, ErrorType}
+import models.values.BalanceId
 import play.api.Logging
 import play.api.http.{HeaderNames, Status}
 import play.api.libs.json.JsResult
@@ -31,7 +31,7 @@ import java.time.Instant
 
 import cats.data.NonEmptyList
 import models.backend.errors.FunctionalError
-import models.values.ErrorType.{NotMatchedErrorType, UnsupportedGuaranteeTypeErrorType}
+import models.values.ErrorType.{InvalidDataErrorType, NotMatchedErrorType}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -42,11 +42,6 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
 
   private val headers = Seq(
     HeaderNames.ACCEPT -> "application/vnd.hmrc.1.0+json"
-  )
-
-  private val errorResponseMap = Map[ErrorType, BalanceRequestResponse](
-    NotMatchedErrorType               -> BalanceRequestNotMatched,
-    UnsupportedGuaranteeTypeErrorType -> BalanceRequestUnsupportedGuaranteeType
   )
 
   // scalastyle:off cyclomatic.complexity
@@ -125,9 +120,12 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
   }
 
   private def convertErrorTypeToBalanceRequestResponse(errorTypes: NonEmptyList[FunctionalError]): Option[BalanceRequestResponse] =
-    errorTypes.toList
-      .flatMap(
-        errorType => errorResponseMap.get(errorType.errorType)
-      )
-      .headOption
+    errorTypes.toList.flatMap(getErrorResponse(_)).headOption
+
+  private def getErrorResponse(errorType: FunctionalError): Option[BalanceRequestResponse] =
+    errorType match {
+      case FunctionalError(NotMatchedErrorType, _, _)                                 => Some(BalanceRequestNotMatched)
+      case FunctionalError(InvalidDataErrorType, "GRR(1).GQY(1).Query identifier", _) => Some(BalanceRequestUnsupportedGuaranteeType)
+      case _                                                                          => None
+    }
 }
