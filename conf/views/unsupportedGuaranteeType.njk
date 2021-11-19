@@ -24,9 +24,7 @@
       </p>
 
       <p class="govuk-body">{{ messages("unsupportedGuaranteeType.checkDetails") }}
-        <a class="govuk-link" id="checkDetails-link" href="{{ routes.controllers.CheckYourAnswersController.onPageLoad().url }}">
-            {{ messages("unsupportedGuaranteeType.checkDetails.link") }}
-        </a> {{ messages("unsupportedGuaranteeType.checkDetails.postLink") }}
+        <a class="govuk-link" id="checkDetails-link" href="{{ routes.controllers.CheckYourAnswersController.onPageLoad().url }}">{{ messages("unsupportedGuaranteeType.checkDetails.link") }}</a> {{ messages("unsupportedGuaranteeType.checkDetails.postLink") }}
       </p>
 
       <form action="{{ routes.controllers.UnsupportedGuaranteeTypeController.onSubmit().url }}" method="post">
