@@ -42,8 +42,7 @@ class UnsupportedGuaranteeTypeController @Inject() (
   }
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
-    implicit request =>
-      Future.successful(Redirect(routes.StartController.startAgain()))
+    Future.successful(Redirect(routes.StartController.startAgain()))
   }
 
 }

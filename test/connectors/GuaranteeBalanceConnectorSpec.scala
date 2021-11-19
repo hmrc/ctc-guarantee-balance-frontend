@@ -167,7 +167,8 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
             |     "errors": [
             |       {
             |         "errorType": 14,
-            |         "errorPointer": "GRR(1).GQY(1).Query identifier"
+            |         "errorPointer": "GRR(1).GQY(1).Query identifier",
+            |         "errorReason": "R261"
             |       }
             |     ]
             |   }
@@ -457,7 +458,10 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
              |     "guaranteeReference": "guarref",
              |     "requestedAt": "$requestedAt",
              |     "completedAt": "$completedAt",
-             |     "response":{"errors":[{"errorType":14,"errorPointer":"GRR(1).GQY(1).Query identifier"}],"status":"FUNCTIONAL_ERROR"}
+             |     "response":{
+             |        "errors":[{"errorType":14,"errorPointer":"GRR(1).GQY(1).Query identifier", "errorReason": "R261"}],
+             |        "status":"FUNCTIONAL_ERROR"
+             |     }
              |   }
              | }
              |""".stripMargin
@@ -485,7 +489,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
              |     "guaranteeReference": "guarref",
              |     "requestedAt": "$requestedAt",
              |     "completedAt": "$completedAt",
-             |     "response":{"errors":[{"errorType":14,"errorPointer":"Foo.Bar(1).Baz"}],"status":"FUNCTIONAL_ERROR"}
+             |     "response":{"errors":[{"errorType":14,"errorPointer":"GRR(1).GQY(1).Query identifier"}],"status":"FUNCTIONAL_ERROR"}
              |   }
              | }
              |""".stripMargin
@@ -497,7 +501,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
         )
 
         val result          = connector.queryPendingBalance(balanceId).futureValue
-        val functionalError = FunctionalError(InvalidDataErrorType, "Foo.Bar(1).Baz", None)
+        val functionalError = FunctionalError(InvalidDataErrorType, "GRR(1).GQY(1).Query identifier", None)
         result mustBe Right(BalanceRequestFunctionalError(NonEmptyList[FunctionalError](functionalError, Nil)))
       }
     }
