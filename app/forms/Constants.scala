@@ -19,7 +19,7 @@ package forms
 object Constants {
 
   lazy val maxEoriNumberLength: Int               = 17
-  lazy val maxGuaranteeReferenceNumberLength: Int = 24
+  lazy val maxGuaranteeReferenceNumberLength: Int = 17
   lazy val accessCodeLength: Int                  = 4
 
   lazy val alphaNumericRegex: String = "^[a-zA-Z0-9]*$"
