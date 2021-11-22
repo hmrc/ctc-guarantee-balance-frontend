@@ -16,13 +16,10 @@
 
 package views
 
+import itBase.ItSpecBase
 import models.{Mode, NormalMode}
 import org.jsoup.Jsoup
 import org.jsoup.select.Elements
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.must.Matchers
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.Json
 import play.api.mvc.RequestHeader
 import play.api.test.CSRFTokenHelper._
@@ -33,7 +30,7 @@ import renderer.Renderer
 import java.io.File
 import scala.collection.JavaConverters._
 
-class TemplatesCompileSpec extends AnyFreeSpec with Matchers with ScalaFutures with IntegrationPatience with GuiceOneAppPerSuite {
+class TemplatesCompileSpec extends ItSpecBase {
 
   def getListOfFiles(dir: String): List[File] = {
     val d = new File(dir)
