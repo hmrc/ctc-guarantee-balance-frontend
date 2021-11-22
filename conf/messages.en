@@ -100,15 +100,13 @@ unsupportedGuaranteeType.checkDetails = You can
 unsupportedGuaranteeType.checkDetails.link = change the reference of the guarantee you are checking
 unsupportedGuaranteeType.checkDetails.postLink = or you can start again.
 
-
-
 accessCode.title = What is the access code?
 accessCode.heading = What is the access code?
 accessCode.checkYourAnswersLabel = Access code
-accessCode.error.required = Enter the access code in the right format
+accessCode.error.required = Enter the access code
 accessCode.error.length = The access code must be 4 characters long, like 0000 or X9X9
-accessCode.error.invalidCharacters = The access code must only include letters a to z without accents and numbers 0 to 9
-accessCode.hintText = Access codes are 4 characters long, such as X9X9 or 1234.
+accessCode.error.invalidCharacters = The access code must only include letters a to z and numbers 0 to 9
+accessCode.hintText = The access code must be 4 characters long, like 0000 or X9X9
 
 checkYourAnswers.title = Check your answers
 checkYourAnswers.heading = Check your answers
