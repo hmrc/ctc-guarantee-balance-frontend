@@ -93,7 +93,7 @@ abstract class SingleViewSpec(protected val viewUnderTest: String, hasSignOutLin
   }
 
   "must render service name link in header" in {
-    val link = doc.getElementsByClass("govuk-header__link--service-name")
+    val link = doc.getElementsByClass("hmrc-header__service-name--linked")
     link.text() mustBe "site.service_name"
     link.attr("href") mustBe controllers.routes.StartController.startAgain().url
   }

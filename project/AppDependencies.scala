@@ -17,8 +17,8 @@ object AppDependencies {
     "uk.gov.hmrc"                %% "play-json-union-formatter"       % "1.15.0-play-28",
     "com.typesafe.play"          %% "play-iteratees"                  % "2.6.1",
     "com.typesafe.play"          %% "play-iteratees-reactive-streams" % "2.6.1",
-    "org.webjars.npm"            % "govuk-frontend"                   % "3.13.0",
-    "org.webjars.npm"            % "hmrc-frontend"                    % "1.35.2",
+    "org.webjars.npm"            % "govuk-frontend"                   % "3.14.0",
+    "uk.gov.hmrc.webjars"        % "hmrc-frontend"                    % "3.1.1",
     "com.lucidchart"             %% "xtract"                          % "2.2.1"
   )
 
