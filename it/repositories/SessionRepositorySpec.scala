@@ -26,8 +26,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class SessionRepositorySpec extends ItSpecBase with MongoSuite with OptionValues {
 
-  private lazy val repository = app.injector.instanceOf[SessionRepository]
-
   private val internalId1 = "internalId1"
   private val internalId2 = "internalId2"
 
@@ -54,6 +52,8 @@ class SessionRepositorySpec extends ItSpecBase with MongoSuite with OptionValues
 
       "must return UserAnswers when given an internal ID" in {
 
+        val repository = app.injector.instanceOf[SessionRepository]
+
         val result = repository.get(internalId1).futureValue
 
         result.value.id mustBe userAnswers1.id
@@ -61,6 +61,8 @@ class SessionRepositorySpec extends ItSpecBase with MongoSuite with OptionValues
       }
 
       "must return None when no UserAnswers match internal ID" in {
+
+        val repository = app.injector.instanceOf[SessionRepository]
 
         val result = repository.get("foo").futureValue
 
@@ -71,6 +73,8 @@ class SessionRepositorySpec extends ItSpecBase with MongoSuite with OptionValues
     "set" - {
 
       "must create new document when given valid UserAnswers" in {
+
+        val repository = app.injector.instanceOf[SessionRepository]
 
         val setResult = repository.set(userAnswers1).futureValue
 

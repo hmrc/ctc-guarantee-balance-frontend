@@ -36,6 +36,8 @@ trait ItSpecBase extends AnyFreeSpec with Matchers with ScalaFutures with Integr
   val mockMongoLockRepository: MongoLockRepository = mock[MongoLockRepository]
 
   override def beforeEach(): Unit = {
+    super.beforeEach()
+
     reset(mockMongoLockRepository)
 
     when(mockMongoLockRepository.releaseLock(any(), any())).thenReturn(Future.successful(()))
