@@ -35,7 +35,7 @@ import scala.collection.JavaConverters._
 
 class TemplatesCompileSpec extends AnyFreeSpec with Matchers with ScalaFutures with IntegrationPatience with GuiceOneAppPerSuite {
 
-  def getListOfFiles(dir: String): List[File] = {
+  private def getListOfFiles(dir: String): List[File] = {
     val d = new File(dir)
     if (d.exists && d.isDirectory) {
       d.listFiles.flatMap {
