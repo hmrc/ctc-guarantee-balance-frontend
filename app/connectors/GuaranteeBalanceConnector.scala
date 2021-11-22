@@ -16,23 +16,22 @@
 
 package connectors
 
+import cats.data.NonEmptyList
 import config.FrontendAppConfig
 import models.RichHttpResponse
 import models.backend._
+import models.backend.errors.FunctionalError
 import models.requests.BalanceRequest
 import models.values.BalanceId
+import models.values.ErrorType.{InvalidDataErrorType, NotMatchedErrorType}
 import play.api.Logging
 import play.api.http.{HeaderNames, Status}
 import play.api.libs.json.JsResult
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions, HttpReads, HttpResponse}
-import javax.inject.Inject
+
 import java.time.Instant
-
-import cats.data.NonEmptyList
-import models.backend.errors.FunctionalError
-import models.values.ErrorType.{InvalidDataErrorType, NotMatchedErrorType}
-
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: FrontendAppConfig)(implicit
@@ -44,7 +43,6 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
     HeaderNames.ACCEPT -> "application/vnd.hmrc.1.0+json"
   )
 
-  // scalastyle:off cyclomatic.complexity
   def submitBalanceRequest(request: BalanceRequest)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] = {
     val url = s"${appConfig.guaranteeBalanceUrl}/balances"
 
@@ -69,8 +67,6 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
       headers
     )
   }
-
-  // scalastyle:on cyclomatic.complexity
 
   def queryPendingBalance(balanceId: BalanceId)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] = {
     val url = s"${appConfig.guaranteeBalanceUrl}/balances/${balanceId.value}"
@@ -120,7 +116,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
   }
 
   private def convertErrorTypeToBalanceRequestResponse(errorTypes: NonEmptyList[FunctionalError]): Option[BalanceRequestResponse] =
-    errorTypes.toList.flatMap(getProcessableErrorResponses(_)).headOption
+    errorTypes.toList.flatMap(getProcessableErrorResponses).headOption
 
   private def getProcessableErrorResponses(errorType: FunctionalError): Option[BalanceRequestResponse] =
     errorType match {

@@ -7,6 +7,8 @@ GET        /keep-alive                              controllers.KeepAliveControl
 
 GET        /this-service-has-been-reset             controllers.SessionExpiredController.onPageLoad()
 
+GET        /                                        controllers.IndexController.onPageLoad()
+
 GET        /start                                   controllers.StartController.start(referral: Option[Referral] ?= None)
 GET        /start-again                             controllers.StartController.startAgain()
 
