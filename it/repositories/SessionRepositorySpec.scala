@@ -45,9 +45,9 @@ class SessionRepositorySpec
     with OptionValues
     with DefaultPlayMongoRepositorySupport[Lock] {
 
-  override lazy val repository = new MongoLockRepository(mongoComponent, timestampSupport)
-
   private lazy val timestampSupport: TimestampSupport = mock[TimestampSupport]
+
+  override lazy val repository = new MongoLockRepository(mongoComponent, timestampSupport)
 
   implicit override lazy val app: Application = new GuiceApplicationBuilder()
     .overrides(
