@@ -25,7 +25,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 private[repositories] class SessionCollection @Inject() (mongo: ReactiveMongoApi)(implicit ec: ExecutionContext) extends (() => Future[JSONCollection]) {
 
-  val collectionName = SessionCollection.collectionName
+  val collectionName: String = SessionCollection.collectionName
 
   override def apply(): Future[JSONCollection] = mongo.database.map(_.collection[JSONCollection](collectionName))
 
