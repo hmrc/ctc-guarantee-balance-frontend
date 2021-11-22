@@ -61,11 +61,12 @@ class TemplatesCompileSpec extends AnyFreeSpec with Matchers with ScalaFutures w
         note(s"Render $filename...")
         val path            = filename.toPath
         val pathInsideViews = path.subpath(2, path.getNameCount)
-        val result = renderer.render(pathInsideViews.toString,
-                                     Json.obj(
-                                       "mode"      -> mode,
-                                       "balanceId" -> "testBalanceId"
-                                     )
+        val result = renderer.render(
+          pathInsideViews.toString,
+          Json.obj(
+            "mode"      -> mode,
+            "balanceId" -> "testBalanceId"
+          )
         )
         val html: Html = result.futureValue
         html mustBe an[Html]
