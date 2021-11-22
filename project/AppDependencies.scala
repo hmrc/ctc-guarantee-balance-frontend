@@ -34,7 +34,8 @@ object AppDependencies {
     "com.typesafe.play"         %% "play-test"                % PlayVersion.current,
     "org.scalacheck"            %% "scalacheck"               % "1.15.0",
     "com.github.tomakehurst"    %  "wiremock-standalone"      % "2.27.2",
-    "wolfendale"                %% "scalacheck-gen-regexp"    % "0.1.2"
+    "wolfendale"                %% "scalacheck-gen-regexp"    % "0.1.2",
+    "uk.gov.hmrc.mongo"         %% "hmrc-mongo-test-play-28" % "0.55.0"
 
   ).map(_ % "test, it")
 

@@ -21,9 +21,16 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
+import org.scalatestplus.mockito.MockitoSugar.mock
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.Application
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import reactivemongo.play.json.collection.JSONCollection
+import uk.gov.hmrc.mongo.lock.{Lock, MongoLockRepository}
+import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
+import play.api.inject.bind
+import uk.gov.hmrc.mongo.TimestampSupport
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -35,9 +42,20 @@ class SessionRepositorySpec
     with BeforeAndAfterEach
     with IntegrationPatience
     with GuiceOneAppPerSuite
-    with OptionValues {
+    with OptionValues
+    with DefaultPlayMongoRepositorySupport[Lock] {
 
-  private val repository = app.injector.instanceOf[SessionRepository]
+  override lazy val repository = new MongoLockRepository(mongoComponent, timestampSupport)
+
+  private lazy val timestampSupport: TimestampSupport = mock[TimestampSupport]
+
+  implicit override lazy val app: Application = new GuiceApplicationBuilder()
+    .overrides(
+      bind[MongoLockRepository].toInstance(repository)
+    )
+    .build()
+
+  private lazy val sessionRepository = app.injector.instanceOf[SessionRepository]
 
   private val internalId1 = "internalId1"
   private val internalId2 = "internalId2"
@@ -65,7 +83,7 @@ class SessionRepositorySpec
 
       "must return UserAnswers when given an internal ID" in {
 
-        val result = repository.get(internalId1).futureValue
+        val result = sessionRepository.get(internalId1).futureValue
 
         result.value.id mustBe userAnswers1.id
         result.value.data mustBe userAnswers1.data
@@ -73,7 +91,7 @@ class SessionRepositorySpec
 
       "must return None when no UserAnswers match internal ID" in {
 
-        val result = repository.get("foo").futureValue
+        val result = sessionRepository.get("foo").futureValue
 
         result mustBe None
       }
@@ -83,9 +101,9 @@ class SessionRepositorySpec
 
       "must create new document when given valid UserAnswers" in {
 
-        val setResult = repository.set(userAnswers1).futureValue
+        val setResult = sessionRepository.set(userAnswers1).futureValue
 
-        val getResult = repository.get(internalId1).futureValue.value
+        val getResult = sessionRepository.get(internalId1).futureValue.value
 
         setResult mustBe true
         getResult.id mustBe userAnswers1.id
