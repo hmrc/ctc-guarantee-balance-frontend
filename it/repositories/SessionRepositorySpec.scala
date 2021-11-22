@@ -24,10 +24,7 @@ import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SessionRepositorySpec
-    extends ItSpecBase
-    with MongoSuite
-    with OptionValues {
+class SessionRepositorySpec extends ItSpecBase with MongoSuite with OptionValues {
 
   private val repository = app.injector.instanceOf[SessionRepository]
 
