@@ -42,15 +42,15 @@ class SessionRepositorySpec
   private val internalId1 = "internalId1"
   private val internalId2 = "internalId2"
 
-  private val userAnswer1 = UserAnswers(internalId1, Json.obj("foo" -> "bar"))
-  private val userAnswer2 = UserAnswers(internalId2, Json.obj("bar" -> "foo"))
+  private val userAnswers1 = UserAnswers(internalId1, Json.obj("foo" -> "bar"))
+  private val userAnswers2 = UserAnswers(internalId2, Json.obj("bar" -> "foo"))
 
   override def beforeEach(): Unit = {
     super.beforeEach()
     database.flatMap {
       _.collection[JSONCollection]("user-answers")
         .insert(ordered = false)
-        .many(Seq(userAnswer1, userAnswer2))
+        .many(Seq(userAnswers1, userAnswers2))
     }.futureValue
   }
 
@@ -67,8 +67,8 @@ class SessionRepositorySpec
 
         val result = repository.get(internalId1).futureValue
 
-        result.value.id mustBe userAnswer1.id
-        result.value.data mustBe userAnswer1.data
+        result.value.id mustBe userAnswers1.id
+        result.value.data mustBe userAnswers1.data
       }
 
       "must return None when no UserAnswers match internal ID" in {
@@ -83,15 +83,13 @@ class SessionRepositorySpec
 
       "must create new document when given valid UserAnswers" in {
 
-        val userAnswer = UserAnswers(internalId1, Json.obj("foo" -> "bar"))
-
-        val setResult = repository.set(userAnswer).futureValue
+        val setResult = repository.set(userAnswers1).futureValue
 
         val getResult = repository.get(internalId1).futureValue.value
 
         setResult mustBe true
-        getResult.id mustBe userAnswer.id
-        getResult.data mustBe userAnswer.data
+        getResult.id mustBe userAnswers1.id
+        getResult.data mustBe userAnswers1.data
       }
     }
   }
