@@ -28,7 +28,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import renderer.Renderer
 import services.GuaranteeBalanceService
-import uk.gov.hmrc.mongo.lock.MongoLockRepository
+import uk.gov.hmrc.mongo.lock.LockRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 import viewModels.CheckYourAnswersViewModelProvider
@@ -44,7 +44,7 @@ class CheckYourAnswersController @Inject() (
   requireData: DataRequiredAction,
   val controllerComponents: MessagesControllerComponents,
   renderer: Renderer,
-  mongoLockRepository: MongoLockRepository,
+  lockRepository: LockRepository,
   guaranteeBalanceService: GuaranteeBalanceService,
   responseHandler: GuaranteeBalanceResponseHandler,
   config: FrontendAppConfig,
@@ -96,7 +96,7 @@ class CheckYourAnswersController @Inject() (
   private def checkRateLimit(eoriNumber: String, guaranteeReferenceNumber: String): Future[Boolean] = {
     val lockId   = LockId(eoriNumber, guaranteeReferenceNumber).toString
     val duration = config.rateLimitDuration.seconds
-    mongoLockRepository.takeLock(lockId, eoriNumber, duration)
+    lockRepository.takeLock(lockId, eoriNumber, duration)
   }
 
   private def processPending(balanceId: BalanceId): Future[Result] =

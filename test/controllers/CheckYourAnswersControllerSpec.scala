@@ -113,7 +113,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
       val request     = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
 
-      when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
+      when(mockLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
 
       when(mockGuaranteeBalanceService.submitBalanceRequest(any())(any()))
         .thenReturn(Future.successful(Right(balance)))
@@ -125,7 +125,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
       redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
 
       val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
-      verify(mockMongoLockRepository).takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())
+      verify(mockLockRepository).takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())
 
       val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
       verify(mockSessionRepository).set(uaCaptor.capture)
@@ -151,7 +151,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
       val request     = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
 
-      when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(false))
+      when(mockLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(false))
 
       val result = route(application, request).value
 
@@ -160,7 +160,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
       redirectLocation(result).value mustEqual routes.RateLimitController.onPageLoad().url
 
       val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
-      verify(mockMongoLockRepository).takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())
+      verify(mockLockRepository).takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())
     }
 
     "must redirect to session timeout if at least one of EORI, GRN and access code are undefined" in {
@@ -180,7 +180,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
           val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
 
-          when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
+          when(mockLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
 
           when(mockGuaranteeBalanceService.submitBalanceRequest(any())(any()))
             .thenReturn(Future.successful(Right(balance)))

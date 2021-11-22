@@ -34,7 +34,7 @@ import play.api.test.{FakeRequest, Helpers}
 import play.twirl.api.Html
 import repositories.SessionRepository
 import services.GuaranteeBalanceService
-import uk.gov.hmrc.mongo.lock.MongoLockRepository
+import uk.gov.hmrc.mongo.lock.LockRepository
 import uk.gov.hmrc.nunjucks.NunjucksRenderer
 
 import scala.concurrent.Future
@@ -47,7 +47,7 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
       mockRenderer,
       mockDataRetrievalAction,
       mockSessionRepository,
-      mockMongoLockRepository,
+      mockLockRepository,
       mockGuaranteeBalanceService
     )
 
@@ -57,14 +57,14 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
     when(mockSessionRepository.set(any()))
       .thenReturn(Future.successful(true))
 
-    when(mockMongoLockRepository.releaseLock(any(), any()))
+    when(mockLockRepository.releaseLock(any(), any()))
       .thenReturn(Future.successful(()))
   }
 
   val mockRenderer: NunjucksRenderer                       = mock[NunjucksRenderer]
   val mockDataRetrievalAction: DataRetrievalAction         = mock[DataRetrievalAction]
   val mockSessionRepository: SessionRepository             = mock[SessionRepository]
-  val mockMongoLockRepository: MongoLockRepository         = mock[MongoLockRepository]
+  val mockLockRepository: LockRepository                   = mock[LockRepository]
   val mockGuaranteeBalanceService: GuaranteeBalanceService = mock[GuaranteeBalanceService]
 
   final override def fakeApplication(): Application =
@@ -80,7 +80,7 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
         bind[NunjucksRenderer].toInstance(mockRenderer),
         bind[MessagesApi].toInstance(Helpers.stubMessagesApi()),
         bind[SessionRepository].toInstance(mockSessionRepository),
-        bind[MongoLockRepository].toInstance(mockMongoLockRepository),
+        bind[LockRepository].toInstance(mockLockRepository),
         bind[GuaranteeBalanceService].toInstance(mockGuaranteeBalanceService)
       )
 
