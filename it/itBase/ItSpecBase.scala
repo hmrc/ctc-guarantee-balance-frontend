@@ -44,7 +44,7 @@ trait ItSpecBase extends AnyFreeSpec with Matchers with ScalaFutures with Integr
     when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
   }
 
-  implicit override lazy val app: Application = new GuiceApplicationBuilder()
+  override def fakeApplication(): Application = new GuiceApplicationBuilder()
     .overrides(bind[MongoLockRepository].toInstance(mockMongoLockRepository))
     .build()
 }
