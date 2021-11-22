@@ -39,6 +39,7 @@ trait ItSpecBase extends AnyFreeSpec with Matchers with ScalaFutures with Integr
     reset(mockMongoLockRepository)
 
     when(mockMongoLockRepository.releaseLock(any(), any())).thenReturn(Future.successful(()))
+    when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
   }
 
   implicit override lazy val app: Application = new GuiceApplicationBuilder()

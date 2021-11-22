@@ -16,15 +16,26 @@
 
 package repositories
 
-import itBase.ItSpecBase
 import models.UserAnswers
-import org.scalatest.OptionValues
+import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.{BeforeAndAfterEach, OptionValues}
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.Json
 import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SessionRepositorySpec extends ItSpecBase with MongoSuite with OptionValues {
+class SessionRepositorySpec
+    extends AnyFreeSpec
+    with Matchers
+    with MongoSuite
+    with ScalaFutures
+    with BeforeAndAfterEach
+    with IntegrationPatience
+    with GuiceOneAppPerSuite
+    with OptionValues {
 
   private val repository = app.injector.instanceOf[SessionRepository]
 
