@@ -19,6 +19,7 @@ package config
 import com.google.inject.AbstractModule
 import controllers.actions._
 import repositories.{DefaultSessionRepository, SessionRepository}
+import uk.gov.hmrc.mongo.lock.{LockRepository, MongoLockRepository}
 
 import java.time.{Clock, ZoneOffset}
 
@@ -34,6 +35,7 @@ class Module extends AbstractModule {
     bind(classOf[IdentifierAction]).to(classOf[AuthenticatedIdentifierAction]).asEagerSingleton()
 
     bind(classOf[SessionRepository]).to(classOf[DefaultSessionRepository]).asEagerSingleton()
+    bind(classOf[LockRepository]).to(classOf[MongoLockRepository]).asEagerSingleton()
   }
 
 }
