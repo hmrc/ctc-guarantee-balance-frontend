@@ -23,8 +23,7 @@ object AppDependencies {
   )
 
   val test: Seq[ModuleID] = Seq(
-    "com.vladsch.flexmark"      %  "flexmark-all"             % "0.35.10",
-    "org.scalatest"             %% "scalatest"                % "3.2.9",
+    "org.scalatest"             %% "scalatest"                % "3.2.10",
     "org.scalatestplus"         %% "mockito-3-2"              % "3.1.2.0",
     "org.scalatestplus.play"    %% "scalatestplus-play"       % "5.1.0",
     "org.scalatestplus"         %% "scalatestplus-scalacheck" % "3.1.0.0-RC2",
@@ -34,7 +33,8 @@ object AppDependencies {
     "com.typesafe.play"         %% "play-test"                % PlayVersion.current,
     "org.scalacheck"            %% "scalacheck"               % "1.15.4",
     "com.github.tomakehurst"    %  "wiremock-standalone"      % "2.27.2",
-    "wolfendale"                %% "scalacheck-gen-regexp"    % "0.1.2"
+    "wolfendale"                %% "scalacheck-gen-regexp"    % "0.1.2",
+    "com.vladsch.flexmark"      %  "flexmark-all"             % "0.62.2"
 
   ).map(_ % "test, it")
 
