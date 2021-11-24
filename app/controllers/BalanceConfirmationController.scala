@@ -16,10 +16,12 @@
 
 package controllers
 
+import java.time.LocalDateTime
+
 import config.FrontendAppConfig
 import controllers.actions._
 import models.Referral
-import pages.BalancePage
+import pages.{AccessCodePage, BalancePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
@@ -27,8 +29,10 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-
 import javax.inject.Inject
+import services.AuditService
+import viewModels.audit.SuccessfulBalanceAuditModel
+
 import scala.concurrent.{ExecutionContext, Future}
 
 class BalanceConfirmationController @Inject() (
@@ -39,7 +43,8 @@ class BalanceConfirmationController @Inject() (
   requireData: DataRequiredAction,
   val controllerComponents: MessagesControllerComponents,
   renderer: Renderer,
-  appConfig: FrontendAppConfig
+  appConfig: FrontendAppConfig,
+  auditService: AuditService
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -54,6 +59,17 @@ class BalanceConfirmationController @Inject() (
             "referral"                        -> request.cookies.get(Referral.cookieName).map(_.value),
             "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
           )
+
+          //todo get GG data
+          val auditEvent = SuccessfulBalanceAuditModel.build(
+            request.userAnswers.get(EoriNumberPage).getOrElse("-").toString,
+            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-").toString,
+            request.userAnswers.get(AccessCodePage).getOrElse("-").toString,
+            OK,
+            balance
+          )
+
+          auditService.audit(auditEvent)
 
           renderer.render("balanceConfirmation.njk", json).map(Ok(_))
         case _ =>
