@@ -16,15 +16,17 @@
 
 package repositories
 
-import models.UserAnswers
+import models.{MongoDateTimeFormats, UserAnswers}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.libs.json.Json
-import reactivemongo.play.json.collection.JSONCollection
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.{Json, Writes}
+import reactivemongo.play.json.collection.Helpers.idWrites
 
+import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class SessionRepositorySpec
@@ -47,33 +49,33 @@ class SessionRepositorySpec
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    database.flatMap {
-      _.collection[JSONCollection]("user-answers")
-        .insert(ordered = false)
-        .many(Seq(userAnswers1, userAnswers2))
+    collection.map {
+      _.insert(ordered = false)
+        .one(userAnswers1)
     }.futureValue
   }
 
   override def afterEach(): Unit = {
     super.afterEach()
-    database.flatMap(_.drop())
+    database.flatMap(_.drop()).futureValue
   }
 
   "SessionRepository" - {
 
     "get" - {
 
-      "must return UserAnswers when given an internal ID" in {
+      "must return UserAnswers when match found for internal ID" in {
 
         val result = repository.get(internalId1).futureValue
 
         result.value.id mustBe userAnswers1.id
         result.value.data mustBe userAnswers1.data
+        result.value.lastUpdated isEqual userAnswers1.lastUpdated mustBe true
       }
 
-      "must return None when no UserAnswers match internal ID" in {
+      "must return None when no match found for internal ID" in {
 
-        val result = repository.get("foo").futureValue
+        val result = repository.get(internalId2).futureValue
 
         result mustBe None
       }
@@ -81,7 +83,7 @@ class SessionRepositorySpec
 
     "set" - {
 
-      "must create new document when given valid UserAnswers" in {
+      "must update document when it already exists" in {
 
         val setResult = repository.set(userAnswers1).futureValue
 
@@ -90,7 +92,51 @@ class SessionRepositorySpec
         setResult mustBe true
         getResult.id mustBe userAnswers1.id
         getResult.data mustBe userAnswers1.data
+        getResult.lastUpdated isAfter userAnswers1.lastUpdated mustBe true
       }
+
+      "must create new document when it doesn't already exist" in {
+
+        val setResult = repository.set(userAnswers2).futureValue
+
+        val getResult = repository.get(internalId2).futureValue.value
+
+        setResult mustBe true
+        getResult.id mustBe userAnswers2.id
+        getResult.data mustBe userAnswers2.data
+        getResult.lastUpdated isAfter userAnswers2.lastUpdated mustBe true
+      }
+    }
+
+    "must remove document after TTL has elapsed" in {
+
+      val testTtl: Int = 1
+      val delay: Int   = testTtl + 1
+
+      val app = new GuiceApplicationBuilder()
+        .configure("mongodb.timeToLiveInSeconds" -> testTtl)
+        .build()
+
+      val repository = app.injector.instanceOf[SessionRepository]
+
+      val setResult = repository.set(userAnswers2).futureValue
+      setResult mustBe true
+
+      Thread.sleep(delay * 1000)
+
+      // By Default, the TTLMonitor thread runs once every 60 seconds
+      // So we're essentially running it manually here by deleting the document if the TTL has elapsed
+      implicit val dateWriter: Writes[LocalDateTime] = MongoDateTimeFormats.localDateTimeWrite
+      val selector = Json.obj(
+        "lastUpdated" -> Json.obj("$lt" -> LocalDateTime.now().minusSeconds(testTtl))
+      )
+      collection.flatMap {
+        _.delete().one(selector)
+      }.futureValue
+
+      val getResult = repository.get(internalId2).futureValue
+
+      getResult mustNot be(defined)
     }
   }
 

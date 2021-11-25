@@ -42,7 +42,7 @@ class DefaultSessionRepository @Inject() (
       "$set" -> Json.obj("lastUpdated" -> LocalDateTime.now)
     )
 
-    def userAnswersF: Future[Option[UserAnswers]] = sessionCollection().flatMap {
+    sessionCollection().flatMap {
       _.findAndUpdate(
         selector = selector,
         update = modifier,
@@ -57,11 +57,6 @@ class DefaultSessionRepository @Inject() (
         arrayFilters = Nil
       ).map(_.value.map(_.as[UserAnswers]))
     }
-
-    for {
-      userAnswers <- userAnswersF
-      result      <- Future.successful(userAnswers)
-    } yield result
   }
 
   override def set(userAnswers: UserAnswers): Future[Boolean] = {
@@ -78,8 +73,7 @@ class DefaultSessionRepository @Inject() (
       _.update(ordered = false)
         .one(selector, modifier, upsert = true)
         .map {
-          lastError =>
-            lastError.ok
+          _.ok
         }
     }
   }
