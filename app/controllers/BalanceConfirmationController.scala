@@ -16,12 +16,11 @@
 
 package controllers
 
-import java.time.LocalDateTime
-
 import config.FrontendAppConfig
 import controllers.actions._
+import javax.inject.Inject
 import models.Referral
-import pages.{AccessCodePage, BalancePage, EoriNumberPage, GuaranteeReferenceNumberPage}
+import pages.BalancePage
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
@@ -29,9 +28,6 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import javax.inject.Inject
-import services.AuditService
-import viewModels.audit.SuccessfulBalanceAuditModel
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -43,8 +39,7 @@ class BalanceConfirmationController @Inject() (
   requireData: DataRequiredAction,
   val controllerComponents: MessagesControllerComponents,
   renderer: Renderer,
-  appConfig: FrontendAppConfig,
-  auditService: AuditService
+  appConfig: FrontendAppConfig
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -59,17 +54,6 @@ class BalanceConfirmationController @Inject() (
             "referral"                        -> request.cookies.get(Referral.cookieName).map(_.value),
             "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
           )
-
-          auditService.audit(
-            SuccessfulBalanceAuditModel.build(
-              request.userAnswers.get(EoriNumberPage).getOrElse("-").toString,
-              request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-").toString,
-              request.userAnswers.get(AccessCodePage).getOrElse("-").toString,
-              OK,
-              balance
-            )
-          )
-
           renderer.render("balanceConfirmation.njk", json).map(Ok(_))
         case _ =>
           logger.warn("[BalanceConfirmationController][onPageLoad] Insufficient data in user answers. Redirecting to start of guarantee balance journey.")

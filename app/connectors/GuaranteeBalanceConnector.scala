@@ -29,12 +29,16 @@ import play.api.http.{HeaderNames, Status}
 import play.api.libs.json.JsResult
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions, HttpReads, HttpResponse}
-
 import java.time.Instant
+
 import javax.inject.Inject
+import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
+import services.AuditService
+import viewModels.audit.SuccessfulBalanceAuditModel
+
 import scala.concurrent.{ExecutionContext, Future}
 
-class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: FrontendAppConfig)(implicit
+class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: FrontendAppConfig, auditService: AuditService)(implicit
   ec: ExecutionContext
 ) extends HttpErrorFunctions
     with Logging {

@@ -18,37 +18,33 @@ package handlers
 
 import config.FrontendAppConfig
 import javax.inject.Inject
-import models.backend.{
-  BalanceRequestFunctionalError,
-  BalanceRequestNotMatched,
-  BalanceRequestPending,
-  BalanceRequestPendingExpired,
-  BalanceRequestResponse,
-  BalanceRequestSuccess,
-  BalanceRequestUnsupportedGuaranteeType
-}
+import models.backend._
 import models.requests.DataRequest
 import models.values.BalanceId
-import pages.BalancePage
+import pages.{AccessCodePage, BalancePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.Logging
+import play.api.http.Status._
 import play.api.libs.json.Json
 import play.api.mvc.Results.{InternalServerError, Redirect}
 import play.api.mvc._
 import renderer.Renderer
 import repositories.SessionRepository
-import uk.gov.hmrc.http.HttpResponse
-import play.api.http.Status.TOO_MANY_REQUESTS
+import services.AuditService
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import viewModels.audit.{SuccessfulBalanceAuditModel, UnsuccessfulBalanceAuditModel}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class GuaranteeBalanceResponseHandler @Inject() (
   sessionRepository: SessionRepository,
   renderer: Renderer,
-  appConfig: FrontendAppConfig
+  appConfig: FrontendAppConfig,
+  auditService: AuditService
 )(implicit ec: ExecutionContext)
     extends Logging {
 
   def processResponse(response: Either[HttpResponse, BalanceRequestResponse], processPending: BalanceId => Future[Result])(implicit
+    hc: HeaderCarrier,
     request: DataRequest[_]
   ): Future[Result] =
     response match {
@@ -57,30 +53,113 @@ class GuaranteeBalanceResponseHandler @Inject() (
     }
 
   def processBalanceRequestResponse(response: BalanceRequestResponse, processPending: BalanceId => Future[Result])(implicit
+    hc: HeaderCarrier,
     request: DataRequest[_]
   ): Future[Result] =
     response match {
       case BalanceRequestPending(balanceId) =>
         processPending(balanceId)
       case successResponse: BalanceRequestSuccess =>
+        auditService.audit(
+          SuccessfulBalanceAuditModel.build(
+            request.userAnswers.get(EoriNumberPage).getOrElse("-").toString,
+            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-").toString,
+            request.userAnswers.get(AccessCodePage).getOrElse("-").toString,
+            OK,
+            successResponse.currency.toString.trim + " " + successResponse.balance.toString.trim
+          )
+        )
         processSuccessResponse(successResponse)
+
       case BalanceRequestNotMatched =>
+        auditService.audit(
+          UnsuccessfulBalanceAuditModel.build(
+            "Balance Request Not Matched",
+            "Balance Request Not Matched Audit",
+            request.userAnswers.get(EoriNumberPage).getOrElse("-").toString,
+            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-").toString,
+            request.userAnswers.get(AccessCodePage).getOrElse("-").toString,
+            SEE_OTHER,
+            "Balance Request Details Do Not Match - But which ?????"
+          )
+        )
+
         Future.successful(Redirect(controllers.routes.DetailsDontMatchController.onPageLoad()))
+
       case BalanceRequestPendingExpired(_) =>
+        auditService.audit(
+          UnsuccessfulBalanceAuditModel.build(
+            "Balance Request Pending Expired",
+            "Balance Request Pending Expired Audit",
+            request.userAnswers.get(EoriNumberPage).getOrElse("-").toString,
+            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-").toString,
+            request.userAnswers.get(AccessCodePage).getOrElse("-").toString,
+            SEE_OTHER,
+            "Balance Request Pending Expired"
+          )
+        )
+
         Future.successful(Redirect(controllers.routes.TryGuaranteeBalanceAgainController.onPageLoad()))
       case BalanceRequestUnsupportedGuaranteeType =>
+        auditService.audit(
+          UnsuccessfulBalanceAuditModel.build(
+            "Balance Request Unsupported Guarantee Type",
+            "Balance Request Unsupported Guarantee Type Audit",
+            request.userAnswers.get(EoriNumberPage).getOrElse("-").toString,
+            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-").toString,
+            request.userAnswers.get(AccessCodePage).getOrElse("-").toString,
+            SEE_OTHER,
+            "Balance Request Unsupported Guarantee Type Type"
+          )
+        )
+
         Future.successful(Redirect(controllers.routes.UnsupportedGuaranteeTypeController.onPageLoad()))
       case fe: BalanceRequestFunctionalError =>
+        auditService.audit(
+          UnsuccessfulBalanceAuditModel.build(
+            "Balance Request Functional Error",
+            "Balance Request Functional Error Audit",
+            request.userAnswers.get(EoriNumberPage).getOrElse("-").toString,
+            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-").toString,
+            request.userAnswers.get(AccessCodePage).getOrElse("-").toString,
+            INTERNAL_SERVER_ERROR,
+            s"Failed to process Response: ${fe.errors}"
+          )
+        )
         logger.warn(s"[GuaranteeBalanceResponseHandler][processBalanceRequestResponse]Failed to process Response: ${fe.errors}")
         technicalDifficulties()
     }
 
-  private def processHttpResponse(response: HttpResponse)(implicit request: DataRequest[_]): Future[Result] =
+  private def processHttpResponse(response: HttpResponse)(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] =
     response match {
       case failureResponse if failureResponse.status.equals(TOO_MANY_REQUESTS) =>
+        auditService.audit(
+          UnsuccessfulBalanceAuditModel.build(
+            "Rate Limit",
+            "Rate Limit Audit",
+            request.userAnswers.get(EoriNumberPage).getOrElse("-").toString,
+            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-").toString,
+            request.userAnswers.get(AccessCodePage).getOrElse("-").toString,
+            TOO_MANY_REQUESTS,
+            "Rate Limit Exceeded"
+          )
+        )
         Future.successful(Redirect(controllers.routes.RateLimitController.onPageLoad()))
       case failureResponse =>
         logger.warn(s"[GuaranteeBalanceResponseHandler][processHttpResponse]Failed to process Response: $failureResponse")
+
+        auditService.audit(
+          UnsuccessfulBalanceAuditModel.build(
+            "Rate Limit",
+            "Rate Limit Audit",
+            request.userAnswers.get(EoriNumberPage).getOrElse("-").toString,
+            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-").toString,
+            request.userAnswers.get(AccessCodePage).getOrElse("-").toString,
+            INTERNAL_SERVER_ERROR,
+            s"Failed to process Response: $failureResponse"
+          )
+        )
+
         technicalDifficulties()
     }
 

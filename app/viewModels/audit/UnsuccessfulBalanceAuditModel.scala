@@ -21,11 +21,17 @@ import java.time.LocalDateTime
 import play.api.libs.json.{JsValue, Json}
 import services.JsonAuditModel
 
-case class UnsuccessfulBalanceAuditModel(eoriNumber: String, guaranteeReferenceNumber: String, accessCode: String, status: Int, errorMessage: String)
-    extends JsonAuditModel {
+case class UnsuccessfulBalanceAuditModel(transaction: String,
+                                         audit: String,
+                                         eoriNumber: String,
+                                         guaranteeReferenceNumber: String,
+                                         accessCode: String,
+                                         status: Int,
+                                         errorMessage: String
+) extends JsonAuditModel {
 
-  override val transactionName: String = "Unsuccessful Balance"
-  override val auditType: String       = "Unsuccessful Balance Audit"
+  override val transactionName: String = transaction
+  override val auditType: String       = audit
 
   override val detail: JsValue = Json.obj(
     "Eori Number"                -> eoriNumber.toString,
@@ -38,19 +44,14 @@ case class UnsuccessfulBalanceAuditModel(eoriNumber: String, guaranteeReferenceN
 
 object UnsuccessfulBalanceAuditModel {
 
-  def build(eoriNumber: String, guaranteeReferenceNumber: String, accessCode: String, status: Int, errorMessage: String): UnsuccessfulBalanceAuditModel =
-    UnsuccessfulBalanceAuditModel(eoriNumber, guaranteeReferenceNumber, accessCode, status, errorMessage)
+  def build(transaction: String,
+            audit: String,
+            eoriNumber: String,
+            guaranteeReferenceNumber: String,
+            accessCode: String,
+            status: Int,
+            errorMessage: String
+  ): UnsuccessfulBalanceAuditModel =
+    UnsuccessfulBalanceAuditModel(transaction, audit, eoriNumber, guaranteeReferenceNumber, accessCode, status, errorMessage)
 }
 
-/*
-date and time of attempt
-all user info we have from GG login
-EORI submitted
-GRN submitted
-access code submitted
-status of what is returned
-What balance is returned
-What user displayed error has been returned (rate limited, details don't match, guarantee type not supported)
-Plain English reason of what the error that was sent (incorrect EORI, incorrect GRN, incorrect access code, EORI/GRN do not match, guarantee type not supported)
-Comment that the user doesn't see what value was incorrect, just that the details submitted do not match
- */

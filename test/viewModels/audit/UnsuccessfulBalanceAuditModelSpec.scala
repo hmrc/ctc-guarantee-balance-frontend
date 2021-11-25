@@ -29,6 +29,8 @@ class UnsuccessfulBalanceAuditModelSpec extends SpecBase with MockitoSugar {
 
       val actualDetails = UnsuccessfulBalanceAuditModel
         .build(
+          "transaction",
+          "audit",
           "GB1234567890",
           "123456789800",
           "1222",

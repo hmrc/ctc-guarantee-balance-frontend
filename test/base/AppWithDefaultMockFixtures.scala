@@ -33,7 +33,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, Helpers}
 import play.twirl.api.Html
 import repositories.SessionRepository
-import services.GuaranteeBalanceService
+import services.{AuditService, GuaranteeBalanceService}
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
 import uk.gov.hmrc.nunjucks.NunjucksRenderer
 
@@ -66,6 +66,7 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
   val mockSessionRepository: SessionRepository             = mock[SessionRepository]
   val mockMongoLockRepository: MongoLockRepository         = mock[MongoLockRepository]
   val mockGuaranteeBalanceService: GuaranteeBalanceService = mock[GuaranteeBalanceService]
+  val mockAuditService: AuditService                       = mock[AuditService]
 
   final override def fakeApplication(): Application =
     applicationBuilder()
@@ -81,7 +82,8 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
         bind[MessagesApi].toInstance(Helpers.stubMessagesApi()),
         bind[SessionRepository].toInstance(mockSessionRepository),
         bind[MongoLockRepository].toInstance(mockMongoLockRepository),
-        bind[GuaranteeBalanceService].toInstance(mockGuaranteeBalanceService)
+        bind[GuaranteeBalanceService].toInstance(mockGuaranteeBalanceService),
+        bind[AuditService].toInstance(mockAuditService)
       )
 
   def injector: Injector = app.injector

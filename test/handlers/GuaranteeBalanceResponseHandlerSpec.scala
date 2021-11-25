@@ -32,13 +32,14 @@ import models.backend.{
 }
 import models.requests.DataRequest
 import models.values.{BalanceId, CurrencyCode, ErrorType}
-import org.mockito.ArgumentCaptor
+import org.mockito.{ArgumentCaptor, Mock}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify}
 import pages.GuaranteeReferenceNumberPage
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.Helpers._
+import services.AuditService
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
@@ -68,7 +69,9 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
   implicit val request = DataRequest(mockRequest, "eoriNumber", populatedUserAnswers)
 
   private lazy val handler: GuaranteeBalanceResponseHandler = app.injector.instanceOf[GuaranteeBalanceResponseHandler]
+
   "GuaranteeBalanceResponseHandlerSpec" - {
+
     "must Redirect to the TryAgain Controller if the status is empty " in {
       val result: Future[Result] = handler.processResponse(tryAgainResponse, processPending)
 
