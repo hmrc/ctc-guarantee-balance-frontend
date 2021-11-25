@@ -27,13 +27,14 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import renderer.Renderer
-import services.GuaranteeBalanceService
+import services.{AuditService, GuaranteeBalanceService}
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 import viewModels.CheckYourAnswersViewModelProvider
-
 import javax.inject.Inject
+import viewModels.audit.{SuccessfulBalanceAuditModel, UnsuccessfulBalanceAuditModel}
+
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -48,7 +49,8 @@ class CheckYourAnswersController @Inject() (
   guaranteeBalanceService: GuaranteeBalanceService,
   responseHandler: GuaranteeBalanceResponseHandler,
   config: FrontendAppConfig,
-  viewModelProvider: CheckYourAnswersViewModelProvider
+  viewModelProvider: CheckYourAnswersViewModelProvider,
+  auditService: AuditService
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -88,7 +90,19 @@ class CheckYourAnswersController @Inject() (
             Future.successful(Redirect(routes.RateLimitController.onPageLoad()))
           }
       }).getOrElse {
-        logger.warn("[CheckYourAnswersController][onSubmit] Insufficient data in user answers.")
+        val message = "Insufficient data in user answers."
+        logger.warn(s"[CheckYourAnswersController][onSubmit] $message")
+
+        auditService.audit(
+          UnsuccessfulBalanceAuditModel.build(
+            request.userAnswers.get(EoriNumberPage).getOrElse("-").toString,
+            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-").toString,
+            request.userAnswers.get(AccessCodePage).getOrElse("-").toString,
+            OK,
+            message
+          )
+        )
+
         Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
       }
   }

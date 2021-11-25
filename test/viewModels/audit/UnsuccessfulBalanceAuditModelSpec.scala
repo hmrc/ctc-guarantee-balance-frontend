@@ -17,24 +17,22 @@
 package viewModels.audit
 
 import base.SpecBase
-import java.time.LocalDateTime
-
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
 
-class SuccessfulBalanceAuditModelSpec extends SpecBase with MockitoSugar {
+class UnsuccessfulBalanceAuditModelSpec extends SpecBase with MockitoSugar {
 
-  "SuccessfulBalanceAuditModel" - {
+  "UnuccessfulBalanceAuditModel" - {
 
     "must build the correct details when build is called" in {
 
-      val actualDetails = SuccessfulBalanceAuditModel
+      val actualDetails = UnsuccessfulBalanceAuditModel
         .build(
           "GB1234567890",
           "123456789800",
           "1222",
-          200,
-          "£1,000,000"
+          500,
+          "Insufficient data in user answers."
         )
         .detail
 
@@ -48,8 +46,8 @@ class SuccessfulBalanceAuditModelSpec extends SpecBase with MockitoSugar {
     "Eori Number"                -> "GB1234567890",
     "Guarantee Reference Number" -> "123456789800",
     "Access Code"                -> "1222",
-    "status"                     -> 200,
-    "Balance"                    -> "£1,000,000"
+    "status"                     -> 500,
+    "Error Message"              -> "Insufficient data in user answers."
   )
 
 }

@@ -26,13 +26,13 @@ case class SuccessfulBalanceAuditModel(eoriNumber: String, guaranteeReferenceNum
 
   override val transactionName: String = "Successful Balance"
   override val auditType: String       = "Successful Balance Audit"
-  //todo get GG data !!!!
+
   override val detail: JsValue = Json.obj(
-    "Eori Number"                         -> eoriNumber.toString,
-    "Guarantee Reference Number"          -> guaranteeReferenceNumber.toString,
-    "Access Code"                         -> accessCode.toString,
-    "status"                              -> status,
-    "Balance"                             -> balance.toString
+    "Eori Number"                -> eoriNumber.toString,
+    "Guarantee Reference Number" -> guaranteeReferenceNumber.toString,
+    "Access Code"                -> accessCode.toString,
+    "status"                     -> status,
+    "Balance"                    -> balance.toString
   )
 }
 
@@ -41,16 +41,3 @@ object SuccessfulBalanceAuditModel {
   def build(eoriNumber: String, guaranteeReferenceNumber: String, accessCode: String, status: Int, balance: String): SuccessfulBalanceAuditModel =
     SuccessfulBalanceAuditModel(eoriNumber, guaranteeReferenceNumber, accessCode, status, balance)
 }
-
-/*
-date and time of attempt
-all user info we have from GG login
-EORI submitted
-GRN submitted
-access code submitted
-status of what is returned
-What balance is returned
-What user displayed error has been returned (rate limited, details don't match, guarantee type not supported)
-Plain English reason of what the error that was sent (incorrect EORI, incorrect GRN, incorrect access code, EORI/GRN do not match, guarantee type not supported)
-Comment that the user doesn't see what value was incorrect, just that the details submitted do not match
- */

@@ -51,7 +51,6 @@ class AuditServiceSpec extends SpecBase with MockitoSugar with NunjucksSupport w
       when(mockAuditConnector.sendExtendedEvent(any())(any(), any())).thenReturn(Future.successful(AuditResult.Success))
 
       val event = SuccessfulBalanceAuditModel.build(
-        LocalDateTime.of(1345, 12, 20, 10, 34, 45),
         "GB1234567890",
         "123456789800",
         "1222",

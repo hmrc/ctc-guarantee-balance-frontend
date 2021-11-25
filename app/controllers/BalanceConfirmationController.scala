@@ -60,16 +60,15 @@ class BalanceConfirmationController @Inject() (
             "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
           )
 
-          //todo get GG data
-          val auditEvent = SuccessfulBalanceAuditModel.build(
-            request.userAnswers.get(EoriNumberPage).getOrElse("-").toString,
-            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-").toString,
-            request.userAnswers.get(AccessCodePage).getOrElse("-").toString,
-            OK,
-            balance
+          auditService.audit(
+            SuccessfulBalanceAuditModel.build(
+              request.userAnswers.get(EoriNumberPage).getOrElse("-").toString,
+              request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-").toString,
+              request.userAnswers.get(AccessCodePage).getOrElse("-").toString,
+              OK,
+              balance
+            )
           )
-
-          auditService.audit(auditEvent)
 
           renderer.render("balanceConfirmation.njk", json).map(Ok(_))
         case _ =>
