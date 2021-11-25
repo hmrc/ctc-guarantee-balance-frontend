@@ -16,23 +16,52 @@
 
 package repositories
 
+import config.FrontendAppConfig
 import play.modules.reactivemongo.ReactiveMongoApi
+import reactivemongo.api.bson.collection.BSONSerializationPack
+import reactivemongo.api.indexes.Index.Aux
+import reactivemongo.api.indexes.IndexType
 import reactivemongo.play.json.collection.JSONCollection
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-private[repositories] class SessionCollection @Inject() (mongo: ReactiveMongoApi)(implicit ec: ExecutionContext) extends (() => Future[JSONCollection]) {
+private[repositories] class SessionCollection @Inject() (
+  mongo: ReactiveMongoApi,
+  config: FrontendAppConfig
+)(implicit ec: ExecutionContext)
+    extends (() => Future[JSONCollection]) {
 
-  val collectionName: String = SessionCollection.collectionName
+  private val collectionName: String = "user-answers"
 
-  override def apply(): Future[JSONCollection] = mongo.database.map(_.collection[JSONCollection](collectionName))
+  private val lastUpdatedIndexName: String = "user-answers-last-updated-index"
 
-}
+  override def apply(): Future[JSONCollection] =
+    for {
+      collection <- mongo.database.map(_.collection[JSONCollection](collectionName))
+      _          <- collection.ensureIndexes
+    } yield collection
 
-object SessionCollection {
+  implicit class RichJSONCollection(collection: JSONCollection) {
 
-  val collectionName: String = "user-answers"
+    def rebuildIndexes: Future[Unit] = for {
+      _ <- dropIndexes
+      _ <- ensureIndexes
+    } yield ()
+
+    def dropIndexes: Future[Int] = collection.indexesManager.dropAll()
+
+    def ensureIndexes: Future[Boolean] = {
+
+      lazy val lastUpdatedIndex: Aux[BSONSerializationPack.type] = SimpleMongoIndexConfig(
+        key = Seq("lastUpdated" -> IndexType.Ascending),
+        name = Some(lastUpdatedIndexName),
+        expireAfterSeconds = Some(config.mongoDbTtl)
+      )
+
+      collection.indexesManager.ensure(lastUpdatedIndex)
+    }
+  }
 
 }

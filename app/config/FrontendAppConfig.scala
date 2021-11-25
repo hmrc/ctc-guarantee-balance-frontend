@@ -22,7 +22,7 @@ import play.api.Configuration
 @Singleton
 class FrontendAppConfig @Inject() (configuration: Configuration) {
 
-  lazy val appName = configuration.get[String]("appName")
+  lazy val appName: String = configuration.get[String]("appName")
 
   lazy val contactHost: String        = configuration.get[Service]("microservice.services.contact-frontend").baseUrl
   lazy val contactFrontendUrl: String = configuration.get[Service]("microservice.services.contact-frontend").fullServiceUrl
@@ -40,8 +40,10 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val userResearchUrl: String         = configuration.get[String]("urls.userResearch")
   val showUserResearchBanner: Boolean = configuration.get[Boolean]("banners.showUserResearch")
 
-  lazy val timeoutSeconds: String               = configuration.get[String]("session.timeoutSeconds")
-  lazy val countdownSeconds: String             = configuration.get[String]("session.countdownSeconds")
+  lazy val timeoutSeconds: String   = configuration.get[String]("session.timeoutSeconds")
+  lazy val countdownSeconds: String = configuration.get[String]("session.countdownSeconds")
+  lazy val mongoDbTtl: Int          = configuration.get[Int]("mongodb.timeToLiveInSeconds")
+
   lazy val rateLimitDuration: Int               = configuration.get[Int]("rateLimit.duration")
   lazy val guaranteeBalanceDelayInSecond: Int   = configuration.get[Int]("guaranteeBalanceLookup.waitTimeInSeconds")
   lazy val guaranteeBalanceMaxTimeInSecond: Int = configuration.get[Int]("guaranteeBalanceLookup.maxTimeInSeconds")
