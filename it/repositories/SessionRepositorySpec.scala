@@ -22,7 +22,6 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import reactivemongo.play.json.collection.JSONCollection
 
@@ -106,27 +105,6 @@ class SessionRepositorySpec
         getResult.data mustBe userAnswers2.data
         getResult.lastUpdated isAfter userAnswers2.lastUpdated mustBe true
       }
-    }
-
-    "must remove document after TTL has elapsed" in {
-
-      val testTtl: Int = 0
-      val delay: Int   = testTtl + 3
-
-      val app = new GuiceApplicationBuilder()
-        .configure("mongodb.timeToLiveInSeconds" -> testTtl)
-        .build()
-
-      val repository = app.injector.instanceOf[SessionRepository]
-
-      val setResult = repository.set(userAnswers2).futureValue
-      setResult mustBe true
-
-      Thread.sleep(delay * 1000)
-
-      val getResult = repository.get(internalId2).futureValue
-
-      getResult mustNot be(defined)
     }
   }
 
