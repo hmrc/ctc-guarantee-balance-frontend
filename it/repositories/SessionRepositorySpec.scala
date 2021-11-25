@@ -16,17 +16,16 @@
 
 package repositories
 
-import models.{MongoDateTimeFormats, UserAnswers}
+import models.UserAnswers
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{Json, Writes}
-import reactivemongo.play.json.collection.Helpers.idWrites
+import play.api.libs.json.Json
+import reactivemongo.play.json.collection.JSONCollection
 
-import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class SessionRepositorySpec
@@ -49,8 +48,9 @@ class SessionRepositorySpec
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    collection.map {
-      _.insert(ordered = false)
+    database.flatMap {
+      _.collection[JSONCollection]("user-answers")
+        .insert(ordered = false)
         .one(userAnswers1)
     }.futureValue
   }
@@ -110,8 +110,8 @@ class SessionRepositorySpec
 
     "must remove document after TTL has elapsed" in {
 
-      val testTtl: Int = 1
-      val delay: Int   = testTtl + 1
+      val testTtl: Int = 0
+      val delay: Int   = testTtl + 3
 
       val app = new GuiceApplicationBuilder()
         .configure("mongodb.timeToLiveInSeconds" -> testTtl)
@@ -123,16 +123,6 @@ class SessionRepositorySpec
       setResult mustBe true
 
       Thread.sleep(delay * 1000)
-
-      // By Default, the TTLMonitor thread runs once every 60 seconds
-      // So we're essentially running it manually here by deleting the document if the TTL has elapsed
-      implicit val dateWriter: Writes[LocalDateTime] = MongoDateTimeFormats.localDateTimeWrite
-      val selector = Json.obj(
-        "lastUpdated" -> Json.obj("$lt" -> LocalDateTime.now().minusSeconds(testTtl))
-      )
-      collection.flatMap {
-        _.delete().one(selector)
-      }.futureValue
 
       val getResult = repository.get(internalId2).futureValue
 

@@ -20,7 +20,6 @@ import com.typesafe.config.ConfigFactory
 import org.scalatest._
 import play.api.Configuration
 import reactivemongo.api._
-import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -50,10 +49,5 @@ trait MongoSuite {
       connection <- MongoSuite.connection
       database   <- connection.database(uri.db.get)
     } yield database
-
-  def collection: Future[JSONCollection] =
-    database.map {
-      _.collection[JSONCollection]("user-answers")
-    }
 
 }
