@@ -18,11 +18,14 @@ package controllers
 
 import controllers.actions._
 import models.NormalMode
+import pages._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
+import services.AuditService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import viewModels.audit.{RateLimitAuditModel, UnsuccessfulBalanceAuditModel}
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
@@ -32,7 +35,8 @@ class RateLimitController @Inject() (
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   val controllerComponents: MessagesControllerComponents,
-  renderer: Renderer
+  renderer: Renderer,
+  auditService: AuditService
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
@@ -40,6 +44,17 @@ class RateLimitController @Inject() (
   def onPageLoad(): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
       val json = Json.obj("nextPageUrl" -> controllers.routes.EoriNumberController.onPageLoad(NormalMode).url)
+
+      println("\n\n\n\n req.ua" + request.userAnswers.toString)
+      auditService.audit(
+        RateLimitAuditModel.build(
+          request.userAnswers.get.get(EoriNumberPage).getOrElse("-").toString,
+          request.userAnswers.get.get(GuaranteeReferenceNumberPage).getOrElse("-").toString,
+          request.userAnswers.get.get(AccessCodePage).getOrElse("-").toString,
+          SEE_OTHER,
+          "Rate Limit"
+        )
+      )
 
       renderer.render("rateLimit.njk", json).map(Ok(_))
   }

@@ -18,6 +18,7 @@ package viewModels.audit
 
 import base.SpecBase
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.http.Status.SEE_OTHER
 import play.api.libs.json.Json
 
 class UnsuccessfulBalanceAuditModelSpec extends SpecBase with MockitoSugar {
@@ -31,7 +32,7 @@ class UnsuccessfulBalanceAuditModelSpec extends SpecBase with MockitoSugar {
           "GB1234567890",
           "123456789800",
           "1222",
-          500,
+          SEE_OTHER,
           "Insufficient data in user answers."
         )
         .detail
@@ -46,7 +47,7 @@ class UnsuccessfulBalanceAuditModelSpec extends SpecBase with MockitoSugar {
     "Eori Number"                -> "GB1234567890",
     "Guarantee Reference Number" -> "123456789800",
     "Access Code"                -> "1222",
-    "status"                     -> 500,
+    "status"                     -> SEE_OTHER,
     "Error Message"              -> "Insufficient data in user answers."
   )
 

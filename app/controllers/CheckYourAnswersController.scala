@@ -23,6 +23,7 @@ import models.requests.BalanceRequest
 import models.values._
 import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.Logging
+import play.api.http.Status.SEE_OTHER
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
@@ -32,6 +33,7 @@ import uk.gov.hmrc.mongo.lock.MongoLockRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 import viewModels.CheckYourAnswersViewModelProvider
+
 import javax.inject.Inject
 import viewModels.audit.{SuccessfulBalanceAuditModel, UnsuccessfulBalanceAuditModel}
 
@@ -98,7 +100,7 @@ class CheckYourAnswersController @Inject() (
             request.userAnswers.get(EoriNumberPage).getOrElse("-").toString,
             request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-").toString,
             request.userAnswers.get(AccessCodePage).getOrElse("-").toString,
-            OK,
+            SEE_OTHER,
             message
           )
         )
