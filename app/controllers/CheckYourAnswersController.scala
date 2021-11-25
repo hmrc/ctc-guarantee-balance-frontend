@@ -88,8 +88,7 @@ class CheckYourAnswersController @Inject() (
             Future.successful(Redirect(routes.RateLimitController.onPageLoad()))
           }
       }).getOrElse {
-        val message = "Insufficient data in user answers."
-        logger.warn(s"[CheckYourAnswersController][onSubmit] $message")
+        logger.warn("[CheckYourAnswersController][onSubmit] Insufficient data in user answers.")
         Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
       }
   }

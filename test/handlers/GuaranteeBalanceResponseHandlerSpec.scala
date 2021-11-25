@@ -22,24 +22,16 @@ import base.{AppWithDefaultMockFixtures, SpecBase}
 import cats.data.NonEmptyList
 import matchers.JsonMatchers
 import models.backend.errors.FunctionalError
-import models.backend.{
-  BalanceRequestFunctionalError,
-  BalanceRequestNotMatched,
-  BalanceRequestPending,
-  BalanceRequestPendingExpired,
-  BalanceRequestSuccess,
-  BalanceRequestUnsupportedGuaranteeType
-}
+import models.backend._
 import models.requests.DataRequest
 import models.values.{BalanceId, CurrencyCode, ErrorType}
-import org.mockito.{ArgumentCaptor, Mock}
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify}
 import pages.GuaranteeReferenceNumberPage
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.Helpers._
-import services.AuditService
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
