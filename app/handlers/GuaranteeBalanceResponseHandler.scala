@@ -80,7 +80,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
             request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-"),
             request.userAnswers.get(AccessCodePage).getOrElse("-"),
             SEE_OTHER,
-            "Balance Request Details Do Not Match - But which ?????"
+            "Balance Request Details Do Not Match"
           )
         )
 
