@@ -27,15 +27,12 @@ import models.values.ErrorType.{InvalidDataErrorType, NotMatchedErrorType}
 import play.api.Logging
 import play.api.http.{HeaderNames, Status}
 import play.api.libs.json.JsResult
+import services.AuditService
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions, HttpReads, HttpResponse}
+
 import java.time.Instant
-
 import javax.inject.Inject
-import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
-import services.AuditService
-import viewModels.audit.SuccessfulBalanceAuditModel
-
 import scala.concurrent.{ExecutionContext, Future}
 
 class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: FrontendAppConfig, auditService: AuditService)(implicit
@@ -124,8 +121,8 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
 
   private def getProcessableErrorResponses(errorType: FunctionalError): Option[BalanceRequestResponse] =
     errorType match {
-      case FunctionalError(NotMatchedErrorType, _, _) =>
-        Some(BalanceRequestNotMatched)
+      case FunctionalError(NotMatchedErrorType, errorPointer, _) =>
+        Some(BalanceRequestNotMatched(errorPointer))
       case FunctionalError(InvalidDataErrorType, "GRR(1).GQY(1).Query identifier", Some("R261")) =>
         Some(BalanceRequestUnsupportedGuaranteeType)
       case _ => None

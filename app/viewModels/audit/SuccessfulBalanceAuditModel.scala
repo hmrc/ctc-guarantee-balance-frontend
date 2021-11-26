@@ -16,8 +16,6 @@
 
 package viewModels.audit
 
-import java.time.LocalDateTime
-
 import play.api.libs.json.{JsValue, Json}
 import services.JsonAuditModel
 
@@ -28,11 +26,11 @@ case class SuccessfulBalanceAuditModel(eoriNumber: String, guaranteeReferenceNum
   override val auditType: String       = "Successful Balance Audit"
 
   override val detail: JsValue = Json.obj(
-    "Eori Number"                -> eoriNumber.toString,
-    "Guarantee Reference Number" -> guaranteeReferenceNumber.toString,
-    "Access Code"                -> accessCode.toString,
+    "Eori Number"                -> eoriNumber,
+    "Guarantee Reference Number" -> guaranteeReferenceNumber,
+    "Access Code"                -> accessCode,
     "status"                     -> status,
-    "Balance"                    -> balance.toString
+    "Balance"                    -> balance
   )
 }
 

@@ -17,18 +17,13 @@
 package connectors
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
-import models.backend.{
-  BalanceRequestFunctionalError,
-  BalanceRequestNotMatched,
-  BalanceRequestPending,
-  BalanceRequestPendingExpired,
-  BalanceRequestSuccess,
-  BalanceRequestUnsupportedGuaranteeType
-}
+import models.backend.errors.FunctionalError
+import models.backend._
 import models.requests.BalanceRequest
-import models.values.ErrorType.NotMatchedErrorType
+import models.values.ErrorType.{InvalidDataErrorType, NotMatchedErrorType}
 import models.values._
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
@@ -37,12 +32,9 @@ import play.api.Application
 import play.api.http.{ContentTypes, HeaderNames, Status}
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
+
 import java.time.Instant
 import java.util.UUID
-
-import cats.data.NonEmptyList
-import models.backend.errors.FunctionalError
-import models.values.ErrorType.InvalidDataErrorType
 
 class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler with ScalaCheckPropertyChecks with AppWithDefaultMockFixtures {
 
@@ -54,7 +46,8 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
 
   implicit private val hc: HeaderCarrier = HeaderCarrier()
 
-  private val submitBalanceRequestUrl                         = s"/balances"
+  private val submitBalanceRequestUrl = s"/balances"
+
   private def queryBalanceRequestUrlFor(balanceId: BalanceId) = s"/balances/${balanceId.value}"
 
   private lazy val connector = app.injector.instanceOf[GuaranteeBalanceConnector]
@@ -127,19 +120,19 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
       "must return balance request not matched for a functional error with error type 12" in {
         val balanceRequestNotMatchedJson: String =
           """
-             | {
-             |   "code": "FUNCTIONAL_ERROR",
-             |   "message": "The request was rejected by the guarantee management system",
-             |   "response": {
-             |     "errors": [
-             |       {
-             |         "errorType": 12,
-             |         "errorPointer": "Foo.Bar(1).Baz"
-             |       }
-             |     ]
-             |   }
-             | }
-             |""".stripMargin
+            | {
+            |   "code": "FUNCTIONAL_ERROR",
+            |   "message": "The request was rejected by the guarantee management system",
+            |   "response": {
+            |     "errors": [
+            |       {
+            |         "errorType": 12,
+            |         "errorPointer": "Foo.Bar(1).Baz"
+            |       }
+            |     ]
+            |   }
+            | }
+            |""".stripMargin
 
         server.stubFor(
           post(urlEqualTo(submitBalanceRequestUrl))
@@ -154,7 +147,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
         )
 
         val result = connector.submitBalanceRequest(request).futureValue
-        result mustBe Right(BalanceRequestNotMatched)
+        result mustBe Right(BalanceRequestNotMatched("Foo.Bar(1).Baz"))
       }
 
       "must return unsupported guarantee balance type for a functional error with error type 14 and Pointer GRR(1).GQY(1).Query identifier" in {
@@ -300,20 +293,20 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
         val completedAt = Instant.now().minusSeconds(1)
         val balanceRequestSuccessResponseJson: String =
           s"""
-            | {
-            |   "request" : {
-            |     "balanceId": "22b9899e-24ee-48e6-a189-97d1f45391c4",
-            |     "taxIdentifier": "taxid",
-            |     "guaranteeReference": "guarref",
-            |     "requestedAt": "$requestedAt",
-            |     "completedAt": "$completedAt",
-            |     "response": {
-            |       "balance": 3.14,
-            |       "currency": "EUR"
-            |     }
-            |   }
-            | }
-            |""".stripMargin
+             | {
+             |   "request" : {
+             |     "balanceId": "22b9899e-24ee-48e6-a189-97d1f45391c4",
+             |     "taxIdentifier": "taxid",
+             |     "guaranteeReference": "guarref",
+             |     "requestedAt": "$requestedAt",
+             |     "completedAt": "$completedAt",
+             |     "response": {
+             |       "balance": 3.14,
+             |       "currency": "EUR"
+             |     }
+             |   }
+             | }
+             |""".stripMargin
 
         val balanceId = BalanceId(testUuid)
 
@@ -442,7 +435,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
         )
 
         val result = connector.queryPendingBalance(balanceId).futureValue
-        result mustBe Right(BalanceRequestNotMatched)
+        result mustBe Right(BalanceRequestNotMatched("Foo.Bar(1).Baz"))
       }
 
       "must return unsupported guaranteebalance type for a functional error with error type 14" in {

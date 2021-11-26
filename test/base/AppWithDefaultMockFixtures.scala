@@ -48,7 +48,8 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
       mockDataRetrievalAction,
       mockSessionRepository,
       mockMongoLockRepository,
-      mockGuaranteeBalanceService
+      mockGuaranteeBalanceService,
+      mockAuditService
     )
 
     when(mockRenderer.render(any(), any())(any()))
