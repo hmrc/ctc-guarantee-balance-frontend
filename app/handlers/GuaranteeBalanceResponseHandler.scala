@@ -76,9 +76,9 @@ class GuaranteeBalanceResponseHandler @Inject() (
           UnsuccessfulBalanceAuditModel.build(
             "Balance Request Not Matched",
             "Balance Request Not Matched Audit",
-            request.userAnswers.get(EoriNumberPage).getOrElse("-").toString,
-            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-").toString,
-            request.userAnswers.get(AccessCodePage).getOrElse("-").toString,
+            request.userAnswers.get(EoriNumberPage).getOrElse("-"),
+            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-"),
+            request.userAnswers.get(AccessCodePage).getOrElse("-"),
             SEE_OTHER,
             "Balance Request Details Do Not Match - But which ?????"
           )
@@ -91,9 +91,9 @@ class GuaranteeBalanceResponseHandler @Inject() (
           UnsuccessfulBalanceAuditModel.build(
             "Balance Request Pending Expired",
             "Balance Request Pending Expired Audit",
-            request.userAnswers.get(EoriNumberPage).getOrElse("-").toString,
-            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-").toString,
-            request.userAnswers.get(AccessCodePage).getOrElse("-").toString,
+            request.userAnswers.get(EoriNumberPage).getOrElse("-"),
+            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-"),
+            request.userAnswers.get(AccessCodePage).getOrElse("-"),
             SEE_OTHER,
             "Balance Request Pending Expired"
           )
@@ -105,9 +105,9 @@ class GuaranteeBalanceResponseHandler @Inject() (
           UnsuccessfulBalanceAuditModel.build(
             "Balance Request Unsupported Guarantee Type",
             "Balance Request Unsupported Guarantee Type Audit",
-            request.userAnswers.get(EoriNumberPage).getOrElse("-").toString,
-            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-").toString,
-            request.userAnswers.get(AccessCodePage).getOrElse("-").toString,
+            request.userAnswers.get(EoriNumberPage).getOrElse("-"),
+            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-"),
+            request.userAnswers.get(AccessCodePage).getOrElse("-"),
             SEE_OTHER,
             "Balance Request Unsupported Guarantee Type Type"
           )
@@ -119,9 +119,9 @@ class GuaranteeBalanceResponseHandler @Inject() (
           UnsuccessfulBalanceAuditModel.build(
             "Balance Request Functional Error",
             "Balance Request Functional Error Audit",
-            request.userAnswers.get(EoriNumberPage).getOrElse("-").toString,
-            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-").toString,
-            request.userAnswers.get(AccessCodePage).getOrElse("-").toString,
+            request.userAnswers.get(EoriNumberPage).getOrElse("-"),
+            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-"),
+            request.userAnswers.get(AccessCodePage).getOrElse("-"),
             INTERNAL_SERVER_ERROR,
             s"Failed to process Response: ${fe.errors}"
           )
@@ -137,9 +137,9 @@ class GuaranteeBalanceResponseHandler @Inject() (
           UnsuccessfulBalanceAuditModel.build(
             "Rate Limit",
             "Rate Limit Audit",
-            request.userAnswers.get(EoriNumberPage).getOrElse("-").toString,
-            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-").toString,
-            request.userAnswers.get(AccessCodePage).getOrElse("-").toString,
+            request.userAnswers.get(EoriNumberPage).getOrElse("-"),
+            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-"),
+            request.userAnswers.get(AccessCodePage).getOrElse("-"),
             TOO_MANY_REQUESTS,
             "Rate Limit Exceeded"
           )
@@ -152,9 +152,9 @@ class GuaranteeBalanceResponseHandler @Inject() (
           UnsuccessfulBalanceAuditModel.build(
             "Rate Limit",
             "Rate Limit Audit",
-            request.userAnswers.get(EoriNumberPage).getOrElse("-").toString,
-            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-").toString,
-            request.userAnswers.get(AccessCodePage).getOrElse("-").toString,
+            request.userAnswers.get(EoriNumberPage).getOrElse("-"),
+            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-"),
+            request.userAnswers.get(AccessCodePage).getOrElse("-"),
             INTERNAL_SERVER_ERROR,
             s"Failed to process Response: $failureResponse"
           )

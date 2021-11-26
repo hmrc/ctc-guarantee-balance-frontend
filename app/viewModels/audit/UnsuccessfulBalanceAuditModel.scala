@@ -54,4 +54,3 @@ object UnsuccessfulBalanceAuditModel {
   ): UnsuccessfulBalanceAuditModel =
     UnsuccessfulBalanceAuditModel(transaction, audit, eoriNumber, guaranteeReferenceNumber, accessCode, status, errorMessage)
 }
-

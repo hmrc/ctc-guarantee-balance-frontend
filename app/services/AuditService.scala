@@ -32,7 +32,6 @@ class AuditService @Inject() (appConfig: FrontendAppConfig, auditConnector: Audi
 
   def audit(dataSource: JsonAuditModel)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): Unit = {
     val evt = toExtendedDataEvent(dataSource, request.path)
-    println(s"evt*************\n\n\n\n\n\n\n\n\n\n${evt.toString}\n\n\n\n\n\n\n************")
     auditConnector.sendExtendedEvent(evt)
   }
 
