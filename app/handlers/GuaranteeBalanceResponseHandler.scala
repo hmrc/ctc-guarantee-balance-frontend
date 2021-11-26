@@ -62,9 +62,9 @@ class GuaranteeBalanceResponseHandler @Inject() (
       case successResponse: BalanceRequestSuccess =>
         auditService.audit(
           SuccessfulBalanceAuditModel.build(
-            request.userAnswers.get(EoriNumberPage).getOrElse("-").toString,
-            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-").toString,
-            request.userAnswers.get(AccessCodePage).getOrElse("-").toString,
+            request.userAnswers.get(EoriNumberPage).getOrElse("-"),
+            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-"),
+            request.userAnswers.get(AccessCodePage).getOrElse("-"),
             OK,
             successResponse.currency.toString.trim + " " + successResponse.balance.toString.trim
           )
