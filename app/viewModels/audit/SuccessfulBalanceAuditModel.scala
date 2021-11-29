@@ -46,7 +46,7 @@ case class SuccessfulBalanceAuditModel(eoriNumber: String,
 
 object SuccessfulBalanceAuditModel {
 
-  def build(  eoriNumber: String,
+  def build(eoriNumber: String,
             guaranteeReferenceNumber: String,
             accessCode: String,
             internalId: String,

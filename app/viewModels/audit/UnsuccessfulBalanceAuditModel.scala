@@ -47,13 +47,13 @@ case class UnsuccessfulBalanceAuditModel(eoriNumber: String,
 object UnsuccessfulBalanceAuditModel {
 
   def build(
-            eoriNumber: String,
-            guaranteeReferenceNumber: String,
-            accessCode: String,
-            internalId: String,
-            dateTime: LocalDateTime,
-            status: Int,
-            errorMessage: String
+    eoriNumber: String,
+    guaranteeReferenceNumber: String,
+    accessCode: String,
+    internalId: String,
+    dateTime: LocalDateTime,
+    status: Int,
+    errorMessage: String
   ): UnsuccessfulBalanceAuditModel =
     UnsuccessfulBalanceAuditModel(eoriNumber, guaranteeReferenceNumber, accessCode, internalId, dateTime, status, errorMessage)
 }
