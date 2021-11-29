@@ -16,23 +16,21 @@
 
 package services
 
-import java.time.LocalDateTime
-
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import config.FrontendAppConfig
 import matchers.JsonMatchers
 import org.mockito.ArgumentCaptor
-import org.scalatestplus.mockito.MockitoSugar
-import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
-import uk.gov.hmrc.viewmodels.NunjucksSupport
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{times, verify, when}
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.FakeRequest
 import play.api.test.Helpers.GET
 import uk.gov.hmrc.http.HeaderCarrier
-import viewModels.audit.SuccessfulBalanceAuditModel
-import org.mockito.Mockito.{times, verify}
+import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
+import uk.gov.hmrc.viewmodels.NunjucksSupport
+import viewModels.audit.SuccessfulBalanceAuditModel
+
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuditServiceSpec extends SpecBase with MockitoSugar with NunjucksSupport with JsonMatchers with AppWithDefaultMockFixtures {

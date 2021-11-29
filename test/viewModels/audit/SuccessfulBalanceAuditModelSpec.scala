@@ -17,8 +17,6 @@
 package viewModels.audit
 
 import base.SpecBase
-import java.time.LocalDateTime
-
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
 
