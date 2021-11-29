@@ -30,8 +30,6 @@ class SuccessfulBalanceAuditModelSpec extends SpecBase with MockitoSugar {
       val localDateTime = LocalDateTime.now
       val actualDetails = SuccessfulBalanceAuditModel
         .build(
-          "AuditTransactionName",
-          "AuditEvent",
           "GB1234567890",
           "123456789800",
           "1222",
@@ -49,13 +47,13 @@ class SuccessfulBalanceAuditModelSpec extends SpecBase with MockitoSugar {
   }
 
   private def expectedDetails(localDateTime: LocalDateTime) = Json.obj(
-    "Eori Number"                -> "GB1234567890",
-    "Guarantee Reference Number" -> "123456789800",
-    "Access Code"                -> "1222",
-    "InternalId"                 -> "internalId",
-    "transactionDateTime"        -> localDateTime.toString,
-    "status"                     -> 200,
-    "Balance"                    -> "£1,000,000"
+    "eoriNumber"               -> "GB1234567890",
+    "guaranteeReferenceNumber" -> "123456789800",
+    "accessCode"               -> "1222",
+    "internalId"               -> "internalId",
+    "transactionDateTime"      -> localDateTime.toString,
+    "status"                   -> 200,
+    "balance"                  -> "£1,000,000"
   )
 
 }

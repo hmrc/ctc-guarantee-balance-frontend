@@ -17,7 +17,16 @@
 package viewModels.audit
 
 object AuditConstants {
-  final val AUDIT_SUBMIT_BALANCE_REQUEST             = "submit-guarantee-balance-request"
-  final val AUDIT_SUBMIT_BALANCE_TRANSACTION_SUCCESS = "GuaranteeeBalanceRequestSuccess"
-  final val AUDIT_SUBMIT_BALANCE_TRANSACTION_FAILURE = "GuaranteeeBalanceRequestFailure"
+  final val AUDIT_SUBMIT_BALANCE_REQUEST             = "submitGuaranteeBalanceRequest"
+  final val AUDIT_SUBMIT_BALANCE_TRANSACTION_SUCCESS = "guaranteee-balance-request-success"
+  final val AUDIT_SUBMIT_BALANCE_TRANSACTION_FAILURE = "guaranteee-balance-request-failure"
+
+  final val AUDIT_FIELD_EORI_NUMBER    = "eoriNumber"
+  final val AUDIT_FIELD_GRN_NUMBER     = "guaranteeReferenceNumber"
+  final val AUDIT_FIELD_ACCESS_CODE    = "accessCode"
+  final val AUDIT_FIELD_GG_INTERNAL_ID = "internalId"
+  final val AUDIT_FIELD_DATE_TIME      = "transactionDateTime"
+  final val AUDIT_FIELD_STATUS         = "status"
+  final val AUDIT_FIELD_BALANCE        = "balance"
+  final val AUDIT_FIELD_ERROR_MESSAGE  = "errorMessage"
 }
