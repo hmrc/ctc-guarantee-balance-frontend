@@ -17,7 +17,7 @@
 package viewModels.audit
 
 object AuditConstants {
-  final val AUDIT_SUBMIT_BALANCE_REQUEST             = "submit-guarantee-balance-request"
-  final val AUDIT_SUBMIT_BALANCE_TRANSACTION_SUCCESS = "GuaranteeeBalanceRequestSuccess"
-  final val AUDIT_SUBMIT_BALANCE_TRANSACTION_FAILURE = "GuaranteeeBalanceRequestFailure"
+  final val AUDIT_SUBMIT_BALANCE_REQUEST             = "submitGuaranteeBalanceRequest"
+  final val AUDIT_SUBMIT_BALANCE_TRANSACTION_SUCCESS = "guaranteee-balance-request-success"
+  final val AUDIT_SUBMIT_BALANCE_TRANSACTION_FAILURE = "guaranteee-balance-request-failure"
 }

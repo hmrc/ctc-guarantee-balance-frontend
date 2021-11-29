@@ -49,13 +49,13 @@ class UnsuccessfulBalanceAuditModelSpec extends SpecBase with MockitoSugar {
   }
 
   private def expectedDetails(localDateTime: LocalDateTime) = Json.obj(
-    "Eori Number"                -> "GB1234567890",
-    "Guarantee Reference Number" -> "123456789800",
-    "Access Code"                -> "1222",
-    "InternalId"                 -> "internalId",
-    "transactionDateTime"        -> localDateTime.toString,
-    "status"                     -> SEE_OTHER,
-    "Error Message"              -> "Insufficient data in user answers."
+    "eoriNumber"               -> "GB1234567890",
+    "guaranteeReferenceNumber" -> "123456789800",
+    "accessCode"               -> "1222",
+    "internalId"               -> "internalId",
+    "transactionDateTime"      -> localDateTime.toString,
+    "status"                   -> SEE_OTHER,
+    "errorMessage"             -> "Insufficient data in user answers."
   )
 
 }

@@ -35,13 +35,13 @@ case class UnsuccessfulBalanceAuditModel(transaction: String,
   override val auditType: String       = audit
 
   override val detail: JsValue = Json.obj(
-    "Eori Number"                -> eoriNumber,
-    "Guarantee Reference Number" -> guaranteeReferenceNumber,
-    "Access Code"                -> accessCode,
-    "InternalId"                 -> internalId,
-    "transactionDateTime"        -> dateTime.toString,
-    "status"                     -> status,
-    "Error Message"              -> errorMessage
+    "eoriNumber"               -> eoriNumber,
+    "guaranteeReferenceNumber" -> guaranteeReferenceNumber,
+    "accessCode"               -> accessCode,
+    "internalId"               -> internalId,
+    "transactionDateTime"      -> dateTime.toString,
+    "status"                   -> status,
+    "errorMessage"             -> errorMessage
   )
 }
 
