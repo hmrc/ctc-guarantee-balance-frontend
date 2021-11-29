@@ -17,24 +17,24 @@
 package handlers
 
 import java.util.UUID
+
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import cats.data.NonEmptyList
 import matchers.JsonMatchers
-import models.backend.errors.FunctionalError
 import models.backend._
+import models.backend.errors.FunctionalError
 import models.requests.DataRequest
 import models.values.{BalanceId, CurrencyCode, ErrorType}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify}
-import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
+import pages.GuaranteeReferenceNumberPage
 import play.api.http.Status.SEE_OTHER
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.Helpers._
 import services.{AuditService, JsonAuditModel}
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpResponse}
-import viewModels.audit.UnsuccessfulBalanceAuditModel
 
 import scala.concurrent.Future
 
@@ -87,7 +87,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
 
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
 
-      jsonCaptor.getValue mustBe buildAuditJsonNoMatch("test")
+      jsonCaptor.getValue.detail.toString.contains("test") mustEqual true
     }
 
     "must Redirect to the DetailsDontMatchController if the status is Eori NoMatch " in {
@@ -99,7 +99,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
 
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
 
-      jsonCaptor.getValue mustBe buildAuditJsonNoMatch("Incorrect EORI")
+      jsonCaptor.getValue.detail.toString.contains("Incorrect EORI") mustEqual true
     }
 
     "must Redirect to the DetailsDontMatchController if the status is GRN NoMatch " in {
@@ -111,7 +111,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
 
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
 
-      jsonCaptor.getValue mustBe buildAuditJsonNoMatch("Incorrect Guarantee Reference Number")
+      jsonCaptor.getValue.detail.toString.contains("Incorrect Guarantee Reference Number") mustEqual true
     }
 
     "must Redirect to the DetailsDontMatchController if the status is Access code NoMatch " in {
@@ -123,7 +123,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
 
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
 
-      jsonCaptor.getValue mustBe buildAuditJsonNoMatch("Incorrect access code")
+      jsonCaptor.getValue.detail.toString.contains("Incorrect access code") mustEqual true
     }
 
     "must Redirect to the DetailsDontMatchController if the status is GRN and Eori NoMatch " in {
@@ -135,7 +135,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
 
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
 
-      jsonCaptor.getValue mustBe buildAuditJsonNoMatch("EORI and Guarantee reference number do not match")
+      jsonCaptor.getValue.detail.toString.contains("EORI and Guarantee reference number do not match") mustEqual true
     }
 
     "must Redirect to the UnsupportedGuaranteeTypeController if the status is Unsupported Type " in {
@@ -186,17 +186,6 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       templateCaptor.getValue mustBe "technicalDifficulties.njk"
     }
   }
-
-  private def buildAuditJsonNoMatch(errorMessage: String) =
-    UnsuccessfulBalanceAuditModel.build(
-      "Balance Request Not Matched",
-      "Balance Request Not Matched Audit",
-      request.userAnswers.get(EoriNumberPage).getOrElse("-"),
-      request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-"),
-      request.userAnswers.get(AccessCodePage).getOrElse("-"),
-      SEE_OTHER,
-      errorMessage
-    )
 
   private def processPending(balanceId: BalanceId): Future[Result] =
     Future.successful(Redirect(controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId)))

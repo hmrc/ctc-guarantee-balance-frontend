@@ -30,9 +30,10 @@ import renderer.Renderer
 import repositories.SessionRepository
 import services.AuditService
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import viewModels.audit.{SuccessfulBalanceAuditModel, UnsuccessfulBalanceAuditModel}
-
+import viewModels.audit.{AuditConstants, SuccessfulBalanceAuditModel, UnsuccessfulBalanceAuditModel}
 import javax.inject.Inject
+import org.joda.time.LocalDateTime
+
 import scala.concurrent.{ExecutionContext, Future}
 
 class GuaranteeBalanceResponseHandler @Inject() (
@@ -62,9 +63,13 @@ class GuaranteeBalanceResponseHandler @Inject() (
       case successResponse: BalanceRequestSuccess =>
         auditService.audit(
           SuccessfulBalanceAuditModel.build(
+            AuditConstants.AUDIT_SUBMIT_BALANCE_TRANSACTION_SUCCESS,
+            AuditConstants.AUDIT_SUBMIT_BALANCE_REQUEST,
             request.userAnswers.get(EoriNumberPage).getOrElse("-"),
             request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-"),
             request.userAnswers.get(AccessCodePage).getOrElse("-"),
+            request.internalId,
+            LocalDateTime.now,
             OK,
             successResponse.currency.toString.trim + " " + successResponse.balance.toString.trim
           )
@@ -77,16 +82,12 @@ class GuaranteeBalanceResponseHandler @Inject() (
 
       case BalanceRequestPendingExpired(_) =>
         auditError(
-          "Balance Request Pending Expired",
-          "Balance Request Pending Expired Audit",
           SEE_OTHER,
           "Balance Request Pending Expired"
         )
         Future.successful(Redirect(controllers.routes.TryGuaranteeBalanceAgainController.onPageLoad()))
       case BalanceRequestUnsupportedGuaranteeType =>
         auditError(
-          "Balance Request Unsupported Guarantee Type",
-          "Balance Request Unsupported Guarantee Type Audit",
           SEE_OTHER,
           "Balance Request Unsupported Guarantee Type Type"
         )
@@ -94,8 +95,6 @@ class GuaranteeBalanceResponseHandler @Inject() (
         Future.successful(Redirect(controllers.routes.UnsupportedGuaranteeTypeController.onPageLoad()))
       case fe: BalanceRequestFunctionalError =>
         auditError(
-          "Balance Request Functional Error",
-          "Balance Request Functional Error Audit",
           INTERNAL_SERVER_ERROR,
           s"Failed to process Response: ${fe.errors}"
         )
@@ -107,8 +106,6 @@ class GuaranteeBalanceResponseHandler @Inject() (
     response match {
       case failureResponse if failureResponse.status.equals(TOO_MANY_REQUESTS) =>
         auditError(
-          "Rate Limit",
-          "Rate Limit Audit",
           TOO_MANY_REQUESTS,
           "Rate Limit Exceeded"
         )
@@ -117,8 +114,6 @@ class GuaranteeBalanceResponseHandler @Inject() (
         logger.warn(s"[GuaranteeBalanceResponseHandler][processHttpResponse]Failed to process Response: $failureResponse")
 
         auditError(
-          "Rate Limit",
-          "Rate Limit Audit",
           INTERNAL_SERVER_ERROR,
           s"Failed to process Response: $failureResponse"
         )
@@ -151,25 +146,25 @@ class GuaranteeBalanceResponseHandler @Inject() (
     }
 
     auditError(
-      "Balance Request Not Matched",
-      "Balance Request Not Matched Audit",
       SEE_OTHER,
       balanceRequestNotMatchedMessage
     )
   }
 
-  private def auditError(transactionName: String, auditName: String, errorCode: Int, errorMessage: String)(implicit
+  private def auditError(errorCode: Int, errorMessage: String)(implicit
     hc: HeaderCarrier,
     ec: ExecutionContext,
     request: DataRequest[_]
   ) =
     auditService.audit(
       UnsuccessfulBalanceAuditModel.build(
-        transactionName,
-        auditName,
+        AuditConstants.AUDIT_SUBMIT_BALANCE_TRANSACTION_FAILURE,
+        AuditConstants.AUDIT_SUBMIT_BALANCE_REQUEST,
         request.userAnswers.get(EoriNumberPage).getOrElse("-"),
         request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-"),
         request.userAnswers.get(AccessCodePage).getOrElse("-"),
+        request.internalId,
+        LocalDateTime.now,
         errorCode,
         errorMessage
       )

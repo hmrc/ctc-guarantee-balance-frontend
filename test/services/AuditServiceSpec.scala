@@ -19,6 +19,7 @@ package services
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import config.FrontendAppConfig
 import matchers.JsonMatchers
+import org.joda.time.LocalDateTime
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
@@ -49,9 +50,13 @@ class AuditServiceSpec extends SpecBase with MockitoSugar with NunjucksSupport w
       when(mockAuditConnector.sendExtendedEvent(any())(any(), any())).thenReturn(Future.successful(AuditResult.Success))
 
       val event = SuccessfulBalanceAuditModel.build(
+        "AuditTransactionName",
+        "AuditEvent",
         "GB1234567890",
         "123456789800",
         "1222",
+        "internalId",
+        LocalDateTime.now,
         200,
         "£1,000,000"
       )

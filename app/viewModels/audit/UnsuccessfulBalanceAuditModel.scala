@@ -16,6 +16,7 @@
 
 package viewModels.audit
 
+import org.joda.time.LocalDateTime
 import play.api.libs.json.{JsValue, Json}
 import services.JsonAuditModel
 
@@ -24,6 +25,8 @@ case class UnsuccessfulBalanceAuditModel(transaction: String,
                                          eoriNumber: String,
                                          guaranteeReferenceNumber: String,
                                          accessCode: String,
+                                         internalId: String,
+                                         dateTime: LocalDateTime,
                                          status: Int,
                                          errorMessage: String
 ) extends JsonAuditModel {
@@ -35,6 +38,8 @@ case class UnsuccessfulBalanceAuditModel(transaction: String,
     "Eori Number"                -> eoriNumber,
     "Guarantee Reference Number" -> guaranteeReferenceNumber,
     "Access Code"                -> accessCode,
+    "InternalId"                 -> internalId,
+    "transactionDateTime"        -> dateTime.toString,
     "status"                     -> status,
     "Error Message"              -> errorMessage
   )
@@ -47,8 +52,10 @@ object UnsuccessfulBalanceAuditModel {
             eoriNumber: String,
             guaranteeReferenceNumber: String,
             accessCode: String,
+            internalId: String,
+            dateTime: LocalDateTime,
             status: Int,
             errorMessage: String
   ): UnsuccessfulBalanceAuditModel =
-    UnsuccessfulBalanceAuditModel(transaction, audit, eoriNumber, guaranteeReferenceNumber, accessCode, status, errorMessage)
+    UnsuccessfulBalanceAuditModel(transaction, audit, eoriNumber, guaranteeReferenceNumber, accessCode, internalId, dateTime, status, errorMessage)
 }
