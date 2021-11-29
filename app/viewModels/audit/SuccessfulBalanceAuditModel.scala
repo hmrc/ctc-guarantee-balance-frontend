@@ -16,19 +16,30 @@
 
 package viewModels.audit
 
+import org.joda.time.LocalDateTime
 import play.api.libs.json.{JsValue, Json}
 import services.JsonAuditModel
 
-case class SuccessfulBalanceAuditModel(eoriNumber: String, guaranteeReferenceNumber: String, accessCode: String, status: Int, balance: String)
-    extends JsonAuditModel {
+case class SuccessfulBalanceAuditModel(transaction: String,
+                                       audit: String,
+                                       eoriNumber: String,
+                                       guaranteeReferenceNumber: String,
+                                       accessCode: String,
+                                       internalId: String,
+                                       dateTime: LocalDateTime,
+                                       status: Int,
+                                       balance: String
+) extends JsonAuditModel {
 
-  override val transactionName: String = "Successful Balance"
-  override val auditType: String       = "Successful Balance Audit"
+  override val transactionName: String = transaction
+  override val auditType: String       = audit
 
   override val detail: JsValue = Json.obj(
     "Eori Number"                -> eoriNumber,
     "Guarantee Reference Number" -> guaranteeReferenceNumber,
     "Access Code"                -> accessCode,
+    "InternalId"                 -> internalId,
+    "transactionDateTime"        -> dateTime.toString,
     "status"                     -> status,
     "Balance"                    -> balance
   )
@@ -36,6 +47,15 @@ case class SuccessfulBalanceAuditModel(eoriNumber: String, guaranteeReferenceNum
 
 object SuccessfulBalanceAuditModel {
 
-  def build(eoriNumber: String, guaranteeReferenceNumber: String, accessCode: String, status: Int, balance: String): SuccessfulBalanceAuditModel =
-    SuccessfulBalanceAuditModel(eoriNumber, guaranteeReferenceNumber, accessCode, status, balance)
+  def build(transaction: String,
+            audit: String,
+            eoriNumber: String,
+            guaranteeReferenceNumber: String,
+            accessCode: String,
+            internalId: String,
+            dateTime: LocalDateTime,
+            status: Int,
+            balance: String
+  ): SuccessfulBalanceAuditModel =
+    SuccessfulBalanceAuditModel(transaction, audit, eoriNumber, guaranteeReferenceNumber, accessCode, internalId, dateTime, status, balance)
 }

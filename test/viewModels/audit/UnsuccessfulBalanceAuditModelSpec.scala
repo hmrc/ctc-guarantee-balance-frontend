@@ -17,6 +17,7 @@
 package viewModels.audit
 
 import base.SpecBase
+import org.joda.time.LocalDateTime
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.http.Status.SEE_OTHER
 import play.api.libs.json.Json
@@ -26,29 +27,33 @@ class UnsuccessfulBalanceAuditModelSpec extends SpecBase with MockitoSugar {
   "UnuccessfulBalanceAuditModel" - {
 
     "must build the correct details when build is called" in {
-
+      val localDateTime = LocalDateTime.now
       val actualDetails = UnsuccessfulBalanceAuditModel
         .build(
-          "transaction",
-          "audit",
+          "AuditTransactionName",
+          "AuditEvent",
           "GB1234567890",
           "123456789800",
           "1222",
+          "internalId",
+          localDateTime,
           SEE_OTHER,
           "Insufficient data in user answers."
         )
         .detail
 
-      actualDetails mustEqual expectedDetails
+      actualDetails mustEqual expectedDetails(localDateTime)
 
     }
 
   }
 
-  private val expectedDetails = Json.obj(
+  private def expectedDetails(localDateTime: LocalDateTime) = Json.obj(
     "Eori Number"                -> "GB1234567890",
     "Guarantee Reference Number" -> "123456789800",
     "Access Code"                -> "1222",
+    "InternalId"                 -> "internalId",
+    "transactionDateTime"        -> localDateTime.toString,
     "status"                     -> SEE_OTHER,
     "Error Message"              -> "Insufficient data in user answers."
   )
