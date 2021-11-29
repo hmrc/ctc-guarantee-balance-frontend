@@ -18,6 +18,7 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions._
+import javax.inject.Inject
 import models.Referral
 import pages.BalancePage
 import play.api.Logging
@@ -28,7 +29,6 @@ import renderer.Renderer
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
-import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class BalanceConfirmationController @Inject() (
@@ -54,7 +54,6 @@ class BalanceConfirmationController @Inject() (
             "referral"                        -> request.cookies.get(Referral.cookieName).map(_.value),
             "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
           )
-
           renderer.render("balanceConfirmation.njk", json).map(Ok(_))
         case _ =>
           logger.warn("[BalanceConfirmationController][onPageLoad] Insufficient data in user answers. Redirecting to start of guarantee balance journey.")

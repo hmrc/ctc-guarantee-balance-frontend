@@ -19,6 +19,7 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions._
 import handlers.GuaranteeBalanceResponseHandler
+import javax.inject.Inject
 import models.requests.BalanceRequest
 import models.values._
 import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
@@ -33,7 +34,6 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 import viewModels.CheckYourAnswersViewModelProvider
 
-import javax.inject.Inject
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{ExecutionContext, Future}
 

@@ -17,29 +17,24 @@
 package handlers
 
 import java.util.UUID
-
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import cats.data.NonEmptyList
 import matchers.JsonMatchers
 import models.backend.errors.FunctionalError
-import models.backend.{
-  BalanceRequestFunctionalError,
-  BalanceRequestNotMatched,
-  BalanceRequestPending,
-  BalanceRequestPendingExpired,
-  BalanceRequestSuccess,
-  BalanceRequestUnsupportedGuaranteeType
-}
+import models.backend._
 import models.requests.DataRequest
 import models.values.{BalanceId, CurrencyCode, ErrorType}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify}
-import pages.GuaranteeReferenceNumberPage
+import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
+import play.api.http.Status.SEE_OTHER
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.Helpers._
+import services.{AuditService, JsonAuditModel}
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpResponse}
+import viewModels.audit.UnsuccessfulBalanceAuditModel
 
 import scala.concurrent.Future
 
@@ -51,13 +46,17 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
   private val grn: String  = "grn"
   val populatedUserAnswers = emptyUserAnswers.set(GuaranteeReferenceNumberPage, grn).success.value
 
-  val noMatchResponse         = Right(BalanceRequestNotMatched)
-  val unsupportedTypeResponse = Right(BalanceRequestUnsupportedGuaranteeType)
-  val successResponse         = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
-  val pendingResponse         = Right(BalanceRequestPending(balanceId))
-  val tryAgainResponse        = Right(BalanceRequestPendingExpired(balanceId))
-  val httpErrorResponse       = Left(HttpResponse(404, ""))
-  val tooManyRequestsResponse = Left(HttpResponse(429, ""))
+  val noMatchResponse          = Right(BalanceRequestNotMatched("test"))
+  val eoriNoMatchResponse      = Right(BalanceRequestNotMatched("RC1.TIN"))
+  val grnNoMatchResponse       = Right(BalanceRequestNotMatched("GRR(1).Guarantee reference number (GRN)"))
+  val accesCodeNoMatchResponse = Right(BalanceRequestNotMatched("GRR(1),ACC(1)"))
+  val eoriAndGrnMatchResponse  = Right(BalanceRequestNotMatched("GRR(1).OTG(1).TIN"))
+  val unsupportedTypeResponse  = Right(BalanceRequestUnsupportedGuaranteeType)
+  val successResponse          = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
+  val pendingResponse          = Right(BalanceRequestPending(balanceId))
+  val tryAgainResponse         = Right(BalanceRequestPendingExpired(balanceId))
+  val httpErrorResponse        = Left(HttpResponse(404, ""))
+  val tooManyRequestsResponse  = Left(HttpResponse(429, ""))
 
   val functionalError      = FunctionalError(ErrorType(1), "", None)
   val balanceErrorResponse = Right(BalanceRequestFunctionalError(NonEmptyList(functionalError, Nil)))
@@ -68,7 +67,10 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
   implicit val request = DataRequest(mockRequest, "eoriNumber", populatedUserAnswers)
 
   private lazy val handler: GuaranteeBalanceResponseHandler = app.injector.instanceOf[GuaranteeBalanceResponseHandler]
+  private lazy val auditService: AuditService               = app.injector.instanceOf[AuditService]
+
   "GuaranteeBalanceResponseHandlerSpec" - {
+
     "must Redirect to the TryAgain Controller if the status is empty " in {
       val result: Future[Result] = handler.processResponse(tryAgainResponse, processPending)
 
@@ -81,6 +83,59 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
 
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
+      val jsonCaptor: ArgumentCaptor[JsonAuditModel] = ArgumentCaptor.forClass(classOf[JsonAuditModel])
+
+      verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
+
+      jsonCaptor.getValue mustBe buildAuditJsonNoMatch("test")
+    }
+
+    "must Redirect to the DetailsDontMatchController if the status is Eori NoMatch " in {
+      val result: Future[Result] = handler.processResponse(eoriNoMatchResponse, processPending)
+
+      status(result) mustEqual SEE_OTHER
+      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
+      val jsonCaptor: ArgumentCaptor[JsonAuditModel] = ArgumentCaptor.forClass(classOf[JsonAuditModel])
+
+      verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
+
+      jsonCaptor.getValue mustBe buildAuditJsonNoMatch("Incorrect EORI")
+    }
+
+    "must Redirect to the DetailsDontMatchController if the status is GRN NoMatch " in {
+      val result: Future[Result] = handler.processResponse(grnNoMatchResponse, processPending)
+
+      status(result) mustEqual SEE_OTHER
+      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
+      val jsonCaptor: ArgumentCaptor[JsonAuditModel] = ArgumentCaptor.forClass(classOf[JsonAuditModel])
+
+      verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
+
+      jsonCaptor.getValue mustBe buildAuditJsonNoMatch("Incorrect Guarantee Reference Number")
+    }
+
+    "must Redirect to the DetailsDontMatchController if the status is Access code NoMatch " in {
+      val result: Future[Result] = handler.processResponse(accesCodeNoMatchResponse, processPending)
+
+      status(result) mustEqual SEE_OTHER
+      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
+      val jsonCaptor: ArgumentCaptor[JsonAuditModel] = ArgumentCaptor.forClass(classOf[JsonAuditModel])
+
+      verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
+
+      jsonCaptor.getValue mustBe buildAuditJsonNoMatch("Incorrect access code")
+    }
+
+    "must Redirect to the DetailsDontMatchController if the status is GRN and Eori NoMatch " in {
+      val result: Future[Result] = handler.processResponse(eoriAndGrnMatchResponse, processPending)
+
+      status(result) mustEqual SEE_OTHER
+      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
+      val jsonCaptor: ArgumentCaptor[JsonAuditModel] = ArgumentCaptor.forClass(classOf[JsonAuditModel])
+
+      verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
+
+      jsonCaptor.getValue mustBe buildAuditJsonNoMatch("EORI and Guarantee reference number do not match")
     }
 
     "must Redirect to the UnsupportedGuaranteeTypeController if the status is Unsupported Type " in {
@@ -131,6 +186,17 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       templateCaptor.getValue mustBe "technicalDifficulties.njk"
     }
   }
+
+  private def buildAuditJsonNoMatch(errorMessage: String) =
+    UnsuccessfulBalanceAuditModel.build(
+      "Balance Request Not Matched",
+      "Balance Request Not Matched Audit",
+      request.userAnswers.get(EoriNumberPage).getOrElse("-"),
+      request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-"),
+      request.userAnswers.get(AccessCodePage).getOrElse("-"),
+      SEE_OTHER,
+      errorMessage
+    )
 
   private def processPending(balanceId: BalanceId): Future[Result] =
     Future.successful(Redirect(controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId)))

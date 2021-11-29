@@ -17,6 +17,7 @@
 package controllers
 
 import controllers.actions._
+import javax.inject.Inject
 import models.NormalMode
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
@@ -24,7 +25,6 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
-import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class RateLimitController @Inject() (
@@ -40,7 +40,6 @@ class RateLimitController @Inject() (
   def onPageLoad(): Action[AnyContent] = (identify andThen getData).async {
     implicit request =>
       val json = Json.obj("nextPageUrl" -> controllers.routes.EoriNumberController.onPageLoad(NormalMode).url)
-
       renderer.render("rateLimit.njk", json).map(Ok(_))
   }
 }

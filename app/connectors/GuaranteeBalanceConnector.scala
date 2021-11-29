@@ -120,8 +120,8 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
 
   private def getProcessableErrorResponses(errorType: FunctionalError): Option[BalanceRequestResponse] =
     errorType match {
-      case FunctionalError(NotMatchedErrorType, _, _) =>
-        Some(BalanceRequestNotMatched)
+      case FunctionalError(NotMatchedErrorType, errorPointer, _) =>
+        Some(BalanceRequestNotMatched(errorPointer))
       case FunctionalError(InvalidDataErrorType, "GRR(1).GQY(1).Query identifier", Some("R261")) =>
         Some(BalanceRequestUnsupportedGuaranteeType)
       case _ => None
