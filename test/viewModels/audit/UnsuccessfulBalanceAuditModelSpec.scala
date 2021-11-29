@@ -30,8 +30,6 @@ class UnsuccessfulBalanceAuditModelSpec extends SpecBase with MockitoSugar {
       val localDateTime = LocalDateTime.now
       val actualDetails = UnsuccessfulBalanceAuditModel
         .build(
-          "AuditTransactionName",
-          "AuditEvent",
           "GB1234567890",
           "123456789800",
           "1222",

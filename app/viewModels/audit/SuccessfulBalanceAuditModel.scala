@@ -19,10 +19,9 @@ package viewModels.audit
 import org.joda.time.LocalDateTime
 import play.api.libs.json.{JsValue, Json}
 import services.JsonAuditModel
+import viewModels.audit.AuditConstants._
 
-case class SuccessfulBalanceAuditModel(transaction: String,
-                                       audit: String,
-                                       eoriNumber: String,
+case class SuccessfulBalanceAuditModel(eoriNumber: String,
                                        guaranteeReferenceNumber: String,
                                        accessCode: String,
                                        internalId: String,
@@ -31,25 +30,23 @@ case class SuccessfulBalanceAuditModel(transaction: String,
                                        balance: String
 ) extends JsonAuditModel {
 
-  override val transactionName: String = transaction
-  override val auditType: String       = audit
+  override val transactionName: String = AUDIT_SUBMIT_BALANCE_TRANSACTION_SUCCESS
+  override val auditType: String       = AUDIT_SUBMIT_BALANCE_REQUEST
 
   override val detail: JsValue = Json.obj(
-    "eoriNumber"               -> eoriNumber,
-    "guaranteeReferenceNumber" -> guaranteeReferenceNumber,
-    "accessCode"               -> accessCode,
-    "internalId"               -> internalId,
-    "transactionDateTime"      -> dateTime.toString,
-    "status"                   -> status,
-    "balance"                  -> balance
+    AUDIT_FIELD_EORI_NUMBER    -> eoriNumber,
+    AUDIT_FIELD_GRN_NUMBER     -> guaranteeReferenceNumber,
+    AUDIT_FIELD_ACCESS_CODE    -> accessCode,
+    AUDIT_FIELD_GG_INTERNAL_ID -> internalId,
+    AUDIT_FIELD_DATE_TIME      -> dateTime.toString,
+    AUDIT_FIELD_STATUS         -> status,
+    AUDIT_FIELD_BALANCE        -> balance
   )
 }
 
 object SuccessfulBalanceAuditModel {
 
-  def build(transaction: String,
-            audit: String,
-            eoriNumber: String,
+  def build(  eoriNumber: String,
             guaranteeReferenceNumber: String,
             accessCode: String,
             internalId: String,
@@ -57,5 +54,5 @@ object SuccessfulBalanceAuditModel {
             status: Int,
             balance: String
   ): SuccessfulBalanceAuditModel =
-    SuccessfulBalanceAuditModel(transaction, audit, eoriNumber, guaranteeReferenceNumber, accessCode, internalId, dateTime, status, balance)
+    SuccessfulBalanceAuditModel(eoriNumber, guaranteeReferenceNumber, accessCode, internalId, dateTime, status, balance)
 }

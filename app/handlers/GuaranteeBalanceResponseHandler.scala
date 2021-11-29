@@ -30,7 +30,7 @@ import renderer.Renderer
 import repositories.SessionRepository
 import services.AuditService
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import viewModels.audit.{AuditConstants, SuccessfulBalanceAuditModel, UnsuccessfulBalanceAuditModel}
+import viewModels.audit.{SuccessfulBalanceAuditModel, UnsuccessfulBalanceAuditModel}
 import javax.inject.Inject
 import org.joda.time.LocalDateTime
 
@@ -63,8 +63,6 @@ class GuaranteeBalanceResponseHandler @Inject() (
       case successResponse: BalanceRequestSuccess =>
         auditService.audit(
           SuccessfulBalanceAuditModel.build(
-            AuditConstants.AUDIT_SUBMIT_BALANCE_TRANSACTION_SUCCESS,
-            AuditConstants.AUDIT_SUBMIT_BALANCE_REQUEST,
             request.userAnswers.get(EoriNumberPage).getOrElse("-"),
             request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-"),
             request.userAnswers.get(AccessCodePage).getOrElse("-"),
@@ -158,8 +156,6 @@ class GuaranteeBalanceResponseHandler @Inject() (
   ) =
     auditService.audit(
       UnsuccessfulBalanceAuditModel.build(
-        AuditConstants.AUDIT_SUBMIT_BALANCE_TRANSACTION_FAILURE,
-        AuditConstants.AUDIT_SUBMIT_BALANCE_REQUEST,
         request.userAnswers.get(EoriNumberPage).getOrElse("-"),
         request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-"),
         request.userAnswers.get(AccessCodePage).getOrElse("-"),
