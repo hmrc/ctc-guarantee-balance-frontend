@@ -96,7 +96,6 @@ class GuaranteeBalanceResponseHandler @Inject() (
           INTERNAL_SERVER_ERROR,
           s"Failed to process Response: ${fe.errors}"
         )
-        logger.warn(s"[GuaranteeBalanceResponseHandler][processBalanceRequestResponse]Failed to process Response: ${fe.errors}")
         technicalDifficulties()
     }
 
@@ -140,7 +139,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
         "Incorrect access code"
       case "GRR(1).OTG(1).TIN" =>
         "EORI and Guarantee reference number do not match"
-      case _ => errorPointer
+      case _ => "The submitted details do not match our records"
     }
 
     auditError(
@@ -153,7 +152,8 @@ class GuaranteeBalanceResponseHandler @Inject() (
     hc: HeaderCarrier,
     ec: ExecutionContext,
     request: DataRequest[_]
-  ) =
+  ) = {
+    logger.warn(s"[GuaranteeBalanceResponseHandler][auditError]Failed to process errorMessage: $errorMessage, status Code: $errorCode")
     auditService.audit(
       UnsuccessfulBalanceAuditModel.build(
         request.userAnswers.get(EoriNumberPage).getOrElse("-"),
@@ -165,5 +165,5 @@ class GuaranteeBalanceResponseHandler @Inject() (
         errorMessage
       )
     )
-
+  }
 }

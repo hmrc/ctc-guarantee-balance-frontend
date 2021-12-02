@@ -87,7 +87,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
 
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
 
-      jsonCaptor.getValue.detail.toString.contains("test") mustEqual true
+      jsonCaptor.getValue.detail.toString.contains("The submitted details do not match our records") mustEqual true
     }
 
     "must Redirect to the DetailsDontMatchController if the status is Eori NoMatch " in {
