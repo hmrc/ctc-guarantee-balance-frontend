@@ -135,7 +135,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
       case "RC1.TIN" => "Incorrect EORI"
       case "GRR(1).Guarantee reference number (GRN)" =>
         "Incorrect Guarantee Reference Number"
-      case "GRR(1),ACC(1)" =>
+      case "GRR(1).ACC(1).Access code" =>
         "Incorrect access code"
       case "GRR(1).OTG(1).TIN" =>
         "EORI and Guarantee reference number do not match"

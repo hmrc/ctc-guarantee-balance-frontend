@@ -46,17 +46,17 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
   private val grn: String  = "grn"
   val populatedUserAnswers = emptyUserAnswers.set(GuaranteeReferenceNumberPage, grn).success.value
 
-  val noMatchResponse          = Right(BalanceRequestNotMatched("test"))
-  val eoriNoMatchResponse      = Right(BalanceRequestNotMatched("RC1.TIN"))
-  val grnNoMatchResponse       = Right(BalanceRequestNotMatched("GRR(1).Guarantee reference number (GRN)"))
-  val accesCodeNoMatchResponse = Right(BalanceRequestNotMatched("GRR(1),ACC(1)"))
-  val eoriAndGrnMatchResponse  = Right(BalanceRequestNotMatched("GRR(1).OTG(1).TIN"))
-  val unsupportedTypeResponse  = Right(BalanceRequestUnsupportedGuaranteeType)
-  val successResponse          = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
-  val pendingResponse          = Right(BalanceRequestPending(balanceId))
-  val tryAgainResponse         = Right(BalanceRequestPendingExpired(balanceId))
-  val httpErrorResponse        = Left(HttpResponse(404, ""))
-  val tooManyRequestsResponse  = Left(HttpResponse(429, ""))
+  val noMatchResponse           = Right(BalanceRequestNotMatched("test"))
+  val eoriNoMatchResponse       = Right(BalanceRequestNotMatched("RC1.TIN"))
+  val grnNoMatchResponse        = Right(BalanceRequestNotMatched("GRR(1).Guarantee reference number (GRN)"))
+  val accessCodeNoMatchResponse = Right(BalanceRequestNotMatched("GRR(1).ACC(1).Access code"))
+  val eoriAndGrnMatchResponse   = Right(BalanceRequestNotMatched("GRR(1).OTG(1).TIN"))
+  val unsupportedTypeResponse   = Right(BalanceRequestUnsupportedGuaranteeType)
+  val successResponse           = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
+  val pendingResponse           = Right(BalanceRequestPending(balanceId))
+  val tryAgainResponse          = Right(BalanceRequestPendingExpired(balanceId))
+  val httpErrorResponse         = Left(HttpResponse(404, ""))
+  val tooManyRequestsResponse   = Left(HttpResponse(429, ""))
 
   val functionalError      = FunctionalError(ErrorType(1), "", None)
   val balanceErrorResponse = Right(BalanceRequestFunctionalError(NonEmptyList(functionalError, Nil)))
@@ -115,7 +115,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
     }
 
     "must Redirect to the DetailsDontMatchController if the status is Access code NoMatch " in {
-      val result: Future[Result] = handler.processResponse(accesCodeNoMatchResponse, processPending)
+      val result: Future[Result] = handler.processResponse(accessCodeNoMatchResponse, processPending)
 
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
