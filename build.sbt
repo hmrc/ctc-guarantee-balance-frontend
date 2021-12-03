@@ -64,8 +64,6 @@ lazy val root = (project in file("."))
     scalacOptions += "-P:silencer:pathFilters=target/.*",
     // Make sure you only exclude warnings for the project directories, i.e. make builds reproducible
     scalacOptions += s"-P:silencer:sourceRoots=${baseDirectory.value.getCanonicalPath}",
-    // Suppress warnings due to mongo dates using `$date` in their Json representation
-    scalacOptions += "-P:silencer:globalFilters=possible missing interpolator: detected interpolated identifier `\\$date`",
     libraryDependencies ++= Seq(
       compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
       "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
