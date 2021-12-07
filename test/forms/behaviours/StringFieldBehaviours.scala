@@ -55,32 +55,19 @@ trait StringFieldBehaviours extends FieldBehaviours {
       }
     }
 
-  def fieldThatIgnoresSpaces(form: Form[_], fieldName: String, regex: String, minLength: Int, maxLength: Int, lengthError: FormError): Unit = {
-    s"must bind strings where the number of non-space characters is between $minLength and $maxLength inclusive" in {
+  def fieldThatIgnoresSpaces(form: Form[_], fieldName: String, regex: String, maxLength: Int, lengthError: FormError): Unit =
+    s"must bind strings that match $regex where the number of non-space characters is less than or equal to $maxLength" in {
 
       forAll(RegexpGen.from(regex.replace("*", s"{${maxLength + 1},}")).retryUntil {
         x =>
           val lengthWithNoSpaces = x.length - x.count(_ == ' ')
-          lengthWithNoSpaces >= minLength && lengthWithNoSpaces <= maxLength
+          lengthWithNoSpaces <= maxLength
       }) {
         string =>
           val result = form.bind(Map(fieldName -> string)).apply(fieldName)
+          result.errors shouldNot contain(lengthError)
           result.value.value shouldBe string
       }
     }
-
-    s"must not bind strings where the number of non-space characters is less than $minLength" in {
-
-      forAll(RegexpGen.from(regex.replace("*", s"{$minLength,}")).retryUntil {
-        x =>
-          val lengthWithNoSpaces = x.length - x.count(_ == ' ')
-          lengthWithNoSpaces < minLength
-      }) {
-        string =>
-          val result = form.bind(Map(fieldName -> string)).apply(fieldName)
-          result.errors shouldEqual Seq(lengthError)
-      }
-    }
-  }
 
 }

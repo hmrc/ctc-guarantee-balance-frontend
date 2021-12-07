@@ -16,7 +16,7 @@
 
 package forms
 
-import forms.Constants.{alphaNumericRegex, eoriNumberRegex, maxEoriNumberLength}
+import forms.Constants._
 import forms.behaviours.StringFieldBehaviours
 import play.api.data.FormError
 import wolfendale.scalacheck.regexp.RegexpGen
@@ -56,7 +56,7 @@ class EoriNumberFormProviderSpec extends StringFieldBehaviours {
     behave like fieldThatDoesNotBindInvalidData(
       form = form,
       fieldName = fieldName,
-      regex = alphaNumericRegex,
+      regex = alphaNumericWithSpacesRegex,
       gen = stringsOfLength(maxEoriNumberLength),
       invalidKey = invalidCharactersKey
     )
@@ -65,8 +65,24 @@ class EoriNumberFormProviderSpec extends StringFieldBehaviours {
       form = form,
       fieldName = fieldName,
       regex = eoriNumberRegex,
-      gen = RegexpGen.from(alphaNumericRegex.replace("*", s"{$maxEoriNumberLength}")),
+      gen = RegexpGen.from(alphaNumericWithSpacesRegex.replace("*", s"{$maxEoriNumberLength}")),
       invalidKey = invalidFormatKey
+    )
+
+    behave like fieldThatIgnoresSpaces(
+      form = form,
+      fieldName = fieldName,
+      regex = alphaNumericWithSpacesRegex,
+      maxLength = maxEoriNumberLength,
+      lengthError = FormError(fieldName, lengthKey, Seq(maxEoriNumberLength))
+    )
+
+    behave like fieldThatIgnoresSpaces(
+      form = form,
+      fieldName = fieldName,
+      regex = eoriNumberRegex,
+      maxLength = maxEoriNumberLength,
+      lengthError = FormError(fieldName, lengthKey, Seq(maxEoriNumberLength))
     )
 
   }
