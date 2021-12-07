@@ -56,7 +56,7 @@ class EoriNumberFormProviderSpec extends StringFieldBehaviours {
     behave like fieldThatDoesNotBindInvalidData(
       form = form,
       fieldName = fieldName,
-      regex = alphaNumericWithSpacesRegex,
+      regex = alphaNumericRegex,
       gen = stringsOfLength(maxEoriNumberLength),
       invalidKey = invalidCharactersKey
     )
@@ -65,25 +65,15 @@ class EoriNumberFormProviderSpec extends StringFieldBehaviours {
       form = form,
       fieldName = fieldName,
       regex = eoriNumberRegex,
-      gen = RegexpGen.from(alphaNumericWithSpacesRegex.replace("*", s"{$maxEoriNumberLength}")),
+      gen = RegexpGen.from(alphaNumericRegex.replace("*", s"{$maxEoriNumberLength}")),
       invalidKey = invalidFormatKey
     )
 
-    behave like fieldThatIgnoresSpaces(
-      form = form,
-      fieldName = fieldName,
-      regex = alphaNumericWithSpacesRegex,
-      maxLength = maxEoriNumberLength,
-      lengthError = FormError(fieldName, lengthKey, Seq(maxEoriNumberLength))
-    )
-
-    behave like fieldThatIgnoresSpaces(
-      form = form,
-      fieldName = fieldName,
-      regex = eoriNumberRegex,
-      maxLength = maxEoriNumberLength,
-      lengthError = FormError(fieldName, lengthKey, Seq(maxEoriNumberLength))
-    )
+    "must remove spaces on bound strings" in {
+      val result = form.bind(Map(fieldName -> " GB 123 456 "))
+      result.errors mustEqual Nil
+      result.get mustEqual "GB123456"
+    }
 
   }
 }

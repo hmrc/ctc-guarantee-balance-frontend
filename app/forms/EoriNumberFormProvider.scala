@@ -26,11 +26,11 @@ class EoriNumberFormProvider @Inject() extends Mappings {
 
   def apply(): Form[String] =
     Form(
-      "value" -> text("eoriNumber.error.required")
+      "value" -> textWithSpacesRemoved("eoriNumber.error.required")
         .verifying(
           forms.StopOnFirstFail[String](
-            maxLengthIgnoreSpaces(maxEoriNumberLength, "eoriNumber.error.length"),
-            regexp(alphaNumericWithSpacesRegex, "eoriNumber.error.invalidCharacters"),
+            maxLength(maxEoriNumberLength, "eoriNumber.error.length"),
+            regexp(alphaNumericRegex, "eoriNumber.error.invalidCharacters"),
             regexp(eoriNumberRegex, "eoriNumber.error.invalidFormat")
           )
         )

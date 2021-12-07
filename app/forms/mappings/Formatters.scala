@@ -18,7 +18,7 @@ package forms.mappings
 
 import play.api.data.FormError
 import play.api.data.format.Formatter
-import models.Enumerable
+import models.{Enumerable, RichString}
 
 import scala.util.control.Exception.nonFatalCatch
 
@@ -31,6 +31,21 @@ trait Formatters {
         case None | Some("") => Left(Seq(FormError(key, errorKey)))
         case Some(s)         => Right(s)
       }
+
+    override def unbind(key: String, value: String): Map[String, String] =
+      Map(key -> value)
+  }
+
+  private[mappings] def spacelessStringFormatter(errorKey: String): Formatter[String] = new Formatter[String] {
+
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], String] = {
+      lazy val error = Left(Seq(FormError(key, errorKey)))
+      data.get(key) match {
+        case None                                => error
+        case Some(s) if s.removeSpaces().isEmpty => error
+        case Some(s)                             => Right(s.removeSpaces())
+      }
+    }
 
     override def unbind(key: String, value: String): Map[String, String] =
       Map(key -> value)

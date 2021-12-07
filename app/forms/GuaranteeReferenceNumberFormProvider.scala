@@ -26,11 +26,11 @@ class GuaranteeReferenceNumberFormProvider @Inject() extends Mappings {
 
   def apply(): Form[String] =
     Form(
-      "value" -> text("guaranteeReferenceNumber.error.required")
+      "value" -> textWithSpacesRemoved("guaranteeReferenceNumber.error.required")
         .verifying(
           forms.StopOnFirstFail[String](
-            maxLengthIgnoreSpaces(maxGuaranteeReferenceNumberLength, "guaranteeReferenceNumber.error.length"),
-            regexp(alphaNumericWithSpacesRegex, "guaranteeReferenceNumber.error.invalid")
+            maxLength(maxGuaranteeReferenceNumberLength, "guaranteeReferenceNumber.error.length"),
+            regexp(alphaNumericRegex, "guaranteeReferenceNumber.error.invalid")
           )
         )
     )

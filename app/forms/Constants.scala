@@ -22,8 +22,7 @@ object Constants {
   lazy val maxGuaranteeReferenceNumberLength: Int = 17
   lazy val accessCodeLength: Int                  = 4
 
-  lazy val alphaNumericRegex: String           = "^[a-zA-Z0-9]*$"
-  lazy val alphaNumericWithSpacesRegex: String = "^[a-zA-Z0-9 ]*$"
-  lazy val eoriNumberRegex: String             = "[ ]*(?i)(gb|xi).*"
+  lazy val alphaNumericRegex: String = "^[a-zA-Z0-9]*$"
+  lazy val eoriNumberRegex: String   = "^(?i)(gb|xi).*$"
 
 }
