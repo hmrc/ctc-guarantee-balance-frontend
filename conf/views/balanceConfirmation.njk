@@ -14,7 +14,8 @@
 
         {{ govukPanel({
           titleText: messages("balanceConfirmation.heading"),
-          html: "<strong>" + balance + "</strong>"
+          html: "<strong>" + balance + "</strong>",
+          classes: "breakAll"
         }) }}
 
         {% switch referral %}
