@@ -33,6 +33,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import viewModels.audit.{SuccessfulBalanceAuditModel, UnsuccessfulBalanceAuditModel}
 import javax.inject.Inject
 import org.joda.time.LocalDateTime
+import viewModels.audit.AuditConstants.{AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT, AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -80,21 +81,27 @@ class GuaranteeBalanceResponseHandler @Inject() (
 
       case BalanceRequestPendingExpired(_) =>
         auditError(
+          AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION,
           SEE_OTHER,
-          "Balance Request Pending Expired"
+          "Balance Request Pending Expired",
+          "try again"
         )
         Future.successful(Redirect(controllers.routes.TryGuaranteeBalanceAgainController.onPageLoad()))
       case BalanceRequestUnsupportedGuaranteeType =>
         auditError(
+          AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION,
           SEE_OTHER,
-          "Balance Request Unsupported Guarantee Type Type"
+          "Balance Request Unsupported Guarantee Type",
+          "guarantee type not supported"
         )
 
         Future.successful(Redirect(controllers.routes.UnsupportedGuaranteeTypeController.onPageLoad()))
       case fe: BalanceRequestFunctionalError =>
         auditError(
+          AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION,
           INTERNAL_SERVER_ERROR,
-          s"Failed to process Response: ${fe.errors}"
+          s"Failed to process Response: ${fe.errors}",
+          "technical difficulties"
         )
         technicalDifficulties()
     }
@@ -103,16 +110,20 @@ class GuaranteeBalanceResponseHandler @Inject() (
     response match {
       case failureResponse if failureResponse.status.equals(TOO_MANY_REQUESTS) =>
         auditError(
+          AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT,
           TOO_MANY_REQUESTS,
-          "Rate Limit Exceeded"
+          "Rate Limit Exceeded",
+          "rate limited"
         )
         Future.successful(Redirect(controllers.routes.RateLimitController.onPageLoad()))
       case failureResponse =>
         logger.warn(s"[GuaranteeBalanceResponseHandler][processHttpResponse]Failed to process Response: $failureResponse")
 
         auditError(
+          AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION,
           INTERNAL_SERVER_ERROR,
-          s"Failed to process Response: $failureResponse"
+          s"Failed to process Response: $failureResponse",
+          "technical difficulties"
         )
         technicalDifficulties()
     }
@@ -143,12 +154,14 @@ class GuaranteeBalanceResponseHandler @Inject() (
     }
 
     auditError(
+      AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION,
       SEE_OTHER,
-      balanceRequestNotMatchedMessage
+      balanceRequestNotMatchedMessage,
+      "details do not match"
     )
   }
 
-  private def auditError(errorCode: Int, errorMessage: String)(implicit
+  private def auditError(auditType: String, errorCode: Int, errorMessage: String, displayedErrorMessage: String)(implicit
     hc: HeaderCarrier,
     ec: ExecutionContext,
     request: DataRequest[_]
@@ -156,13 +169,15 @@ class GuaranteeBalanceResponseHandler @Inject() (
     logger.warn(s"[GuaranteeBalanceResponseHandler][auditError]Failed to process errorMessage: $errorMessage, status Code: $errorCode")
     auditService.audit(
       UnsuccessfulBalanceAuditModel.build(
+        auditType,
         request.userAnswers.get(EoriNumberPage).getOrElse("-"),
         request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-"),
         request.userAnswers.get(AccessCodePage).getOrElse("-"),
         request.internalId,
         LocalDateTime.now,
         errorCode,
-        errorMessage
+        errorMessage,
+        displayedErrorMessage
       )
     )
   }

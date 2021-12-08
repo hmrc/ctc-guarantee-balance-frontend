@@ -19,41 +19,52 @@ package viewModels.audit
 import org.joda.time.LocalDateTime
 import play.api.libs.json.{JsValue, Json}
 import services.JsonAuditModel
-import viewModels.audit.AuditConstants._
+import viewModels.audit.AuditConstants.{AUDIT_FIELD_ERROR_MESSAGE, _}
 
-case class UnsuccessfulBalanceAuditModel(eoriNumber: String,
+case class UnsuccessfulBalanceAuditModel(override val auditType: String,
+                                         eoriNumber: String,
                                          guaranteeReferenceNumber: String,
                                          accessCode: String,
                                          internalId: String,
                                          dateTime: LocalDateTime,
                                          status: Int,
-                                         errorMessage: String
+                                         errorMessage: String,
+                                         displayedErrorMessage: String
 ) extends JsonAuditModel {
 
-  override val transactionName: String = AUDIT_SUBMIT_BALANCE_TRANSACTION_FAILURE
-  override val auditType: String       = AUDIT_SUBMIT_BALANCE_REQUEST
-
   override val detail: JsValue = Json.obj(
-    AUDIT_FIELD_EORI_NUMBER    -> eoriNumber,
-    AUDIT_FIELD_GRN_NUMBER     -> guaranteeReferenceNumber,
-    AUDIT_FIELD_ACCESS_CODE    -> accessCode,
-    AUDIT_FIELD_GG_INTERNAL_ID -> internalId,
-    AUDIT_FIELD_DATE_TIME      -> dateTime.toString,
-    AUDIT_FIELD_STATUS         -> status,
-    AUDIT_FIELD_ERROR_MESSAGE  -> errorMessage
+    AUDIT_FIELD_EORI_NUMBER             -> eoriNumber,
+    AUDIT_FIELD_GRN_NUMBER              -> guaranteeReferenceNumber,
+    AUDIT_FIELD_ACCESS_CODE             -> accessCode,
+    AUDIT_FIELD_GG_INTERNAL_ID          -> internalId,
+    AUDIT_FIELD_DATE_TIME               -> dateTime.toString,
+    AUDIT_FIELD_STATUS                  -> status,
+    AUDIT_FIELD_ERROR_MESSAGE           -> errorMessage,
+    AUDIT_FIELD_DISPLAYED_ERROR_MESSAGE -> displayedErrorMessage
   )
 }
 
 object UnsuccessfulBalanceAuditModel {
 
   def build(
+    auditType: String,
     eoriNumber: String,
     guaranteeReferenceNumber: String,
     accessCode: String,
     internalId: String,
     dateTime: LocalDateTime,
     status: Int,
-    errorMessage: String
+    errorMessage: String,
+    displayedErrorMessage: String
   ): UnsuccessfulBalanceAuditModel =
-    UnsuccessfulBalanceAuditModel(eoriNumber, guaranteeReferenceNumber, accessCode, internalId, dateTime, status, errorMessage)
+    UnsuccessfulBalanceAuditModel(auditType,
+                                  eoriNumber,
+                                  guaranteeReferenceNumber,
+                                  accessCode,
+                                  internalId,
+                                  dateTime,
+                                  status,
+                                  errorMessage,
+                                  displayedErrorMessage
+    )
 }

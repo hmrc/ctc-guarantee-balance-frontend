@@ -30,8 +30,7 @@ case class SuccessfulBalanceAuditModel(eoriNumber: String,
                                        balance: String
 ) extends JsonAuditModel {
 
-  override val transactionName: String = AUDIT_SUBMIT_BALANCE_TRANSACTION_SUCCESS
-  override val auditType: String       = AUDIT_SUBMIT_BALANCE_REQUEST
+  override val auditType: String = AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION
 
   override val detail: JsValue = Json.obj(
     AUDIT_FIELD_EORI_NUMBER    -> eoriNumber,

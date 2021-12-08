@@ -39,7 +39,7 @@ class AuditService @Inject() (appConfig: FrontendAppConfig, auditConnector: Audi
     val event = ExtendedDataEvent(
       auditSource = appConfig.appName,
       auditType = auditModel.auditType,
-      tags = AuditExtensions.auditHeaderCarrier(hc).toAuditTags(auditModel.transactionName, path),
+      tags = AuditExtensions.auditHeaderCarrier(hc).toAuditTags(path),
       detail = auditModel.detail
     )
     event
@@ -48,6 +48,5 @@ class AuditService @Inject() (appConfig: FrontendAppConfig, auditConnector: Audi
 
 trait JsonAuditModel extends JsonUtils {
   val auditType: String
-  val transactionName: String
   val detail: JsValue
 }
