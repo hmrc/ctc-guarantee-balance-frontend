@@ -37,8 +37,7 @@ class UnsuccessfulBalanceAuditModelSpec extends SpecBase with MockitoSugar {
           "internalId",
           localDateTime,
           SEE_OTHER,
-          "Insufficient data in user answers.",
-          "Details do not match"
+          ErrorMessage("Insufficient data in user answers.", "Details do not match")
         )
         .detail
 

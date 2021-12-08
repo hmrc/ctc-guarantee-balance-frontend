@@ -19,7 +19,7 @@ package viewModels.audit
 import org.joda.time.LocalDateTime
 import play.api.libs.json.{JsValue, Json}
 import services.JsonAuditModel
-import viewModels.audit.AuditConstants.{AUDIT_FIELD_ERROR_MESSAGE, _}
+import viewModels.audit.AuditConstants._
 
 case class UnsuccessfulBalanceAuditModel(override val auditType: String,
                                          eoriNumber: String,
@@ -28,8 +28,7 @@ case class UnsuccessfulBalanceAuditModel(override val auditType: String,
                                          internalId: String,
                                          dateTime: LocalDateTime,
                                          status: Int,
-                                         errorMessage: String,
-                                         displayedErrorMessage: String
+                                         errorMessage: ErrorMessage
 ) extends JsonAuditModel {
 
   override val detail: JsValue = Json.obj(
@@ -39,8 +38,8 @@ case class UnsuccessfulBalanceAuditModel(override val auditType: String,
     AUDIT_FIELD_GG_INTERNAL_ID          -> internalId,
     AUDIT_FIELD_DATE_TIME               -> dateTime.toString,
     AUDIT_FIELD_STATUS                  -> status,
-    AUDIT_FIELD_ERROR_MESSAGE           -> errorMessage,
-    AUDIT_FIELD_DISPLAYED_ERROR_MESSAGE -> displayedErrorMessage
+    AUDIT_FIELD_ERROR_MESSAGE           -> errorMessage.errorMessage,
+    AUDIT_FIELD_DISPLAYED_ERROR_MESSAGE -> errorMessage.displayedErrorMessage
   )
 }
 
@@ -54,17 +53,7 @@ object UnsuccessfulBalanceAuditModel {
     internalId: String,
     dateTime: LocalDateTime,
     status: Int,
-    errorMessage: String,
-    displayedErrorMessage: String
+    errorMessage: ErrorMessage
   ): UnsuccessfulBalanceAuditModel =
-    UnsuccessfulBalanceAuditModel(auditType,
-                                  eoriNumber,
-                                  guaranteeReferenceNumber,
-                                  accessCode,
-                                  internalId,
-                                  dateTime,
-                                  status,
-                                  errorMessage,
-                                  displayedErrorMessage
-    )
+    UnsuccessfulBalanceAuditModel(auditType, eoriNumber, guaranteeReferenceNumber, accessCode, internalId, dateTime, status, errorMessage)
 }
