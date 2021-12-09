@@ -30,13 +30,14 @@ class UnsuccessfulBalanceAuditModelSpec extends SpecBase with MockitoSugar {
       val localDateTime = LocalDateTime.now
       val actualDetails = UnsuccessfulBalanceAuditModel
         .build(
+          "TestAuditType",
           "GB1234567890",
           "123456789800",
           "1222",
           "internalId",
           localDateTime,
           SEE_OTHER,
-          "Insufficient data in user answers."
+          ErrorMessage("Insufficient data in user answers.", "Details do not match")
         )
         .detail
 
@@ -53,7 +54,8 @@ class UnsuccessfulBalanceAuditModelSpec extends SpecBase with MockitoSugar {
     "internalId"               -> "internalId",
     "transactionDateTime"      -> localDateTime.toString,
     "status"                   -> SEE_OTHER,
-    "errorMessage"             -> "Insufficient data in user answers."
+    "errorMessage"             -> "Insufficient data in user answers.",
+    "displayedErrorMessage"    -> "Details do not match"
   )
 
 }
