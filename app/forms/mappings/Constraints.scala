@@ -16,7 +16,6 @@
 
 package forms.mappings
 
-import models.RichString
 import play.api.data.validation.{Constraint, Invalid, Valid}
 
 import java.time.LocalDate
@@ -81,12 +80,6 @@ trait Constraints {
 
   protected def minLength(minimum: Int, errorKey: String): Constraint[String] =
     lengthConstraint(minimum, errorKey, _.length >= minimum)
-
-  protected def maxLengthIgnoreSpaces(maximum: Int, errorKey: String): Constraint[String] =
-    lengthConstraint(maximum, errorKey, _.removeSpaces().length <= maximum)
-
-  protected def minLengthIgnoreSpaces(minimum: Int, errorKey: String): Constraint[String] =
-    lengthConstraint(minimum, errorKey, _.removeSpaces().length >= minimum)
 
   protected def exactLength(exact: Int, errorKey: String): Constraint[String] =
     lengthConstraint(exact, errorKey, _.length == exact)

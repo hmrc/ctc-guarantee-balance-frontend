@@ -16,7 +16,7 @@
 
 package forms
 
-import forms.Constants.{alphaNumericRegex, maxGuaranteeReferenceNumberLength}
+import forms.Constants._
 import forms.behaviours.StringFieldBehaviours
 import play.api.data.FormError
 
@@ -58,6 +58,12 @@ class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
       gen = stringsOfLength(maxGuaranteeReferenceNumberLength),
       invalidKey = invalidKey
     )
+
+    "must remove spaces on bound strings" in {
+      val result = form.bind(Map(fieldName -> " 123 456 "))
+      result.errors mustEqual Nil
+      result.get mustEqual "123456"
+    }
 
   }
 }

@@ -19,7 +19,6 @@ package forms.behaviours
 import org.scalacheck.Gen
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import play.api.data.{Field, Form, FormError}
-import wolfendale.scalacheck.regexp.RegexpGen
 
 trait StringFieldBehaviours extends FieldBehaviours {
 
@@ -54,33 +53,5 @@ trait StringFieldBehaviours extends FieldBehaviours {
           result.errors must contain(expectedError)
       }
     }
-
-  def fieldThatIgnoresSpaces(form: Form[_], fieldName: String, regex: String, minLength: Int, maxLength: Int, lengthError: FormError): Unit = {
-    s"must bind strings where the number of non-space characters is between $minLength and $maxLength inclusive" in {
-
-      forAll(RegexpGen.from(regex.replace("*", s"{${maxLength + 1},}")).retryUntil {
-        x =>
-          val lengthWithNoSpaces = x.length - x.count(_ == ' ')
-          lengthWithNoSpaces >= minLength && lengthWithNoSpaces <= maxLength
-      }) {
-        string =>
-          val result = form.bind(Map(fieldName -> string)).apply(fieldName)
-          result.value.value shouldBe string
-      }
-    }
-
-    s"must not bind strings where the number of non-space characters is less than $minLength" in {
-
-      forAll(RegexpGen.from(regex.replace("*", s"{$minLength,}")).retryUntil {
-        x =>
-          val lengthWithNoSpaces = x.length - x.count(_ == ' ')
-          lengthWithNoSpaces < minLength
-      }) {
-        string =>
-          val result = form.bind(Map(fieldName -> string)).apply(fieldName)
-          result.errors shouldEqual Seq(lengthError)
-      }
-    }
-  }
 
 }

@@ -16,7 +16,7 @@
 
 package forms
 
-import forms.Constants.{alphaNumericRegex, eoriNumberRegex, maxEoriNumberLength}
+import forms.Constants._
 import forms.mappings.Mappings
 import play.api.data.Form
 
@@ -26,10 +26,11 @@ class EoriNumberFormProvider @Inject() extends Mappings {
 
   def apply(): Form[String] =
     Form(
-      "value" -> text("eoriNumber.error.required")
+      "value" -> textWithSpacesRemoved("eoriNumber.error.required")
         .verifying(
           forms.StopOnFirstFail[String](
-            maxLength(maxEoriNumberLength, "eoriNumber.error.length"),
+            maxLength(maxEoriNumberLength, "eoriNumber.error.maxLength"),
+            minLength(minEoriNumberLength, "eoriNumber.error.minLength"),
             regexp(alphaNumericRegex, "eoriNumber.error.invalidCharacters"),
             regexp(eoriNumberRegex, "eoriNumber.error.invalidFormat")
           )
