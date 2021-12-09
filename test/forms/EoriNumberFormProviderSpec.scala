@@ -24,7 +24,8 @@ import wolfendale.scalacheck.regexp.RegexpGen
 class EoriNumberFormProviderSpec extends StringFieldBehaviours {
 
   val requiredKey          = "eoriNumber.error.required"
-  val lengthKey            = "eoriNumber.error.length"
+  val maxLengthKey         = "eoriNumber.error.maxLength"
+  val minLengthKey         = "eoriNumber.error.minLength"
   val invalidCharactersKey = "eoriNumber.error.invalidCharacters"
   val invalidFormatKey     = "eoriNumber.error.invalidFormat"
 
@@ -44,7 +45,14 @@ class EoriNumberFormProviderSpec extends StringFieldBehaviours {
       form = form,
       fieldName = fieldName,
       maxLength = maxEoriNumberLength,
-      lengthError = FormError(fieldName, lengthKey, Seq(maxEoriNumberLength))
+      lengthError = FormError(fieldName, maxLengthKey, Seq(maxEoriNumberLength))
+    )
+
+    behave like fieldWithMinLength(
+      form = form,
+      fieldName = fieldName,
+      minLength = minEoriNumberLength,
+      lengthError = FormError(fieldName, minLengthKey, Seq(minEoriNumberLength))
     )
 
     behave like mandatoryField(
@@ -70,9 +78,9 @@ class EoriNumberFormProviderSpec extends StringFieldBehaviours {
     )
 
     "must remove spaces on bound strings" in {
-      val result = form.bind(Map(fieldName -> " GB 123 456 "))
+      val result = form.bind(Map(fieldName -> " GB 123 456 789"))
       result.errors mustEqual Nil
-      result.get mustEqual "GB123456"
+      result.get mustEqual "GB123456789"
     }
 
   }

@@ -41,7 +41,7 @@ class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksS
   val formProvider = new EoriNumberFormProvider()
   val form         = formProvider()
 
-  val validAnswer: String = "GB123"
+  val validAnswer: String = "GB123456789"
 
   def eoriNumberRoute(mode: Mode = NormalMode): String = routes.EoriNumberController.onPageLoad(mode).url
 
