@@ -29,9 +29,8 @@ class TestOnlyMongoController @Inject() (
   override val messagesApi: MessagesApi,
   mongo: ReactiveMongoApi,
   val controllerComponents: MessagesControllerComponents
-)(implicit
-  ec: ExecutionContext
-) extends FrontendBaseController {
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController {
 
   def dropMongoCollections(): Action[AnyContent] = Action.async {
     _ =>
