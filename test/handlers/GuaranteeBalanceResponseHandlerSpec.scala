@@ -35,18 +35,7 @@ import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.Helpers._
 import services.{AuditService, JsonAuditModel}
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpResponse}
-import viewModels.audit.AuditConstants.{
-  AUDIT_DEST_DETAILS_DO_NOT_MATCH,
-  AUDIT_DEST_RATE_LIMITED,
-  AUDIT_ERROR_DO_NOT_MATCH,
-  AUDIT_ERROR_EORI_GRN_DO_NOT_MATCH,
-  AUDIT_ERROR_INCORRECT_ACCESS_CODE,
-  AUDIT_ERROR_INCORRECT_EORI,
-  AUDIT_ERROR_INCORRECT_GRN,
-  AUDIT_ERROR_RATE_LIMIT_EXCEEDED,
-  AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT,
-  AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION
-}
+import viewModels.audit.AuditConstants._
 
 import scala.concurrent.Future
 

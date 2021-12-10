@@ -33,6 +33,8 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import services.{AuditService, JsonAuditModel}
+import viewModels.audit.AuditConstants.{AUDIT_DEST_RATE_LIMITED, AUDIT_ERROR_RATE_LIMIT_EXCEEDED, AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT}
 import viewModels.{CheckYourAnswersViewModel, CheckYourAnswersViewModelProvider, Section}
 
 import scala.concurrent.Future
@@ -53,6 +55,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
   // format: on
 
   private val mockViewModelProvider: CheckYourAnswersViewModelProvider = mock[CheckYourAnswersViewModelProvider]
+  private lazy val auditService: AuditService                          = app.injector.instanceOf[AuditService]
 
   override protected def applicationBuilder(userAnswers: Option[UserAnswers]): GuiceApplicationBuilder =
     super
@@ -161,6 +164,14 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
       val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
       verify(mockMongoLockRepository).takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())
+
+      val jsonCaptor: ArgumentCaptor[JsonAuditModel] = ArgumentCaptor.forClass(classOf[JsonAuditModel])
+
+      verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
+
+      jsonCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT
+      jsonCaptor.getValue.detail.toString.contains(AUDIT_ERROR_RATE_LIMIT_EXCEEDED) mustEqual true
+      jsonCaptor.getValue.detail.toString.contains(AUDIT_DEST_RATE_LIMITED) mustEqual true
     }
 
     "must redirect to session timeout if at least one of EORI, GRN and access code are undefined" in {
