@@ -29,4 +29,19 @@ object AuditConstants {
   final val AUDIT_FIELD_BALANCE                 = "balance"
   final val AUDIT_FIELD_ERROR_MESSAGE           = "errorMessage"
   final val AUDIT_FIELD_DISPLAYED_ERROR_MESSAGE = "displayedErrorMessage"
+
+  final val AUDIT_ERROR_INCORRECT_EORI        = "Incorrect EORI"
+  final val AUDIT_ERROR_INCORRECT_GRN         = "Incorrect Guarantee Reference Number"
+  final val AUDIT_ERROR_INCORRECT_ACCESS_CODE = "Incorrect access code"
+  final val AUDIT_ERROR_EORI_GRN_DO_NOT_MATCH = "EORI and Guarantee reference number do not match"
+  final val AUDIT_ERROR_DO_NOT_MATCH          = "The submitted details do not match our records"
+  final val AUDIT_ERROR_RATE_LIMIT_EXCEEDED   = "Rate Limit Exceeded"
+  final val AUDIT_ERROR_UNSUPPORTED_TYPE      = "Balance Request Unsupported Guarantee Type"
+  final val AUDIT_ERROR_REQUEST_EXPIRED       = "Balance Request Pending Expired"
+
+  final val AUDIT_DEST_DETAILS_DO_NOT_MATCH   = "details do not match"
+  final val AUDIT_DEST_TECHNICAL_DIFFICULTIES = "technical difficulties"
+  final val AUDIT_DEST_TRY_AGAIN              = "try again"
+  final val AUDIT_DEST_UNSUPPORTED_TYPE       = "guarantee type not supported"
+  final val AUDIT_DEST_RATE_LIMITED           = "rate limited"
 }

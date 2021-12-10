@@ -81,24 +81,21 @@ class GuaranteeBalanceResponseHandler @Inject() (
 
       case BalanceRequestPendingExpired(_) =>
         auditError(
-          AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION,
           SEE_OTHER,
-          ErrorMessage("Balance Request Pending Expired", "try again")
+          ErrorMessage(AUDIT_ERROR_REQUEST_EXPIRED, AUDIT_DEST_TRY_AGAIN)
         )
         Future.successful(Redirect(controllers.routes.TryGuaranteeBalanceAgainController.onPageLoad()))
       case BalanceRequestUnsupportedGuaranteeType =>
         auditError(
-          AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION,
           SEE_OTHER,
-          ErrorMessage("Balance Request Unsupported Guarantee Type", "guarantee type not supported")
+          ErrorMessage(AUDIT_ERROR_UNSUPPORTED_TYPE, AUDIT_DEST_UNSUPPORTED_TYPE)
         )
 
         Future.successful(Redirect(controllers.routes.UnsupportedGuaranteeTypeController.onPageLoad()))
       case fe: BalanceRequestFunctionalError =>
         auditError(
-          AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION,
           INTERNAL_SERVER_ERROR,
-          ErrorMessage(s"Failed to process Response: ${fe.errors}", "technical difficulties")
+          ErrorMessage(s"Failed to process Response: ${fe.errors}", AUDIT_DEST_TECHNICAL_DIFFICULTIES)
         )
         technicalDifficulties()
     }
@@ -107,18 +104,16 @@ class GuaranteeBalanceResponseHandler @Inject() (
     response match {
       case failureResponse if failureResponse.status.equals(TOO_MANY_REQUESTS) =>
         auditError(
-          AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT,
           TOO_MANY_REQUESTS,
-          ErrorMessage("Rate Limit Exceeded", "rate limited")
+          ErrorMessage(AUDIT_ERROR_RATE_LIMIT_EXCEEDED, AUDIT_DEST_RATE_LIMITED)
         )
         Future.successful(Redirect(controllers.routes.RateLimitController.onPageLoad()))
       case failureResponse =>
         logger.warn(s"[GuaranteeBalanceResponseHandler][processHttpResponse]Failed to process Response: $failureResponse")
 
         auditError(
-          AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION,
           INTERNAL_SERVER_ERROR,
-          ErrorMessage(s"Failed to process Response: $failureResponse", "technical difficulties")
+          ErrorMessage(s"Failed to process Response: $failureResponse", AUDIT_DEST_TECHNICAL_DIFFICULTIES)
         )
         technicalDifficulties()
     }
@@ -138,24 +133,20 @@ class GuaranteeBalanceResponseHandler @Inject() (
 
   private def auditBalanceRequestNotMatched(errorPointer: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]) = {
     val balanceRequestNotMatchedMessage = errorPointer match {
-      case "RC1.TIN" => "Incorrect EORI"
-      case "GRR(1).Guarantee reference number (GRN)" =>
-        "Incorrect Guarantee Reference Number"
-      case "GRR(1).ACC(1).Access code" =>
-        "Incorrect access code"
-      case "GRR(1).OTG(1).TIN" =>
-        "EORI and Guarantee reference number do not match"
-      case _ => "The submitted details do not match our records"
+      case "RC1.TIN"                                 => AUDIT_ERROR_INCORRECT_EORI
+      case "GRR(1).Guarantee reference number (GRN)" => AUDIT_ERROR_INCORRECT_GRN
+      case "GRR(1).ACC(1).Access code"               => AUDIT_ERROR_INCORRECT_ACCESS_CODE
+      case "GRR(1).OTG(1).TIN"                       => AUDIT_ERROR_EORI_GRN_DO_NOT_MATCH
+      case _                                         => AUDIT_ERROR_DO_NOT_MATCH
     }
 
     auditError(
-      AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION,
       SEE_OTHER,
-      ErrorMessage(balanceRequestNotMatchedMessage, "details do not match")
+      ErrorMessage(balanceRequestNotMatchedMessage, AUDIT_DEST_DETAILS_DO_NOT_MATCH)
     )
   }
 
-  private def auditError(auditType: String, errorCode: Int, errorMessage: ErrorMessage)(implicit
+  private def auditError(errorCode: Int, errorMessage: ErrorMessage)(implicit
     hc: HeaderCarrier,
     ec: ExecutionContext,
     request: DataRequest[_]
@@ -163,7 +154,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
     logger.warn(s"[GuaranteeBalanceResponseHandler][auditError]Failed to process errorMessage: $errorMessage, status Code: $errorCode")
     auditService.audit(
       UnsuccessfulBalanceAuditModel.build(
-        auditType,
+        AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION,
         request.userAnswers.get(EoriNumberPage).getOrElse("-"),
         request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-"),
         request.userAnswers.get(AccessCodePage).getOrElse("-"),
