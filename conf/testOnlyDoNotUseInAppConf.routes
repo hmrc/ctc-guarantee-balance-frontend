@@ -13,7 +13,7 @@
 GET        /check-guarantee-balance/test-only/technicalDifficulties     controllers.testOnly.TestOnlyTechnicalDifficultiesController.onPageLoad()
 
 + nocsrf
-DELETE     /check-guarantee-balance/test-only/drop-mongo-collections    controllers.testOnly.TestOnlyMongoController.dropMongoCollections()
+DELETE     /check-guarantee-balance/test-only/mongo-collections         controllers.testOnly.TestOnlyMongoController.dropMongoCollections()
 
 # Add all the application routes to the prod.routes file
 ->         /                          prod.Routes
