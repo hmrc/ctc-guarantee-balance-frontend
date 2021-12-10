@@ -35,7 +35,18 @@ import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.Helpers._
 import services.{AuditService, JsonAuditModel}
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpResponse}
-import viewModels.audit.AuditConstants.{AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT, AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION}
+import viewModels.audit.AuditConstants.{
+  AUDIT_DEST_DETAILS_DO_NOT_MATCH,
+  AUDIT_DEST_RATE_LIMITED,
+  AUDIT_ERROR_DO_NOT_MATCH,
+  AUDIT_ERROR_EORI_GRN_DO_NOT_MATCH,
+  AUDIT_ERROR_INCORRECT_ACCESS_CODE,
+  AUDIT_ERROR_INCORRECT_EORI,
+  AUDIT_ERROR_INCORRECT_GRN,
+  AUDIT_ERROR_RATE_LIMIT_EXCEEDED,
+  AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT,
+  AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION
+}
 
 import scala.concurrent.Future
 
@@ -89,8 +100,8 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
 
       jsonCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION
-      jsonCaptor.getValue.detail.toString.contains("The submitted details do not match our records") mustEqual true
-      jsonCaptor.getValue.detail.toString.contains("details do not match") mustEqual true
+      jsonCaptor.getValue.detail.toString.contains(AUDIT_ERROR_DO_NOT_MATCH) mustEqual true
+      jsonCaptor.getValue.detail.toString.contains(AUDIT_DEST_DETAILS_DO_NOT_MATCH) mustEqual true
     }
 
     "must Redirect to the DetailsDontMatchController if the status is Eori NoMatch " in {
@@ -103,8 +114,8 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
 
       jsonCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION
-      jsonCaptor.getValue.detail.toString.contains("Incorrect EORI") mustEqual true
-      jsonCaptor.getValue.detail.toString.contains("details do not match") mustEqual true
+      jsonCaptor.getValue.detail.toString.contains(AUDIT_ERROR_INCORRECT_EORI) mustEqual true
+      jsonCaptor.getValue.detail.toString.contains(AUDIT_DEST_DETAILS_DO_NOT_MATCH) mustEqual true
     }
 
     "must Redirect to the DetailsDontMatchController if the status is GRN NoMatch " in {
@@ -117,8 +128,8 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
 
       jsonCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION
-      jsonCaptor.getValue.detail.toString.contains("Incorrect Guarantee Reference Number") mustEqual true
-      jsonCaptor.getValue.detail.toString.contains("details do not match") mustEqual true
+      jsonCaptor.getValue.detail.toString.contains(AUDIT_ERROR_INCORRECT_GRN) mustEqual true
+      jsonCaptor.getValue.detail.toString.contains(AUDIT_DEST_DETAILS_DO_NOT_MATCH) mustEqual true
     }
 
     "must Redirect to the DetailsDontMatchController if the status is Access code NoMatch " in {
@@ -131,8 +142,8 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
 
       jsonCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION
-      jsonCaptor.getValue.detail.toString.contains("Incorrect access code") mustEqual true
-      jsonCaptor.getValue.detail.toString.contains("details do not match") mustEqual true
+      jsonCaptor.getValue.detail.toString.contains(AUDIT_ERROR_INCORRECT_ACCESS_CODE) mustEqual true
+      jsonCaptor.getValue.detail.toString.contains(AUDIT_DEST_DETAILS_DO_NOT_MATCH) mustEqual true
     }
 
     "must Redirect to the DetailsDontMatchController if the status is GRN and Eori NoMatch " in {
@@ -145,8 +156,8 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
 
       jsonCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION
-      jsonCaptor.getValue.detail.toString.contains("EORI and Guarantee reference number do not match") mustEqual true
-      jsonCaptor.getValue.detail.toString.contains("details do not match") mustEqual true
+      jsonCaptor.getValue.detail.toString.contains(AUDIT_ERROR_EORI_GRN_DO_NOT_MATCH) mustEqual true
+      jsonCaptor.getValue.detail.toString.contains(AUDIT_DEST_DETAILS_DO_NOT_MATCH) mustEqual true
     }
 
     "must Redirect to the UnsupportedGuaranteeTypeController if the status is Unsupported Type " in {
@@ -190,9 +201,9 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
 
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
 
-      jsonCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT
-      jsonCaptor.getValue.detail.toString.contains("Rate Limit Exceeded") mustEqual true
-      jsonCaptor.getValue.detail.toString.contains("rate limited") mustEqual true
+      jsonCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION
+      jsonCaptor.getValue.detail.toString.contains(AUDIT_ERROR_RATE_LIMIT_EXCEEDED) mustEqual true
+      jsonCaptor.getValue.detail.toString.contains(AUDIT_DEST_RATE_LIMITED) mustEqual true
     }
 
     "must Redirect show the technical difficulties page if it has a httpResponseError " in {
