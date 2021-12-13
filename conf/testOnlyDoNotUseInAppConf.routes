@@ -10,7 +10,10 @@
 # Failing to follow this rule may result in test routes deployed in production.
 
 + nocsrf
-GET        /check-guarantee-balance/test-only/technicalDifficulties    controllers.testOnly.TestOnlyTechnicalDifficultiesController.onPageLoad()
+GET        /check-guarantee-balance/test-only/technicalDifficulties     controllers.testOnly.TestOnlyTechnicalDifficultiesController.onPageLoad()
+
++ nocsrf
+DELETE     /check-guarantee-balance/test-only/mongo-collections         controllers.testOnly.TestOnlyMongoController.dropMongoCollections()
 
 # Add all the application routes to the prod.routes file
 ->         /                          prod.Routes
