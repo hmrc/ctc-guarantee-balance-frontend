@@ -27,27 +27,19 @@ import javax.inject.{Inject, Singleton}
 class Navigator @Inject() () {
 
   private val normalRoutes: Page => UserAnswers => Call = {
-    commonRoutes(NormalMode) orElse {
-      case _ => _ => routes.StartController.startAgain()
-    }
+    case EoriNumberPage               => _ => routes.GuaranteeReferenceNumberController.onPageLoad(NormalMode)
+    case GuaranteeReferenceNumberPage => _ => routes.AccessCodeController.onPageLoad(NormalMode)
+    case AccessCodePage               => _ => routes.CheckYourAnswersController.onPageLoad()
+    case _                            => _ => routes.StartController.startAgain()
   }
 
-  private val checkRoutes: Page => UserAnswers => Call = {
-    commonRoutes(CheckMode) orElse {
-      case _ => _ => routes.CheckYourAnswersController.onPageLoad()
-    }
-  }
+  private val checkRoutes: Page => UserAnswers => Call =
+    _ => _ => routes.CheckYourAnswersController.onPageLoad()
 
   def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call = mode match {
     case NormalMode =>
       normalRoutes(page)(userAnswers)
     case CheckMode =>
       checkRoutes(page)(userAnswers)
-  }
-
-  private def commonRoutes(mode: Mode): PartialFunction[Page, UserAnswers => Call] = {
-    case EoriNumberPage               => _ => routes.GuaranteeReferenceNumberController.onPageLoad(mode)
-    case GuaranteeReferenceNumberPage => _ => routes.AccessCodeController.onPageLoad(mode)
-    case AccessCodePage               => _ => routes.CheckYourAnswersController.onPageLoad()
   }
 }
