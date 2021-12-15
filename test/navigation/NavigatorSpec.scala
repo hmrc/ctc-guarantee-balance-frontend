@@ -81,27 +81,27 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
 
       val mode: Mode = CheckMode
 
-      "must go from EORI number page to GRN page" in {
+      "must go from EORI number page to CYA page" in {
 
         forAll(arbitrary[UserAnswers]) {
           answers =>
             navigator
               .nextPage(EoriNumberPage, mode, answers)
-              .mustBe(routes.GuaranteeReferenceNumberController.onPageLoad(mode))
+              .mustBe(routes.CheckYourAnswersController.onPageLoad())
         }
       }
 
-      "must go from GRN page to Access code page" in {
+      "must go from GRN page to CYA page" in {
 
         forAll(arbitrary[UserAnswers]) {
           answers =>
             navigator
               .nextPage(GuaranteeReferenceNumberPage, mode, answers)
-              .mustBe(routes.AccessCodeController.onPageLoad(mode))
+              .mustBe(routes.CheckYourAnswersController.onPageLoad())
         }
       }
 
-      "must go from Access code page to Check your answers page" in {
+      "must go from Access code page to CYA page" in {
 
         forAll(arbitrary[UserAnswers]) {
           answers =>
