@@ -14,9 +14,9 @@ site.continueWaiting = Continue waiting
 site.tryAgain = Try again
 site.startAgain = Start again
 site.confirmAndSend = Confirm and send
-site.service_name = Check your guarantee balance
+site.service_name = Check your transit guarantee balance
 site.textarea.char_limit = (Limit is {0} characters)
-site.title.suffix = - Check your guarantee balance - GOV.UK
+site.title.suffix = - Check your transit guarantee balance - GOV.UK
 site.youMust = You must
 
 error.title.prefix = Error:
