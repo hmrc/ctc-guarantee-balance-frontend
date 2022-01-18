@@ -43,7 +43,7 @@ class AuditServiceSpec extends SpecBase with MockitoSugar with NunjucksSupport w
     val auditService                                               = new AuditService(mockFrontendAppConfig, mockAuditConnector)
     implicit val hc: HeaderCarrier                                 = HeaderCarrier()
     implicit val ec: ExecutionContext                              = ExecutionContext.global
-    implicit val request                                           = FakeRequest(GET, "/check-guarantee-balance/balance")
+    implicit val request                                           = FakeRequest(GET, "/check-transit-guarantee-balance/balance")
     val extendedDataEventCaptor: ArgumentCaptor[ExtendedDataEvent] = ArgumentCaptor.forClass(classOf[ExtendedDataEvent])
 
     "audit must call sendExtendedEvent exactly once in audit connector if there's an event" in {
