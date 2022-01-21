@@ -48,12 +48,14 @@ abstract class SingleViewSpec(protected val viewUnderTest: String, hasSignOutLin
   private val renderer = {
     val env                   = Environment.simple()
     val nunjucksSetup         = new NunjucksSetup(env)
-    val nunjucksConfiguration = new NunjucksConfigurationProvider(Configuration.load(env), nunjucksSetup).get()
+    val configuration         = Configuration.load(env)
+    val nunjucksConfiguration = new NunjucksConfigurationProvider(configuration, nunjucksSetup).get()
     val nunjucksRoutesHelper  = new DevelopmentNunjucksRoutesHelper(env)
 
     val nunjucksRenderer = new NunjucksRenderer(
       nunjucksSetup,
       nunjucksConfiguration,
+      configuration,
       env,
       nunjucksRoutesHelper,
       Helpers.stubMessagesApi()

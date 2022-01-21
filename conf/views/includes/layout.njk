@@ -46,7 +46,8 @@
 
   {{ hmrcReportTechnicalIssue({
     serviceCode: config.serviceIdentifier,
-    baseUrl: config.contactHost
+    baseUrl: config.contactHost,
+    referrerUrl: globals.reportTechnicalIssueHost + request.uri
   }) }}
 
 {% endblock %}
