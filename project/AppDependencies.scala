@@ -12,7 +12,7 @@ object AppDependencies {
     "uk.gov.hmrc"                %% "play-conditional-form-mapping"   % "1.10.0-play-28",
     "uk.gov.hmrc"                %% "bootstrap-frontend-play-28"      % "5.19.0",
     "uk.gov.hmrc"                %% "play-allowlist-filter"           % "1.0.0-play-28",
-    "uk.gov.hmrc"                %% "play-nunjucks"                   % "0.33.0-play-28",
+    "uk.gov.hmrc"                %% "play-nunjucks"                   % "0.35.0-play-28",
     "uk.gov.hmrc"                %% "play-nunjucks-viewmodel"         % "0.15.0-play-28",
     "uk.gov.hmrc"                %% "play-json-union-formatter"       % "1.15.0-play-28",
     "com.typesafe.play"          %% "play-iteratees"                  % "2.6.1",
