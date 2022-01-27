@@ -26,7 +26,7 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 class Navigator @Inject() () {
 
-  private val normalRoutes: Page => UserAnswers => Call = {
+  private val normalRoutesXXX: Page => UserAnswers => Call = {
     case EoriNumberPage               => _ => routes.GuaranteeReferenceNumberController.onPageLoad(NormalMode)
     case GuaranteeReferenceNumberPage => _ => routes.AccessCodeController.onPageLoad(NormalMode)
     case AccessCodePage               => _ => routes.CheckYourAnswersController.onPageLoad()
