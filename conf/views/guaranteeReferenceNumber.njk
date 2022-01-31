@@ -30,29 +30,25 @@
           }) }}
         {% endif %}
 
+        <h1 class="govuk-heading-xl">{{ messages("guaranteeReferenceNumber.heading") }}</h1>
+
+        <p class="govuk-body">{{ messages("guaranteeReferenceNumber.paragraph1") }}</p>
+        <ul class="govuk-list govuk-list--bullet">
+          <li>{{ messages("guaranteeReferenceNumber.bullet1") }}</li>
+          <li>{{ messages("guaranteeReferenceNumber.bullet2") }}</li>
+          <li>{{ messages("guaranteeReferenceNumber.bullet3") }}</li>
+        </ul>
+        <p class="govuk-body">{{ messages("guaranteeReferenceNumber.paragraph2") }}</p>
+
         <form action="{{ routes.controllers.GuaranteeReferenceNumberController.onSubmit(mode).url }}" method="post">
 
           {{ csrf() | safe }}
 
-          {% set hintHtml = [
-            "<p class='govuk-body'>", messages('guaranteeReferenceNumber.paragraph1'), "</p>",
-            "<ul class='govuk-list govuk-list--bullet'>",
-              "<li>", messages('guaranteeReferenceNumber.bullet1'), "</li>",
-              "<li>", messages('guaranteeReferenceNumber.bullet2'), "</li>",
-              "<li>", messages('guaranteeReferenceNumber.bullet3'), "</li>",
-            "</ul>",
-            "<p class='govuk-body'>", messages('guaranteeReferenceNumber.paragraph2'), "</p>"
-          ] | join %}
-
           {{ govukInput({
             label: {
               text: messages('guaranteeReferenceNumber.title'),
-              isPageHeading: true,
-              classes: "govuk-label--xl"
-            },
-            hint: {
-              html: hintHtml,
-              classes: "hint-as-label"
+              isPageHeading: false,
+              classes: "govuk-label--m"
             },
             id: "value",
             classes: "govuk-input--width-20",
