@@ -22,8 +22,12 @@ class GuaranteeReferenceNumberViewSpec extends SingleViewSpec("guaranteeReferenc
 
   val input: Element = doc.getElementsByClass("govuk-input").first()
 
-  "must render paragraph text" in {
-    assertContainsText(doc, "guaranteeReferenceNumber.paragraph")
+  "must render hint text" in {
+    assertContainsText(doc, messages("guaranteeReferenceNumber.paragraph1"))
+    assertContainsText(doc, messages("guaranteeReferenceNumber.bullet1"))
+    assertContainsText(doc, messages("guaranteeReferenceNumber.bullet2"))
+    assertContainsText(doc, messages("guaranteeReferenceNumber.bullet3"))
+    assertContainsText(doc, messages("guaranteeReferenceNumber.paragraph2"))
   }
 
   "must have correct width class" in {

@@ -34,21 +34,24 @@
 
           {{ csrf() | safe }}
 
-           <h1 class="govuk-heading-xl">{{ messages("guaranteeReferenceNumber.heading") }}</h1>
-
-                <p class ="govuk-body">
-                    <div class="govuk-body">{{ messages("guaranteeReferenceNumber.paragraph1") }}</div>
-                    <ul class="govuk-list govuk-list--bullet">
-                        <li>{{ messages("guaranteeReferenceNumber.paragraph.bullet1") }}</li>
-                        <li>{{ messages("guaranteeReferenceNumber.paragraph.bullet2") }}</li>
-                        <li>{{ messages("guaranteeReferenceNumber.paragraph.bullet3") }}</li>
-                    </ul>
-                </p>
+          {% set hintHtml = [
+            "<p class='govuk-body'>", messages('guaranteeReferenceNumber.paragraph1'), "</p>",
+            "<ul class='govuk-list govuk-list--bullet'>",
+              "<li>", messages('guaranteeReferenceNumber.bullet1'), "</li>",
+              "<li>", messages('guaranteeReferenceNumber.bullet2'), "</li>",
+              "<li>", messages('guaranteeReferenceNumber.bullet3'), "</li>",
+            "</ul>",
+            "<p class='govuk-body'>", messages('guaranteeReferenceNumber.paragraph2'), "</p>"
+          ] | join %}
 
           {{ govukInput({
-
+            label: {
+              text: messages('guaranteeReferenceNumber.title'),
+              isPageHeading: true,
+              classes: "govuk-label--xl"
+            },
             hint: {
-              text: messages('guaranteeReferenceNumber.paragraph2'),
+              html: hintHtml,
               classes: "hint-as-label"
             },
             id: "value",
@@ -65,6 +68,6 @@
         </form>
 
       </div>
-  </div>
+    </div>
 
 {% endblock %}
