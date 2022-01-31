@@ -34,14 +34,21 @@
 
           {{ csrf() | safe }}
 
+           <h1 class="govuk-heading-xl">{{ messages("guaranteeReferenceNumber.heading") }}</h1>
+
+                <p class ="govuk-body">
+                    <div class="govuk-body">{{ messages("guaranteeReferenceNumber.paragraph1") }}</div>
+                    <ul class="govuk-list govuk-list--bullet">
+                        <li>{{ messages("guaranteeReferenceNumber.paragraph.bullet1") }}</li>
+                        <li>{{ messages("guaranteeReferenceNumber.paragraph.bullet2") }}</li>
+                        <li>{{ messages("guaranteeReferenceNumber.paragraph.bullet3") }}</li>
+                    </ul>
+                </p>
+
           {{ govukInput({
-            label: {
-              text: messages('guaranteeReferenceNumber.title'),
-              isPageHeading: true,
-              classes: "govuk-label--xl"
-            },
+
             hint: {
-              text: messages('guaranteeReferenceNumber.paragraph'),
+              text: messages('guaranteeReferenceNumber.paragraph2'),
               classes: "hint-as-label"
             },
             id: "value",
