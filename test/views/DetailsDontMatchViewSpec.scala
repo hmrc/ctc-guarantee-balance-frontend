@@ -22,14 +22,25 @@ class DetailsDontMatchViewSpec extends SingleViewSpec("detailsDontMatch.njk") {
     assertPageTitleEqualsMessage(doc, "detailsDontMatch.heading")
   }
 
-  "must have paragraph text and link" in {
-    assertContainsText(doc, "detailsDontMatch.youMust")
+  "must have 'try again' paragraph text and link" in {
+    assertContainsText(doc, "detailsDontMatch.p1")
 
     assertPageHasLink(
       doc = doc,
       id = "try-again",
-      expectedText = "detailsDontMatch.checkYourAnswers",
+      expectedText = "detailsDontMatch.p1.a",
       expectedHref = controllers.routes.CheckYourAnswersController.onPageLoad().url
+    )
+  }
+
+  "must have 'contact helpdesk' paragraph text and link" in {
+    assertContainsText(doc, "detailsDontMatch.p2")
+
+    assertPageHasLink(
+      doc = doc,
+      id = "contact",
+      expectedText = "detailsDontMatch.p2.a",
+      expectedHref = frontendAppConfig.nctsEnquiriesUrl
     )
   }
 

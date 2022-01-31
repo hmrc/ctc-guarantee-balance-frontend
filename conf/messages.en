@@ -123,8 +123,10 @@ balanceConfirmation.fromNcts.link2 = manage your transit movements
 
 detailsDontMatch.title = Your details do not match our records
 detailsDontMatch.heading = Your details do not match our records
-detailsDontMatch.youMust = You must
-detailsDontMatch.checkYourAnswers = check your answers and try again
+detailsDontMatch.p1 = You must
+detailsDontMatch.p1.a = check your answers and try again
+detailsDontMatch.p2 = If your details are correct, you must
+detailsDontMatch.p2.a = contact the NCTS helpdesk (opens in a new tab)
 
 rateLimit.title = You can try again
 rateLimit.heading = You can try again
