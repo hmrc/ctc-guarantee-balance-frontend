@@ -34,4 +34,8 @@ class EoriNumberViewSpec extends SingleViewSpec("eoriNumber.njk") {
     assertPageHasButton(doc, "site.continue")
   }
 
+  "must render a hint" in {
+    assertPageHasHint(doc, "eoriNumber.hint")
+  }
+
 }

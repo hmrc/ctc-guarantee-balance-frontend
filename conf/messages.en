@@ -68,6 +68,7 @@ technicalDifficulties.contact.link = contact the New Computerised Transit System
 eoriNumber.title = What is your EORI number?
 eoriNumber.heading = What is your EORI number?
 eoriNumber.checkYourAnswersLabel = EORI number
+eoriNumber.hint = This starts with GB or XI only. This is followed by 12 numbers, like GB123456123456.
 eoriNumber.error.required = Enter your EORI number
 eoriNumber.error.maxLength = Your EORI number must be 17 characters or less
 eoriNumber.error.minLength = Your EORI number must be 10 characters or more
