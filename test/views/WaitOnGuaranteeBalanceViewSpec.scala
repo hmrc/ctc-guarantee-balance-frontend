@@ -16,17 +16,27 @@
 
 package views
 
+import controllers.routes
+
 class WaitOnGuaranteeBalanceViewSpec extends SingleViewSpec("waitOnGuaranteeBalance.njk") {
 
   "must render correct heading" in {
     assertPageTitleEqualsMessage(doc, "waitOnGuaranteeBalance.heading")
   }
 
-  "must render waitOnGuaranteeBalance text" in {
-    assertContainsText(doc, "waitOnGuaranteeBalance.paragraph")
+  "must render waitOnGuaranteeBalance prelink text" in {
+    assertContainsText(doc, "waitOnGuaranteeBalance.checkDetails.prelink")
+  }
+
+  "display link with id checkDetails-link" in {
+    assertPageHasLink(doc, "checkDetails-link", "waitOnGuaranteeBalance.checkDetails.link", routes.CheckYourAnswersController.onPageLoad().url)
+  }
+
+  "must render waitOnGuaranteeBalance postlink text" in {
+    assertContainsText(doc, "waitOnGuaranteeBalance.checkDetails.postlink")
   }
 
   "behave like a page with a submit button" in {
-    assertPageHasButton(doc, "site.continueWaiting")
+    assertPageHasButton(doc, "site.tryAgain")
   }
 }

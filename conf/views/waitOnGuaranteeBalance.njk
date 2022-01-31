@@ -13,12 +13,18 @@
     <div class="govuk-grid-column-two-thirds">
 
       <h1 class="govuk-heading-xl">{{ messages("waitOnGuaranteeBalance.heading") }}</h1>
-      <p class="govuk-body">{{ messages("waitOnGuaranteeBalance.paragraph", waitTimeInSeconds) }}</p>
+      <p class="govuk-body">{{ messages("waitOnGuaranteeBalance.checkDetails.prelink") }}
+        <a class="govuk-link" id="checkDetails-link" href="{{ routes.controllers.CheckYourAnswersController.onPageLoad().url }}">
+            {{ messages("waitOnGuaranteeBalance.checkDetails.link") }}
+        </a>
+        {{ messages("waitOnGuaranteeBalance.checkDetails.postlink", waitTimeInSeconds) }}
+      </p>
+
       <form action="{{ routes.controllers.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url }}" method="post">
          {{ csrf() | safe }}
 
          {{ govukButton({
-            text: messages("site.continueWaiting")
+            text: messages("site.tryAgain")
          }) }}
       </form>
    </div>
