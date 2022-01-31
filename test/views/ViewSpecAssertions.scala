@@ -132,8 +132,8 @@ trait ViewSpecAssertions extends Matchers {
     caption.text() mustBe expectedText
   }
 
-  def assertPageHasHint(doc: Document, expectedText: String): Assertion = {
+  def assertPageHasHint(doc: Document, key: String): Assertion = {
     val hint = doc.getElementsByClass("govuk-hint").first()
-    hint.text() mustBe messages(expectedText)
+    hint.text() mustBe messages(key)
   }
 }
