@@ -65,7 +65,8 @@ class TemplatesCompileSpec extends AnyFreeSpec with Matchers with ScalaFutures w
           pathInsideViews.toString,
           Json.obj(
             "mode"      -> mode,
-            "balanceId" -> "testBalanceId"
+            "balanceId" -> "testBalanceId",
+            "submitUrl" -> "submitUrl"
           )
         )
         val html: Html = result.futureValue
