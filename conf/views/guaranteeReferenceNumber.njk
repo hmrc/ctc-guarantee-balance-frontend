@@ -43,14 +43,11 @@
                         <li>{{ messages("guaranteeReferenceNumber.paragraph.bullet2") }}</li>
                         <li>{{ messages("guaranteeReferenceNumber.paragraph.bullet3") }}</li>
                     </ul>
+                     <div class="govuk-body">{{ messages("guaranteeReferenceNumber.paragraph2") }}</div>
+
                 </p>
 
           {{ govukInput({
-
-            hint: {
-              text: messages('guaranteeReferenceNumber.paragraph2'),
-              classes: "hint-as-label"
-            },
             id: "value",
             classes: "govuk-input--width-20",
             name: "value",
