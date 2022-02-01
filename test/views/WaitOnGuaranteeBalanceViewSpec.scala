@@ -44,7 +44,7 @@ class WaitOnGuaranteeBalanceViewSpec extends SingleViewSpec("waitOnGuaranteeBala
   }
 
   "display link with id check-details" in {
-    assertPageHasLink(doc, "check-details", "waitOnGuaranteeBalance.checkDetails.link", routes.CheckYourAnswersController.waitOnResultsPageLoad(balanceId).url)
+    assertPageHasLink(doc, "check-details", "waitOnGuaranteeBalance.checkDetails.link", routes.WaitOnGuaranteeBalanceController.checkDetails(balanceId).url)
   }
 
   "must render waitOnGuaranteeBalance postlink text" in {

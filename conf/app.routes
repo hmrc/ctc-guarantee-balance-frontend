@@ -31,8 +31,8 @@ GET        /check-your-answers                      controllers.CheckYourAnswers
 POST       /check-your-answers                      controllers.CheckYourAnswersController.onSubmit()
 
 GET        /:balanceId/wait-on-balance              controllers.WaitOnGuaranteeBalanceController.onPageLoad(balanceId: models.values.BalanceId)
+GET        /:balanceId/check-details                controllers.WaitOnGuaranteeBalanceController.checkDetails(balanceId: models.values.BalanceId)
 POST       /:balanceId/wait-on-balance              controllers.WaitOnGuaranteeBalanceController.onSubmit(balanceId: models.values.BalanceId)
-GET        /:balanceId/check-your-answers           controllers.CheckYourAnswersController.waitOnResultsPageLoad(balanceId: models.values.BalanceId)
 
 GET        /try-again                               controllers.TryGuaranteeBalanceAgainController.onPageLoad()
 

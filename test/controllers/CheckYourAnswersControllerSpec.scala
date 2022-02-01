@@ -29,7 +29,7 @@ import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{AccessCodePage, BalancePage, EoriNumberPage, GuaranteeReferenceNumberPage}
+import pages.{AccessCodePage, BalanceIdPage, BalancePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
@@ -46,11 +46,19 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
   private val grn: String    = "grn"
   private val access: String = "access"
   private val taxId: String  = "taxId"
+  private val expectedUuid   = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
+  private val balanceId      = BalanceId(expectedUuid)
 
   private val balance = BalanceRequestSuccess(8500, CurrencyCode("GBP"))
 
   // format: off
   private val baseAnswers: UserAnswers = emptyUserAnswers
+    .set(GuaranteeReferenceNumberPage, grn).success.value
+    .set(AccessCodePage, access).success.value
+    .set(EoriNumberPage, taxId).success.value
+
+  private val baseAnswersWithBalanceId: UserAnswers = emptyUserAnswers
+    .set(BalanceIdPage, balanceId).success.value
     .set(GuaranteeReferenceNumberPage, grn).success.value
     .set(AccessCodePage, access).success.value
     .set(EoriNumberPage, taxId).success.value
@@ -74,64 +82,58 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
   "CheckYourAnswers Controller" - {
 
-    "return OK and the correct view for a GET" - {
-      "when checking the answers normally" in {
+    "return OK and the correct view for a GET" in {
+      val userAnswers = baseAnswers
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      val request     = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
 
-        val userAnswers = baseAnswers
-        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
-        val request     = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+      val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
 
-        val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-        val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
+      val result = route(application, request).value
 
-        val result = route(application, request).value
+      status(result) mustEqual OK
 
-        status(result) mustEqual OK
+      verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
-        verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
+      val expectedJson = Json.obj(
+        "section"   -> emptySection,
+        "submitUrl" -> routes.CheckYourAnswersController.onSubmit().url
+      )
 
-        val expectedJson = Json.obj(
-          "section"   -> emptySection,
-          "submitUrl" -> routes.CheckYourAnswersController.onSubmit().url
-        )
+      templateCaptor.getValue mustEqual "checkYourAnswers.njk"
+      jsonCaptor.getValue must containJson(expectedJson)
 
-        templateCaptor.getValue mustEqual "checkYourAnswers.njk"
-        jsonCaptor.getValue must containJson(expectedJson)
+      verify(mockViewModelProvider)(userAnswers)
 
-        verify(mockViewModelProvider)(userAnswers)
+      application.stop()
+    }
 
-        application.stop()
-      }
+    "return OK and the correct view for a GET when we have a BalanceId set" in {
+      val userAnswers = baseAnswersWithBalanceId
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      val request     = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
 
-      "when checking the answers normally whilst waiting on a response" in {
-        val expectedUuid = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
-        val balanceId    = BalanceId(expectedUuid)
+      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+      val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
 
-        val userAnswers = baseAnswers
-        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
-        val request     = FakeRequest(GET, routes.CheckYourAnswersController.waitOnResultsPageLoad(balanceId).url)
+      val result = route(application, request).value
 
-        val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-        val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
+      status(result) mustEqual OK
 
-        val result = route(application, request).value
+      verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
-        status(result) mustEqual OK
+      val expectedJson = Json.obj(
+        "section"   -> emptySection,
+        "submitUrl" -> routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url
+      )
 
-        verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
+      templateCaptor.getValue mustEqual "checkYourAnswers.njk"
+      jsonCaptor.getValue must containJson(expectedJson)
 
-        val expectedJson = Json.obj(
-          "section"   -> emptySection,
-          "submitUrl" -> routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url
-        )
+      verify(mockViewModelProvider)(userAnswers)
 
-        templateCaptor.getValue mustEqual "checkYourAnswers.njk"
-        jsonCaptor.getValue must containJson(expectedJson)
-
-        verify(mockViewModelProvider)(userAnswers)
-
-        application.stop()
-      }
+      application.stop()
     }
 
     "must redirect to Session Expired for a GET if no existing data is found" in {
@@ -238,6 +240,5 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
           redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
       }
     }
-
   }
 }

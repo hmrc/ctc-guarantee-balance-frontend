@@ -26,8 +26,10 @@ import play.api.mvc._
 import renderer.Renderer
 import services.GuaranteeBalanceService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-
 import javax.inject.Inject
+import pages.BalanceIdPage
+import repositories.SessionRepository
+
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
@@ -41,7 +43,8 @@ class WaitOnGuaranteeBalanceController @Inject() (
   renderer: Renderer,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
-  appConfig: FrontendAppConfig
+  appConfig: FrontendAppConfig,
+  sessionRepository: SessionRepository
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
@@ -49,6 +52,14 @@ class WaitOnGuaranteeBalanceController @Inject() (
   def onPageLoad(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       displayWaitPage(balanceId)
+  }
+
+  def checkDetails(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+    implicit request =>
+      for {
+        updatedAnswers <- Future.fromTry(request.userAnswers.set(BalanceIdPage, balanceId))
+        _              <- sessionRepository.set(updatedAnswers)
+      } yield Redirect(routes.CheckYourAnswersController.onPageLoad())
   }
 
   def onSubmit(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData andThen requireData).async {

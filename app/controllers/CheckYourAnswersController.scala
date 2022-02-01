@@ -23,7 +23,7 @@ import javax.inject.Inject
 import models.requests.BalanceRequest
 import models.values._
 import org.joda.time.LocalDateTime
-import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
+import pages.{AccessCodePage, BalanceIdPage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
@@ -63,21 +63,16 @@ class CheckYourAnswersController @Inject() (
     implicit request =>
       val viewModel = viewModelProvider(request.userAnswers)
 
-      val json = Json.obj(
-        "section"   -> Json.toJson(viewModel.section),
-        "submitUrl" -> routes.CheckYourAnswersController.onSubmit().url
-      )
-
-      renderer.render("checkYourAnswers.njk", json).map(Ok(_))
-  }
-
-  def waitOnResultsPageLoad(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData andThen requireData).async {
-    implicit request =>
-      val viewModel = viewModelProvider(request.userAnswers)
+      val submitUrl = request.userAnswers.get(BalanceIdPage) match {
+        case Some(balanceId) =>
+          routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url
+        case None =>
+          routes.CheckYourAnswersController.onSubmit().url
+      }
 
       val json = Json.obj(
         "section"   -> Json.toJson(viewModel.section),
-        "submitUrl" -> routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url
+        "submitUrl" -> submitUrl
       )
 
       renderer.render("checkYourAnswers.njk", json).map(Ok(_))
