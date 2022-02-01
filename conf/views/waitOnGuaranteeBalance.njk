@@ -14,7 +14,7 @@
 
       <h1 class="govuk-heading-xl">{{ messages("waitOnGuaranteeBalance.heading") }}</h1>
       <p class="govuk-body">{{ messages("waitOnGuaranteeBalance.checkDetails.prelink") }}
-        <a class="govuk-link" id="check-details" href="{{ routes.controllers.CheckYourAnswersController.onPageLoad().url }}">
+        <a class="govuk-link" id="check-details" href="{{ routes.controllers.CheckYourAnswersController.waitOnResultsPageLoad(balanceId).url }}">
             {{ messages("waitOnGuaranteeBalance.checkDetails.link") }}
         </a>
         {{ messages("waitOnGuaranteeBalance.checkDetails.postlink", waitTimeInSeconds) }}
@@ -24,7 +24,9 @@
          {{ csrf() | safe }}
 
          {{ govukButton({
-            text: messages("site.tryAgain")
+            text: messages("site.tryAgain"),
+            preventDoubleClick: true,
+            attributes: {id: "submit"}
          }) }}
       </form>
    </div>

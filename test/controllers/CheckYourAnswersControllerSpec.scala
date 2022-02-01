@@ -16,12 +16,14 @@
 
 package controllers
 
+import java.util.UUID
+
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import matchers.JsonMatchers.containJson
 import models.UserAnswers
 import models.backend.BalanceRequestSuccess
 import models.requests.BalanceRequest
-import models.values.{AccessCode, CurrencyCode, GuaranteeReference, TaxIdentifier}
+import models.values.{AccessCode, BalanceId, CurrencyCode, GuaranteeReference, TaxIdentifier}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, times, verify, when}
@@ -72,31 +74,64 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
   "CheckYourAnswers Controller" - {
 
-    "return OK and the correct view for a GET" in {
+    "return OK and the correct view for a GET" - {
+      "when checking the answers normally" in {
 
-      val userAnswers = baseAnswers
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
-      val request     = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+        val userAnswers = baseAnswers
+        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+        val request     = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
 
-      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-      val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
+        val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+        val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
 
-      val result = route(application, request).value
+        val result = route(application, request).value
 
-      status(result) mustEqual OK
+        status(result) mustEqual OK
 
-      verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
+        verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
-      val expectedJson = Json.obj(
-        "section" -> emptySection
-      )
+        val expectedJson = Json.obj(
+          "section"   -> emptySection,
+          "submitUrl" -> routes.CheckYourAnswersController.onSubmit().url
+        )
 
-      templateCaptor.getValue mustEqual "checkYourAnswers.njk"
-      jsonCaptor.getValue must containJson(expectedJson)
+        templateCaptor.getValue mustEqual "checkYourAnswers.njk"
+        jsonCaptor.getValue must containJson(expectedJson)
 
-      verify(mockViewModelProvider)(userAnswers)
+        verify(mockViewModelProvider)(userAnswers)
 
-      application.stop()
+        application.stop()
+      }
+
+      "when checking the answers normally whilst waiting on a response" in {
+        val expectedUuid = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
+        val balanceId    = BalanceId(expectedUuid)
+
+        val userAnswers = baseAnswers
+        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+        val request     = FakeRequest(GET, routes.CheckYourAnswersController.waitOnResultsPageLoad(balanceId).url)
+
+        val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+        val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
+
+        val result = route(application, request).value
+
+        status(result) mustEqual OK
+
+        verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
+
+        val expectedJson = Json.obj(
+          "section"   -> emptySection,
+          "submitUrl" -> routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url
+        )
+
+        templateCaptor.getValue mustEqual "checkYourAnswers.njk"
+        jsonCaptor.getValue must containJson(expectedJson)
+
+        verify(mockViewModelProvider)(userAnswers)
+
+        application.stop()
+      }
     }
 
     "must redirect to Session Expired for a GET if no existing data is found" in {

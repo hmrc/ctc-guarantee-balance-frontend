@@ -64,7 +64,20 @@ class CheckYourAnswersController @Inject() (
       val viewModel = viewModelProvider(request.userAnswers)
 
       val json = Json.obj(
-        "section" -> Json.toJson(viewModel.section)
+        "section"   -> Json.toJson(viewModel.section),
+        "submitUrl" -> routes.CheckYourAnswersController.onSubmit().url
+      )
+
+      renderer.render("checkYourAnswers.njk", json).map(Ok(_))
+  }
+
+  def waitOnResultsPageLoad(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+    implicit request =>
+      val viewModel = viewModelProvider(request.userAnswers)
+
+      val json = Json.obj(
+        "section"   -> Json.toJson(viewModel.section),
+        "submitUrl" -> routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url
       )
 
       renderer.render("checkYourAnswers.njk", json).map(Ok(_))

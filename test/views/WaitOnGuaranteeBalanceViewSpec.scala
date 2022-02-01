@@ -16,9 +16,24 @@
 
 package views
 
+import java.util.UUID
+
 import controllers.routes
+import models.values.BalanceId
+import org.jsoup.nodes.Document
+import play.api.libs.json.Json
 
 class WaitOnGuaranteeBalanceViewSpec extends SingleViewSpec("waitOnGuaranteeBalance.njk") {
+
+  val expectedUuid = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
+  val balanceId    = BalanceId(expectedUuid)
+
+  val json = Json.obj(
+    "balanceId"         -> balanceId,
+    "waitTimeInSeconds" -> 10
+  )
+
+  override lazy val doc: Document = renderDocument(json).futureValue
 
   "must render correct heading" in {
     assertPageTitleEqualsMessage(doc, "waitOnGuaranteeBalance.heading")
@@ -29,7 +44,7 @@ class WaitOnGuaranteeBalanceViewSpec extends SingleViewSpec("waitOnGuaranteeBala
   }
 
   "display link with id check-details" in {
-    assertPageHasLink(doc, "check-details", "waitOnGuaranteeBalance.checkDetails.link", routes.CheckYourAnswersController.onPageLoad().url)
+    assertPageHasLink(doc, "check-details", "waitOnGuaranteeBalance.checkDetails.link", routes.CheckYourAnswersController.waitOnResultsPageLoad(balanceId).url)
   }
 
   "must render waitOnGuaranteeBalance postlink text" in {
