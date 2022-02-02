@@ -131,4 +131,9 @@ trait ViewSpecAssertions extends Matchers {
     val caption = doc.getElementsByClass("govuk-caption-xl").first()
     caption.text() mustBe expectedText
   }
+
+  def assertPageHasTitle(doc: Document, prefix: String): Assertion = {
+    val caption = doc.getElementsByTag("title").first()
+    caption.text() mustBe messages(s"$prefix.title site.title.suffix")
+  }
 }

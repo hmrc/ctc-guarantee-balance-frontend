@@ -79,7 +79,8 @@ waitOnGuaranteeBalance.heading = We are trying to get your guarantee balance
 waitOnGuaranteeBalance.paragraph = This may take up to {0} seconds.
 
 guaranteeReferenceNumber.heading = Guarantee reference number
-guaranteeReferenceNumber.title = What is the guarantee reference number?
+guaranteeReferenceNumber.title = Guarantee reference number
+guaranteeReferenceNumber.label = What is the guarantee reference number?
 guaranteeReferenceNumber.checkYourAnswersLabel = Guarantee reference number
 guaranteeReferenceNumber.paragraph1 = You can only check the balance for:
 guaranteeReferenceNumber.bullet1 = comprehensive guarantee
