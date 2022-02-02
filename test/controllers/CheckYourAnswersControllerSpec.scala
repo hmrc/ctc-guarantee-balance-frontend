@@ -56,12 +56,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
     .set(GuaranteeReferenceNumberPage, grn).success.value
     .set(AccessCodePage, access).success.value
     .set(EoriNumberPage, taxId).success.value
-
-  private val baseAnswersWithBalanceId: UserAnswers = emptyUserAnswers
-    .set(BalanceIdPage, balanceId).success.value
-    .set(GuaranteeReferenceNumberPage, grn).success.value
-    .set(AccessCodePage, access).success.value
-    .set(EoriNumberPage, taxId).success.value
   // format: on
 
   private val mockViewModelProvider: CheckYourAnswersViewModelProvider = mock[CheckYourAnswersViewModelProvider]
@@ -110,7 +104,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
     }
 
     "return OK and the correct view for a GET when we have a BalanceId set" in {
-      val userAnswers = baseAnswersWithBalanceId
+      val userAnswers = baseAnswers.set(BalanceIdPage, balanceId).success.value
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
       val request     = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
 

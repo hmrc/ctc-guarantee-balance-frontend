@@ -27,6 +27,8 @@ import renderer.Renderer
 import services.GuaranteeBalanceService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import javax.inject.Inject
+import models.UserAnswers
+import models.requests.DataRequest
 import pages.BalanceIdPage
 import repositories.SessionRepository
 
@@ -64,14 +66,26 @@ class WaitOnGuaranteeBalanceController @Inject() (
 
   def onSubmit(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      balanceService
-        .pollForGuaranteeBalance(
-          balanceId = balanceId,
-          delay = appConfig.guaranteeBalanceDelayInSecond seconds,
-          maxTime = appConfig.guaranteeBalanceMaxTimeInSecond seconds
-        )
-        .flatMap(responseHandler.processResponse(_, displayWaitPage))
+      for {
+        _           <- removeBalanceIdFromUserAnswers
+        displayPage <- pollForGuaranteeBalance(balanceId)
+      } yield displayPage
   }
+
+  private def removeBalanceIdFromUserAnswers()(implicit request: DataRequest[AnyContent]): Future[UserAnswers] =
+    for {
+      updatedAnswers <- Future.fromTry(request.userAnswers.remove(BalanceIdPage))
+      _              <- sessionRepository.set(updatedAnswers)
+    } yield updatedAnswers
+
+  private def pollForGuaranteeBalance(balanceId: BalanceId)(implicit request: DataRequest[AnyContent]): Future[Result] =
+    balanceService
+      .pollForGuaranteeBalance(
+        balanceId = balanceId,
+        delay = appConfig.guaranteeBalanceDelayInSecond seconds,
+        maxTime = appConfig.guaranteeBalanceMaxTimeInSecond seconds
+      )
+      .flatMap(responseHandler.processResponse(_, displayWaitPage))
 
   private def displayWaitPage(balanceId: BalanceId)(implicit request: Request[_]): Future[Result] = {
     val json = Json.obj(

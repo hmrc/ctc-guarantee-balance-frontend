@@ -16,9 +16,23 @@
 
 package pages
 
+import java.util.UUID
+
+import models.UserAnswers
+import models.values.BalanceId
 import pages.behaviours.PageBehaviours
+import play.api.libs.json.Json
 
 class AccessCodePageSpec extends PageBehaviours {
+
+  private val access: String = "access"
+  private val expectedUuid   = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
+  private val balanceId      = BalanceId(expectedUuid)
+
+  // format: off
+  val baseUserAnswers: UserAnswers = UserAnswers("id", Json.obj())
+    .set(AccessCodePage, access).success.value
+  // format: on
 
   "AccessCodePage" - {
 
@@ -27,5 +41,24 @@ class AccessCodePageSpec extends PageBehaviours {
     beSettable[String](AccessCodePage)
 
     beRemovable[String](AccessCodePage)
+
+    "cleanup" - {
+
+      "must remove BalanceId when AccessCode changes" in {
+        val answersWithBalanceId = baseUserAnswers.set(BalanceIdPage, balanceId).success.value
+        answersWithBalanceId.get(BalanceIdPage).isDefined mustEqual true
+
+        val result = answersWithBalanceId.set(AccessCodePage, "newValue")
+        result.success.value.get(BalanceIdPage).isDefined mustEqual false
+      }
+
+      "must NOT remove BalanceId when AccessCode hasn't changed" in {
+        val answersWithBalanceId = baseUserAnswers.set(BalanceIdPage, balanceId).success.value
+        answersWithBalanceId.get(BalanceIdPage).isDefined mustEqual true
+
+        val result = answersWithBalanceId.set(AccessCodePage, access)
+        result.success.value.get(BalanceIdPage).isDefined mustEqual true
+      }
+    }
   }
 }

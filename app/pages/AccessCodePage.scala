@@ -16,11 +16,21 @@
 
 package pages
 
+import models.UserAnswers
 import play.api.libs.json.JsPath
+
+import scala.util.Try
 
 case object AccessCodePage extends QuestionPage[String] {
 
   override def path: JsPath = JsPath \ toString
 
   override def toString: String = "accessCode"
+
+  override def cleanup(value: Option[String], userAnswers: UserAnswers, hasChanged: Boolean): Try[UserAnswers] =
+    if (hasChanged) {
+      userAnswers.remove(BalanceIdPage)
+    } else {
+      super.cleanup(value, userAnswers, hasChanged)
+    }
 }

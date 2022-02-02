@@ -54,7 +54,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
       case Left(failureResponse)         => processHttpResponse(failureResponse)
     }
 
-  def processBalanceRequestResponse(response: BalanceRequestResponse, processPending: BalanceId => Future[Result])(implicit
+  private def processBalanceRequestResponse(response: BalanceRequestResponse, processPending: BalanceId => Future[Result])(implicit
     hc: HeaderCarrier,
     request: DataRequest[_]
   ): Future[Result] =
