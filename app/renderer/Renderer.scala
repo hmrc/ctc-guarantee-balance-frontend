@@ -21,7 +21,6 @@ import play.api.libs.json.{JsObject, Json, OWrites}
 import play.api.mvc.RequestHeader
 import play.twirl.api.Html
 import uk.gov.hmrc.nunjucks.NunjucksRenderer
-import views.html.helper.CSPNonce
 
 import javax.inject.Inject
 import scala.concurrent.Future
