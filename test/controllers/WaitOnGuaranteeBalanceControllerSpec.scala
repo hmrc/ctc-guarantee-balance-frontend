@@ -29,7 +29,8 @@ import java.util.UUID
 
 import config.FrontendAppConfig
 import matchers.JsonMatchers
-import pages.GuaranteeReferenceNumberPage
+import models.UserAnswers
+import pages.{BalanceIdPage, GuaranteeReferenceNumberPage}
 import play.api.libs.json.{JsObject, Json}
 
 import scala.concurrent.Future
@@ -81,27 +82,37 @@ class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with JsonMatchers wi
       "must Redirect to the Balance Confirmation Controller if the status is DataReturned " in {
         when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId), any(), any())(any())).thenReturn(Future.successful(successResponse))
 
-        val request     = FakeRequest(POST, routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url)
-        val application = applicationBuilder(userAnswers = Some(populatedUserAnswers)).build()
-        val result      = route(application, request).value
+        val balanceIdUserAnswers = populatedUserAnswers.set(BalanceIdPage, balanceId).success.value
+        val request              = FakeRequest(POST, routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url)
+        val application          = applicationBuilder(userAnswers = Some(balanceIdUserAnswers)).build()
+        val result               = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
+
+        val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+        verify(mockSessionRepository, times(2)).set(userAnswersCaptor.capture())
+        userAnswersCaptor.getAllValues.get(0).get(BalanceIdPage).isDefined mustEqual false
       }
 
       "must show the technical difficulties page if we have an error " in {
         when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId), any(), any())(any())).thenReturn(Future.successful(errorResponse))
 
-        val request = FakeRequest(POST, routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url)
+        val balanceIdUserAnswers = populatedUserAnswers.set(BalanceIdPage, balanceId).success.value
+        val request              = FakeRequest(POST, routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url)
 
-        val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-        val application    = applicationBuilder(userAnswers = Some(populatedUserAnswers)).build()
-        val result         = route(application, request).value
+        val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+        val application                            = applicationBuilder(userAnswers = Some(balanceIdUserAnswers)).build()
+        val result                                 = route(application, request).value
 
         status(result) mustEqual INTERNAL_SERVER_ERROR
 
         verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
         templateCaptor.getValue mustEqual "technicalDifficulties.njk"
+
+        val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+        verify(mockSessionRepository, times(1)).set(userAnswersCaptor.capture())
+        userAnswersCaptor.getValue.get(BalanceIdPage).isDefined mustEqual false
       }
     }
   }
