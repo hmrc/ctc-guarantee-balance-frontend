@@ -16,8 +16,6 @@
 
 package views
 
-import play.api.libs.json.Json
-
 class TechnicalDifficultiesViewSpec extends SingleViewSpec("technicalDifficulties.njk") {
 
   "must render tryAgain text" in {
@@ -29,12 +27,6 @@ class TechnicalDifficultiesViewSpec extends SingleViewSpec("technicalDifficultie
   }
 
   "display link with id contact-link" in {
-    val url = frontendAppConfig.nctsEnquiriesUrl
-    val json = Json.obj(
-      "contactUrl" -> url
-    )
-    val doc = renderDocument(json).futureValue
-
-    assertPageHasLink(doc, "contact-link", "technicalDifficulties.contact.link", url)
+    assertPageHasLink(doc, "contact-link", "technicalDifficulties.contact.link", frontendAppConfig.nctsEnquiriesUrl)
   }
 }
