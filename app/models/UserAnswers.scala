@@ -34,7 +34,7 @@ final case class UserAnswers(
   def set[A](page: Settable[A] with Gettable[A], newValue: A)(implicit writes: Writes[A], rds: Reads[A]): Try[UserAnswers] = {
 
     val oldValue   = get(page)
-    val hasChanged = oldValue != Some(newValue)
+    val hasChanged = !oldValue.contains(newValue)
 
     val updatedData = data.setObject(page.path, Json.toJson(newValue)) match {
       case JsSuccess(jsValue, _) =>
@@ -62,7 +62,7 @@ final case class UserAnswers(
     updatedData.flatMap {
       d =>
         val updatedAnswers = copy(data = d)
-        page.cleanup(None, updatedAnswers, true)
+        page.cleanup(None, updatedAnswers, hasChanged = true)
     }
   }
 

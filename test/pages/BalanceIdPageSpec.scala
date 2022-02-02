@@ -14,29 +14,19 @@
  * limitations under the License.
  */
 
-package generators
+package pages
 
-import java.util.UUID
-
-import models._
 import models.values.BalanceId
-import org.scalacheck.Arbitrary.arbitrary
-import org.scalacheck.{Arbitrary, Gen}
+import pages.behaviours.PageBehaviours
 
-trait ModelGenerators {
+class BalanceIdPageSpec extends PageBehaviours {
 
-  implicit lazy val arbitraryMode: Arbitrary[Mode] =
-    Arbitrary {
-      Gen.oneOf(NormalMode, CheckMode)
-    }
+  "BalanceIdPage" - {
 
-  implicit lazy val arbitraryReferral: Arbitrary[Referral] =
-    Arbitrary {
-      Gen.oneOf(Referral.values)
-    }
+    beRetrievable[BalanceId](BalanceIdPage)
 
-  implicit lazy val arbitraryBalanceId: Arbitrary[BalanceId] =
-    Arbitrary {
-      BalanceId(arbitrary[UUID].sample.get)
-    }
+    beSettable[BalanceId](BalanceIdPage)
+
+    beRemovable[BalanceId](BalanceIdPage)
+  }
 }
