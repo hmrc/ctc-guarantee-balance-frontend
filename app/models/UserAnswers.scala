@@ -33,8 +33,7 @@ final case class UserAnswers(
 
   def set[A](page: Settable[A] with Gettable[A], newValue: A)(implicit writes: Writes[A], rds: Reads[A]): Try[UserAnswers] = {
 
-    val oldValue   = get(page)
-    val hasChanged = !oldValue.contains(newValue)
+    val hasChanged = !get(page).contains(newValue)
 
     val updatedData = data.setObject(page.path, Json.toJson(newValue)) match {
       case JsSuccess(jsValue, _) =>

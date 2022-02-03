@@ -16,11 +16,18 @@
 
 package pages
 
-import play.api.libs.json.JsPath
+import models.UserAnswers
+import scala.util.Try
+import queries.Settable
 
-case object EoriNumberPage extends ClearValueOnChangePage[String] {
+trait ClearValueOnChangePage[A] extends QuestionPage[A] {
 
-  override val pageToClear      = BalanceIdPage
-  override def path: JsPath     = JsPath \ toString
-  override def toString: String = "eoriNumber"
+  val pageToClear: Settable[_]
+
+  override def cleanup(value: Option[A], userAnswers: UserAnswers, hasChanged: Boolean): Try[UserAnswers] =
+    if (hasChanged) {
+      userAnswers.remove(pageToClear)
+    } else {
+      super.cleanup(value, userAnswers, hasChanged)
+    }
 }
