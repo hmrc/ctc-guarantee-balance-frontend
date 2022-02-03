@@ -22,12 +22,16 @@ class GuaranteeReferenceNumberViewSpec extends SingleViewSpec("guaranteeReferenc
 
   val input: Element = doc.getElementsByClass("govuk-input").first()
 
-  "must render paragraph text" in {
-    assertContainsText(doc, "guaranteeReferenceNumber.paragraph")
+  "must render hint text" in {
+    assertContainsText(doc, messages("guaranteeReferenceNumber.paragraph1"))
+    assertContainsText(doc, messages("guaranteeReferenceNumber.bullet1"))
+    assertContainsText(doc, messages("guaranteeReferenceNumber.bullet2"))
+    assertContainsText(doc, messages("guaranteeReferenceNumber.bullet3"))
+    assertContainsText(doc, messages("guaranteeReferenceNumber.paragraph2"))
   }
 
   "must have correct width class" in {
-    input.hasClass("govuk-input--width-20") mustBe true
+    assert(input.hasClass("govuk-input--width-20"))
   }
 
   "must have correct ID" in {
@@ -36,6 +40,20 @@ class GuaranteeReferenceNumberViewSpec extends SingleViewSpec("guaranteeReferenc
 
   "must render a continue button" in {
     assertPageHasButton(doc, "site.continue")
+  }
+
+  "must render correct title" in {
+    assertPageHasTitle(doc, "guaranteeReferenceNumber")
+  }
+
+  "must render correct heading" in {
+    assertPageTitleEqualsMessage(doc, "guaranteeReferenceNumber.heading")
+  }
+
+  "must render correct label" in {
+    val label = doc.getElementsByClass("govuk-label").first()
+    assert(label.hasClass("govuk-label--m"))
+    label.text() mustBe messages("guaranteeReferenceNumber.label")
   }
 
 }

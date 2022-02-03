@@ -39,7 +39,7 @@ class Renderer @Inject() (appConfig: FrontendAppConfig, renderer: NunjucksRender
   private def renderTemplate(template: String, ctx: JsObject)(implicit request: RequestHeader): Future[Html] =
     renderer.render(template, ctx ++ Json.obj("config" -> config))
 
-  private lazy val config: JsObject = Json.obj(
+  private val config: JsObject = Json.obj(
     "betaFeedbackUnauthenticatedUrl" -> appConfig.betaFeedbackUnauthenticatedUrl,
     "serviceIdentifier"              -> appConfig.contactFormServiceIdentifier,
     "contactHost"                    -> appConfig.contactHost,
@@ -52,6 +52,6 @@ class Renderer @Inject() (appConfig: FrontendAppConfig, renderer: NunjucksRender
     "showPhaseBanner"                -> appConfig.showPhaseBanner,
     "showUserResearchBanner"         -> appConfig.showUserResearchBanner,
     "manageTransitMovementsUrl"      -> appConfig.manageTransitMovementsUrl,
-    "nctsUrl"                        -> appConfig.nctsUrl
+    "nctsEnquiriesUrl"               -> appConfig.nctsEnquiriesUrl
   )
 }

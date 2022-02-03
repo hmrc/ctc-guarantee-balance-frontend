@@ -28,6 +28,6 @@ class NotFoundViewSpec extends SingleViewSpec("notFound.njk") {
     assertContainsText(doc, "pageNotFound.paragraph2")
 
     assertContainsText(doc, "pageNotFound.paragraph3Start")
-    assertPageHasLink(doc, "contact", "pageNotFound.contactLink", frontendAppConfig.nctsUrl)
+    assertPageHasLink(doc, "contact", "pageNotFound.contactLink", frontendAppConfig.nctsEnquiriesUrl)
   }
 }

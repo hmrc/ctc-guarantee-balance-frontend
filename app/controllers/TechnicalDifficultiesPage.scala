@@ -17,7 +17,6 @@
 package controllers
 
 import config.FrontendAppConfig
-import play.api.libs.json.Json
 import play.api.mvc.{Request, Result}
 import renderer.Renderer
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -30,11 +29,7 @@ trait TechnicalDifficultiesPage {
   val config: FrontendAppConfig
   val renderer: Renderer
 
-  def renderTechnicalDifficultiesPage(implicit request: Request[_], ec: ExecutionContext): Future[Result] = {
-    val json = Json.obj(
-      "contactUrl" -> config.nctsEnquiriesUrl
-    )
-    renderer.render("technicalDifficulties.njk", json).map(InternalServerError(_))
-  }
+  def renderTechnicalDifficultiesPage(implicit request: Request[_], ec: ExecutionContext): Future[Result] =
+    renderer.render("technicalDifficulties.njk").map(InternalServerError(_))
 
 }
