@@ -24,8 +24,16 @@ class TryGuaranteeBalanceAgainViewSpec extends SingleViewSpec("tryGuaranteeBalan
     assertPageTitleEqualsMessage(doc, "tryGuaranteeBalanceAgain.heading")
   }
 
-  "display link with id checkDetails-link" in {
-    assertPageHasLink(doc, "checkDetails-link", "tryGuaranteeBalanceAgain.checkDetails.link", routes.CheckYourAnswersController.onPageLoad().url)
+  "must render check-details prelink text" in {
+    assertContainsText(doc, "tryGuaranteeBalanceAgain.checkDetails.prelink")
+  }
+
+  "display link with id check-details" in {
+    assertPageHasLink(doc, "check-details", "tryGuaranteeBalanceAgain.checkDetails.link", routes.CheckYourAnswersController.onPageLoad().url)
+  }
+
+  "must render check-details postlink text" in {
+    assertContainsText(doc, "tryGuaranteeBalanceAgain.checkDetails.postlink")
   }
 
   "behave like a page with a submit button" in {

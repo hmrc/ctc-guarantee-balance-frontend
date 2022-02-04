@@ -96,8 +96,9 @@ guaranteeReferenceNumber.error.invalid = The guarantee reference number must onl
 
 tryGuaranteeBalanceAgain.title = We have not been able to get your guarantee balance
 tryGuaranteeBalanceAgain.heading = We have not been able to get your guarantee balance
-tryGuaranteeBalanceAgain.checkDetails = You can
+tryGuaranteeBalanceAgain.checkDetails.prelink = You can
 tryGuaranteeBalanceAgain.checkDetails.link = check that your details are correct
+waitOnGuaranteeBalance.checkDetails.postlink = or you can try again in {0} seconds.
 
 unsupportedGuaranteeType.title = We cannot get the balance for this type of guarantee
 unsupportedGuaranteeType.heading = We cannot get the balance for this type of guarantee

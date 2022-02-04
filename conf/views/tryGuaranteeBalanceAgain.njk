@@ -13,8 +13,11 @@
     <div class="govuk-grid-column-two-thirds">
 
       <h1 class="govuk-heading-xl">{{ messages("tryGuaranteeBalanceAgain.heading") }}</h1>
-      <p class="govuk-body">{{ messages("tryGuaranteeBalanceAgain.checkDetails") }}
-        <a class="govuk-link" id="checkDetails-link" href="{{ routes.controllers.CheckYourAnswersController.onPageLoad().url }}">{{ messages("tryGuaranteeBalanceAgain.checkDetails.link") }}</a>.
+      <p class="govuk-body">{{ messages("tryGuaranteeBalanceAgain.checkDetails.prelink") }}
+        <a class="govuk-link" id="check-details" href="{{ routes.controllers.CheckYourAnswersController.onPageLoad().url }}">
+           {{ messages("tryGuaranteeBalanceAgain.checkDetails.link") }}
+        </a>
+        {{ messages("tryGuaranteeBalanceAgain.checkDetails.postlink", waitTimeInSeconds) }}
       </p>
 
       <form action="{{ routes.controllers.CheckYourAnswersController.onSubmit().url }}" method="post">
