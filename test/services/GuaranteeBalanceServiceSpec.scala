@@ -16,6 +16,8 @@
 
 package services
 
+import java.util.UUID
+
 import akka.actor.ActorSystem
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import config.FrontendAppConfig
@@ -37,7 +39,6 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
 import viewModels.audit.AuditConstants.{AUDIT_DEST_RATE_LIMITED, AUDIT_ERROR_RATE_LIMIT_EXCEEDED, AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT}
 
-import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -73,11 +74,12 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
   // format: on
 
   "submitBalanceRequest" - {
-    val request = BalanceRequest(TaxIdentifier(""), GuaranteeReference(""), AccessCode(""))
-    "return successResponse when the connector returns sucessResponse" in {
-      val mockGuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
+    "must redirect to Session Expired for a POST if no existing data is found" in {
 
-      when(mockGuaranteeBalanceConnector.submitBalanceRequest(any())(any())).thenReturn(Future.successful(successResponse))
+      val request              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+      implicit val dataRequest = DataRequest(request, "internalId", emptyUserAnswers)
+
+      implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
 
       val service = new GuaranteeBalanceService(actorSystem,
                                                 mockGuaranteeBalanceConnector,
@@ -86,13 +88,104 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
                                                 mockMongoLockRepository,
                                                 config
       )
+      val result = service.submitBalanceRequest(emptyUserAnswers, "internalId")
 
-      val result = service.submitBalanceRequest(request)
-      whenReady(result) {
-        _ mustEqual successResponse
+      status(result) mustEqual SEE_OTHER
+      redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
+    }
+
+    "must redirect to Balance Confirmation for a POST if no lock in mongo repository for that user and GRN" in {
+
+      val userAnswers = baseAnswers
+
+      when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
+      when(mockGuaranteeBalanceConnector.submitBalanceRequest(any())(any()))
+        .thenReturn(Future.successful(Right(balance)))
+
+      val service = new GuaranteeBalanceService(actorSystem,
+                                                mockGuaranteeBalanceConnector,
+                                                guaranteeBalanceResponseHandler,
+                                                mockAuditService,
+                                                mockMongoLockRepository,
+                                                config
+      )
+      val result = service.submitBalanceRequest(userAnswers, "id")
+
+      status(result) mustEqual SEE_OTHER
+      redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
+
+      val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
+      verify(mockMongoLockRepository).takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())
+      val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+      verify(mockSessionRepository).set(uaCaptor.capture)
+      uaCaptor.getValue.get(BalancePage).get mustBe balance.formatForDisplay
+
+      verify(mockGuaranteeBalanceConnector).submitBalanceRequest(eqTo(BalanceRequest(TaxIdentifier(taxId), GuaranteeReference(grn), AccessCode(access))))(any())
+    }
+    "must redirect to rate limit if lock in mongo repository for that user and GRN" in {
+
+      val userAnswers = baseAnswers
+
+      when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(false))
+      val service = new GuaranteeBalanceService(actorSystem,
+                                                mockGuaranteeBalanceConnector,
+                                                guaranteeBalanceResponseHandler,
+                                                mockAuditService,
+                                                mockMongoLockRepository,
+                                                config
+      )
+      val result = service.submitBalanceRequest(userAnswers, "id")
+
+      status(result) mustEqual SEE_OTHER
+
+      redirectLocation(result).value mustEqual routes.RateLimitController.onPageLoad().url
+
+      val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
+      verify(mockMongoLockRepository).takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())
+
+      val jsonCaptor: ArgumentCaptor[JsonAuditModel] = ArgumentCaptor.forClass(classOf[JsonAuditModel])
+
+      verify(mockAuditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
+
+      jsonCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT
+      jsonCaptor.getValue.detail.toString.contains(AUDIT_ERROR_RATE_LIMIT_EXCEEDED) mustEqual true
+      jsonCaptor.getValue.detail.toString.contains(AUDIT_DEST_RATE_LIMITED) mustEqual true
+    }
+
+    "must redirect to session timeout if at least one of EORI, GRN and access code are undefined" in {
+
+      forAll(arbitrary[(Option[String], Option[String], Option[String])].retryUntil {
+        case (eoriNumber, grn, accessCode) => !(eoriNumber.isDefined && grn.isDefined && accessCode.isDefined)
+      }) {
+        case (eoriNumber, grn, accessCode) =>
+          // format: off
+          val userAnswers = emptyUserAnswers
+            .setOption(EoriNumberPage, eoriNumber).success.value
+            .setOption(GuaranteeReferenceNumberPage, grn).success.value
+            .setOption(AccessCodePage, accessCode).success.value
+          // format: on
+
+          val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+
+          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+
+          when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
+
+          when(mockGuaranteeBalanceConnector.submitBalanceRequest(any())(any()))
+            .thenReturn(Future.successful(Right(balance)))
+
+          val service = new GuaranteeBalanceService(actorSystem,
+                                                    mockGuaranteeBalanceConnector,
+                                                    guaranteeBalanceResponseHandler,
+                                                    mockAuditService,
+                                                    mockMongoLockRepository,
+                                                    config
+          )
+          val result = service.submitBalanceRequest(userAnswers, "id")
+          status(result) mustEqual SEE_OTHER
+
+          redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
       }
-
-      verify(mockGuaranteeBalanceConnector, times(1)).submitBalanceRequest(any())(any())
     }
   }
 
@@ -205,122 +298,6 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
       //Second after 3 seconds
       //Third after 6 seoncds -- Timeout here
       verify(mockGuaranteeBalanceConnector, times(3)).queryPendingBalance(any())(any())
-    }
-  }
-
-  "submit" - {
-    "must redirect to Session Expired for a POST if no existing data is found" in {
-
-      val request              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-      implicit val dataRequest = DataRequest(request, "internalId", emptyUserAnswers)
-
-      implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
-
-      val service = new GuaranteeBalanceService(actorSystem,
-                                                mockGuaranteeBalanceConnector,
-                                                guaranteeBalanceResponseHandler,
-                                                mockAuditService,
-                                                mockMongoLockRepository,
-                                                config
-      )
-      val result = service.submit(emptyUserAnswers, "internalId")
-
-      status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
-    }
-
-    "must redirect to Balance Confirmation for a POST if no lock in mongo repository for that user and GRN" in {
-
-      val userAnswers = baseAnswers
-
-      when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
-      when(mockGuaranteeBalanceConnector.submitBalanceRequest(any())(any()))
-        .thenReturn(Future.successful(Right(balance)))
-
-      val service = new GuaranteeBalanceService(actorSystem,
-                                                mockGuaranteeBalanceConnector,
-                                                guaranteeBalanceResponseHandler,
-                                                mockAuditService,
-                                                mockMongoLockRepository,
-                                                config
-      )
-      val result = service.submit(userAnswers, "id")
-
-      status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
-
-      val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
-      verify(mockMongoLockRepository).takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())
-      val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
-      verify(mockSessionRepository).set(uaCaptor.capture)
-      uaCaptor.getValue.get(BalancePage).get mustBe balance.formatForDisplay
-
-      verify(mockGuaranteeBalanceConnector).submitBalanceRequest(eqTo(BalanceRequest(TaxIdentifier(taxId), GuaranteeReference(grn), AccessCode(access))))(any())
-    }
-    "must redirect to rate limit if lock in mongo repository for that user and GRN" in {
-
-      val userAnswers = baseAnswers
-
-      when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(false))
-      val service = new GuaranteeBalanceService(actorSystem,
-                                                mockGuaranteeBalanceConnector,
-                                                guaranteeBalanceResponseHandler,
-                                                mockAuditService,
-                                                mockMongoLockRepository,
-                                                config
-      )
-      val result = service.submit(userAnswers, "id")
-
-      status(result) mustEqual SEE_OTHER
-
-      redirectLocation(result).value mustEqual routes.RateLimitController.onPageLoad().url
-
-      val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
-      verify(mockMongoLockRepository).takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())
-
-      val jsonCaptor: ArgumentCaptor[JsonAuditModel] = ArgumentCaptor.forClass(classOf[JsonAuditModel])
-
-      verify(mockAuditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
-
-      jsonCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT
-      jsonCaptor.getValue.detail.toString.contains(AUDIT_ERROR_RATE_LIMIT_EXCEEDED) mustEqual true
-      jsonCaptor.getValue.detail.toString.contains(AUDIT_DEST_RATE_LIMITED) mustEqual true
-    }
-
-    "must redirect to session timeout if at least one of EORI, GRN and access code are undefined" in {
-
-      forAll(arbitrary[(Option[String], Option[String], Option[String])].retryUntil {
-        case (eoriNumber, grn, accessCode) => !(eoriNumber.isDefined && grn.isDefined && accessCode.isDefined)
-      }) {
-        case (eoriNumber, grn, accessCode) =>
-          // format: off
-          val userAnswers = emptyUserAnswers
-            .setOption(EoriNumberPage, eoriNumber).success.value
-            .setOption(GuaranteeReferenceNumberPage, grn).success.value
-            .setOption(AccessCodePage, accessCode).success.value
-          // format: on
-
-          val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
-
-          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-
-          when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
-
-          when(mockGuaranteeBalanceService.submitBalanceRequest(any())(any()))
-            .thenReturn(Future.successful(Right(balance)))
-
-          val service = new GuaranteeBalanceService(actorSystem,
-                                                    mockGuaranteeBalanceConnector,
-                                                    guaranteeBalanceResponseHandler,
-                                                    mockAuditService,
-                                                    mockMongoLockRepository,
-                                                    config
-          )
-          val result = service.submit(userAnswers, "id")
-          status(result) mustEqual SEE_OTHER
-
-          redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
-      }
     }
   }
 

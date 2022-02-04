@@ -50,7 +50,7 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
 )(implicit ec: ExecutionContext, hc: HeaderCarrier, dr: DataRequest[_])
     extends Logging {
 
-  def submit(userAnswers: UserAnswers, internalId: String): Future[Result] =
+  def submitBalanceRequest(userAnswers: UserAnswers, internalId: String): Future[Result] =
     (for {
       guaranteeReferenceNumber <- userAnswers.get(GuaranteeReferenceNumberPage)
       taxIdentifier            <- userAnswers.get(EoriNumberPage)
@@ -58,13 +58,14 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
     } yield checkRateLimit(internalId, guaranteeReferenceNumber).flatMap {
       lockFree =>
         if (lockFree) {
-          submitBalanceRequest(
-            BalanceRequest(
-              TaxIdentifier(taxIdentifier),
-              GuaranteeReference(guaranteeReferenceNumber),
-              AccessCode(accessCode)
+          connector
+            .submitBalanceRequest(
+              BalanceRequest(
+                TaxIdentifier(taxIdentifier),
+                GuaranteeReference(guaranteeReferenceNumber),
+                AccessCode(accessCode)
+              )
             )
-          )
             .flatMap(responseHandler.processResponse(_, processPending))
         } else {
           auditService.audit(
@@ -94,9 +95,6 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
 
   private def processPending(balanceId: BalanceId): Future[Result] =
     Future.successful(Redirect(controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId)))
-
-  def submitBalanceRequest(balanceRequest: BalanceRequest)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] =
-    connector.submitBalanceRequest(balanceRequest)
 
   def pollForGuaranteeBalance(balanceId: BalanceId, delay: FiniteDuration, maxTime: FiniteDuration)(implicit
     hc: HeaderCarrier
