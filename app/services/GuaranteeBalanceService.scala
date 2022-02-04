@@ -65,7 +65,7 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
                 AccessCode(accessCode)
               )
             )
-            .flatMap(responseHandler.processResponse(_, processPending))
+            .flatMap(responseHandler.processResponse(_))
         } else {
           auditService.audit(
             UnsuccessfulBalanceAuditModel.build(
@@ -91,9 +91,6 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
     val duration = config.rateLimitDuration.seconds
     mongoLockRepository.takeLock(lockId, eoriNumber, duration)
   }
-
-  private def processPending(balanceId: BalanceId): Future[Result] =
-    Future.successful(Redirect(controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId)))
 
   def pollForGuaranteeBalance(balanceId: BalanceId, delay: FiniteDuration, maxTime: FiniteDuration)(implicit
     hc: HeaderCarrier

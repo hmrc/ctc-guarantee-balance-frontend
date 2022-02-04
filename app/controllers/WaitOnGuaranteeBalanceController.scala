@@ -53,7 +53,11 @@ class WaitOnGuaranteeBalanceController @Inject() (
 
   def onPageLoad(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      displayWaitPage(balanceId)
+      val json = Json.obj(
+        "balanceId"         -> balanceId,
+        "waitTimeInSeconds" -> config.guaranteeBalanceDisplayDelay
+      )
+      renderer.render("waitOnGuaranteeBalance.njk", json).map(Ok(_))
   }
 
   def checkDetails(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData andThen requireData).async {
@@ -85,14 +89,6 @@ class WaitOnGuaranteeBalanceController @Inject() (
         delay = appConfig.guaranteeBalanceDelayInSecond seconds,
         maxTime = appConfig.guaranteeBalanceMaxTimeInSecond seconds
       )
-      .flatMap(responseHandler.processResponse(_, displayWaitPage))
-
-  private def displayWaitPage(balanceId: BalanceId)(implicit request: Request[_]): Future[Result] = {
-    val json = Json.obj(
-      "balanceId"         -> balanceId,
-      "waitTimeInSeconds" -> config.guaranteeBalanceDisplayDelay
-    )
-    renderer.render("waitOnGuaranteeBalance.njk", json).map(Ok(_))
-  }
+      .flatMap(responseHandler.processResponse(_))
 
 }

@@ -17,9 +17,10 @@
 package handlers
 
 import config.FrontendAppConfig
+import javax.inject.Inject
 import models.backend._
 import models.requests.DataRequest
-import models.values.BalanceId
+import org.joda.time.LocalDateTime
 import pages.{AccessCodePage, BalancePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.Logging
 import play.api.http.Status._
@@ -30,10 +31,8 @@ import renderer.Renderer
 import repositories.SessionRepository
 import services.AuditService
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import viewModels.audit.{ErrorMessage, SuccessfulBalanceAuditModel, UnsuccessfulBalanceAuditModel}
-import javax.inject.Inject
-import org.joda.time.LocalDateTime
 import viewModels.audit.AuditConstants._
+import viewModels.audit.{ErrorMessage, SuccessfulBalanceAuditModel, UnsuccessfulBalanceAuditModel}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -45,22 +44,22 @@ class GuaranteeBalanceResponseHandler @Inject() (
 )(implicit ec: ExecutionContext)
     extends Logging {
 
-  def processResponse(response: Either[HttpResponse, BalanceRequestResponse], processPending: BalanceId => Future[Result])(implicit
+  def processResponse(response: Either[HttpResponse, BalanceRequestResponse])(implicit
     hc: HeaderCarrier,
     request: DataRequest[_]
   ): Future[Result] =
     response match {
-      case Right(balanceRequestResponse) => processBalanceRequestResponse(balanceRequestResponse, processPending)
+      case Right(balanceRequestResponse) => processBalanceRequestResponse(balanceRequestResponse)
       case Left(failureResponse)         => processHttpResponse(failureResponse)
     }
 
-  private def processBalanceRequestResponse(response: BalanceRequestResponse, processPending: BalanceId => Future[Result])(implicit
+  private def processBalanceRequestResponse(response: BalanceRequestResponse)(implicit
     hc: HeaderCarrier,
     request: DataRequest[_]
   ): Future[Result] =
     response match {
       case BalanceRequestPending(balanceId) =>
-        processPending(balanceId)
+        Future.successful(Redirect(controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId)))
       case successResponse: BalanceRequestSuccess =>
         auditService.audit(
           SuccessfulBalanceAuditModel.build(
