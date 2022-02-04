@@ -20,7 +20,7 @@
         {{ messages("tryGuaranteeBalanceAgain.checkDetails.postlink", waitTimeInSeconds) }}
       </p>
 
-      <form action="{{ routes.controllers.CheckYourAnswersController.onSubmit().url }}" method="post">
+      <form action="{{ routes.controllers.TryGuaranteeBalanceAgainController.onSubmit().url }}" method="post">
 
         {{ csrf() | safe }}
 

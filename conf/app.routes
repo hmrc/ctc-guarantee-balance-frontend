@@ -35,8 +35,10 @@ GET        /:balanceId/check-details                controllers.WaitOnGuaranteeB
 POST       /:balanceId/wait-on-balance              controllers.WaitOnGuaranteeBalanceController.onSubmit(balanceId: models.values.BalanceId)
 
 GET        /try-again                               controllers.TryGuaranteeBalanceAgainController.onPageLoad()
+POST       /try-again                               controllers.TryGuaranteeBalanceAgainController.onSubmit()
 
 GET        /rate-limit                              controllers.RateLimitController.onPageLoad()
+POST       /rate-limit                              controllers.RateLimitController.onSubmit()
 
 GET        /balance                                 controllers.BalanceConfirmationController.onPageLoad()
 GET        /check-another-guarantee-balance         controllers.BalanceConfirmationController.checkAnotherGuaranteeBalance()

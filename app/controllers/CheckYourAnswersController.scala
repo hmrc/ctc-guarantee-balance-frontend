@@ -16,29 +16,20 @@
 
 package controllers
 
-import config.FrontendAppConfig
 import controllers.actions._
-import handlers.GuaranteeBalanceResponseHandler
 import javax.inject.Inject
-import models.requests.BalanceRequest
-import models.values._
-import org.joda.time.LocalDateTime
-import pages.{AccessCodePage, BalanceIdPage, EoriNumberPage, GuaranteeReferenceNumberPage}
+import pages.BalanceIdPage
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
-import services.{AuditService, GuaranteeBalanceService}
-import uk.gov.hmrc.mongo.lock.MongoLockRepository
+import services.GuaranteeBalanceService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 import viewModels.CheckYourAnswersViewModelProvider
-import viewModels.audit.AuditConstants.{AUDIT_DEST_RATE_LIMITED, AUDIT_ERROR_RATE_LIMIT_EXCEEDED, AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT}
-import viewModels.audit.{ErrorMessage, UnsuccessfulBalanceAuditModel}
 
-import scala.concurrent.duration.DurationInt
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class CheckYourAnswersController @Inject() (
   override val messagesApi: MessagesApi,
@@ -47,12 +38,8 @@ class CheckYourAnswersController @Inject() (
   requireData: DataRequiredAction,
   val controllerComponents: MessagesControllerComponents,
   renderer: Renderer,
-  mongoLockRepository: MongoLockRepository,
   guaranteeBalanceService: GuaranteeBalanceService,
-  responseHandler: GuaranteeBalanceResponseHandler,
-  config: FrontendAppConfig,
-  viewModelProvider: CheckYourAnswersViewModelProvider,
-  auditService: AuditService
+  viewModelProvider: CheckYourAnswersViewModelProvider
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -80,49 +67,6 @@ class CheckYourAnswersController @Inject() (
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      (for {
-        guaranteeReferenceNumber <- request.userAnswers.get(GuaranteeReferenceNumberPage)
-        taxIdentifier            <- request.userAnswers.get(EoriNumberPage)
-        accessCode               <- request.userAnswers.get(AccessCodePage)
-      } yield checkRateLimit(request.internalId, guaranteeReferenceNumber).flatMap {
-        lockFree =>
-          if (lockFree) {
-            guaranteeBalanceService
-              .submitBalanceRequest(
-                BalanceRequest(
-                  TaxIdentifier(taxIdentifier),
-                  GuaranteeReference(guaranteeReferenceNumber),
-                  AccessCode(accessCode)
-                )
-              )
-              .flatMap(responseHandler.processResponse(_, processPending))
-          } else {
-            auditService.audit(
-              UnsuccessfulBalanceAuditModel.build(
-                AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT,
-                taxIdentifier,
-                guaranteeReferenceNumber,
-                accessCode,
-                request.internalId,
-                LocalDateTime.now,
-                TOO_MANY_REQUESTS,
-                ErrorMessage(AUDIT_ERROR_RATE_LIMIT_EXCEEDED, AUDIT_DEST_RATE_LIMITED)
-              )
-            )
-            Future.successful(Redirect(routes.RateLimitController.onPageLoad()))
-          }
-      }).getOrElse {
-        logger.warn("[CheckYourAnswersController][onSubmit] Insufficient data in user answers.")
-        Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
-      }
+      guaranteeBalanceService.submitBalanceRequest
   }
-
-  private def checkRateLimit(eoriNumber: String, guaranteeReferenceNumber: String): Future[Boolean] = {
-    val lockId   = LockId(eoriNumber, guaranteeReferenceNumber).toString
-    val duration = config.rateLimitDuration.seconds
-    mongoLockRepository.takeLock(lockId, eoriNumber, duration)
-  }
-
-  private def processPending(balanceId: BalanceId): Future[Result] =
-    Future.successful(Redirect(controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId)))
 }
