@@ -58,6 +58,6 @@ class CheckYourAnswersController @Inject() (
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      guaranteeBalanceService.submitBalanceRequest(request.userAnswers, request.internalId)
+      guaranteeBalanceService.submitBalanceRequest
   }
 }

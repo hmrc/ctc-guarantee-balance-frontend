@@ -22,7 +22,7 @@ import config.FrontendAppConfig
 import connectors.GuaranteeBalanceConnector
 import controllers.routes
 import handlers.GuaranteeBalanceResponseHandler
-import models.UserAnswers
+import javax.inject.Inject
 import models.backend.{BalanceRequestPending, BalanceRequestResponse}
 import models.requests.{BalanceRequest, DataRequest}
 import models.values._
@@ -37,7 +37,6 @@ import uk.gov.hmrc.mongo.lock.MongoLockRepository
 import viewModels.audit.AuditConstants.{AUDIT_DEST_RATE_LIMITED, AUDIT_ERROR_RATE_LIMIT_EXCEEDED, AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT}
 import viewModels.audit.{ErrorMessage, UnsuccessfulBalanceAuditModel}
 
-import javax.inject.Inject
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -50,12 +49,12 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
 )(implicit ec: ExecutionContext)
     extends Logging {
 
-  def submitBalanceRequest(userAnswers: UserAnswers, internalId: String)(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] =
+  def submitBalanceRequest()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] =
     (for {
-      guaranteeReferenceNumber <- userAnswers.get(GuaranteeReferenceNumberPage)
-      taxIdentifier            <- userAnswers.get(EoriNumberPage)
-      accessCode               <- userAnswers.get(AccessCodePage)
-    } yield checkRateLimit(internalId, guaranteeReferenceNumber).flatMap {
+      guaranteeReferenceNumber <- request.userAnswers.get(GuaranteeReferenceNumberPage)
+      taxIdentifier            <- request.userAnswers.get(EoriNumberPage)
+      accessCode               <- request.userAnswers.get(AccessCodePage)
+    } yield checkRateLimit(request.internalId, guaranteeReferenceNumber).flatMap {
       lockFree =>
         if (lockFree) {
           connector
@@ -74,7 +73,7 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
               taxIdentifier,
               guaranteeReferenceNumber,
               accessCode,
-              internalId,
+              request.internalId,
               LocalDateTime.now,
               TOO_MANY_REQUESTS,
               ErrorMessage(AUDIT_ERROR_RATE_LIMIT_EXCEEDED, AUDIT_DEST_RATE_LIMITED)

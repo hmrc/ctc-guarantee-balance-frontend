@@ -63,8 +63,6 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
   private val guaranteeBalanceResponseHandler: GuaranteeBalanceResponseHandler = injector.instanceOf[GuaranteeBalanceResponseHandler]
   private val config: FrontendAppConfig                                        = injector.instanceOf[FrontendAppConfig]
   private val balance                                                          = BalanceRequestSuccess(8500, CurrencyCode("GBP"))
-  private val request                                                          = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-  implicit private val dataRequest                                             = DataRequest(request, "id", emptyUserAnswers)
 
   // format: off
   private val baseAnswers: UserAnswers = emptyUserAnswers
@@ -88,7 +86,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
                                                 mockMongoLockRepository,
                                                 config
       )
-      val result = service.submitBalanceRequest(emptyUserAnswers, "internalId")
+      val result = service.submitBalanceRequest
 
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
@@ -96,7 +94,9 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
 
     "must redirect to Balance Confirmation for a POST if no lock in mongo repository for that user and GRN" in {
 
-      val userAnswers = baseAnswers
+      val userAnswers          = baseAnswers
+      val request              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+      implicit val dataRequest = DataRequest(request, "id", userAnswers)
 
       when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
       when(mockGuaranteeBalanceConnector.submitBalanceRequest(any())(any()))
@@ -109,7 +109,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
                                                 mockMongoLockRepository,
                                                 config
       )
-      val result = service.submitBalanceRequest(userAnswers, "id")
+      val result = service.submitBalanceRequest
 
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
@@ -124,9 +124,13 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
     }
     "must redirect to rate limit if lock in mongo repository for that user and GRN" in {
 
-      val userAnswers = baseAnswers
+      val userAnswers          = baseAnswers
+      val request              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+      implicit val dataRequest = DataRequest(request, "id", userAnswers)
 
-      when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(false))
+      val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
+
+      when(mockMongoLockRepository.takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())).thenReturn(Future.successful(false))
       val service = new GuaranteeBalanceService(actorSystem,
                                                 mockGuaranteeBalanceConnector,
                                                 guaranteeBalanceResponseHandler,
@@ -134,13 +138,12 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
                                                 mockMongoLockRepository,
                                                 config
       )
-      val result = service.submitBalanceRequest(userAnswers, "id")
+      val result = service.submitBalanceRequest
 
       status(result) mustEqual SEE_OTHER
 
       redirectLocation(result).value mustEqual routes.RateLimitController.onPageLoad().url
 
-      val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
       verify(mockMongoLockRepository).takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())
 
       val jsonCaptor: ArgumentCaptor[JsonAuditModel] = ArgumentCaptor.forClass(classOf[JsonAuditModel])
@@ -164,6 +167,8 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
             .setOption(GuaranteeReferenceNumberPage, grn).success.value
             .setOption(AccessCodePage, accessCode).success.value
           // format: on
+          val request              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+          implicit val dataRequest = DataRequest(request, "internalId", userAnswers)
 
           when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
 
@@ -177,7 +182,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
                                                     mockMongoLockRepository,
                                                     config
           )
-          val result = service.submitBalanceRequest(userAnswers, "id")
+          val result = service.submitBalanceRequest
           status(result) mustEqual SEE_OTHER
 
           redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url

@@ -19,10 +19,13 @@ package controllers
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{times, verify}
+import org.mockito.Mockito.{times, verify, when}
 import pages.GuaranteeReferenceNumberPage
+import play.api.mvc.Results.Redirect
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+
+import scala.concurrent.Future
 
 class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
@@ -60,5 +63,22 @@ class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaul
       redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
     }
 
+    "must redirect if POST successful" in {
+
+      val userAnswers = baseAnswers
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      val request     = FakeRequest(POST, routes.TryGuaranteeBalanceAgainController.onSubmit().url)
+
+      when(mockGuaranteeBalanceService.submitBalanceRequest()(any(), any()))
+        .thenReturn(Future.successful(Redirect(routes.BalanceConfirmationController.onPageLoad().url)))
+
+      val result = route(application, request).value
+
+      status(result) mustEqual SEE_OTHER
+
+      redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
+
+      verify(mockGuaranteeBalanceService).submitBalanceRequest()(any(), any())
+    }
   }
 }

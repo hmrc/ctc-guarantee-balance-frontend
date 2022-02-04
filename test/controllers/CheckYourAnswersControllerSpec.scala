@@ -19,10 +19,8 @@ package controllers
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import matchers.JsonMatchers.containJson
 import models.UserAnswers
-import models.backend.BalanceRequestSuccess
-import models.values.CurrencyCode
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
@@ -110,7 +108,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
       val request     = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
 
-      when(mockGuaranteeBalanceService.submitBalanceRequest(any(), any())(any(), any()))
+      when(mockGuaranteeBalanceService.submitBalanceRequest()(any(), any()))
         .thenReturn(Future.successful(Redirect(routes.BalanceConfirmationController.onPageLoad().url)))
 
       val result = route(application, request).value
@@ -119,7 +117,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
       redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
 
-      verify(mockGuaranteeBalanceService).submitBalanceRequest(eqTo(userAnswers), any())(any(), any())
+      verify(mockGuaranteeBalanceService).submitBalanceRequest()(any(), any())
     }
 
   }
