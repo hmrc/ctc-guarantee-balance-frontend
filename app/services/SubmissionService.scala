@@ -1,3 +1,19 @@
+/*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package services
 
 import config.FrontendAppConfig
@@ -21,20 +37,20 @@ import javax.inject.Inject
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{ExecutionContext, Future}
 
-class SubmissionService @Inject()(
-                                   guaranteeBalanceService: GuaranteeBalanceService,
-                                   responseHandler: GuaranteeBalanceResponseHandler,
-                                   auditService: AuditService,
-                                   mongoLockRepository: MongoLockRepository,
-                                   config: FrontendAppConfig
+class SubmissionService @Inject() (
+  guaranteeBalanceService: GuaranteeBalanceService,
+  responseHandler: GuaranteeBalanceResponseHandler,
+  auditService: AuditService,
+  mongoLockRepository: MongoLockRepository,
+  config: FrontendAppConfig
+)(implicit ec: ExecutionContext, hc: HeaderCarrier, dr: DataRequest[_])
+    extends Logging {
 
-                                 ) (implicit ec: ExecutionContext, hc: HeaderCarrier, dr: DataRequest[_]) extends Logging {
-
-  def submit(userAnswers: UserAnswers, internalId: String) = {
+  def submit(userAnswers: UserAnswers, internalId: String) =
     (for {
       guaranteeReferenceNumber <- userAnswers.get(GuaranteeReferenceNumberPage)
-      taxIdentifier <- userAnswers.get(EoriNumberPage)
-      accessCode <- userAnswers.get(AccessCodePage)
+      taxIdentifier            <- userAnswers.get(EoriNumberPage)
+      accessCode               <- userAnswers.get(AccessCodePage)
     } yield checkRateLimit(internalId, guaranteeReferenceNumber).flatMap {
       lockFree =>
         if (lockFree) {
@@ -66,10 +82,9 @@ class SubmissionService @Inject()(
       logger.warn("[CheckYourAnswersController][onSubmit] Insufficient data in user answers.")
       Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
     }
-  }
 
   private def checkRateLimit(eoriNumber: String, guaranteeReferenceNumber: String): Future[Boolean] = {
-    val lockId = LockId(eoriNumber, guaranteeReferenceNumber).toString
+    val lockId   = LockId(eoriNumber, guaranteeReferenceNumber).toString
     val duration = config.rateLimitDuration.seconds
     mongoLockRepository.takeLock(lockId, eoriNumber, duration)
   }
