@@ -31,10 +31,7 @@ import models.UserAnswers
 import models.requests.DataRequest
 import pages.BalanceIdPage
 import repositories.SessionRepository
-
-import scala.concurrent.duration.DurationInt
 import scala.concurrent.{ExecutionContext, Future}
-import scala.language.postfixOps
 
 class WaitOnGuaranteeBalanceController @Inject() (
   balanceService: GuaranteeBalanceService,
@@ -45,7 +42,6 @@ class WaitOnGuaranteeBalanceController @Inject() (
   renderer: Renderer,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
-  appConfig: FrontendAppConfig,
   sessionRepository: SessionRepository
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
@@ -84,11 +80,7 @@ class WaitOnGuaranteeBalanceController @Inject() (
 
   private def pollForGuaranteeBalance(balanceId: BalanceId)(implicit request: DataRequest[AnyContent]): Future[Result] =
     balanceService
-      .pollForGuaranteeBalance(
-        balanceId = balanceId,
-        delay = appConfig.guaranteeBalanceDelayInSecond seconds,
-        maxTime = appConfig.guaranteeBalanceMaxTimeInSecond seconds
-      )
+      .pollForGuaranteeBalance(balanceId = balanceId)
       .flatMap(responseHandler.processResponse(_))
 
 }

@@ -32,7 +32,6 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
 import org.scalacheck.Arbitrary.arbitrary
-import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
 import pages.{AccessCodePage, BalancePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -41,7 +40,6 @@ import viewModels.audit.AuditConstants.{AUDIT_DEST_RATE_LIMITED, AUDIT_ERROR_RAT
 
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
-import scala.language.postfixOps
 
 class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
@@ -61,7 +59,6 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
   private val access: String                                                   = "access"
   private val taxId: String                                                    = "taxId"
   private val guaranteeBalanceResponseHandler: GuaranteeBalanceResponseHandler = injector.instanceOf[GuaranteeBalanceResponseHandler]
-  private val config: FrontendAppConfig                                        = injector.instanceOf[FrontendAppConfig]
   private val balance                                                          = BalanceRequestSuccess(8500, CurrencyCode("GBP"))
 
   // format: off
@@ -72,6 +69,8 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
   // format: on
 
   "submitBalanceRequest" - {
+    val config: FrontendAppConfig = injector.instanceOf[FrontendAppConfig]
+
     "must redirect to Session Expired for a POST if no existing data is found" in {
 
       val request              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
@@ -122,6 +121,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
 
       verify(mockGuaranteeBalanceConnector).submitBalanceRequest(eqTo(BalanceRequest(TaxIdentifier(taxId), GuaranteeReference(grn), AccessCode(access))))(any())
     }
+
     "must redirect to rate limit if lock in mongo repository for that user and GRN" in {
 
       val userAnswers          = baseAnswers
@@ -191,6 +191,8 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
   }
 
   "pollForResponse" - {
+    val config: FrontendAppConfig = injector.instanceOf[FrontendAppConfig]
+
     "return successResponse first time with a single call" in {
       val mockGuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
       when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any())).thenReturn(Future.successful(successResponse))
@@ -203,7 +205,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
                                                 config
       )
 
-      val result = service.pollForGuaranteeBalance(balanceId, 1 seconds, 5 seconds)
+      val result = service.pollForGuaranteeBalance(balanceId)
       whenReady(result) {
         _ mustEqual successResponse
       }
@@ -223,7 +225,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
                                                 config
       )
 
-      val result = service.pollForGuaranteeBalance(balanceId, 1 seconds, 5 seconds)
+      val result = service.pollForGuaranteeBalance(balanceId)
       whenReady(result) {
         _ mustEqual tryAgainResponse
       }
@@ -244,8 +246,8 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
                                                 mockMongoLockRepository,
                                                 config
       )
-      val result = service.pollForGuaranteeBalance(balanceId, 1 seconds, 5 seconds)
 
+      val result = service.pollForGuaranteeBalance(balanceId)
       whenReady(result) {
         _ mustEqual successResponse
       }
@@ -268,7 +270,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
                                                 config
       )
 
-      val result = service.pollForGuaranteeBalance(balanceId, 1 seconds, 5 seconds)
+      val result = service.pollForGuaranteeBalance(balanceId)
 
       whenReady(result) {
         _ mustEqual tryAgainResponse
@@ -289,17 +291,12 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
                                                 config
       )
 
-      val result = service.pollForGuaranteeBalance(balanceId, 3 seconds, 5 seconds)
-
+      val result = service.pollForGuaranteeBalance(balanceId)
       whenReady(result) {
         _ mustEqual pendingResponse
       }
-
-      //First call after 0 seconds
-      //Second after 3 seconds
-      //Third after 6 seoncds -- Timeout here
-      verify(mockGuaranteeBalanceConnector, times(3)).queryPendingBalance(any())(any())
+      //With test.application.conf waitTimeInSeconds = 1 and  maxTimeInSeconds = 3
+      verify(mockGuaranteeBalanceConnector, times(4)).queryPendingBalance(any())(any())
     }
   }
-
 }

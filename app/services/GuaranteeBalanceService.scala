@@ -92,21 +92,24 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
     mongoLockRepository.takeLock(lockId, eoriNumber, duration)
   }
 
-  def pollForGuaranteeBalance(balanceId: BalanceId, delay: FiniteDuration, maxTime: FiniteDuration)(implicit
+  def pollForGuaranteeBalance(balanceId: BalanceId)(implicit
     hc: HeaderCarrier
   ): Future[Either[HttpResponse, BalanceRequestResponse]] = {
     val startTimeMillis: Long = System.nanoTime()
-    retryGuaranteeBalance(balanceId, delay, maxTime, startTimeMillis)
+    retryGuaranteeBalance(balanceId, startTimeMillis)
   }
 
-  def retryGuaranteeBalance(balanceId: BalanceId, delay: FiniteDuration, maxTime: FiniteDuration, startTimeMillis: Long)(implicit
+  def retryGuaranteeBalance(balanceId: BalanceId, startTimeMillis: Long)(implicit
     hc: HeaderCarrier
-  ): Future[Either[HttpResponse, BalanceRequestResponse]] =
+  ): Future[Either[HttpResponse, BalanceRequestResponse]] = {
+    val delay   = config.guaranteeBalanceDelayInSecond.seconds
+    val maxTime = config.guaranteeBalanceMaxTimeInSecond.seconds
     queryPendingBalance(balanceId).flatMap {
       case Right(BalanceRequestPending(_)) if remainingProcessingTime(startTimeMillis, maxTime) =>
-        after(delay, actorSystem.scheduler)(retryGuaranteeBalance(balanceId, delay, maxTime, startTimeMillis))
+        after(delay, actorSystem.scheduler)(retryGuaranteeBalance(balanceId, startTimeMillis))
       case result => Future.successful(result)
     }
+  }
 
   private def queryPendingBalance(balanceId: BalanceId)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] =
     connector.queryPendingBalance(balanceId)

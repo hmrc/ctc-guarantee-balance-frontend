@@ -43,11 +43,8 @@ class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with JsonMatchers wi
   private val grn: String  = "grn"
   val populatedUserAnswers = emptyUserAnswers.set(GuaranteeReferenceNumberPage, grn).success.value
 
-  val noMatchResponse  = Right(BalanceRequestNotMatched)
-  val successResponse  = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
-  val pendingResponse  = Right(BalanceRequestPending(balanceId))
-  val tryAgainResponse = Right(BalanceRequestPendingExpired(balanceId))
-  val errorResponse    = Left(HttpResponse(404, ""))
+  val successResponse = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
+  val errorResponse   = Left(HttpResponse(404, ""))
 
   implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
 
@@ -80,7 +77,7 @@ class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with JsonMatchers wi
 
     "onSubmit" - {
       "must Redirect to the Balance Confirmation Controller if the status is DataReturned " in {
-        when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId), any(), any())(any())).thenReturn(Future.successful(successResponse))
+        when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId))(any())).thenReturn(Future.successful(successResponse))
 
         val balanceIdUserAnswers = populatedUserAnswers.set(BalanceIdPage, balanceId).success.value
         val request              = FakeRequest(POST, routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url)
@@ -96,7 +93,7 @@ class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with JsonMatchers wi
       }
 
       "must show the technical difficulties page if we have an error " in {
-        when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId), any(), any())(any())).thenReturn(Future.successful(errorResponse))
+        when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId))(any())).thenReturn(Future.successful(errorResponse))
 
         val balanceIdUserAnswers = populatedUserAnswers.set(BalanceIdPage, balanceId).success.value
         val request              = FakeRequest(POST, routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url)
