@@ -19,13 +19,13 @@ package controllers
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import models.UserAnswers
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
+import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.mvc.Results.Redirect
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 
 import scala.concurrent.Future
 
