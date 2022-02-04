@@ -42,8 +42,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
   private val access: String = "access"
   private val taxId: String  = "taxId"
 
-  private val balance = BalanceRequestSuccess(8500, CurrencyCode("GBP"))
-
   // format: off
   private val baseAnswers: UserAnswers = emptyUserAnswers
     .set(GuaranteeReferenceNumberPage, grn).success.value
@@ -112,7 +110,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
       val request     = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
 
-      when(mockGuaranteeBalanceService.submitBalanceRequest(any(), any()))
+      when(mockGuaranteeBalanceService.submitBalanceRequest(any(), any())(any(), any()))
         .thenReturn(Future.successful(Redirect(routes.BalanceConfirmationController.onPageLoad().url)))
 
       val result = route(application, request).value
@@ -121,7 +119,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
       redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
 
-      verify(mockGuaranteeBalanceService).submitBalanceRequest(eqTo(userAnswers), any())
+      verify(mockGuaranteeBalanceService).submitBalanceRequest(eqTo(userAnswers), any())(any(), any())
     }
 
   }

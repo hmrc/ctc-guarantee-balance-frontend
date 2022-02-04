@@ -67,7 +67,7 @@ class RateLimitControllerSpec extends SpecBase with MockitoSugar with AppWithDef
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
       val request     = FakeRequest(POST, routes.RateLimitController.onSubmit().url)
 
-      when(mockGuaranteeBalanceService.submitBalanceRequest(any(), any()))
+      when(mockGuaranteeBalanceService.submitBalanceRequest(any(), any())(any(), any()))
         .thenReturn(Future.successful(Redirect(routes.BalanceConfirmationController.onPageLoad().url)))
 
       val result = route(application, request).value
@@ -76,7 +76,7 @@ class RateLimitControllerSpec extends SpecBase with MockitoSugar with AppWithDef
 
       redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
 
-      verify(mockGuaranteeBalanceService).submitBalanceRequest(eqTo(userAnswers), any())
+      verify(mockGuaranteeBalanceService).submitBalanceRequest(eqTo(userAnswers), any())(any(), any())
     }
 
   }

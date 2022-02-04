@@ -165,10 +165,6 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
             .setOption(AccessCodePage, accessCode).success.value
           // format: on
 
-          val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
-
-          val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-
           when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
 
           when(mockGuaranteeBalanceConnector.submitBalanceRequest(any())(any()))

@@ -47,10 +47,10 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
                                          auditService: AuditService,
                                          mongoLockRepository: MongoLockRepository,
                                          config: FrontendAppConfig
-)(implicit ec: ExecutionContext, hc: HeaderCarrier, dr: DataRequest[_])
+)(implicit ec: ExecutionContext)
     extends Logging {
 
-  def submitBalanceRequest(userAnswers: UserAnswers, internalId: String): Future[Result] =
+  def submitBalanceRequest(userAnswers: UserAnswers, internalId: String)(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] =
     (for {
       guaranteeReferenceNumber <- userAnswers.get(GuaranteeReferenceNumberPage)
       taxIdentifier            <- userAnswers.get(EoriNumberPage)
