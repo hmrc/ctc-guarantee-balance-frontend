@@ -76,7 +76,7 @@ class StartControllerSpec extends SpecBase with MockitoSugar with NunjucksSuppor
 
               status(result) mustEqual SEE_OTHER
               redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
-              session(result).get(Referral.key) mustNot be(defined)
+              result.map(_.session(request).get(Referral.key) mustNot be(defined)
 
               val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
               verify(mockSessionRepository).set(uaCaptor.capture)
