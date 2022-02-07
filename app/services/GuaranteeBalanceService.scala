@@ -48,7 +48,8 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
       case None                       => submitBalanceRequest
     }
 
-  def submitBalanceRequest()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] =
+  def submitBalanceRequest()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] = {
+    logger.info("[GuaranteeBalanceService][submitBalanceRequest]")
     (for {
       guaranteeReferenceNumber <- request.userAnswers.get(GuaranteeReferenceNumberPage)
       taxIdentifier            <- request.userAnswers.get(EoriNumberPage)
@@ -72,6 +73,7 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
       logger.warn("[GuaranteeBalanceService][submit] Insufficient data in user answers.")
       Future.successful(Right(BalanceRequestSessionExpired()))
     }
+  }
 
   private def checkRateLimit(eoriNumber: String, guaranteeReferenceNumber: String): Future[Boolean] = {
     val lockId   = LockId(eoriNumber, guaranteeReferenceNumber).toString
@@ -83,6 +85,7 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
     hc: HeaderCarrier,
     request: DataRequest[_]
   ): Future[Either[HttpResponse, BalanceRequestResponse]] = {
+    logger.info("[GuaranteeBalanceService][pollForGuaranteeBalance]")
     val startTimeMillis: Long = System.nanoTime()
     removeBalanceIdFromUserAnswers
     retryGuaranteeBalance(balanceId, startTimeMillis)
