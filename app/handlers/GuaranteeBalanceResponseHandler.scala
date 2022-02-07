@@ -32,7 +32,7 @@ import repositories.SessionRepository
 import services.AuditService
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import viewModels.audit.AuditConstants._
-import viewModels.audit.{ErrorMessage, SuccessfulBalanceAuditModel, UnsuccessfulBalanceAuditModel}
+import viewModels.audit.{ErrorMessage, UnsuccessfulBalanceAuditModel}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -129,7 +129,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
     renderer.render("technicalDifficulties.njk", json).map(InternalServerError(_))
   }
 
-  private def auditBalanceRequestNotMatched(errorPointer: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]) = {
+  private def auditBalanceRequestNotMatched(errorPointer: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]): Unit = {
     val balanceRequestNotMatchedMessage = errorPointer match {
       case "RC1.TIN"                                 => AUDIT_ERROR_INCORRECT_EORI
       case "GRR(1).Guarantee reference number (GRN)" => AUDIT_ERROR_INCORRECT_GRN
@@ -144,7 +144,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
     )
   }
 
-  private def auditSuccess()(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]) =
+  private def auditSuccess()(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]): Unit =
     auditService.audit(
       UnsuccessfulBalanceAuditModel.build(
         AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT,
@@ -158,7 +158,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
       )
     )
 
-  private def auditRateLimit()(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]) =
+  private def auditRateLimit()(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]): Unit =
     auditService.audit(
       UnsuccessfulBalanceAuditModel.build(
         AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT,
@@ -176,7 +176,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
     hc: HeaderCarrier,
     ec: ExecutionContext,
     request: DataRequest[_]
-  ) = {
+  ): Unit = {
     logger.warn(s"[GuaranteeBalanceResponseHandler][auditError]Failed to process errorMessage: $errorMessage, status Code: $errorCode")
     auditService.audit(
       UnsuccessfulBalanceAuditModel.build(
