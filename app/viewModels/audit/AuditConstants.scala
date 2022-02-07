@@ -17,8 +17,8 @@
 package viewModels.audit
 
 object AuditConstants {
-  final val AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT = "guaranteeBalanceRateLimit"
-  final val AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION = "guaranteeBalanceSubmission"
+  final val AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT = "GuaranteeBalanceRateLimit"
+  final val AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION = "GuaranteeBalanceSubmission"
 
   final val AUDIT_FIELD_EORI_NUMBER             = "eoriNumber"
   final val AUDIT_FIELD_GRN_NUMBER              = "guaranteeReferenceNumber"
