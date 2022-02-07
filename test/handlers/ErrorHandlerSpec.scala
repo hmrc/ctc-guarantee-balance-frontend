@@ -30,6 +30,7 @@ import play.api.test.Helpers._
 
 import scala.concurrent.Future
 
+// scalastyle:off magic.number
 class ErrorHandlerSpec extends SpecBase with JsonMatchers with AppWithDefaultMockFixtures with OptionValues {
 
   private lazy val handler: ErrorHandler = app.injector.instanceOf[ErrorHandler]
@@ -48,30 +49,36 @@ class ErrorHandlerSpec extends SpecBase with JsonMatchers with AppWithDefaultMoc
 
   "must render BadRequest page when given a client error (400-499)" in {
 
-    val clientErrorCode = Gen.choose(400, 499).sample.value
+    forAll(Gen.choose(400, 499).suchThat(_ != 404)) {
+      clientErrorCode =>
+        beforeEach()
 
-    val result: Future[Result] = handler.onClientError(new FakeRequestHeader, clientErrorCode)
+        val result: Future[Result] = handler.onClientError(new FakeRequestHeader, clientErrorCode)
 
-    val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+        val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
 
-    verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
+        verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
 
-    status(result) mustBe clientErrorCode
-    templateCaptor.getValue mustEqual "badRequest.njk"
+        status(result) mustBe clientErrorCode
+        templateCaptor.getValue mustEqual "badRequest.njk"
+    }
   }
 
   "must render TechnicalDifficulties page when given any other error" in {
 
-    val clientErrorCode = Gen.choose(500, 599).sample.value
+    forAll(Gen.choose(500, 599)) {
+      clientErrorCode =>
+        beforeEach()
 
-    val result: Future[Result] = handler.onClientError(new FakeRequestHeader, clientErrorCode)
+        val result: Future[Result] = handler.onClientError(new FakeRequestHeader, clientErrorCode)
 
-    val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+        val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
 
-    verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
+        verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
 
-    status(result) mustBe clientErrorCode
-    templateCaptor.getValue mustEqual "technicalDifficulties.njk"
+        status(result) mustBe clientErrorCode
+        templateCaptor.getValue mustEqual "technicalDifficulties.njk"
+    }
   }
 
   class FakeRequestHeader extends RequestHeader {
@@ -89,3 +96,4 @@ class ErrorHandlerSpec extends SpecBase with JsonMatchers with AppWithDefaultMoc
   }
 
 }
+// scalastyle:on magic.number
