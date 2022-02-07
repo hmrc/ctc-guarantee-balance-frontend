@@ -32,7 +32,7 @@ import repositories.SessionRepository
 import services.AuditService
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import viewModels.audit.AuditConstants._
-import viewModels.audit.{ErrorMessage, SuccessfulBalanceAuditModel, UnsuccessfulBalanceAuditModel}
+import viewModels.audit.{ErrorMessage, UnsuccessfulBalanceAuditModel}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -60,23 +60,21 @@ class GuaranteeBalanceResponseHandler @Inject() (
     response match {
       case BalanceRequestPending(balanceId) =>
         Future.successful(Redirect(controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId)))
+
       case successResponse: BalanceRequestSuccess =>
-        auditService.audit(
-          SuccessfulBalanceAuditModel.build(
-            request.userAnswers.get(EoriNumberPage).getOrElse("-"),
-            request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-"),
-            request.userAnswers.get(AccessCodePage).getOrElse("-"),
-            request.internalId,
-            LocalDateTime.now,
-            OK,
-            successResponse.currency.toString.trim + " " + successResponse.balance.toString.trim
-          )
-        )
+        auditSuccess
         processSuccessResponse(successResponse)
+
+      case _: BalanceRequestSessionExpired =>
+        Future.successful(Redirect(controllers.routes.SessionExpiredController.onPageLoad()))
 
       case BalanceRequestNotMatched(errorPointer) =>
         auditBalanceRequestNotMatched(errorPointer)
         Future.successful(Redirect(controllers.routes.DetailsDontMatchController.onPageLoad()))
+
+      case _: BalanceRequestRateLimit =>
+        auditRateLimit
+        Future.successful(Redirect(controllers.routes.RateLimitController.onPageLoad()))
 
       case BalanceRequestPendingExpired(_) =>
         auditError(
@@ -84,6 +82,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
           ErrorMessage(AUDIT_ERROR_REQUEST_EXPIRED, AUDIT_DEST_TRY_AGAIN)
         )
         Future.successful(Redirect(controllers.routes.TryGuaranteeBalanceAgainController.onPageLoad()))
+
       case BalanceRequestUnsupportedGuaranteeType =>
         auditError(
           SEE_OTHER,
@@ -130,7 +129,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
     renderer.render("technicalDifficulties.njk", json).map(InternalServerError(_))
   }
 
-  private def auditBalanceRequestNotMatched(errorPointer: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]) = {
+  private def auditBalanceRequestNotMatched(errorPointer: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]): Unit = {
     val balanceRequestNotMatchedMessage = errorPointer match {
       case "RC1.TIN"                                 => AUDIT_ERROR_INCORRECT_EORI
       case "GRR(1).Guarantee reference number (GRN)" => AUDIT_ERROR_INCORRECT_GRN
@@ -145,11 +144,39 @@ class GuaranteeBalanceResponseHandler @Inject() (
     )
   }
 
+  private def auditSuccess()(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]): Unit =
+    auditService.audit(
+      UnsuccessfulBalanceAuditModel.build(
+        AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT,
+        request.userAnswers.get(EoriNumberPage).getOrElse("-"),
+        request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-"),
+        request.userAnswers.get(AccessCodePage).getOrElse("-"),
+        request.internalId,
+        LocalDateTime.now,
+        TOO_MANY_REQUESTS,
+        ErrorMessage(AUDIT_ERROR_RATE_LIMIT_EXCEEDED, AUDIT_DEST_RATE_LIMITED)
+      )
+    )
+
+  private def auditRateLimit()(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]): Unit =
+    auditService.audit(
+      UnsuccessfulBalanceAuditModel.build(
+        AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT,
+        request.userAnswers.get(EoriNumberPage).getOrElse("-"),
+        request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-"),
+        request.userAnswers.get(AccessCodePage).getOrElse("-"),
+        request.internalId,
+        LocalDateTime.now,
+        TOO_MANY_REQUESTS,
+        ErrorMessage(AUDIT_ERROR_RATE_LIMIT_EXCEEDED, AUDIT_DEST_RATE_LIMITED)
+      )
+    )
+
   private def auditError(errorCode: Int, errorMessage: ErrorMessage)(implicit
     hc: HeaderCarrier,
     ec: ExecutionContext,
     request: DataRequest[_]
-  ) = {
+  ): Unit = {
     logger.warn(s"[GuaranteeBalanceResponseHandler][auditError]Failed to process errorMessage: $errorMessage, status Code: $errorCode")
     auditService.audit(
       UnsuccessfulBalanceAuditModel.build(

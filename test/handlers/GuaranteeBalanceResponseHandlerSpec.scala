@@ -46,17 +46,19 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
   private val grn: String  = "grn"
   val populatedUserAnswers = emptyUserAnswers.set(GuaranteeReferenceNumberPage, grn).success.value
 
-  val noMatchResponse           = Right(BalanceRequestNotMatched("test"))
-  val eoriNoMatchResponse       = Right(BalanceRequestNotMatched("RC1.TIN"))
-  val grnNoMatchResponse        = Right(BalanceRequestNotMatched("GRR(1).Guarantee reference number (GRN)"))
-  val accessCodeNoMatchResponse = Right(BalanceRequestNotMatched("GRR(1).ACC(1).Access code"))
-  val eoriAndGrnMatchResponse   = Right(BalanceRequestNotMatched("GRR(1).OTG(1).TIN"))
-  val unsupportedTypeResponse   = Right(BalanceRequestUnsupportedGuaranteeType)
-  val successResponse           = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
-  val pendingResponse           = Right(BalanceRequestPending(balanceId))
-  val tryAgainResponse          = Right(BalanceRequestPendingExpired(balanceId))
-  val httpErrorResponse         = Left(HttpResponse(404, ""))
-  val tooManyRequestsResponse   = Left(HttpResponse(429, ""))
+  val noMatchResponse             = Right(BalanceRequestNotMatched("test"))
+  val eoriNoMatchResponse         = Right(BalanceRequestNotMatched("RC1.TIN"))
+  val grnNoMatchResponse          = Right(BalanceRequestNotMatched("GRR(1).Guarantee reference number (GRN)"))
+  val accessCodeNoMatchResponse   = Right(BalanceRequestNotMatched("GRR(1).ACC(1).Access code"))
+  val eoriAndGrnMatchResponse     = Right(BalanceRequestNotMatched("GRR(1).OTG(1).TIN"))
+  val unsupportedTypeResponse     = Right(BalanceRequestUnsupportedGuaranteeType)
+  val successResponse             = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
+  val pendingResponse             = Right(BalanceRequestPending(balanceId))
+  val tryAgainResponse            = Right(BalanceRequestPendingExpired(balanceId))
+  val tooManyRequestsResponse     = Right(BalanceRequestRateLimit())
+  val sessionExpiredResponse      = Right(BalanceRequestSessionExpired())
+  val httpErrorResponse           = Left(HttpResponse(404, ""))
+  val tooManyRequestsHttpResponse = Left(HttpResponse(429, ""))
 
   val functionalError      = FunctionalError(ErrorType(1), "", None)
   val balanceErrorResponse = Right(BalanceRequestFunctionalError(NonEmptyList(functionalError, Nil)))
@@ -169,6 +171,16 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       redirectLocation(result).value mustEqual controllers.routes.BalanceConfirmationController.onPageLoad().url
     }
 
+    "must Redirect to the session expires page if we have a session expired response" in {
+      val result: Future[Result] = handler.processResponse(sessionExpiredResponse)
+
+      status(result) mustEqual SEE_OTHER
+      redirectLocation(result).value mustEqual controllers.routes.SessionExpiredController.onPageLoad().url
+
+      verify(auditService, times(0)).audit(any())(any(), any(), any())
+
+    }
+
     "must Redirect show the technical difficulties page if it has a processErrorResponse " in {
       val result: Future[Result] = handler.processResponse(balanceErrorResponse)
 
@@ -180,7 +192,8 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
     }
 
     "must Redirect to the rate limit page if there are too many requests" in {
-      val result: Future[Result] = handler.processResponse(tooManyRequestsResponse)
+
+      val result: Future[Result] = handler.processResponse(tooManyRequestsHttpResponse)
 
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value mustEqual controllers.routes.RateLimitController.onPageLoad().url
@@ -190,6 +203,21 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
 
       jsonCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION
+      jsonCaptor.getValue.detail.toString.contains(AUDIT_ERROR_RATE_LIMIT_EXCEEDED) mustEqual true
+      jsonCaptor.getValue.detail.toString.contains(AUDIT_DEST_RATE_LIMITED) mustEqual true
+    }
+
+    "must Redirect to the rate limit page if we have a RateLimit Response" in {
+      val result: Future[Result] = handler.processResponse(tooManyRequestsResponse)
+
+      status(result) mustEqual SEE_OTHER
+      redirectLocation(result).value mustEqual controllers.routes.RateLimitController.onPageLoad().url
+
+      val jsonCaptor: ArgumentCaptor[JsonAuditModel] = ArgumentCaptor.forClass(classOf[JsonAuditModel])
+
+      verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
+
+      jsonCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT
       jsonCaptor.getValue.detail.toString.contains(AUDIT_ERROR_RATE_LIMIT_EXCEEDED) mustEqual true
       jsonCaptor.getValue.detail.toString.contains(AUDIT_DEST_RATE_LIMITED) mustEqual true
     }

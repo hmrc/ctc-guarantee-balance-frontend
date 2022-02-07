@@ -17,6 +17,7 @@
 package controllers
 
 import controllers.actions._
+import handlers.GuaranteeBalanceResponseHandler
 import javax.inject.Inject
 import pages.BalanceIdPage
 import play.api.Logging
@@ -39,7 +40,8 @@ class CheckYourAnswersController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   renderer: Renderer,
   guaranteeBalanceService: GuaranteeBalanceService,
-  viewModelProvider: CheckYourAnswersViewModelProvider
+  viewModelProvider: CheckYourAnswersViewModelProvider,
+  responseHandler: GuaranteeBalanceResponseHandler
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -68,5 +70,6 @@ class CheckYourAnswersController @Inject() (
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       guaranteeBalanceService.submitBalanceRequest
+        .flatMap(responseHandler.processResponse(_))
   }
 }

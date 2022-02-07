@@ -16,22 +16,22 @@
 
 package controllers
 
+import java.util.UUID
+
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import models.backend.{BalanceRequestNotMatched, BalanceRequestPending, BalanceRequestPendingExpired, BalanceRequestSuccess}
+import config.FrontendAppConfig
+import matchers.JsonMatchers
+import models.UserAnswers
+import models.backend.BalanceRequestSuccess
 import models.values.{BalanceId, CurrencyCode}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
+import pages.{BalanceIdPage, GuaranteeReferenceNumberPage}
+import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpResponse}
-import java.util.UUID
-
-import config.FrontendAppConfig
-import matchers.JsonMatchers
-import models.UserAnswers
-import pages.{BalanceIdPage, GuaranteeReferenceNumberPage}
-import play.api.libs.json.{JsObject, Json}
 
 import scala.concurrent.Future
 

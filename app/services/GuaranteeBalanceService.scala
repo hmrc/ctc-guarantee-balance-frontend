@@ -20,36 +20,26 @@ import akka.actor.ActorSystem
 import akka.pattern.after
 import config.FrontendAppConfig
 import connectors.GuaranteeBalanceConnector
-import controllers.routes
-import handlers.GuaranteeBalanceResponseHandler
 import javax.inject.Inject
-import models.backend.{BalanceRequestPending, BalanceRequestResponse}
+import models.backend.{BalanceRequestPending, BalanceRequestRateLimit, BalanceRequestResponse, BalanceRequestSessionExpired}
 import models.requests.{BalanceRequest, DataRequest}
 import models.values._
-import org.joda.time.LocalDateTime
 import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.Logging
-import play.api.http.Status.TOO_MANY_REQUESTS
-import play.api.mvc.Result
-import play.api.mvc.Results.Redirect
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
-import viewModels.audit.AuditConstants.{AUDIT_DEST_RATE_LIMITED, AUDIT_ERROR_RATE_LIMIT_EXCEEDED, AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT}
-import viewModels.audit.{ErrorMessage, UnsuccessfulBalanceAuditModel}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
 class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
                                          connector: GuaranteeBalanceConnector,
-                                         responseHandler: GuaranteeBalanceResponseHandler,
-                                         auditService: AuditService,
                                          mongoLockRepository: MongoLockRepository,
                                          config: FrontendAppConfig
 )(implicit ec: ExecutionContext)
     extends Logging {
 
-  def submitBalanceRequest()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] =
+  def submitBalanceRequest()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] =
     (for {
       guaranteeReferenceNumber <- request.userAnswers.get(GuaranteeReferenceNumberPage)
       taxIdentifier            <- request.userAnswers.get(EoriNumberPage)
@@ -65,25 +55,13 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
                 AccessCode(accessCode)
               )
             )
-            .flatMap(responseHandler.processResponse(_))
         } else {
-          auditService.audit(
-            UnsuccessfulBalanceAuditModel.build(
-              AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT,
-              taxIdentifier,
-              guaranteeReferenceNumber,
-              accessCode,
-              request.internalId,
-              LocalDateTime.now,
-              TOO_MANY_REQUESTS,
-              ErrorMessage(AUDIT_ERROR_RATE_LIMIT_EXCEEDED, AUDIT_DEST_RATE_LIMITED)
-            )
-          )
-          Future.successful(Redirect(routes.RateLimitController.onPageLoad()))
+          logger.warn("[GuaranteeBalanceService][submit] Rate Limit hit")
+          Future.successful(Right(BalanceRequestRateLimit()))
         }
     }).getOrElse {
       logger.warn("[GuaranteeBalanceService][submit] Insufficient data in user answers.")
-      Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
+      Future.successful(Right(BalanceRequestSessionExpired()))
     }
 
   private def checkRateLimit(eoriNumber: String, guaranteeReferenceNumber: String): Future[Boolean] = {
