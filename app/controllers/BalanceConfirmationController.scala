@@ -51,7 +51,7 @@ class BalanceConfirmationController @Inject() (
         case Some(balance) =>
           val json = Json.obj(
             "balance"                         -> balance,
-            "referral"                        -> request.cookies.get(Referral.cookieName).map(_.value),
+            "referral"                        -> request.session.get(Referral.key),
             "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
           )
           renderer.render("balanceConfirmation.njk", json).map(Ok(_))

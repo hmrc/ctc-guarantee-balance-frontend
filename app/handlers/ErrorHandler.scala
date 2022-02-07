@@ -75,12 +75,13 @@ class ErrorHandler @Inject() (
       """
         |
         |! %sInternal server error, for (%s) [%s] ->
-        | """.stripMargin.format(ex match {
-                                   case p: PlayException => "@" + p.id + " - "
-                                   case _                => ""
-                                 },
-                                 request.method,
-                                 request.uri
+        | """.stripMargin.format(
+        ex match {
+          case p: PlayException => "@" + p.id + " - "
+          case _                => ""
+        },
+        request.method,
+        request.uri
       ),
       ex
     )

@@ -27,7 +27,6 @@ import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{BalancePage, EoriNumberPage}
 import play.api.libs.json.{JsObject, Json}
-import play.api.mvc.Cookie
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
@@ -53,7 +52,7 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
                 val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
                 val request = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
-                  .withCookies(Cookie(Referral.cookieName, referral.toString))
+                  .withSession(Referral.key -> referral.toString)
 
                 val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
                 val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])

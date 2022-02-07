@@ -98,8 +98,7 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
               val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new MissingBearerToken), frontendAppConfig, bodyParsers)
               val harness    = new Harness(authAction)
-              val cookie     = Cookie(Referral.cookieName, referral.toString)
-              val result     = harness.test()(fakeRequest.withCookies(cookie))
+              val result     = harness.test()(fakeRequest.withSession(Referral.key -> referral.toString))
 
               status(result) mustBe SEE_OTHER
 

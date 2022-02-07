@@ -52,7 +52,7 @@ class AuthenticatedIdentifierAction @Inject() (
       }.getOrElse(throw new UnauthorizedException("Unable to retrieve internal Id"))
     } recover {
       case _: NoActiveSession =>
-        val referral = request.cookies.get(Referral.cookieName).map(_.value)
+        val referral = request.session.get(Referral.key)
         val loginContinueUrl = config.loginContinueUrl + referral.fold("")(
           r => s"?referral=$r"
         )

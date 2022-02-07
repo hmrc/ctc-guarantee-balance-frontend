@@ -37,7 +37,7 @@ class ReferralAction(referral: Option[Referral])(implicit val executionContext: 
 
   override def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] =
     referral match {
-      case Some(value) => block(request).map(_.withCookies(Cookie(Referral.cookieName, value.toString)))
+      case Some(value) => block(request).map(_.addingToSession(Referral.key -> value.toString)(request))
       case None        => block(request)
     }
 }

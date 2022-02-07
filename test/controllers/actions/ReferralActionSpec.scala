@@ -48,7 +48,7 @@ class ReferralActionSpec extends SpecBase with AppWithDefaultMockFixtures {
             val result  = harness.test()(fakeRequest)
 
             status(result) mustBe OK
-            cookies(result) must contain(Cookie(Referral.cookieName, referral.toString))
+            result.map(_.session(fakeRequest).get(Referral.key).get mustEqual referral.toString)
         }
       }
     }
@@ -62,7 +62,8 @@ class ReferralActionSpec extends SpecBase with AppWithDefaultMockFixtures {
         val result  = harness.test()(fakeRequest)
 
         status(result) mustBe OK
-        cookies(result).map(_.name) mustNot contain(Referral.cookieName)
+        cookies(result).map(_.name) mustNot contain(Referral.key)
+        result.map(_.session(fakeRequest).get(Referral.key) mustNot be(defined))
       }
     }
   }
