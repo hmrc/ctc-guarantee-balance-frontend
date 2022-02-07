@@ -18,7 +18,6 @@ package controllers.actions
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import com.google.inject.Inject
-import config.FrontendAppConfig
 import controllers.routes
 import models.Referral
 import org.mockito.ArgumentMatchers.any
@@ -26,6 +25,7 @@ import org.mockito.Mockito.when
 import org.scalacheck.Arbitrary.arbitrary
 import play.api.mvc._
 import play.api.test.Helpers._
+import services.ReferralService
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
@@ -46,6 +46,9 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
     }
   }
 
+  private val bodyParsers     = app.injector.instanceOf[BodyParsers.Default]
+  private val referralService = app.injector.instanceOf[ReferralService]
+
   "Auth Action" - {
 
     "when the user has logged in" - {
@@ -55,10 +58,14 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
         when(mockAuthConnector.authorise[Option[String]](any(), any())(any(), any()))
           .thenReturn(Future.successful(Some("internalId")))
 
-        val bodyParsers       = app.injector.instanceOf[BodyParsers.Default]
-        val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
+        val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 
-        val authAction = new AuthenticatedIdentifierAction(mockAuthConnector, frontendAppConfig, bodyParsers)
+        val authAction = new AuthenticatedIdentifierAction(
+          mockAuthConnector,
+          frontendAppConfig,
+          bodyParsers,
+          referralService
+        )
 
         val harness = new Harness(authAction)
         val result  = harness.test()(fakeRequest)
@@ -71,10 +78,12 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
         when(mockAuthConnector.authorise[Option[String]](any(), any())(any(), any()))
           .thenReturn(Future.successful(None))
 
-        val bodyParsers       = app.injector.instanceOf[BodyParsers.Default]
-        val frontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
-
-        val authAction = new AuthenticatedIdentifierAction(mockAuthConnector, frontendAppConfig, bodyParsers)
+        val authAction = new AuthenticatedIdentifierAction(
+          mockAuthConnector,
+          frontendAppConfig,
+          bodyParsers,
+          referralService
+        )
 
         val harness = new Harness(authAction)
         val result  = harness.test()(fakeRequest)
@@ -94,11 +103,15 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           forAll(arbitrary[Referral]) {
             referral =>
-              val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+              val authAction = new AuthenticatedIdentifierAction(
+                new FakeFailingAuthConnector(new MissingBearerToken),
+                frontendAppConfig,
+                bodyParsers,
+                referralService
+              )
 
-              val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new MissingBearerToken), frontendAppConfig, bodyParsers)
-              val harness    = new Harness(authAction)
-              val result     = harness.test()(fakeRequest.withSession(Referral.key -> referral.toString))
+              val harness = new Harness(authAction)
+              val result  = harness.test()(fakeRequest.withSession(Referral.key -> referral.toString))
 
               status(result) mustBe SEE_OTHER
 
@@ -109,11 +122,15 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         "when session does not have referral value" in {
 
-          val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+          val authAction = new AuthenticatedIdentifierAction(
+            new FakeFailingAuthConnector(new MissingBearerToken),
+            frontendAppConfig,
+            bodyParsers,
+            referralService
+          )
 
-          val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new MissingBearerToken), frontendAppConfig, bodyParsers)
-          val harness    = new Harness(authAction)
-          val result     = harness.test()(fakeRequest)
+          val harness = new Harness(authAction)
+          val result  = harness.test()(fakeRequest)
 
           status(result) mustBe SEE_OTHER
 
@@ -127,11 +144,15 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
       "must redirect the user to log in " in {
 
-        val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+        val authAction = new AuthenticatedIdentifierAction(
+          new FakeFailingAuthConnector(new BearerTokenExpired),
+          frontendAppConfig,
+          bodyParsers,
+          referralService
+        )
 
-        val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new BearerTokenExpired), frontendAppConfig, bodyParsers)
-        val harness    = new Harness(authAction)
-        val result     = harness.test()(fakeRequest)
+        val harness = new Harness(authAction)
+        val result  = harness.test()(fakeRequest)
 
         status(result) mustBe SEE_OTHER
 
@@ -143,11 +164,15 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
       "must redirect the user to the unauthorised page" in {
 
-        val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+        val authAction = new AuthenticatedIdentifierAction(
+          new FakeFailingAuthConnector(new InsufficientConfidenceLevel),
+          frontendAppConfig,
+          bodyParsers,
+          referralService
+        )
 
-        val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new InsufficientConfidenceLevel), frontendAppConfig, bodyParsers)
-        val harness    = new Harness(authAction)
-        val result     = harness.test()(fakeRequest)
+        val harness = new Harness(authAction)
+        val result  = harness.test()(fakeRequest)
 
         status(result) mustBe SEE_OTHER
 
@@ -159,11 +184,15 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
       "must redirect the user to the unauthorised page" in {
 
-        val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+        val authAction = new AuthenticatedIdentifierAction(
+          new FakeFailingAuthConnector(new UnsupportedAuthProvider),
+          frontendAppConfig,
+          bodyParsers,
+          referralService
+        )
 
-        val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new UnsupportedAuthProvider), frontendAppConfig, bodyParsers)
-        val harness    = new Harness(authAction)
-        val result     = harness.test()(fakeRequest)
+        val harness = new Harness(authAction)
+        val result  = harness.test()(fakeRequest)
 
         status(result) mustBe SEE_OTHER
 
@@ -175,11 +204,15 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
       "must redirect the user to the unauthorised page" in {
 
-        val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+        val authAction = new AuthenticatedIdentifierAction(
+          new FakeFailingAuthConnector(new UnsupportedAffinityGroup),
+          frontendAppConfig,
+          bodyParsers,
+          referralService
+        )
 
-        val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new UnsupportedAffinityGroup), frontendAppConfig, bodyParsers)
-        val harness    = new Harness(authAction)
-        val result     = harness.test()(fakeRequest)
+        val harness = new Harness(authAction)
+        val result  = harness.test()(fakeRequest)
 
         status(result) mustBe SEE_OTHER
 
@@ -191,11 +224,15 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
       "must redirect the user to the unauthorised page" in {
 
-        val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
+        val authAction = new AuthenticatedIdentifierAction(
+          new FakeFailingAuthConnector(new UnsupportedCredentialRole),
+          frontendAppConfig,
+          bodyParsers,
+          referralService
+        )
 
-        val authAction = new AuthenticatedIdentifierAction(new FakeFailingAuthConnector(new UnsupportedCredentialRole), frontendAppConfig, bodyParsers)
-        val harness    = new Harness(authAction)
-        val result     = harness.test()(fakeRequest)
+        val harness = new Harness(authAction)
+        val result  = harness.test()(fakeRequest)
 
         status(result) mustBe SEE_OTHER
 

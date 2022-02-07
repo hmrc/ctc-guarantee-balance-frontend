@@ -18,8 +18,6 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions._
-import javax.inject.Inject
-import models.Referral
 import pages.BalancePage
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -27,8 +25,10 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
 import repositories.SessionRepository
+import services.ReferralService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class BalanceConfirmationController @Inject() (
@@ -39,7 +39,8 @@ class BalanceConfirmationController @Inject() (
   requireData: DataRequiredAction,
   val controllerComponents: MessagesControllerComponents,
   renderer: Renderer,
-  appConfig: FrontendAppConfig
+  appConfig: FrontendAppConfig,
+  referralService: ReferralService
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -51,7 +52,7 @@ class BalanceConfirmationController @Inject() (
         case Some(balance) =>
           val json = Json.obj(
             "balance"                         -> balance,
-            "referral"                        -> request.session.get(Referral.key),
+            "referral"                        -> referralService.getReferralFromSession(request),
             "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
           )
           renderer.render("balanceConfirmation.njk", json).map(Ok(_))
