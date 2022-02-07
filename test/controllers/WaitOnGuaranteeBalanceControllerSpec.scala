@@ -79,7 +79,7 @@ class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with JsonMatchers wi
 
     "onSubmit" - {
       "must Redirect to the Balance Confirmation Controller if the status is DataReturned " in {
-        when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId), any(), any())(any())).thenReturn(Future.successful(successResponse))
+        when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId))(any())).thenReturn(Future.successful(successResponse))
 
         val request     = FakeRequest(POST, routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url)
         val application = applicationBuilder(userAnswers = Some(populatedUserAnswers)).build()
@@ -90,13 +90,13 @@ class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with JsonMatchers wi
       }
 
       "must show the technical difficulties page if we have an error " in {
-        when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId), any(), any())(any())).thenReturn(Future.successful(errorResponse))
+        when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId))(any())).thenReturn(Future.successful(errorResponse))
 
         val request = FakeRequest(POST, routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url)
 
-        val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-        val application    = applicationBuilder(userAnswers = Some(populatedUserAnswers)).build()
-        val result         = route(application, request).value
+        val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
+        val application                            = applicationBuilder(userAnswers = Some(populatedUserAnswers)).build()
+        val result                                 = route(application, request).value
 
         status(result) mustEqual INTERNAL_SERVER_ERROR
 
