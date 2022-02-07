@@ -90,7 +90,7 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
       "must redirect the user to log in" - {
 
-        "when user has referral cookie" in {
+        "when session has referral value" in {
 
           forAll(arbitrary[Referral]) {
             referral =>
@@ -107,7 +107,7 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
           }
         }
 
-        "when user does not have referral cookie" in {
+        "when session does not have referral value" in {
 
           val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
 

@@ -41,7 +41,7 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
 
           val balance = "£8,500.00"
 
-          "when cookie set" in {
+          "when session has referral value" in {
 
             forAll(arbitrary[Referral]) {
               referral =>
@@ -76,7 +76,7 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
             }
           }
 
-          "when cookie not set" in {
+          "when session does not have referral value" in {
 
             val userAnswers = emptyUserAnswers.set(BalancePage, balance).success.value
 

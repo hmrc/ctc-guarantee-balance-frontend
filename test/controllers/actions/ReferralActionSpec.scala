@@ -38,7 +38,7 @@ class ReferralActionSpec extends SpecBase with AppWithDefaultMockFixtures {
   "Referral Action" - {
 
     "when referral provided" - {
-      "must store referral in a cookie" in {
+      "must store referral in session" in {
 
         forAll(arbitrary[Referral]) {
           referral =>
@@ -54,7 +54,7 @@ class ReferralActionSpec extends SpecBase with AppWithDefaultMockFixtures {
     }
 
     "when referral not provided" - {
-      "must not store referral in a cookie" in {
+      "must not store referral in session" in {
 
         val referralAction = new ReferralAction(None)
 
@@ -62,7 +62,6 @@ class ReferralActionSpec extends SpecBase with AppWithDefaultMockFixtures {
         val result  = harness.test()(fakeRequest)
 
         status(result) mustBe OK
-        cookies(result).map(_.name) mustNot contain(Referral.key)
         result.map(_.session(fakeRequest).get(Referral.key) mustNot be(defined))
       }
     }
