@@ -19,6 +19,8 @@ package controllers
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import matchers.JsonMatchers.containJson
 import models.UserAnswers
+import models.backend.BalanceRequestSuccess
+import models.values.CurrencyCode
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, times, verify, when}
@@ -27,7 +29,6 @@ import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
-import play.api.mvc.Results.Redirect
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import viewModels.{CheckYourAnswersViewModel, CheckYourAnswersViewModelProvider, Section}
@@ -102,14 +103,14 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
       redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
     }
 
-    "must redirect if successful" in {
+    "must pass the response from the submit onto the processor" in {
 
       val userAnswers = baseAnswers
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
       val request     = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
 
       when(mockGuaranteeBalanceService.submitBalanceRequest()(any(), any()))
-        .thenReturn(Future.successful(Redirect(routes.BalanceConfirmationController.onPageLoad().url)))
+        .thenReturn(Future.successful(Right(BalanceRequestSuccess(123.45, CurrencyCode("GBP")))))
 
       val result = route(application, request).value
 

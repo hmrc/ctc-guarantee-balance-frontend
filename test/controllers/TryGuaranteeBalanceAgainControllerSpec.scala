@@ -17,11 +17,12 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import models.backend.BalanceRequestSuccess
+import models.values.CurrencyCode
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
 import pages.GuaranteeReferenceNumberPage
-import play.api.mvc.Results.Redirect
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
@@ -63,14 +64,14 @@ class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaul
       redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
     }
 
-    "must redirect if POST successful" in {
+    "must pass the response from the submit onto the processor" in {
 
       val userAnswers = baseAnswers
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
       val request     = FakeRequest(POST, routes.TryGuaranteeBalanceAgainController.onSubmit().url)
 
       when(mockGuaranteeBalanceService.submitBalanceRequest()(any(), any()))
-        .thenReturn(Future.successful(Redirect(routes.BalanceConfirmationController.onPageLoad().url)))
+        .thenReturn(Future.successful(Right(BalanceRequestSuccess(123.45, CurrencyCode("GBP")))))
 
       val result = route(application, request).value
 
@@ -80,5 +81,6 @@ class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaul
 
       verify(mockGuaranteeBalanceService).submitBalanceRequest()(any(), any())
     }
+
   }
 }

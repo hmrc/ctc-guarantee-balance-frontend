@@ -17,6 +17,7 @@
 package controllers
 
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
+import handlers.GuaranteeBalanceResponseHandler
 import pages.GuaranteeReferenceNumberPage
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -33,7 +34,8 @@ class TryGuaranteeBalanceAgainController @Inject() (
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
-  guaranteeBalanceService: GuaranteeBalanceService
+  guaranteeBalanceService: GuaranteeBalanceService,
+  responseHandler: GuaranteeBalanceResponseHandler
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
@@ -49,5 +51,6 @@ class TryGuaranteeBalanceAgainController @Inject() (
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       guaranteeBalanceService.submitBalanceRequest
+        .flatMap(responseHandler.processResponse(_))
   }
 }

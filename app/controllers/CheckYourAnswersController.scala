@@ -17,6 +17,7 @@
 package controllers
 
 import controllers.actions._
+import handlers.GuaranteeBalanceResponseHandler
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
@@ -26,8 +27,8 @@ import services.GuaranteeBalanceService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 import viewModels.CheckYourAnswersViewModelProvider
-
 import javax.inject.Inject
+
 import scala.concurrent.ExecutionContext
 
 class CheckYourAnswersController @Inject() (
@@ -38,7 +39,8 @@ class CheckYourAnswersController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   renderer: Renderer,
   guaranteeBalanceService: GuaranteeBalanceService,
-  viewModelProvider: CheckYourAnswersViewModelProvider
+  viewModelProvider: CheckYourAnswersViewModelProvider,
+  responseHandler: GuaranteeBalanceResponseHandler
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -59,5 +61,6 @@ class CheckYourAnswersController @Inject() (
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       guaranteeBalanceService.submitBalanceRequest
+        .flatMap(responseHandler.processResponse(_))
   }
 }

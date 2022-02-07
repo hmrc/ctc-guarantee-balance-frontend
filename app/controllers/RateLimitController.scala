@@ -17,6 +17,7 @@
 package controllers
 
 import controllers.actions._
+import handlers.GuaranteeBalanceResponseHandler
 import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -33,7 +34,8 @@ class RateLimitController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   renderer: Renderer,
   requireData: DataRequiredAction,
-  guaranteeBalanceService: GuaranteeBalanceService
+  guaranteeBalanceService: GuaranteeBalanceService,
+  responseHandler: GuaranteeBalanceResponseHandler
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
@@ -46,5 +48,6 @@ class RateLimitController @Inject() (
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       guaranteeBalanceService.submitBalanceRequest
+        .flatMap(responseHandler.processResponse(_))
   }
 }
