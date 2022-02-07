@@ -16,18 +16,16 @@
 
 package controllers
 
-import java.util.UUID
-
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import matchers.JsonMatchers.containJson
 import models.UserAnswers
 import models.backend.BalanceRequestSuccess
-import models.values.{BalanceId, CurrencyCode}
+import models.values.CurrencyCode
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{AccessCodePage, BalanceIdPage, EoriNumberPage, GuaranteeReferenceNumberPage}
+import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
@@ -42,8 +40,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
   private val grn: String    = "grn"
   private val access: String = "access"
   private val taxId: String  = "taxId"
-  private val expectedUuid   = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
-  private val balanceId      = BalanceId(expectedUuid)
 
   // format: off
   private val baseAnswers: UserAnswers = emptyUserAnswers
@@ -84,35 +80,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
       val expectedJson = Json.obj(
-        "section"   -> emptySection,
-        "submitUrl" -> routes.CheckYourAnswersController.onSubmit().url
-      )
-
-      templateCaptor.getValue mustEqual "checkYourAnswers.njk"
-      jsonCaptor.getValue must containJson(expectedJson)
-
-      verify(mockViewModelProvider)(userAnswers)
-
-      application.stop()
-    }
-
-    "return OK and the correct view for a GET when we have a BalanceId set" in {
-      val userAnswers = baseAnswers.set(BalanceIdPage, balanceId).success.value
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
-      val request     = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
-
-      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-      val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
-
-      val result = route(application, request).value
-
-      status(result) mustEqual OK
-
-      verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
-
-      val expectedJson = Json.obj(
-        "section"   -> emptySection,
-        "submitUrl" -> routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url
+        "section" -> emptySection
       )
 
       templateCaptor.getValue mustEqual "checkYourAnswers.njk"
@@ -140,7 +108,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
       val request     = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
 
-      when(mockGuaranteeBalanceService.submitBalanceRequest()(any(), any()))
+      when(mockGuaranteeBalanceService.submitRequestOrPollForResponse()(any(), any()))
         .thenReturn(Future.successful(Right(BalanceRequestSuccess(123.45, CurrencyCode("GBP")))))
 
       val result = route(application, request).value
@@ -149,7 +117,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
       redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
 
-      verify(mockGuaranteeBalanceService).submitBalanceRequest()(any(), any())
+      verify(mockGuaranteeBalanceService).submitRequestOrPollForResponse()(any(), any())
     }
   }
 }

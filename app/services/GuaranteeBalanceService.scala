@@ -21,11 +21,13 @@ import akka.pattern.after
 import config.FrontendAppConfig
 import connectors.GuaranteeBalanceConnector
 import javax.inject.Inject
+import models.UserAnswers
 import models.backend.{BalanceRequestPending, BalanceRequestRateLimit, BalanceRequestResponse, BalanceRequestSessionExpired}
 import models.requests.{BalanceRequest, DataRequest}
 import models.values._
-import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
+import pages.{AccessCodePage, BalanceIdPage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.Logging
+import repositories.SessionRepository
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
 
@@ -35,9 +37,16 @@ import scala.concurrent.{ExecutionContext, Future}
 class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
                                          connector: GuaranteeBalanceConnector,
                                          mongoLockRepository: MongoLockRepository,
-                                         config: FrontendAppConfig
+                                         config: FrontendAppConfig,
+                                         sessionRepository: SessionRepository
 )(implicit ec: ExecutionContext)
     extends Logging {
+
+  def submitRequestOrPollForResponse()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] =
+    request.userAnswers.get(BalanceIdPage) match {
+      case Some(balanceId: BalanceId) => pollForGuaranteeBalance(balanceId)
+      case None                       => submitBalanceRequest
+    }
 
   def submitBalanceRequest()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] =
     (for {
@@ -71,13 +80,21 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
   }
 
   def pollForGuaranteeBalance(balanceId: BalanceId)(implicit
-    hc: HeaderCarrier
+    hc: HeaderCarrier,
+    request: DataRequest[_]
   ): Future[Either[HttpResponse, BalanceRequestResponse]] = {
     val startTimeMillis: Long = System.nanoTime()
+    removeBalanceIdFromUserAnswers
     retryGuaranteeBalance(balanceId, startTimeMillis)
   }
 
-  def retryGuaranteeBalance(balanceId: BalanceId, startTimeMillis: Long)(implicit
+  private def removeBalanceIdFromUserAnswers()(implicit request: DataRequest[_]): Future[UserAnswers] =
+    for {
+      updatedAnswers <- Future.fromTry(request.userAnswers.remove(BalanceIdPage))
+      _              <- sessionRepository.set(updatedAnswers)
+    } yield updatedAnswers
+
+  private def retryGuaranteeBalance(balanceId: BalanceId, startTimeMillis: Long)(implicit
     hc: HeaderCarrier
   ): Future[Either[HttpResponse, BalanceRequestResponse]] = {
     val delay   = config.guaranteeBalanceDelayInSecond.seconds

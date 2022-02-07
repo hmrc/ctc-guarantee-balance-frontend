@@ -21,7 +21,6 @@ import java.util.UUID
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import config.FrontendAppConfig
 import matchers.JsonMatchers
-import models.UserAnswers
 import models.backend.BalanceRequestSuccess
 import models.values.{BalanceId, CurrencyCode}
 import org.mockito.ArgumentCaptor
@@ -37,14 +36,14 @@ import scala.concurrent.Future
 
 class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with JsonMatchers with AppWithDefaultMockFixtures {
 
-  val expectedUuid = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
-  val balanceId    = BalanceId(expectedUuid)
+  private val expectedUuid: UUID   = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
+  private val balanceId: BalanceId = BalanceId(expectedUuid)
 
-  private val grn: String  = "grn"
-  val populatedUserAnswers = emptyUserAnswers.set(GuaranteeReferenceNumberPage, grn).success.value
+  private val grn: String          = "grn"
+  private val populatedUserAnswers = emptyUserAnswers.set(GuaranteeReferenceNumberPage, grn).success.value
 
-  val successResponse = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
-  val errorResponse   = Left(HttpResponse(404, ""))
+  private val successResponse = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
+  private val errorResponse   = Left(HttpResponse(404, ""))
 
   implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
 
@@ -75,9 +74,24 @@ class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with JsonMatchers wi
       }
     }
 
+    "checkDetails" - {
+      "must Redirect to Check Your Answers " in {
+        when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
+
+        val request     = FakeRequest(GET, routes.WaitOnGuaranteeBalanceController.checkDetails(balanceId).url)
+        val application = applicationBuilder(userAnswers = Some(populatedUserAnswers)).build()
+        val result      = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad().url
+
+        verify(mockSessionRepository, times(1)).set(any())
+      }
+    }
+
     "onSubmit" - {
       "must Redirect to the Balance Confirmation Controller if the status is DataReturned " in {
-        when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId))(any())).thenReturn(Future.successful(successResponse))
+        when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId))(any(), any())).thenReturn(Future.successful(successResponse))
 
         val balanceIdUserAnswers = populatedUserAnswers.set(BalanceIdPage, balanceId).success.value
         val request              = FakeRequest(POST, routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url)
@@ -86,14 +100,10 @@ class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with JsonMatchers wi
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
-
-        val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
-        verify(mockSessionRepository, times(2)).set(userAnswersCaptor.capture())
-        userAnswersCaptor.getAllValues.get(0).get(BalanceIdPage).isDefined mustEqual false
       }
 
       "must show the technical difficulties page if we have an error " in {
-        when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId))(any())).thenReturn(Future.successful(errorResponse))
+        when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId))(any(), any())).thenReturn(Future.successful(errorResponse))
 
         val balanceIdUserAnswers = populatedUserAnswers.set(BalanceIdPage, balanceId).success.value
         val request              = FakeRequest(POST, routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url)
@@ -106,10 +116,6 @@ class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with JsonMatchers wi
 
         verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
         templateCaptor.getValue mustEqual "technicalDifficulties.njk"
-
-        val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
-        verify(mockSessionRepository, times(1)).set(userAnswersCaptor.capture())
-        userAnswersCaptor.getValue.get(BalanceIdPage).isDefined mustEqual false
       }
     }
   }

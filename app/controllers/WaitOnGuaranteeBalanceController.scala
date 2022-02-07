@@ -19,18 +19,17 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import handlers.GuaranteeBalanceResponseHandler
+import javax.inject.Inject
 import models.values.BalanceId
+import pages.BalanceIdPage
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json
 import play.api.mvc._
 import renderer.Renderer
+import repositories.SessionRepository
 import services.GuaranteeBalanceService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import javax.inject.Inject
-import models.UserAnswers
-import models.requests.DataRequest
-import pages.BalanceIdPage
-import repositories.SessionRepository
+
 import scala.concurrent.{ExecutionContext, Future}
 
 class WaitOnGuaranteeBalanceController @Inject() (
@@ -66,21 +65,8 @@ class WaitOnGuaranteeBalanceController @Inject() (
 
   def onSubmit(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      for {
-        _           <- removeBalanceIdFromUserAnswers
-        displayPage <- pollForGuaranteeBalance(balanceId)
-      } yield displayPage
+      balanceService
+        .pollForGuaranteeBalance(balanceId = balanceId)
+        .flatMap(responseHandler.processResponse(_))
   }
-
-  private def removeBalanceIdFromUserAnswers()(implicit request: DataRequest[AnyContent]): Future[UserAnswers] =
-    for {
-      updatedAnswers <- Future.fromTry(request.userAnswers.remove(BalanceIdPage))
-      _              <- sessionRepository.set(updatedAnswers)
-    } yield updatedAnswers
-
-  private def pollForGuaranteeBalance(balanceId: BalanceId)(implicit request: DataRequest[AnyContent]): Future[Result] =
-    balanceService
-      .pollForGuaranteeBalance(balanceId = balanceId)
-      .flatMap(responseHandler.processResponse(_))
-
 }

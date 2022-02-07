@@ -19,7 +19,6 @@ package controllers
 import controllers.actions._
 import handlers.GuaranteeBalanceResponseHandler
 import javax.inject.Inject
-import pages.BalanceIdPage
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
@@ -52,16 +51,8 @@ class CheckYourAnswersController @Inject() (
     implicit request =>
       val viewModel = viewModelProvider(request.userAnswers)
 
-      val submitUrl = request.userAnswers.get(BalanceIdPage) match {
-        case Some(balanceId) =>
-          routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url
-        case None =>
-          routes.CheckYourAnswersController.onSubmit().url
-      }
-
       val json = Json.obj(
-        "section"   -> Json.toJson(viewModel.section),
-        "submitUrl" -> submitUrl
+        "section" -> Json.toJson(viewModel.section)
       )
 
       renderer.render("checkYourAnswers.njk", json).map(Ok(_))
@@ -69,7 +60,7 @@ class CheckYourAnswersController @Inject() (
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      guaranteeBalanceService.submitBalanceRequest
+      guaranteeBalanceService.submitRequestOrPollForResponse
         .flatMap(responseHandler.processResponse(_))
   }
 }

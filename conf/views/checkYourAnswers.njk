@@ -20,7 +20,7 @@
           {{ messages("checkYourAnswers.heading") }}
         </h1>
 
-        <form action="{{ submitUrl }}" method="post">
+        <form action="{{ routes.controllers.CheckYourAnswersController.onSubmit().url }}" method="post">
 
           {{ csrf() | safe }}
 
