@@ -99,15 +99,12 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
   ): Future[Either[HttpResponse, BalanceRequestResponse]] = {
     val delay   = config.guaranteeBalanceDelayInSecond.seconds
     val maxTime = config.guaranteeBalanceMaxTimeInSecond.seconds
-    queryPendingBalance(balanceId).flatMap {
+    connector.queryPendingBalance(balanceId).flatMap {
       case Right(BalanceRequestPending(_)) if remainingProcessingTime(startTimeMillis, maxTime) =>
         after(delay, actorSystem.scheduler)(retryGuaranteeBalance(balanceId, startTimeMillis))
       case result => Future.successful(result)
     }
   }
-
-  private def queryPendingBalance(balanceId: BalanceId)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] =
-    connector.queryPendingBalance(balanceId)
 
   private def remainingProcessingTime(startTimeMillis: Long, maxTime: FiniteDuration): Boolean = {
     val currentTimeMillis: Long = System.nanoTime()
