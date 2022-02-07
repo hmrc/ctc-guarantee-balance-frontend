@@ -41,8 +41,7 @@ class ReferralAction(referral: Option[Referral])(referralService: ReferralServic
 
   override def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] =
     referral match {
-      case Some(value) =>
-        block(request).map(referralService.setReferralInSession(_, value)(request))
-      case None => block(request)
+      case Some(value) => block(request).map(referralService.setReferralInSession(_, value)(request))
+      case None        => block(request)
     }
 }
