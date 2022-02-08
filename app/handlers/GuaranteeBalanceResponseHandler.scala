@@ -32,7 +32,7 @@ import repositories.SessionRepository
 import services.AuditService
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import viewModels.audit.AuditConstants._
-import viewModels.audit.{ErrorMessage, UnsuccessfulBalanceAuditModel}
+import viewModels.audit.{ErrorMessage, SuccessfulBalanceAuditModel, UnsuccessfulBalanceAuditModel}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -63,7 +63,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
         Future.successful(Redirect(controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId)))
 
       case successResponse: BalanceRequestSuccess =>
-        auditSuccess
+        auditSuccess(successResponse)
         processSuccessResponse(successResponse)
 
       case _: BalanceRequestSessionExpired =>
@@ -100,21 +100,15 @@ class GuaranteeBalanceResponseHandler @Inject() (
         technicalDifficulties()
     }
 
-  private def processHttpResponse(response: HttpResponse)(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] =
-    response match {
-      case failureResponse if failureResponse.status.equals(TOO_MANY_REQUESTS) =>
-        auditError(
-          TOO_MANY_REQUESTS,
-          ErrorMessage(AUDIT_ERROR_RATE_LIMIT_EXCEEDED, AUDIT_DEST_RATE_LIMITED)
-        )
-        Future.successful(Redirect(controllers.routes.RateLimitController.onPageLoad()))
-      case failureResponse =>
-        auditError(
-          INTERNAL_SERVER_ERROR,
-          ErrorMessage(s"Failed to process Response: $failureResponse", AUDIT_DEST_TECHNICAL_DIFFICULTIES)
-        )
-        technicalDifficulties()
-    }
+  private def processHttpResponse(failureResponse: HttpResponse)(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
+    logger.warn(s"[GuaranteeBalanceResponseHandler][processHttpResponse]Failed to process Response: $failureResponse")
+
+    auditError(
+      INTERNAL_SERVER_ERROR,
+      ErrorMessage(s"Failed to process Response: $failureResponse", AUDIT_DEST_TECHNICAL_DIFFICULTIES)
+    )
+    technicalDifficulties()
+  }
 
   private def processSuccessResponse(balanceResponse: BalanceRequestSuccess)(implicit request: DataRequest[_]): Future[Result] =
     for {
@@ -144,19 +138,18 @@ class GuaranteeBalanceResponseHandler @Inject() (
     )
   }
 
-  private def auditSuccess()(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]): Unit = {
+  private def auditSuccess(successResponse: BalanceRequestSuccess)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]): Unit = {
     logger.info(s"[GuaranteeBalanceResponseHandler][auditSuccess]")
 
     auditService.audit(
-      UnsuccessfulBalanceAuditModel.build(
-        AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT,
+      SuccessfulBalanceAuditModel.build(
         request.userAnswers.get(EoriNumberPage).getOrElse("-"),
         request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-"),
         request.userAnswers.get(AccessCodePage).getOrElse("-"),
         request.internalId,
         LocalDateTime.now,
-        TOO_MANY_REQUESTS,
-        ErrorMessage(AUDIT_ERROR_RATE_LIMIT_EXCEEDED, AUDIT_DEST_RATE_LIMITED)
+        OK,
+        successResponse.currency.toString.trim + " " + successResponse.balance.toString.trim
       )
     )
   }
