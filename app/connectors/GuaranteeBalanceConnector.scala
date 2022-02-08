@@ -53,6 +53,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
             case Status.ACCEPTED =>
               Right(BalanceRequestPending(response.json.as[PostBalanceRequestPendingResponse].balanceId))
             case Status.TOO_MANY_REQUESTS =>
+              logger.warn("[GuaranteeBalanceConnector][submitBalanceRequest] TOO_MANY_REQUESTS response from back end call")
               Right(BalanceRequestRateLimit())
             case Status.OK =>
               Right(response.json.as[PostBalanceRequestSuccessResponse].response)
