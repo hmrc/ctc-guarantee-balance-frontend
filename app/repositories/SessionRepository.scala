@@ -16,66 +16,50 @@
 
 package repositories
 
-import models.{MongoDateTimeFormats, UserAnswers}
-import play.api.libs.json._
-import reactivemongo.api.WriteConcern
-import reactivemongo.play.json.collection.Helpers.idWrites
+import config.FrontendAppConfig
+import models.UserAnswers
+import org.mongodb.scala.model._
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
 import java.time.LocalDateTime
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class DefaultSessionRepository @Inject() (
-  sessionCollection: SessionCollection
+  mongoComponent: MongoComponent,
+  config: FrontendAppConfig
 )(implicit ec: ExecutionContext)
-    extends SessionRepository {
-
-  override def get(id: String): Future[Option[UserAnswers]] = {
-
-    implicit val dateWriter: Writes[LocalDateTime] = MongoDateTimeFormats.localDateTimeWrite
-
-    val selector = Json.obj(
-      "_id" -> id
+    extends PlayMongoRepository[UserAnswers](
+      mongoComponent = mongoComponent,
+      collectionName = "user-answers",
+      domainFormat = UserAnswers.format,
+      indexes = Seq(
+        IndexModel(
+          Indexes.ascending("lastUpdated"),
+          IndexOptions().name("user-answers-last-updated-index").expireAfter(config.mongoDbTtl, TimeUnit.SECONDS)
+        )
+      ),
+      extraCodecs = Seq(
+//        Codecs.playFormatCodec(MongoDateTimeFormats.localDateTimeFormat)
+      )
     )
+    with SessionRepository {
 
-    val modifier = Json.obj(
-      "$set" -> Json.obj("lastUpdated" -> LocalDateTime.now)
-    )
-
-    sessionCollection().flatMap {
-      _.findAndUpdate(
-        selector = selector,
-        update = modifier,
-        fetchNewObject = false,
-        upsert = false,
-        sort = None,
-        fields = None,
-        bypassDocumentValidation = false,
-        writeConcern = WriteConcern.Default,
-        maxTime = None,
-        collation = None,
-        arrayFilters = Nil
-      ).map(_.value.map(_.as[UserAnswers]))
-    }
-  }
+  override def get(id: String): Future[Option[UserAnswers]] =
+    collection
+      .findOneAndUpdate(Filters.eq("_id", id), Updates.set("lastUpdated", LocalDateTime.now()))
+      .toFutureOption()
 
   override def set(userAnswers: UserAnswers): Future[Boolean] = {
 
-    val selector = Json.obj(
-      "_id" -> userAnswers.id
-    )
+    val updatedUserAnswers = userAnswers.copy(lastUpdated = LocalDateTime.now())
 
-    val modifier = Json.obj(
-      "$set" -> (userAnswers copy (lastUpdated = LocalDateTime.now))
-    )
-
-    sessionCollection().flatMap {
-      _.update(ordered = false)
-        .one(selector, modifier, upsert = true)
-        .map {
-          _.ok
-        }
-    }
+    collection
+      .replaceOne(Filters.eq("_id", userAnswers.id), updatedUserAnswers, ReplaceOptions().upsert(true))
+      .toFuture()
+      .map(_.wasAcknowledged())
   }
 }
 

@@ -23,7 +23,7 @@ import play.api.libs.json._
 trait MongoDateTimeFormats {
 
   implicit val localDateTimeRead: Reads[LocalDateTime] =
-    (__ \ "$date").read[Long].map {
+    (__ \ "$date" \ "$numberLong").read[Long].map {
       millis =>
         LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneOffset.UTC)
     }
@@ -32,6 +32,8 @@ trait MongoDateTimeFormats {
     Json.obj(
       "$date" -> dateTime.atZone(ZoneOffset.UTC).toInstant.toEpochMilli
     )
+
+  implicit val localDateTimeFormat: Format[LocalDateTime] = Format(localDateTimeRead, localDateTimeWrite)
 }
 
 object MongoDateTimeFormats extends MongoDateTimeFormats

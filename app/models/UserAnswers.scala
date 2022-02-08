@@ -69,25 +69,21 @@ final case class UserAnswers(
 
 object UserAnswers {
 
-  implicit lazy val reads: Reads[UserAnswers] = {
+  import play.api.libs.functional.syntax._
 
-    import play.api.libs.functional.syntax._
-
+  implicit lazy val reads: Reads[UserAnswers] =
     (
       (__ \ "_id").read[String] and
         (__ \ "data").read[JsObject] and
-        (__ \ "lastUpdated").read(MongoDateTimeFormats.localDateTimeRead)
+        (__ \ "lastUpdated").read[LocalDateTime]
     )(UserAnswers.apply _)
-  }
 
-  implicit lazy val writes: OWrites[UserAnswers] = {
-
-    import play.api.libs.functional.syntax._
-
+  implicit lazy val writes: OWrites[UserAnswers] =
     (
       (__ \ "_id").write[String] and
         (__ \ "data").write[JsObject] and
-        (__ \ "lastUpdated").write(MongoDateTimeFormats.localDateTimeWrite)
+        (__ \ "lastUpdated").write[LocalDateTime]
     )(unlift(UserAnswers.unapply))
-  }
+
+  implicit lazy val format: Format[UserAnswers] = Format(reads, writes)
 }
