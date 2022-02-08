@@ -32,7 +32,7 @@ import repositories.SessionRepository
 import services.AuditService
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import viewModels.audit.AuditConstants._
-import viewModels.audit.{ErrorMessage, UnsuccessfulBalanceAuditModel}
+import viewModels.audit.{ErrorMessage, SuccessfulBalanceAuditModel, UnsuccessfulBalanceAuditModel}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -62,7 +62,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
         Future.successful(Redirect(controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId)))
 
       case successResponse: BalanceRequestSuccess =>
-        auditSuccess
+        auditSuccess(successResponse)
         processSuccessResponse(successResponse)
 
       case _: BalanceRequestSessionExpired =>
@@ -144,17 +144,16 @@ class GuaranteeBalanceResponseHandler @Inject() (
     )
   }
 
-  private def auditSuccess()(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]): Unit =
+  private def auditSuccess(successResponse: BalanceRequestSuccess)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]): Unit =
     auditService.audit(
-      UnsuccessfulBalanceAuditModel.build(
-        AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT,
+      SuccessfulBalanceAuditModel.build(
         request.userAnswers.get(EoriNumberPage).getOrElse("-"),
         request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-"),
         request.userAnswers.get(AccessCodePage).getOrElse("-"),
         request.internalId,
         LocalDateTime.now,
-        TOO_MANY_REQUESTS,
-        ErrorMessage(AUDIT_ERROR_RATE_LIMIT_EXCEEDED, AUDIT_DEST_RATE_LIMITED)
+        OK,
+        successResponse.currency.toString.trim + " " + successResponse.balance.toString.trim
       )
     )
 

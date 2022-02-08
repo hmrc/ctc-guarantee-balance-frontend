@@ -24,14 +24,10 @@ import javax.inject.Inject
 import models.backend.{BalanceRequestPending, BalanceRequestRateLimit, BalanceRequestResponse, BalanceRequestSessionExpired}
 import models.requests.{BalanceRequest, DataRequest}
 import models.values._
-import org.joda.time.LocalDateTime
 import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.Logging
-import play.api.http.Status.TOO_MANY_REQUESTS
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
-import viewModels.audit.AuditConstants.{AUDIT_DEST_RATE_LIMITED, AUDIT_ERROR_RATE_LIMIT_EXCEEDED, AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT}
-import viewModels.audit.{ErrorMessage, UnsuccessfulBalanceAuditModel}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
