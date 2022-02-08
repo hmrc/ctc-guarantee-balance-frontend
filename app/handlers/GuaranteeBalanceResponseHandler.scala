@@ -98,23 +98,15 @@ class GuaranteeBalanceResponseHandler @Inject() (
         technicalDifficulties()
     }
 
-  private def processHttpResponse(response: HttpResponse)(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] =
-    response match {
-      case failureResponse if failureResponse.status.equals(TOO_MANY_REQUESTS) =>
-        auditError(
-          TOO_MANY_REQUESTS,
-          ErrorMessage(AUDIT_ERROR_RATE_LIMIT_EXCEEDED, AUDIT_DEST_RATE_LIMITED)
-        )
-        Future.successful(Redirect(controllers.routes.RateLimitController.onPageLoad()))
-      case failureResponse =>
-        logger.warn(s"[GuaranteeBalanceResponseHandler][processHttpResponse]Failed to process Response: $failureResponse")
+  private def processHttpResponse(failureResponse: HttpResponse)(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
+    logger.warn(s"[GuaranteeBalanceResponseHandler][processHttpResponse]Failed to process Response: $failureResponse")
 
-        auditError(
-          INTERNAL_SERVER_ERROR,
-          ErrorMessage(s"Failed to process Response: $failureResponse", AUDIT_DEST_TECHNICAL_DIFFICULTIES)
-        )
-        technicalDifficulties()
-    }
+    auditError(
+      INTERNAL_SERVER_ERROR,
+      ErrorMessage(s"Failed to process Response: $failureResponse", AUDIT_DEST_TECHNICAL_DIFFICULTIES)
+    )
+    technicalDifficulties()
+  }
 
   private def processSuccessResponse(balanceResponse: BalanceRequestSuccess)(implicit request: DataRequest[_]): Future[Result] =
     for {

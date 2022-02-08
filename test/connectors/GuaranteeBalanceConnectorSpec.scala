@@ -184,7 +184,41 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
         result mustBe Right(BalanceRequestUnsupportedGuaranteeType)
       }
 
-      "must return an Httpe error when we get a response with error type 14 and other Pointer" in {
+      "must return rate limit balance type when we have an http response TOO_MANY_REQUESTS" in {
+        val balanceRequestNotMatchedJson: String =
+          """
+            | {
+            |   "code": "FUNCTIONAL_ERROR",
+            |   "message": "The request was rejected by the guarantee management system",
+            |   "response": {
+            |     "errors": [
+            |       {
+            |         "errorType": 14,
+            |         "errorPointer": "GRR(1).GQY(1).Query identifier",
+            |         "errorReason": "R261"
+            |       }
+            |     ]
+            |   }
+            | }
+            |""".stripMargin
+
+        server.stubFor(
+          post(urlEqualTo(submitBalanceRequestUrl))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+            .withRequestBody(equalToJson(requestAsJsonString))
+            .willReturn(
+              aResponse()
+                .withStatus(Status.TOO_MANY_REQUESTS)
+                .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
+                .withBody(balanceRequestNotMatchedJson)
+            )
+        )
+
+        val result = connector.submitBalanceRequest(request).futureValue
+        result mustBe Right(BalanceRequestRateLimit())
+      }
+
+      "must return an Http error when we get a response with error type 14 and other Pointer" in {
         val functionErrorJson: String =
           """
             | {
