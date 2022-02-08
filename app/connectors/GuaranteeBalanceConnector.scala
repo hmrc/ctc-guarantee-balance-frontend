@@ -58,7 +58,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
               Right(response.json.as[PostBalanceRequestSuccessResponse].response)
             case Status.BAD_REQUEST =>
               processSubmitErrorResponse(response)
-            case status if is4xx(status) || is5xx(status) =>
+            case _ =>
               Left(response)
           }
       }
@@ -77,9 +77,9 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
       HttpReads[HttpResponse].map {
         response =>
           response.status match {
-            case Status.OK                                => Right(processQuerySuccessResponse(balanceId, response))
-            case Status.NOT_FOUND                         => Right(BalanceRequestPendingExpired(balanceId))
-            case status if is4xx(status) || is5xx(status) => Left(response)
+            case Status.OK        => Right(processQuerySuccessResponse(balanceId, response))
+            case Status.NOT_FOUND => Right(BalanceRequestPendingExpired(balanceId))
+            case _                => Left(response)
           }
       }
 
