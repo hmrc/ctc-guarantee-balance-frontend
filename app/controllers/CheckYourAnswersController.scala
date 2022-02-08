@@ -19,7 +19,6 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions._
 import handlers.GuaranteeBalanceResponseHandler
-import javax.inject.Inject
 import models.requests.BalanceRequest
 import models.values._
 import org.joda.time.LocalDateTime
@@ -29,14 +28,15 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import renderer.Renderer
+import repositories.MongoLockRepository
 import services.{AuditService, GuaranteeBalanceService}
-import uk.gov.hmrc.mongo.lock.MongoLockRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 import viewModels.CheckYourAnswersViewModelProvider
 import viewModels.audit.AuditConstants.{AUDIT_DEST_RATE_LIMITED, AUDIT_ERROR_RATE_LIMIT_EXCEEDED, AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT}
 import viewModels.audit.{ErrorMessage, UnsuccessfulBalanceAuditModel}
 
+import javax.inject.Inject
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -79,12 +79,15 @@ class CheckYourAnswersController @Inject() (
       } yield checkRateLimit(request.internalId, guaranteeReferenceNumber).flatMap {
         lockFree =>
           if (lockFree) {
-            for {
-              _ <- releaseLock(request.internalId, guaranteeReferenceNumber)
-              balanceRequest = BalanceRequest(TaxIdentifier(taxIdentifier), GuaranteeReference(guaranteeReferenceNumber), AccessCode(accessCode))
-              response <- guaranteeBalanceService.submitBalanceRequest(balanceRequest)
-              result   <- responseHandler.processResponse(response, processPending)
-            } yield result
+            guaranteeBalanceService
+              .submitBalanceRequest(
+                BalanceRequest(
+                  TaxIdentifier(taxIdentifier),
+                  GuaranteeReference(guaranteeReferenceNumber),
+                  AccessCode(accessCode)
+                )
+              )
+              .flatMap(responseHandler.processResponse(_, processPending))
           } else {
             auditService.audit(
               UnsuccessfulBalanceAuditModel.build(
@@ -106,14 +109,11 @@ class CheckYourAnswersController @Inject() (
       }
   }
 
-  private def checkRateLimit(internalId: String, guaranteeReferenceNumber: String): Future[Boolean] =
-    mongoLockRepository.takeLock(lockId(internalId, guaranteeReferenceNumber), internalId, config.rateLimitDuration.seconds)
-
-  private def releaseLock(internalId: String, guaranteeReferenceNumber: String): Future[Unit] =
-    mongoLockRepository.releaseLock(lockId(internalId, guaranteeReferenceNumber), internalId)
-
-  private def lockId(internalId: String, guaranteeReferenceNumber: String): String =
-    LockId(internalId, guaranteeReferenceNumber).toString
+  private def checkRateLimit(eoriNumber: String, guaranteeReferenceNumber: String): Future[Boolean] = {
+    val lockId   = LockId(eoriNumber, guaranteeReferenceNumber).toString
+    val duration = config.rateLimitDuration.seconds
+    mongoLockRepository.takeLock(lockId, eoriNumber, duration)
+  }
 
   private def processPending(balanceId: BalanceId): Future[Result] =
     Future.successful(Redirect(controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId)))
