@@ -79,15 +79,12 @@ class CheckYourAnswersController @Inject() (
       } yield checkRateLimit(request.internalId, guaranteeReferenceNumber).flatMap {
         lockFree =>
           if (lockFree) {
-            guaranteeBalanceService
-              .submitBalanceRequest(
-                BalanceRequest(
-                  TaxIdentifier(taxIdentifier),
-                  GuaranteeReference(guaranteeReferenceNumber),
-                  AccessCode(accessCode)
-                )
-              )
-              .flatMap(responseHandler.processResponse(_, processPending))
+            for {
+              _ <- releaseLock(request.internalId, guaranteeReferenceNumber)
+              balanceRequest = BalanceRequest(TaxIdentifier(taxIdentifier), GuaranteeReference(guaranteeReferenceNumber), AccessCode(accessCode))
+              response <- guaranteeBalanceService.submitBalanceRequest(balanceRequest)
+              result   <- responseHandler.processResponse(response, processPending)
+            } yield result
           } else {
             auditService.audit(
               UnsuccessfulBalanceAuditModel.build(
@@ -109,11 +106,14 @@ class CheckYourAnswersController @Inject() (
       }
   }
 
-  private def checkRateLimit(eoriNumber: String, guaranteeReferenceNumber: String): Future[Boolean] = {
-    val lockId   = LockId(eoriNumber, guaranteeReferenceNumber).toString
-    val duration = config.rateLimitDuration.seconds
-    mongoLockRepository.takeLock(lockId, eoriNumber, duration)
-  }
+  private def checkRateLimit(internalId: String, guaranteeReferenceNumber: String): Future[Boolean] =
+    mongoLockRepository.takeLock(lockId(internalId, guaranteeReferenceNumber), internalId, config.rateLimitDuration.seconds)
+
+  private def releaseLock(internalId: String, guaranteeReferenceNumber: String): Future[Unit] =
+    mongoLockRepository.releaseLock(lockId(internalId, guaranteeReferenceNumber), internalId)
+
+  private def lockId(internalId: String, guaranteeReferenceNumber: String): String =
+    LockId(internalId, guaranteeReferenceNumber).toString
 
   private def processPending(balanceId: BalanceId): Future[Result] =
     Future.successful(Redirect(controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId)))

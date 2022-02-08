@@ -57,9 +57,6 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
 
     when(mockSessionRepository.set(any()))
       .thenReturn(Future.successful(true))
-
-    when(mockMongoLockRepository.releaseLock(any(), any()))
-      .thenReturn(Future.successful(()))
   }
 
   val mockRenderer: NunjucksRenderer                       = mock[NunjucksRenderer]

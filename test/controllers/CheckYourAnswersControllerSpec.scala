@@ -117,6 +117,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
       val request     = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
 
       when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
+      when(mockMongoLockRepository.releaseLock(any(), any())).thenReturn(Future.successful(()))
 
       when(mockGuaranteeBalanceService.submitBalanceRequest(any())(any()))
         .thenReturn(Future.successful(Right(balance)))
@@ -129,6 +130,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
       val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
       verify(mockMongoLockRepository).takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())
+      verify(mockMongoLockRepository).releaseLock(eqTo(expectedLockId), eqTo(userAnswers.id))
 
       val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
       verify(mockSessionRepository).set(uaCaptor.capture)
