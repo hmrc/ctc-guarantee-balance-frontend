@@ -17,10 +17,10 @@
 package controllers
 
 import java.util.UUID
-
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import config.FrontendAppConfig
 import matchers.JsonMatchers
+import models.{PollMode, SubmitMode}
 import models.backend.BalanceRequestSuccess
 import models.values.{BalanceId, CurrencyCode}
 import org.mockito.ArgumentCaptor
@@ -51,7 +51,7 @@ class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with JsonMatchers wi
 
     "onLoad" - {
       "must return OK and the correct view for a GET" in {
-        val request = FakeRequest(GET, routes.WaitOnGuaranteeBalanceController.onPageLoad(BalanceId(expectedUuid)).url)
+        val request = FakeRequest(GET, routes.WaitOnGuaranteeBalanceController.onPageLoad(BalanceId(expectedUuid), PollMode).url)
 
         val application = applicationBuilder(userAnswers = Some(populatedUserAnswers)).build()
         val result      = route(application, request).value
@@ -75,10 +75,10 @@ class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with JsonMatchers wi
     }
 
     "checkDetails" - {
-      "must Redirect to Check Your Answers " in {
+      "must Redirect to Check Your Answers and update user answers if Poll Mode" in {
         when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
 
-        val request     = FakeRequest(GET, routes.WaitOnGuaranteeBalanceController.checkDetails(balanceId).url)
+        val request     = FakeRequest(GET, routes.WaitOnGuaranteeBalanceController.checkDetails(balanceId, PollMode).url)
         val application = applicationBuilder(userAnswers = Some(populatedUserAnswers)).build()
         val result      = route(application, request).value
 
@@ -87,26 +87,54 @@ class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with JsonMatchers wi
 
         verify(mockSessionRepository, times(1)).set(any())
       }
+
+      "must Redirect to Check Your Answers and not update user answers if Submit Mode" in {
+
+        val request     = FakeRequest(GET, routes.WaitOnGuaranteeBalanceController.checkDetails(balanceId, SubmitMode).url)
+        val application = applicationBuilder(userAnswers = Some(populatedUserAnswers)).build()
+        val result      = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual routes.CheckYourAnswersController.onPageLoad().url
+
+        verify(mockSessionRepository, times(0)).set(any())
+      }
     }
 
     "onSubmit" - {
-      "must Redirect to the Balance Confirmation Controller if the status is DataReturned " in {
+      "must poll for a response and then Redirect to the Balance Confirmation Controller if the status is DataReturned and Poll Mode" in {
         when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId))(any(), any())).thenReturn(Future.successful(successResponse))
 
         val balanceIdUserAnswers = populatedUserAnswers.set(BalanceIdPage, balanceId).success.value
-        val request              = FakeRequest(POST, routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url)
+        val request              = FakeRequest(POST, routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId, PollMode).url)
         val application          = applicationBuilder(userAnswers = Some(balanceIdUserAnswers)).build()
         val result               = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
+        verify(mockGuaranteeBalanceService, times(1)).pollForGuaranteeBalance(eqTo(balanceId))(any(), any())
+
+      }
+
+      "must poll for a response and then Redirect to the Balance Confirmation Controller if the status is DataReturned and Submit Mode" in {
+        when(mockGuaranteeBalanceService.submitBalanceRequest()(any(), any())).thenReturn(Future.successful(successResponse))
+
+        val balanceIdUserAnswers = populatedUserAnswers.set(BalanceIdPage, balanceId).success.value
+        val request              = FakeRequest(POST, routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId, SubmitMode).url)
+        val application          = applicationBuilder(userAnswers = Some(balanceIdUserAnswers)).build()
+        val result               = route(application, request).value
+
+        status(result) mustEqual SEE_OTHER
+
+        redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
+        verify(mockGuaranteeBalanceService, times(1)).submitBalanceRequest()(any(), any())
       }
 
       "must show the technical difficulties page if we have an error " in {
         when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId))(any(), any())).thenReturn(Future.successful(errorResponse))
 
         val balanceIdUserAnswers = populatedUserAnswers.set(BalanceIdPage, balanceId).success.value
-        val request              = FakeRequest(POST, routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url)
+        val request              = FakeRequest(POST, routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId, PollMode).url)
 
         val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
         val application                            = applicationBuilder(userAnswers = Some(balanceIdUserAnswers)).build()

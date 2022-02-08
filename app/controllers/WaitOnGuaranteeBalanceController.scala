@@ -19,8 +19,8 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import handlers.GuaranteeBalanceResponseHandler
-import javax.inject.Inject
 import models.values.BalanceId
+import models.{PollMode, SubmissionMode, SubmitMode}
 import pages.BalanceIdPage
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json
@@ -30,6 +30,7 @@ import repositories.SessionRepository
 import services.GuaranteeBalanceService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class WaitOnGuaranteeBalanceController @Inject() (
@@ -46,27 +47,38 @@ class WaitOnGuaranteeBalanceController @Inject() (
     extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onPageLoad(balanceId: BalanceId, mode: SubmissionMode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       val json = Json.obj(
         "balanceId"         -> balanceId,
-        "waitTimeInSeconds" -> config.guaranteeBalanceDisplayDelay
+        "waitTimeInSeconds" -> config.guaranteeBalanceDisplayDelay,
+        "submissionMode"    -> mode
       )
       renderer.render("waitOnGuaranteeBalance.njk", json).map(Ok(_))
   }
 
-  def checkDetails(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def checkDetails(balanceId: BalanceId, mode: SubmissionMode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      for {
-        updatedAnswers <- Future.fromTry(request.userAnswers.set(BalanceIdPage, balanceId))
-        _              <- sessionRepository.set(updatedAnswers)
-      } yield Redirect(routes.CheckYourAnswersController.onPageLoad())
+      if (mode == PollMode) {
+        for {
+          updatedAnswers <- Future.fromTry(request.userAnswers.set(BalanceIdPage, balanceId))
+          _              <- sessionRepository.set(updatedAnswers)
+        } yield Redirect(routes.CheckYourAnswersController.onPageLoad())
+      } else {
+        Future.successful(Redirect(routes.CheckYourAnswersController.onPageLoad()))
+      }
   }
 
-  def onSubmit(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(balanceId: BalanceId, mode: SubmissionMode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      balanceService
-        .pollForGuaranteeBalance(balanceId = balanceId)
-        .flatMap(responseHandler.processResponse(_))
+      mode match {
+        case PollMode =>
+          balanceService
+            .pollForGuaranteeBalance(balanceId = balanceId)
+            .flatMap(responseHandler.processResponse(_))
+        case SubmitMode =>
+          balanceService.submitBalanceRequest
+            .flatMap(responseHandler.processResponse(_))
+      }
   }
 }

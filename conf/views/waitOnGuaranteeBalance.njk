@@ -14,13 +14,13 @@
 
       <h1 class="govuk-heading-xl">{{ messages("waitOnGuaranteeBalance.heading") }}</h1>
       <p class="govuk-body">{{ messages("waitOnGuaranteeBalance.checkDetails.prelink") }}
-        <a class="govuk-link" id="check-details" href="{{ routes.controllers.WaitOnGuaranteeBalanceController.checkDetails(balanceId).url }}">
+        <a class="govuk-link" id="check-details" href="{{ routes.controllers.WaitOnGuaranteeBalanceController.checkDetails(balanceId, submissionMode).url }}">
             {{ messages("waitOnGuaranteeBalance.checkDetails.link") }}
         </a>
         {{ messages("waitOnGuaranteeBalance.checkDetails.postlink", waitTimeInSeconds) }}
       </p>
 
-      <form action="{{ routes.controllers.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url }}" method="post">
+      <form action="{{ routes.controllers.WaitOnGuaranteeBalanceController.onSubmit(balanceId, submissionMode).url }}" method="post">
          {{ csrf() | safe }}
 
          {{ govukButton({
