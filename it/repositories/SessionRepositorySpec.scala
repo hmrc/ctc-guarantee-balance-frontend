@@ -32,7 +32,7 @@ class SessionRepositorySpec extends AnyFreeSpec with Matchers with DefaultPlayMo
 
   private val config: FrontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
 
-  override protected def repository = new DefaultSessionRepository(mongoComponent, config)
+  override protected def repository = new SessionRepository(mongoComponent, config)
 
   private val internalId1 = "internalId1"
   private val internalId2 = "internalId2"

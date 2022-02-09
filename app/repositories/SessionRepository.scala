@@ -24,10 +24,11 @@ import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
 import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-class DefaultSessionRepository @Inject() (
+@Singleton
+class SessionRepository @Inject() (
   mongoComponent: MongoComponent,
   config: FrontendAppConfig
 )(implicit ec: ExecutionContext)
@@ -41,15 +42,14 @@ class DefaultSessionRepository @Inject() (
           IndexOptions().name("user-answers-last-updated-index").expireAfter(config.mongoDbTtl, TimeUnit.SECONDS)
         )
       )
-    )
-    with SessionRepository {
+    ) {
 
-  override def get(id: String): Future[Option[UserAnswers]] =
+  def get(id: String): Future[Option[UserAnswers]] =
     collection
       .findOneAndUpdate(Filters.eq("_id", id), Updates.set("lastUpdated", LocalDateTime.now()), FindOneAndUpdateOptions().upsert(false))
       .toFutureOption()
 
-  override def set(userAnswers: UserAnswers): Future[Boolean] = {
+  def set(userAnswers: UserAnswers): Future[Boolean] = {
 
     val updatedUserAnswers = userAnswers.copy(lastUpdated = LocalDateTime.now())
 
@@ -58,12 +58,4 @@ class DefaultSessionRepository @Inject() (
       .toFuture()
       .map(_.wasAcknowledged())
   }
-}
-
-trait SessionRepository {
-
-  def get(id: String): Future[Option[UserAnswers]]
-
-  def set(userAnswers: UserAnswers): Future[Boolean]
-
 }

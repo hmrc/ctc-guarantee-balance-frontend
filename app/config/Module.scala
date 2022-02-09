@@ -18,7 +18,6 @@ package config
 
 import com.google.inject.AbstractModule
 import controllers.actions._
-import repositories.{DefaultSessionRepository, SessionRepository}
 
 import java.time.{Clock, ZoneOffset}
 
@@ -26,14 +25,13 @@ class Module extends AbstractModule {
 
   override def configure(): Unit = {
     bind(classOf[Clock]).toInstance(Clock.systemDefaultZone.withZone(ZoneOffset.UTC))
+
     bind(classOf[DataRetrievalAction]).to(classOf[DataRetrievalActionImpl]).asEagerSingleton()
     bind(classOf[DataRequiredAction]).to(classOf[DataRequiredActionImpl]).asEagerSingleton()
     bind(classOf[ReferralActionProvider]).to(classOf[ReferralActionProviderImpl]).asEagerSingleton()
 
     // For session based storage instead of cred based, change to SessionIdentifierAction
     bind(classOf[IdentifierAction]).to(classOf[AuthenticatedIdentifierAction]).asEagerSingleton()
-
-    bind(classOf[SessionRepository]).to(classOf[DefaultSessionRepository]).asEagerSingleton()
   }
 
 }
