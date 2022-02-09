@@ -28,9 +28,7 @@ import services.GuaranteeBalanceService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.Inject
-import scala.concurrent.duration.DurationInt
-import scala.concurrent.{ExecutionContext, Future}
-import scala.language.postfixOps
+import scala.concurrent.ExecutionContext
 
 class WaitOnGuaranteeBalanceController @Inject() (
   balanceService: GuaranteeBalanceService,
@@ -40,34 +38,24 @@ class WaitOnGuaranteeBalanceController @Inject() (
   identify: IdentifierAction,
   renderer: Renderer,
   getData: DataRetrievalAction,
-  requireData: DataRequiredAction,
-  appConfig: FrontendAppConfig
+  requireData: DataRequiredAction
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
 
   def onPageLoad(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      displayWaitPage(balanceId)
+      val json = Json.obj(
+        "balanceId"         -> balanceId,
+        "waitTimeInSeconds" -> config.guaranteeBalanceDisplayDelay
+      )
+      renderer.render("waitOnGuaranteeBalance.njk", json).map(Ok(_))
   }
 
   def onSubmit(balanceId: BalanceId): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       balanceService
-        .pollForGuaranteeBalance(
-          balanceId = balanceId,
-          delay = appConfig.guaranteeBalanceDelayInSecond seconds,
-          maxTime = appConfig.guaranteeBalanceMaxTimeInSecond seconds
-        )
-        .flatMap(responseHandler.processResponse(_, displayWaitPage))
+        .pollForGuaranteeBalance(balanceId = balanceId)
+        .flatMap(responseHandler.processResponse(_))
   }
-
-  private def displayWaitPage(balanceId: BalanceId)(implicit request: Request[_]): Future[Result] = {
-    val json = Json.obj(
-      "balanceId"         -> balanceId,
-      "waitTimeInSeconds" -> config.guaranteeBalanceDisplayDelay
-    )
-    renderer.render("waitOnGuaranteeBalance.njk", json).map(Ok(_))
-  }
-
 }

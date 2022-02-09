@@ -16,8 +16,8 @@
 
 package models.values
 
-case class LockId(eoriNumber: String, grn: String) {
+case class LockId(internalId: String, grn: String) {
 
-  override def toString: String = (eoriNumber + grn.trim.toLowerCase).hashCode.toString
+  override def toString: String = (internalId + grn.trim.toLowerCase).hashCode.toString
 
 }

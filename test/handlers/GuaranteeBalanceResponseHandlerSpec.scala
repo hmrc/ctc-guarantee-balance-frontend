@@ -29,13 +29,13 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify}
 import pages.GuaranteeReferenceNumberPage
-import play.api.http.Status.SEE_OTHER
-import play.api.mvc.Results.Redirect
+import play.api.http.Status.{OK, SEE_OTHER}
 import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.Helpers._
-import services.{AuditService, JsonAuditModel}
+import services.AuditService
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpResponse}
 import viewModels.audit.AuditConstants._
+import viewModels.audit.{SuccessfulBalanceAuditModel, UnsuccessfulBalanceAuditModel}
 
 import scala.concurrent.Future
 
@@ -56,8 +56,9 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
   val successResponse           = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
   val pendingResponse           = Right(BalanceRequestPending(balanceId))
   val tryAgainResponse          = Right(BalanceRequestPendingExpired(balanceId))
+  val tooManyRequestsResponse   = Right(BalanceRequestRateLimit)
+  val sessionExpiredResponse    = Right(BalanceRequestSessionExpired)
   val httpErrorResponse         = Left(HttpResponse(404, ""))
-  val tooManyRequestsResponse   = Left(HttpResponse(429, ""))
 
   val functionalError      = FunctionalError(ErrorType(1), "", None)
   val balanceErrorResponse = Right(BalanceRequestFunctionalError(NonEmptyList(functionalError, Nil)))
@@ -73,18 +74,18 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
   "GuaranteeBalanceResponseHandlerSpec" - {
 
     "must Redirect to the TryAgain Controller if the status is empty " in {
-      val result: Future[Result] = handler.processResponse(tryAgainResponse, processPending)
+      val result: Future[Result] = handler.processResponse(tryAgainResponse)
 
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value mustEqual controllers.routes.TryGuaranteeBalanceAgainController.onPageLoad().url
     }
 
     "must Redirect to the DetailsDontMatchController if the status is NoMatch " in {
-      val result: Future[Result] = handler.processResponse(noMatchResponse, processPending)
+      val result: Future[Result] = handler.processResponse(noMatchResponse)
 
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
-      val jsonCaptor: ArgumentCaptor[JsonAuditModel] = ArgumentCaptor.forClass(classOf[JsonAuditModel])
+      val jsonCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
 
@@ -94,11 +95,11 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
     }
 
     "must Redirect to the DetailsDontMatchController if the status is Eori NoMatch " in {
-      val result: Future[Result] = handler.processResponse(eoriNoMatchResponse, processPending)
+      val result: Future[Result] = handler.processResponse(eoriNoMatchResponse)
 
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
-      val jsonCaptor: ArgumentCaptor[JsonAuditModel] = ArgumentCaptor.forClass(classOf[JsonAuditModel])
+      val jsonCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
 
@@ -108,11 +109,11 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
     }
 
     "must Redirect to the DetailsDontMatchController if the status is GRN NoMatch " in {
-      val result: Future[Result] = handler.processResponse(grnNoMatchResponse, processPending)
+      val result: Future[Result] = handler.processResponse(grnNoMatchResponse)
 
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
-      val jsonCaptor: ArgumentCaptor[JsonAuditModel] = ArgumentCaptor.forClass(classOf[JsonAuditModel])
+      val jsonCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
 
@@ -122,11 +123,11 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
     }
 
     "must Redirect to the DetailsDontMatchController if the status is Access code NoMatch " in {
-      val result: Future[Result] = handler.processResponse(accessCodeNoMatchResponse, processPending)
+      val result: Future[Result] = handler.processResponse(accessCodeNoMatchResponse)
 
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
-      val jsonCaptor: ArgumentCaptor[JsonAuditModel] = ArgumentCaptor.forClass(classOf[JsonAuditModel])
+      val jsonCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
 
@@ -136,11 +137,11 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
     }
 
     "must Redirect to the DetailsDontMatchController if the status is GRN and Eori NoMatch " in {
-      val result: Future[Result] = handler.processResponse(eoriAndGrnMatchResponse, processPending)
+      val result: Future[Result] = handler.processResponse(eoriAndGrnMatchResponse)
 
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
-      val jsonCaptor: ArgumentCaptor[JsonAuditModel] = ArgumentCaptor.forClass(classOf[JsonAuditModel])
+      val jsonCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
 
@@ -150,28 +151,47 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
     }
 
     "must Redirect to the UnsupportedGuaranteeTypeController if the status is Unsupported Type " in {
-      val result: Future[Result] = handler.processResponse(unsupportedTypeResponse, processPending)
+      val result: Future[Result] = handler.processResponse(unsupportedTypeResponse)
 
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value mustEqual controllers.routes.UnsupportedGuaranteeTypeController.onPageLoad().url
     }
 
     "must return back to the wait page if the status is still pending " in {
-      val result: Future[Result] = handler.processResponse(pendingResponse, processPending)
+      val result: Future[Result] = handler.processResponse(pendingResponse)
 
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value mustEqual controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId).url
+
+      verify(auditService, times(0)).audit(any())(any(), any(), any())
     }
 
     "must Redirect to the Balance Confirmation Controller if the status is DataReturned " in {
-      val result: Future[Result] = handler.processResponse(successResponse, processPending)
+      val result: Future[Result] = handler.processResponse(successResponse)
 
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value mustEqual controllers.routes.BalanceConfirmationController.onPageLoad().url
+
+      val jsonCaptor: ArgumentCaptor[SuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[SuccessfulBalanceAuditModel])
+
+      verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
+
+      jsonCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION
+      jsonCaptor.getValue.status mustEqual OK
+    }
+
+    "must Redirect to the session expires page if we have a session expired response" in {
+      val result: Future[Result] = handler.processResponse(sessionExpiredResponse)
+
+      status(result) mustEqual SEE_OTHER
+      redirectLocation(result).value mustEqual controllers.routes.SessionExpiredController.onPageLoad().url
+
+      verify(auditService, times(0)).audit(any())(any(), any(), any())
+
     }
 
     "must Redirect show the technical difficulties page if it has a processErrorResponse " in {
-      val result: Future[Result] = handler.processResponse(balanceErrorResponse, processPending)
+      val result: Future[Result] = handler.processResponse(balanceErrorResponse)
 
       val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
@@ -180,23 +200,23 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       templateCaptor.getValue mustBe "technicalDifficulties.njk"
     }
 
-    "must Redirect to the rate limit page if there are too many requests" in {
-      val result: Future[Result] = handler.processResponse(tooManyRequestsResponse, processPending)
+    "must Redirect to the rate limit page if we have a RateLimit Response" in {
+      val result: Future[Result] = handler.processResponse(tooManyRequestsResponse)
 
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value mustEqual controllers.routes.RateLimitController.onPageLoad().url
 
-      val jsonCaptor: ArgumentCaptor[JsonAuditModel] = ArgumentCaptor.forClass(classOf[JsonAuditModel])
+      val jsonCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
 
-      jsonCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION
+      jsonCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT
       jsonCaptor.getValue.detail.toString.contains(AUDIT_ERROR_RATE_LIMIT_EXCEEDED) mustEqual true
       jsonCaptor.getValue.detail.toString.contains(AUDIT_DEST_RATE_LIMITED) mustEqual true
     }
 
     "must Redirect show the technical difficulties page if it has a httpResponseError " in {
-      val result: Future[Result] = handler.processResponse(httpErrorResponse, processPending)
+      val result: Future[Result] = handler.processResponse(httpErrorResponse)
 
       val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
@@ -206,6 +226,4 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
     }
   }
 
-  private def processPending(balanceId: BalanceId): Future[Result] =
-    Future.successful(Redirect(controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId)))
 }

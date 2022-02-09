@@ -20,12 +20,19 @@
           {{ messages("rateLimit.paragraph") }}
         </p>
 
+      <form action="{{ routes.controllers.RateLimitController.onSubmit().url }}" method="post">
+
+        {{ csrf() | safe }}
+
         {{ govukButton({
-          text: messages("rateLimit.button"),
+          text: messages("site.tryAgain"),
           preventDoubleClick: true,
-          href: nextPageUrl,
-          isStartButton: false
+          attributes: {id: "submit"}
         }) }}
+
+      </form>
+
+
 
       </div>
     </div>

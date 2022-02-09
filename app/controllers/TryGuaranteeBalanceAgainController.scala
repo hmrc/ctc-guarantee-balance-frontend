@@ -17,13 +17,15 @@
 package controllers
 
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
+import handlers.GuaranteeBalanceResponseHandler
 import pages.GuaranteeReferenceNumberPage
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-
 import javax.inject.Inject
+import services.GuaranteeBalanceService
+
 import scala.concurrent.{ExecutionContext, Future}
 
 class TryGuaranteeBalanceAgainController @Inject() (
@@ -31,7 +33,9 @@ class TryGuaranteeBalanceAgainController @Inject() (
   renderer: Renderer,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
-  requireData: DataRequiredAction
+  requireData: DataRequiredAction,
+  guaranteeBalanceService: GuaranteeBalanceService,
+  responseHandler: GuaranteeBalanceResponseHandler
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
@@ -44,7 +48,9 @@ class TryGuaranteeBalanceAgainController @Inject() (
       }
   }
 
-  def onSubmit(): Action[AnyContent] = (identify andThen getData) {
-    Redirect(routes.BalanceConfirmationController.onPageLoad())
+  def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+    implicit request =>
+      guaranteeBalanceService.submitBalanceRequest
+        .flatMap(responseHandler.processResponse(_))
   }
 }

@@ -17,14 +17,31 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import models.UserAnswers
+import models.backend.BalanceRequestSuccess
+import models.values.CurrencyCode
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{times, verify}
+import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
+import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
+import scala.concurrent.Future
+
 class RateLimitControllerSpec extends SpecBase with MockitoSugar with AppWithDefaultMockFixtures {
+
+  private val grn: String    = "grn"
+  private val access: String = "access"
+  private val taxId: String  = "taxId"
+
+  // format: off
+  private val baseAnswers: UserAnswers = emptyUserAnswers
+    .set(GuaranteeReferenceNumberPage, grn).success.value
+    .set(AccessCodePage, access).success.value
+    .set(EoriNumberPage, taxId).success.value
+  // format: on
 
   "RateLimit Controller" - {
 
@@ -44,5 +61,24 @@ class RateLimitControllerSpec extends SpecBase with MockitoSugar with AppWithDef
 
       application.stop()
     }
+
+    "must pass the response from the submit onto the processor" in {
+
+      val userAnswers = baseAnswers
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      val request     = FakeRequest(POST, routes.RateLimitController.onSubmit().url)
+
+      when(mockGuaranteeBalanceService.submitBalanceRequest()(any(), any()))
+        .thenReturn(Future.successful(Right(BalanceRequestSuccess(123.45, CurrencyCode("GBP")))))
+
+      val result = route(application, request).value
+
+      status(result) mustEqual SEE_OTHER
+
+      redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
+
+      verify(mockGuaranteeBalanceService).submitBalanceRequest()(any(), any())
+    }
+
   }
 }
