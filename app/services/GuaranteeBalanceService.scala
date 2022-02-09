@@ -49,7 +49,14 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
     }
 
   def submitBalanceRequest()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] = {
-    logger.info("[GuaranteeBalanceService][submitBalanceRequest]")
+    logger.info("[GuaranteeBalanceService][submitBalanceRequest] submit balance request")
+    for {
+      _                   <- removeBalanceIdFromUserAnswers
+      responseFromRequest <- checkForRateLimitAndSubmitRequest
+    } yield responseFromRequest
+  }
+
+  private def checkForRateLimitAndSubmitRequest()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] =
     (for {
       guaranteeReferenceNumber <- request.userAnswers.get(GuaranteeReferenceNumberPage)
       taxIdentifier            <- request.userAnswers.get(EoriNumberPage)
@@ -73,7 +80,6 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
       logger.warn("[GuaranteeBalanceService][submit] Insufficient data in user answers.")
       Future.successful(Right(BalanceRequestSessionExpired))
     }
-  }
 
   private def checkRateLimit(internalId: String, guaranteeReferenceNumber: String): Future[Boolean] = {
     val lockId   = LockId(internalId, guaranteeReferenceNumber).toString
@@ -85,17 +91,12 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
     hc: HeaderCarrier,
     request: DataRequest[_]
   ): Future[Either[HttpResponse, BalanceRequestResponse]] = {
-    logger.info("[GuaranteeBalanceService][pollForGuaranteeBalance]")
-    val startTimeMillis: Long = System.nanoTime()
-    removeBalanceIdFromUserAnswers
-    retryGuaranteeBalance(balanceId, startTimeMillis)
-  }
-
-  private def removeBalanceIdFromUserAnswers()(implicit request: DataRequest[_]): Future[UserAnswers] =
+    logger.info("[GuaranteeBalanceService][pollForGuaranteeBalance] poll for response")
     for {
-      updatedAnswers <- Future.fromTry(request.userAnswers.remove(BalanceIdPage))
-      _              <- sessionRepository.set(updatedAnswers)
-    } yield updatedAnswers
+      _                   <- removeBalanceIdFromUserAnswers
+      responseFromPolling <- retryGuaranteeBalance(balanceId, System.nanoTime())
+    } yield responseFromPolling
+  }
 
   private def retryGuaranteeBalance(balanceId: BalanceId, startTimeMillis: Long)(implicit
     hc: HeaderCarrier
@@ -114,4 +115,10 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
     val durationInSeconds       = (currentTimeMillis - startTimeMillis) / 1e9d
     durationInSeconds < maxTime.toSeconds
   }
+
+  def removeBalanceIdFromUserAnswers()(implicit request: DataRequest[_]): Future[UserAnswers] =
+    for {
+      updatedAnswers <- Future.fromTry(request.userAnswers.remove(BalanceIdPage))
+      _              <- sessionRepository.set(updatedAnswers)
+    } yield updatedAnswers
 }

@@ -59,14 +59,16 @@ class WaitOnGuaranteeBalanceController @Inject() (
 
   def checkDetails(balanceId: BalanceId, mode: SubmissionMode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      if (mode == PollMode) {
-        for {
-          updatedAnswers <- Future.fromTry(request.userAnswers.set(BalanceIdPage, balanceId))
-          _              <- sessionRepository.set(updatedAnswers)
-        } yield Redirect(routes.CheckYourAnswersController.onPageLoad())
-      } else {
-        Future.successful(Redirect(routes.CheckYourAnswersController.onPageLoad()))
+      lazy val updatedAnswers = mode match {
+        case PollMode   => request.userAnswers.set(BalanceIdPage, balanceId)
+        case SubmitMode => request.userAnswers.remove(BalanceIdPage)
       }
+
+      for {
+        updatedAnswers <- Future.fromTry(updatedAnswers)
+        _              <- sessionRepository.set(updatedAnswers)
+      } yield Redirect(routes.CheckYourAnswersController.onPageLoad())
+
   }
 
   def onSubmit(balanceId: BalanceId, mode: SubmissionMode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
