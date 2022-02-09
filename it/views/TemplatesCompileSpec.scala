@@ -16,7 +16,7 @@
 
 package views
 
-import models.{Mode, NormalMode}
+import models.{Mode, NormalMode, SubmissionMode, SubmitMode}
 import org.jsoup.Jsoup
 import org.jsoup.select.Elements
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
@@ -29,8 +29,8 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 import renderer.Renderer
-
 import java.io.File
+
 import scala.collection.JavaConverters._
 
 class TemplatesCompileSpec extends AnyFreeSpec with Matchers with ScalaFutures with IntegrationPatience with GuiceOneAppPerSuite {
@@ -47,7 +47,8 @@ class TemplatesCompileSpec extends AnyFreeSpec with Matchers with ScalaFutures w
     }
   }
 
-  private val mode: Mode = NormalMode
+  private val mode: Mode                     = NormalMode
+  private val submissionMode: SubmissionMode = SubmitMode
 
   "must render all the templates" in {
 
@@ -64,9 +65,9 @@ class TemplatesCompileSpec extends AnyFreeSpec with Matchers with ScalaFutures w
         val result = renderer.render(
           pathInsideViews.toString,
           Json.obj(
-            "mode"      -> mode,
-            "balanceId" -> "testBalanceId",
-            "submitUrl" -> "submitAction"
+            "mode"           -> mode,
+            "balanceId"      -> "testBalanceId",
+            "submissionMode" -> submissionMode
           )
         )
         val html: Html = result.futureValue
