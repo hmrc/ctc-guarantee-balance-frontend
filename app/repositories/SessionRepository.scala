@@ -40,16 +40,13 @@ class DefaultSessionRepository @Inject() (
           Indexes.ascending("lastUpdated"),
           IndexOptions().name("user-answers-last-updated-index").expireAfter(config.mongoDbTtl, TimeUnit.SECONDS)
         )
-      ),
-      extraCodecs = Seq(
-//        Codecs.playFormatCodec(MongoDateTimeFormats.localDateTimeFormat)
       )
     )
     with SessionRepository {
 
   override def get(id: String): Future[Option[UserAnswers]] =
     collection
-      .findOneAndUpdate(Filters.eq("_id", id), Updates.set("lastUpdated", LocalDateTime.now()))
+      .findOneAndUpdate(Filters.eq("_id", id), Updates.set("lastUpdated", LocalDateTime.now()), FindOneAndUpdateOptions().upsert(false))
       .toFutureOption()
 
   override def set(userAnswers: UserAnswers): Future[Boolean] = {

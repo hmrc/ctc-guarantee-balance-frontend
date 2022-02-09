@@ -16,28 +16,23 @@
 
 package repositories
 
+import config.FrontendAppConfig
 import models.UserAnswers
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.mongodb.scala.bson.{BsonDocument, BsonInt64, BsonString}
+import org.scalatest.OptionValues
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import org.scalatest.{BeforeAndAfterEach, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.Json
-import reactivemongo.play.json.collection.JSONCollection
+import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SessionRepositorySpec
-    extends AnyFreeSpec
-    with Matchers
-    with MongoSuite
-    with ScalaFutures
-    with BeforeAndAfterEach
-    with IntegrationPatience
-    with GuiceOneAppPerSuite
-    with OptionValues {
+class SessionRepositorySpec extends AnyFreeSpec with Matchers with DefaultPlayMongoRepositorySupport[UserAnswers] with GuiceOneAppPerSuite with OptionValues {
 
-  private val repository = app.injector.instanceOf[SessionRepository]
+  private val config: FrontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
+
+  override protected def repository = new DefaultSessionRepository(mongoComponent, config)
 
   private val internalId1 = "internalId1"
   private val internalId2 = "internalId2"
@@ -45,25 +40,13 @@ class SessionRepositorySpec
   private val userAnswers1 = UserAnswers(internalId1, Json.obj("foo" -> "bar"))
   private val userAnswers2 = UserAnswers(internalId2, Json.obj("bar" -> "foo"))
 
-  override def beforeEach(): Unit = {
-    super.beforeEach()
-    database.flatMap {
-      _.collection[JSONCollection]("user-answers")
-        .insert(ordered = false)
-        .one(userAnswers1)
-    }.futureValue
-  }
-
-  override def afterEach(): Unit = {
-    super.afterEach()
-    database.flatMap(_.drop()).futureValue
-  }
-
   "SessionRepository" - {
 
     "get" - {
 
       "must return UserAnswers when match found for internal ID" in {
+
+        insert(userAnswers1).futureValue
 
         val result = repository.get(internalId1).futureValue
 
@@ -105,6 +88,18 @@ class SessionRepositorySpec
         getResult.data mustBe userAnswers2.data
         getResult.lastUpdated isAfter userAnswers2.lastUpdated mustBe true
       }
+    }
+
+    "must ensure indexes" in {
+
+      val indexes = mongoDatabase.getCollection("user-answers").listIndexes().toFuture().futureValue
+
+      indexes.length mustEqual 2
+
+      indexes(1).get("name").get mustEqual BsonString("user-answers-last-updated-index")
+      indexes(1).get("key").get mustEqual BsonDocument("lastUpdated" -> 1)
+      indexes(1).get("expireAfterSeconds").get mustEqual BsonInt64(config.mongoDbTtl)
+
     }
   }
 

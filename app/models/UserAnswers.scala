@@ -18,6 +18,7 @@ package models
 
 import play.api.libs.json._
 import queries._
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.LocalDateTime
 import scala.util.{Failure, Success, Try}
@@ -75,14 +76,14 @@ object UserAnswers {
     (
       (__ \ "_id").read[String] and
         (__ \ "data").read[JsObject] and
-        (__ \ "lastUpdated").read[LocalDateTime]
+        (__ \ "lastUpdated").read(MongoJavatimeFormats.localDateTimeReads)
     )(UserAnswers.apply _)
 
   implicit lazy val writes: OWrites[UserAnswers] =
     (
       (__ \ "_id").write[String] and
         (__ \ "data").write[JsObject] and
-        (__ \ "lastUpdated").write[LocalDateTime]
+        (__ \ "lastUpdated").write(MongoJavatimeFormats.localDateTimeWrites)
     )(unlift(UserAnswers.unapply))
 
   implicit lazy val format: Format[UserAnswers] = Format(reads, writes)
