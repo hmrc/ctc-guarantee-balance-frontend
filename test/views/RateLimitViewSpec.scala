@@ -27,6 +27,6 @@ class RateLimitViewSpec extends SingleViewSpec("rateLimit.njk") {
   }
 
   "behave like a page with a submit button" in {
-    assertPageHasButton(doc, "rateLimit.button")
+    assertPageHasButton(doc, "site.tryAgain")
   }
 }

@@ -17,12 +17,16 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import models.backend.BalanceRequestSuccess
+import models.values.CurrencyCode
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{times, verify}
+import org.mockito.Mockito.{times, verify, when}
 import pages.GuaranteeReferenceNumberPage
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+
+import scala.concurrent.Future
 
 class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
@@ -58,6 +62,24 @@ class TryGuaranteeBalanceAgainControllerSpec extends SpecBase with AppWithDefaul
       status(result) mustEqual SEE_OTHER
 
       redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
+    }
+
+    "must pass the response from the submit onto the processor" in {
+
+      val userAnswers = baseAnswers
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      val request     = FakeRequest(POST, routes.TryGuaranteeBalanceAgainController.onSubmit().url)
+
+      when(mockGuaranteeBalanceService.submitBalanceRequest()(any(), any()))
+        .thenReturn(Future.successful(Right(BalanceRequestSuccess(123.45, CurrencyCode("GBP")))))
+
+      val result = route(application, request).value
+
+      status(result) mustEqual SEE_OTHER
+
+      redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
+
+      verify(mockGuaranteeBalanceService).submitBalanceRequest()(any(), any())
     }
 
   }
