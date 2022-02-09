@@ -139,4 +139,4 @@ detailsDontMatch.p2.a = contact the NCTS helpdesk (opens in a new tab)
 rateLimit.title = You can try again
 rateLimit.heading = You can try again
 rateLimit.paragraph = We were unable to get your details. You can try again and this may take up to 60 seconds.
-rateLimit.button = Try again
+
