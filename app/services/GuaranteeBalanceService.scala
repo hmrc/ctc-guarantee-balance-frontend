@@ -64,10 +64,10 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
       Future.successful(Right(BalanceRequestSessionExpired))
     }
 
-  private def checkRateLimit(eoriNumber: String, guaranteeReferenceNumber: String): Future[Boolean] = {
-    val lockId   = LockId(eoriNumber, guaranteeReferenceNumber).toString
+  private def checkRateLimit(internalId: String, guaranteeReferenceNumber: String): Future[Boolean] = {
+    val lockId   = LockId(internalId, guaranteeReferenceNumber).toString
     val duration = config.rateLimitDuration.seconds
-    mongoLockRepository.takeLock(lockId, eoriNumber, duration)
+    mongoLockRepository.takeLock(lockId, internalId, duration)
   }
 
   def pollForGuaranteeBalance(balanceId: BalanceId)(implicit
