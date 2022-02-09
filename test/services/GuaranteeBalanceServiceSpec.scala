@@ -74,6 +74,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
   "submitRequestOrPollForResponse" - {
 
     "submitRequest when no balanceId" - {
+
       "must redirect to Session Expired if no existing data is found" in {
 
         val request              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
@@ -83,7 +84,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
 
         val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config, mockSessionRepository)
         val result  = service.submitRequestOrPollForResponse().futureValue
-        result mustEqual Right(BalanceRequestSessionExpired())
+        result mustEqual Right(BalanceRequestSessionExpired)
       }
 
       "must redirect to Balance Confirmation if no lock in mongo repository for that user and GRN" in {
@@ -119,7 +120,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
         when(mockMongoLockRepository.takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())).thenReturn(Future.successful(false))
         val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config, mockSessionRepository)
         val result  = service.submitRequestOrPollForResponse.futureValue
-        result mustEqual Right(BalanceRequestRateLimit())
+        result mustEqual Right(BalanceRequestRateLimit)
 
         verify(mockMongoLockRepository).takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())
       }
@@ -146,7 +147,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
 
             val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config, mockSessionRepository)
             val result  = service.submitRequestOrPollForResponse.futureValue
-            result mustEqual Right(BalanceRequestSessionExpired())
+            result mustEqual Right(BalanceRequestSessionExpired)
         }
       }
     }

@@ -56,8 +56,8 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
   val successResponse           = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
   val pendingResponse           = Right(BalanceRequestPending(balanceId))
   val tryAgainResponse          = Right(BalanceRequestPendingExpired(balanceId))
-  val tooManyRequestsResponse   = Right(BalanceRequestRateLimit())
-  val sessionExpiredResponse    = Right(BalanceRequestSessionExpired())
+  val tooManyRequestsResponse   = Right(BalanceRequestRateLimit)
+  val sessionExpiredResponse    = Right(BalanceRequestSessionExpired)
   val httpErrorResponse         = Left(HttpResponse(404, ""))
 
   val functionalError      = FunctionalError(ErrorType(1), "", None)

@@ -215,7 +215,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
         )
 
         val result = connector.submitBalanceRequest(request).futureValue
-        result mustBe Right(BalanceRequestRateLimit())
+        result mustBe Right(BalanceRequestRateLimit)
       }
 
       "must return an Http error when we get a response with error type 14 and other Pointer" in {

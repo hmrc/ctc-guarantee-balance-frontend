@@ -67,18 +67,18 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
             )
         } else {
           logger.warn("[GuaranteeBalanceService][submit] Rate Limit hit")
-          Future.successful(Right(BalanceRequestRateLimit()))
+          Future.successful(Right(BalanceRequestRateLimit))
         }
     }).getOrElse {
       logger.warn("[GuaranteeBalanceService][submit] Insufficient data in user answers.")
-      Future.successful(Right(BalanceRequestSessionExpired()))
+      Future.successful(Right(BalanceRequestSessionExpired))
     }
   }
 
-  private def checkRateLimit(eoriNumber: String, guaranteeReferenceNumber: String): Future[Boolean] = {
-    val lockId   = LockId(eoriNumber, guaranteeReferenceNumber).toString
+  private def checkRateLimit(internalId: String, guaranteeReferenceNumber: String): Future[Boolean] = {
+    val lockId   = LockId(internalId, guaranteeReferenceNumber).toString
     val duration = config.rateLimitDuration.seconds
-    mongoLockRepository.takeLock(lockId, eoriNumber, duration)
+    mongoLockRepository.takeLock(lockId, internalId, duration)
   }
 
   def pollForGuaranteeBalance(balanceId: BalanceId)(implicit
