@@ -35,10 +35,10 @@ class TestOnlyMongoController @Inject() (
       Future
         .sequence(collectionNames.map {
           collection =>
-            mongo.database.getCollection(collection).drop().toFutureOption()
+            mongo.database.getCollection(collection).drop().toFuture()
         })
         .map {
-          x => if (x.forall(_.isDefined)) Ok else InternalServerError
+          _ => Ok
         }
   }
 
