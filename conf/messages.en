@@ -94,12 +94,6 @@ guaranteeReferenceNumber.error.required = Enter the guarantee reference number
 guaranteeReferenceNumber.error.length = The guarantee reference number must be 17 characters or less
 guaranteeReferenceNumber.error.invalid = The guarantee reference number must only include letters a to z without accents and numbers 0 to 9
 
-tryGuaranteeBalanceAgain.title = We have not been able to get your guarantee balance
-tryGuaranteeBalanceAgain.heading = We have not been able to get your guarantee balance
-tryGuaranteeBalanceAgain.checkDetails.prelink = You can
-tryGuaranteeBalanceAgain.checkDetails.link = check that your details are correct
-tryGuaranteeBalanceAgain.checkDetails.postlink = or you can try again in {0} seconds.
-
 unsupportedGuaranteeType.title = We cannot get the balance for this type of guarantee
 unsupportedGuaranteeType.heading = We cannot get the balance for this type of guarantee
 unsupportedGuaranteeType.paragraph = We can only get the balance for:

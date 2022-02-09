@@ -30,12 +30,13 @@ POST       /change-access-code                      controllers.AccessCodeContro
 GET        /check-your-answers                      controllers.CheckYourAnswersController.onPageLoad()
 POST       /check-your-answers                      controllers.CheckYourAnswersController.onSubmit()
 
-GET        /:balanceId/wait-on-balance              controllers.WaitOnGuaranteeBalanceController.onPageLoad(balanceId: models.values.BalanceId)
-GET        /:balanceId/check-details                controllers.WaitOnGuaranteeBalanceController.checkDetails(balanceId: models.values.BalanceId)
-POST       /:balanceId/wait-on-balance              controllers.WaitOnGuaranteeBalanceController.onSubmit(balanceId: models.values.BalanceId)
+GET        /:balanceId/wait-on-balance              controllers.WaitOnGuaranteeBalanceController.onPageLoad(balanceId: models.values.BalanceId, mode: SubmissionMode = PollMode)
+GET        /:balanceId/check-details                controllers.WaitOnGuaranteeBalanceController.checkDetails(balanceId: models.values.BalanceId, mode: SubmissionMode = PollMode)
+POST       /:balanceId/wait-on-balance              controllers.WaitOnGuaranteeBalanceController.onSubmit(balanceId: models.values.BalanceId, mode: SubmissionMode = PollMode)
 
-GET        /try-again                               controllers.TryGuaranteeBalanceAgainController.onPageLoad()
-POST       /try-again                               controllers.TryGuaranteeBalanceAgainController.onSubmit()
+GET        /:balanceId/try-again                    controllers.WaitOnGuaranteeBalanceController.onPageLoad(balanceId: models.values.BalanceId, mode: SubmissionMode = SubmitMode)
+GET        /:balanceId/try-again-check-details      controllers.WaitOnGuaranteeBalanceController.checkDetails(balanceId: models.values.BalanceId, mode: SubmissionMode = SubmitMode)
+POST       /:balanceId/try-again                    controllers.WaitOnGuaranteeBalanceController.onSubmit(balanceId: models.values.BalanceId, mode: SubmissionMode = SubmitMode)
 
 GET        /rate-limit                              controllers.RateLimitController.onPageLoad()
 POST       /rate-limit                              controllers.RateLimitController.onSubmit()

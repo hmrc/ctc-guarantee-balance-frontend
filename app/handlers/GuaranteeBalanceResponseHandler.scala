@@ -17,6 +17,8 @@
 package handlers
 
 import config.FrontendAppConfig
+import models.{PollMode, SubmitMode}
+
 import javax.inject.Inject
 import models.backend._
 import models.requests.DataRequest
@@ -60,7 +62,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
     response match {
       case BalanceRequestPending(balanceId) =>
         logger.info("[GuaranteeBalanceResponseHandler][processBalanceRequestResponse] BalanceRequestPending")
-        Future.successful(Redirect(controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId)))
+        Future.successful(Redirect(controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId, PollMode)))
 
       case successResponse: BalanceRequestSuccess =>
         auditSuccess(successResponse)
@@ -78,12 +80,12 @@ class GuaranteeBalanceResponseHandler @Inject() (
         auditRateLimit
         Future.successful(Redirect(controllers.routes.RateLimitController.onPageLoad()))
 
-      case BalanceRequestPendingExpired(_) =>
+      case BalanceRequestPendingExpired(balanceId) =>
         auditError(
           SEE_OTHER,
           ErrorMessage(AUDIT_ERROR_REQUEST_EXPIRED, AUDIT_DEST_TRY_AGAIN)
         )
-        Future.successful(Redirect(controllers.routes.TryGuaranteeBalanceAgainController.onPageLoad()))
+        Future.successful(Redirect(controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId, SubmitMode)))
 
       case BalanceRequestUnsupportedGuaranteeType =>
         auditError(

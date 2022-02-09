@@ -17,8 +17,8 @@
 package views
 
 import java.util.UUID
-
 import controllers.routes
+import models.PollMode
 import models.values.BalanceId
 import org.jsoup.nodes.Document
 import play.api.libs.json.Json
@@ -30,7 +30,8 @@ class WaitOnGuaranteeBalanceViewSpec extends SingleViewSpec("waitOnGuaranteeBala
 
   val json = Json.obj(
     "balanceId"         -> balanceId,
-    "waitTimeInSeconds" -> 10
+    "waitTimeInSeconds" -> 10,
+    "submissionMode"    -> PollMode
   )
 
   override lazy val doc: Document = renderDocument(json).futureValue
@@ -44,7 +45,11 @@ class WaitOnGuaranteeBalanceViewSpec extends SingleViewSpec("waitOnGuaranteeBala
   }
 
   "display link with id check-details" in {
-    assertPageHasLink(doc, "check-details", "waitOnGuaranteeBalance.checkDetails.link", routes.WaitOnGuaranteeBalanceController.checkDetails(balanceId).url)
+    assertPageHasLink(doc,
+                      "check-details",
+                      "waitOnGuaranteeBalance.checkDetails.link",
+                      routes.WaitOnGuaranteeBalanceController.checkDetails(balanceId, PollMode).url
+    )
   }
 
   "must render waitOnGuaranteeBalance postlink text" in {

@@ -17,10 +17,10 @@
 package handlers
 
 import java.util.UUID
-
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import cats.data.NonEmptyList
 import matchers.JsonMatchers
+import models.{PollMode, SubmitMode}
 import models.backend._
 import models.backend.errors.FunctionalError
 import models.requests.DataRequest
@@ -77,7 +77,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       val result: Future[Result] = handler.processResponse(tryAgainResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.TryGuaranteeBalanceAgainController.onPageLoad().url
+      redirectLocation(result).value mustEqual controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId, SubmitMode).url
     }
 
     "must Redirect to the DetailsDontMatchController if the status is NoMatch " in {
@@ -161,7 +161,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       val result: Future[Result] = handler.processResponse(pendingResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId).url
+      redirectLocation(result).value mustEqual controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId, PollMode).url
 
       verify(auditService, times(0)).audit(any())(any(), any(), any())
     }
