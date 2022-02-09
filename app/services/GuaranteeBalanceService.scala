@@ -57,11 +57,11 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
             )
         } else {
           logger.warn("[GuaranteeBalanceService][submit] Rate Limit hit")
-          Future.successful(Right(BalanceRequestRateLimit()))
+          Future.successful(Right(BalanceRequestRateLimit))
         }
     }).getOrElse {
       logger.warn("[GuaranteeBalanceService][submit] Insufficient data in user answers.")
-      Future.successful(Right(BalanceRequestSessionExpired()))
+      Future.successful(Right(BalanceRequestSessionExpired))
     }
 
   private def checkRateLimit(eoriNumber: String, guaranteeReferenceNumber: String): Future[Boolean] = {

@@ -65,14 +65,14 @@ class GuaranteeBalanceResponseHandler @Inject() (
         auditSuccess(successResponse)
         processSuccessResponse(successResponse)
 
-      case _: BalanceRequestSessionExpired =>
+      case BalanceRequestSessionExpired =>
         Future.successful(Redirect(controllers.routes.SessionExpiredController.onPageLoad()))
 
       case BalanceRequestNotMatched(errorPointer) =>
         auditBalanceRequestNotMatched(errorPointer)
         Future.successful(Redirect(controllers.routes.DetailsDontMatchController.onPageLoad()))
 
-      case _: BalanceRequestRateLimit =>
+      case BalanceRequestRateLimit =>
         auditRateLimit
         Future.successful(Redirect(controllers.routes.RateLimitController.onPageLoad()))
 

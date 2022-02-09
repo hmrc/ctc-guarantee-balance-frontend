@@ -50,9 +50,9 @@ object BalanceRequestUnsupportedGuaranteeType extends BalanceRequestResponse
 
 case class BalanceRequestPendingExpired(balanceId: BalanceId) extends BalanceRequestResponse
 
-case class BalanceRequestRateLimit() extends BalanceRequestResponse
+case object BalanceRequestRateLimit extends BalanceRequestResponse
 
-case class BalanceRequestSessionExpired() extends BalanceRequestResponse
+case object BalanceRequestSessionExpired extends BalanceRequestResponse
 
 case class BalanceRequestFunctionalError(
   errors: NonEmptyList[FunctionalError]

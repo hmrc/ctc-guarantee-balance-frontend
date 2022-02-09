@@ -76,7 +76,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
 
       val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config)
       val result  = service.submitBalanceRequest.futureValue
-      result mustEqual Right(BalanceRequestSessionExpired())
+      result mustEqual Right(BalanceRequestSessionExpired)
     }
 
     "must redirect to Balance Confirmation for a POST if no lock in mongo repository for that user and GRN" in {
@@ -110,7 +110,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
       when(mockMongoLockRepository.takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())).thenReturn(Future.successful(false))
       val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config)
       val result  = service.submitBalanceRequest.futureValue
-      result mustEqual Right(BalanceRequestRateLimit())
+      result mustEqual Right(BalanceRequestRateLimit)
 
       verify(mockMongoLockRepository).takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())
     }
@@ -137,7 +137,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
 
           val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config)
           val result  = service.submitBalanceRequest.futureValue
-          result mustEqual Right(BalanceRequestSessionExpired())
+          result mustEqual Right(BalanceRequestSessionExpired)
       }
     }
   }
