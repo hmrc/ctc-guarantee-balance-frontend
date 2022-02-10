@@ -18,9 +18,10 @@ package pages
 
 import play.api.libs.json.JsPath
 
-case object GuaranteeReferenceNumberPage extends QuestionPage[String] {
+case object GuaranteeReferenceNumberPage extends ClearValueOnChangePage[String] {
 
-  override def path: JsPath = JsPath \ toString
-
+  override val pageToClear      = BalanceIdPage
+  override def path: JsPath     = JsPath \ toString
   override def toString: String = "guaranteeReferenceNumber"
+
 }

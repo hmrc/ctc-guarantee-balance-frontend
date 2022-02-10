@@ -21,11 +21,13 @@ import akka.pattern.after
 import config.FrontendAppConfig
 import connectors.GuaranteeBalanceConnector
 import javax.inject.Inject
+import models.UserAnswers
 import models.backend.{BalanceRequestPending, BalanceRequestRateLimit, BalanceRequestResponse, BalanceRequestSessionExpired}
 import models.requests.{BalanceRequest, DataRequest}
 import models.values._
-import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
+import pages.{AccessCodePage, BalanceIdPage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.Logging
+import repositories.SessionRepository
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
 
@@ -35,11 +37,26 @@ import scala.concurrent.{ExecutionContext, Future}
 class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
                                          connector: GuaranteeBalanceConnector,
                                          mongoLockRepository: MongoLockRepository,
-                                         config: FrontendAppConfig
+                                         config: FrontendAppConfig,
+                                         sessionRepository: SessionRepository
 )(implicit ec: ExecutionContext)
     extends Logging {
 
-  def submitBalanceRequest()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] =
+  def submitRequestOrPollForResponse()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] =
+    request.userAnswers.get(BalanceIdPage) match {
+      case Some(balanceId: BalanceId) => pollForGuaranteeBalance(balanceId)
+      case None                       => submitBalanceRequest
+    }
+
+  def submitBalanceRequest()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] = {
+    logger.info("[GuaranteeBalanceService][submitBalanceRequest] submit balance request")
+    for {
+      _                   <- removeBalanceIdFromUserAnswers
+      responseFromRequest <- checkForRateLimitAndSubmitRequest
+    } yield responseFromRequest
+  }
+
+  private def checkForRateLimitAndSubmitRequest()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] =
     (for {
       guaranteeReferenceNumber <- request.userAnswers.get(GuaranteeReferenceNumberPage)
       taxIdentifier            <- request.userAnswers.get(EoriNumberPage)
@@ -71,30 +88,37 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
   }
 
   def pollForGuaranteeBalance(balanceId: BalanceId)(implicit
-    hc: HeaderCarrier
+    hc: HeaderCarrier,
+    request: DataRequest[_]
   ): Future[Either[HttpResponse, BalanceRequestResponse]] = {
-    val startTimeMillis: Long = System.nanoTime()
-    retryGuaranteeBalance(balanceId, startTimeMillis)
+    logger.info("[GuaranteeBalanceService][pollForGuaranteeBalance] poll for response")
+    for {
+      _                   <- removeBalanceIdFromUserAnswers
+      responseFromPolling <- retryGuaranteeBalance(balanceId, System.nanoTime())
+    } yield responseFromPolling
   }
 
-  def retryGuaranteeBalance(balanceId: BalanceId, startTimeMillis: Long)(implicit
+  private def retryGuaranteeBalance(balanceId: BalanceId, startTimeMillis: Long)(implicit
     hc: HeaderCarrier
   ): Future[Either[HttpResponse, BalanceRequestResponse]] = {
     val delay   = config.guaranteeBalanceDelayInSecond.seconds
     val maxTime = config.guaranteeBalanceMaxTimeInSecond.seconds
-    queryPendingBalance(balanceId).flatMap {
+    connector.queryPendingBalance(balanceId).flatMap {
       case Right(BalanceRequestPending(_)) if remainingProcessingTime(startTimeMillis, maxTime) =>
         after(delay, actorSystem.scheduler)(retryGuaranteeBalance(balanceId, startTimeMillis))
       case result => Future.successful(result)
     }
   }
 
-  private def queryPendingBalance(balanceId: BalanceId)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] =
-    connector.queryPendingBalance(balanceId)
-
   private def remainingProcessingTime(startTimeMillis: Long, maxTime: FiniteDuration): Boolean = {
     val currentTimeMillis: Long = System.nanoTime()
     val durationInSeconds       = (currentTimeMillis - startTimeMillis) / 1e9d
     durationInSeconds < maxTime.toSeconds
   }
+
+  def removeBalanceIdFromUserAnswers()(implicit request: DataRequest[_]): Future[UserAnswers] =
+    for {
+      updatedAnswers <- Future.fromTry(request.userAnswers.remove(BalanceIdPage))
+      _              <- sessionRepository.set(updatedAnswers)
+    } yield updatedAnswers
 }

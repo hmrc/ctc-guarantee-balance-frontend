@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package views
+package pages
 
-class WaitOnGuaranteeBalanceViewSpec extends SingleViewSpec("waitOnGuaranteeBalance.njk") {
+import models.values.BalanceId
+import pages.behaviours.PageBehaviours
 
-  "must render correct heading" in {
-    assertPageTitleEqualsMessage(doc, "waitOnGuaranteeBalance.heading")
-  }
+class BalanceIdPageSpec extends PageBehaviours {
 
-  "must render waitOnGuaranteeBalance text" in {
-    assertContainsText(doc, "waitOnGuaranteeBalance.paragraph")
-  }
+  "BalanceIdPage" - {
 
-  "behave like a page with a submit button" in {
-    assertPageHasButton(doc, "site.continueWaiting")
+    beRetrievable[BalanceId](BalanceIdPage)
+
+    beSettable[BalanceId](BalanceIdPage)
+
+    beRemovable[BalanceId](BalanceIdPage)
   }
 }

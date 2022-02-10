@@ -16,41 +16,43 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import handlers.GuaranteeBalanceResponseHandler
-import pages.GuaranteeReferenceNumberPage
 import play.api.i18n.I18nSupport
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.libs.json.Json
+import play.api.mvc._
 import renderer.Renderer
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import javax.inject.Inject
 import services.GuaranteeBalanceService
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
-import scala.concurrent.{ExecutionContext, Future}
+import javax.inject.Inject
+import scala.concurrent.ExecutionContext
 
-class TryGuaranteeBalanceAgainController @Inject() (
+class TryAgainController @Inject() (
+  balanceService: GuaranteeBalanceService,
   val controllerComponents: MessagesControllerComponents,
-  renderer: Renderer,
+  responseHandler: GuaranteeBalanceResponseHandler,
+  config: FrontendAppConfig,
   identify: IdentifierAction,
+  renderer: Renderer,
   getData: DataRetrievalAction,
-  requireData: DataRequiredAction,
-  guaranteeBalanceService: GuaranteeBalanceService,
-  responseHandler: GuaranteeBalanceResponseHandler
+  requireData: DataRequiredAction
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      request.userAnswers.get(GuaranteeReferenceNumberPage) match {
-        case Some(guaranteeReferenceNumber: String) => renderer.render("tryGuaranteeBalanceAgain.njk").map(Ok(_))
-        case None                                   => Future.successful(Redirect(routes.SessionExpiredController.onPageLoad()))
-      }
+      val json = Json.obj(
+        "waitTimeInSeconds" -> config.guaranteeBalanceDisplayDelay
+      )
+      renderer.render("tryAgain.njk", json).map(Ok(_))
   }
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      guaranteeBalanceService.submitBalanceRequest
+      balanceService.submitRequestOrPollForResponse
         .flatMap(responseHandler.processResponse(_))
   }
 }

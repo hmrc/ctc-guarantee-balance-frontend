@@ -16,47 +16,56 @@
 
 package controllers
 
+import java.util.UUID
+
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import models.backend.{BalanceRequestNotMatched, BalanceRequestPending, BalanceRequestPendingExpired, BalanceRequestSuccess}
+import config.FrontendAppConfig
+import matchers.JsonMatchers
+import models.UserAnswers
+import models.backend.BalanceRequestSuccess
 import models.values.{BalanceId, CurrencyCode}
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
+import pages.{AccessCodePage, BalanceIdPage, EoriNumberPage, GuaranteeReferenceNumberPage}
+import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpResponse}
-import java.util.UUID
-
-import config.FrontendAppConfig
-import matchers.JsonMatchers
-import pages.GuaranteeReferenceNumberPage
-import play.api.libs.json.{JsObject, Json}
 
 import scala.concurrent.Future
 
-class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with JsonMatchers with AppWithDefaultMockFixtures {
+class TryAgainControllerSpec extends SpecBase with JsonMatchers with AppWithDefaultMockFixtures {
 
-  val expectedUuid = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
-  val balanceId    = BalanceId(expectedUuid)
+  private val expectedUuid: UUID   = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
+  private val balanceId: BalanceId = BalanceId(expectedUuid)
 
-  private val grn: String  = "grn"
-  val populatedUserAnswers = emptyUserAnswers.set(GuaranteeReferenceNumberPage, grn).success.value
+  private val grn: String    = "grn"
+  private val access: String = "access"
+  private val taxId: String  = "taxId"
 
-  val noMatchResponse  = Right(BalanceRequestNotMatched)
-  val successResponse  = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
-  val pendingResponse  = Right(BalanceRequestPending(balanceId))
-  val tryAgainResponse = Right(BalanceRequestPendingExpired(balanceId))
-  val errorResponse    = Left(HttpResponse(404, ""))
+  // format: off
+  private val baseAnswers: UserAnswers = emptyUserAnswers
+    .set(GuaranteeReferenceNumberPage, grn).success.value
+    .set(AccessCodePage, access).success.value
+    .set(EoriNumberPage, taxId).success.value
+
+  private val baseAnswersWithBalanceId: UserAnswers = baseAnswers
+    .set(BalanceIdPage, balanceId).success.value
+  // format: on
+
+  private val successResponse = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
+  private val errorResponse   = Left(HttpResponse(404, ""))
 
   implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
 
-  "WaitOnGuaranteeBalanceController" - {
+  "TryAgainController" - {
 
     "onLoad" - {
       "must return OK and the correct view for a GET" in {
-        val request = FakeRequest(GET, routes.WaitOnGuaranteeBalanceController.onPageLoad(BalanceId(expectedUuid)).url)
+        val request = FakeRequest(GET, routes.TryAgainController.onPageLoad().url)
 
-        val application = applicationBuilder(userAnswers = Some(populatedUserAnswers)).build()
+        val application = applicationBuilder(userAnswers = Some(baseAnswers)).build()
         val result      = route(application, request).value
 
         status(result) mustEqual OK
@@ -68,38 +77,40 @@ class WaitOnGuaranteeBalanceControllerSpec extends SpecBase with JsonMatchers wi
 
         val config = application.injector.instanceOf[FrontendAppConfig]
         val expectedJson = Json.obj(
-          "balanceId"         -> balanceId,
           "waitTimeInSeconds" -> config.guaranteeBalanceDisplayDelay
         )
 
         jsonCaptor.getValue must containJson(expectedJson)
-        templateCaptor.getValue mustBe "waitOnGuaranteeBalance.njk"
+        templateCaptor.getValue mustBe "tryAgain.njk"
       }
     }
 
     "onSubmit" - {
-      "must Redirect to the Balance Confirmation Controller if the status is DataReturned " in {
-        when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId))(any())).thenReturn(Future.successful(successResponse))
+      "must submit a request and then Redirect to the Balance Confirmation Controller if the status is DataReturned and Submit Mode" in {
+        when(mockGuaranteeBalanceService.submitRequestOrPollForResponse()(any(), any())).thenReturn(Future.successful(successResponse))
 
-        val request     = FakeRequest(POST, routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url)
-        val application = applicationBuilder(userAnswers = Some(populatedUserAnswers)).build()
+        val request     = FakeRequest(POST, routes.TryAgainController.onSubmit().url)
+        val application = applicationBuilder(userAnswers = Some(baseAnswersWithBalanceId)).build()
         val result      = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
+
         redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
+        verify(mockGuaranteeBalanceService, times(1)).submitRequestOrPollForResponse()(any(), any())
       }
 
       "must show the technical difficulties page if we have an error " in {
-        when(mockGuaranteeBalanceService.pollForGuaranteeBalance(eqTo(balanceId))(any())).thenReturn(Future.successful(errorResponse))
+        when(mockGuaranteeBalanceService.submitRequestOrPollForResponse()(any(), any())).thenReturn(Future.successful(errorResponse))
 
-        val request = FakeRequest(POST, routes.WaitOnGuaranteeBalanceController.onSubmit(balanceId).url)
+        val request = FakeRequest(POST, routes.TryAgainController.onSubmit().url)
 
         val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-        val application                            = applicationBuilder(userAnswers = Some(populatedUserAnswers)).build()
+        val application                            = applicationBuilder(userAnswers = Some(baseAnswersWithBalanceId)).build()
         val result                                 = route(application, request).value
 
         status(result) mustEqual INTERNAL_SERVER_ERROR
 
+        verify(mockGuaranteeBalanceService, times(1)).submitRequestOrPollForResponse()(any(), any())
         verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
         templateCaptor.getValue mustEqual "technicalDifficulties.njk"
       }

@@ -18,6 +18,7 @@ package controllers
 
 import controllers.actions._
 import handlers.GuaranteeBalanceResponseHandler
+import javax.inject.Inject
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
@@ -27,7 +28,6 @@ import services.GuaranteeBalanceService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 import viewModels.CheckYourAnswersViewModelProvider
-import javax.inject.Inject
 
 import scala.concurrent.ExecutionContext
 
@@ -60,7 +60,7 @@ class CheckYourAnswersController @Inject() (
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      guaranteeBalanceService.submitBalanceRequest
+      guaranteeBalanceService.submitRequestOrPollForResponse
         .flatMap(responseHandler.processResponse(_))
   }
 }

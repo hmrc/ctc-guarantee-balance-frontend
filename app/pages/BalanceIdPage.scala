@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package views
+package pages
 
-class RateLimitViewSpec extends SingleViewSpec("rateLimit.njk") {
+import models.values.BalanceId
+import play.api.libs.json.JsPath
 
-  "must render correct heading" in {
-    assertPageTitleEqualsMessage(doc, "rateLimit.heading")
-  }
+case object BalanceIdPage extends QuestionPage[BalanceId] {
 
-  "must render paragraph" in {
-    assertContainsText(doc, "rateLimit.paragraph")
-  }
+  override def path: JsPath = JsPath \ toString
 
-  "behave like a page with a submit button" in {
-    assertPageHasButton(doc, "site.tryAgain")
-  }
+  override def toString: String = "balanceId"
 }

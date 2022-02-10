@@ -17,7 +17,6 @@
 package handlers
 
 import java.util.UUID
-
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import cats.data.NonEmptyList
 import matchers.JsonMatchers
@@ -77,7 +76,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       val result: Future[Result] = handler.processResponse(tryAgainResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.TryGuaranteeBalanceAgainController.onPageLoad().url
+      redirectLocation(result).value mustEqual controllers.routes.TryAgainController.onPageLoad().url
     }
 
     "must Redirect to the DetailsDontMatchController if the status is NoMatch " in {
@@ -161,7 +160,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       val result: Future[Result] = handler.processResponse(pendingResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId).url
+      redirectLocation(result).value mustEqual controllers.routes.TryAgainController.onPageLoad().url
 
       verify(auditService, times(0)).audit(any())(any(), any(), any())
     }
@@ -204,7 +203,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       val result: Future[Result] = handler.processResponse(tooManyRequestsResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.RateLimitController.onPageLoad().url
+      redirectLocation(result).value mustEqual controllers.routes.TryAgainController.onPageLoad().url
 
       val jsonCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 

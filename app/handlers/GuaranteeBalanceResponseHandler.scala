@@ -17,6 +17,7 @@
 package handlers
 
 import config.FrontendAppConfig
+
 import javax.inject.Inject
 import models.backend._
 import models.requests.DataRequest
@@ -58,14 +59,16 @@ class GuaranteeBalanceResponseHandler @Inject() (
     request: DataRequest[_]
   ): Future[Result] =
     response match {
-      case BalanceRequestPending(balanceId) =>
-        Future.successful(Redirect(controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId)))
+      case BalanceRequestPending(_) =>
+        logger.info("[GuaranteeBalanceResponseHandler][processBalanceRequestResponse] BalanceRequestPending")
+        Future.successful(Redirect(controllers.routes.TryAgainController.onPageLoad()))
 
       case successResponse: BalanceRequestSuccess =>
         auditSuccess(successResponse)
         processSuccessResponse(successResponse)
 
       case BalanceRequestSessionExpired =>
+        logger.info("[GuaranteeBalanceResponseHandler][processBalanceRequestResponse] BalanceRequestSessionExpired")
         Future.successful(Redirect(controllers.routes.SessionExpiredController.onPageLoad()))
 
       case BalanceRequestNotMatched(errorPointer) =>
@@ -74,14 +77,14 @@ class GuaranteeBalanceResponseHandler @Inject() (
 
       case BalanceRequestRateLimit =>
         auditRateLimit
-        Future.successful(Redirect(controllers.routes.RateLimitController.onPageLoad()))
+        Future.successful(Redirect(controllers.routes.TryAgainController.onPageLoad()))
 
       case BalanceRequestPendingExpired(_) =>
         auditError(
           SEE_OTHER,
           ErrorMessage(AUDIT_ERROR_REQUEST_EXPIRED, AUDIT_DEST_TRY_AGAIN)
         )
-        Future.successful(Redirect(controllers.routes.TryGuaranteeBalanceAgainController.onPageLoad()))
+        Future.successful(Redirect(controllers.routes.TryAgainController.onPageLoad()))
 
       case BalanceRequestUnsupportedGuaranteeType =>
         auditError(
@@ -129,14 +132,16 @@ class GuaranteeBalanceResponseHandler @Inject() (
       case "GRR(1).OTG(1).TIN"                       => AUDIT_ERROR_EORI_GRN_DO_NOT_MATCH
       case _                                         => AUDIT_ERROR_DO_NOT_MATCH
     }
-
+    logger.info(s"[GuaranteeBalanceResponseHandler][auditBalanceRequestNotMatched] Failed to match $errorPointer")
     auditError(
       SEE_OTHER,
       ErrorMessage(balanceRequestNotMatchedMessage, AUDIT_DEST_DETAILS_DO_NOT_MATCH)
     )
   }
 
-  private def auditSuccess(successResponse: BalanceRequestSuccess)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]): Unit =
+  private def auditSuccess(successResponse: BalanceRequestSuccess)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]): Unit = {
+    logger.info(s"[GuaranteeBalanceResponseHandler][auditSuccess]")
+
     auditService.audit(
       SuccessfulBalanceAuditModel.build(
         request.userAnswers.get(EoriNumberPage).getOrElse("-"),
@@ -148,8 +153,10 @@ class GuaranteeBalanceResponseHandler @Inject() (
         successResponse.currency.toString.trim + " " + successResponse.balance.toString.trim
       )
     )
+  }
 
-  private def auditRateLimit()(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]): Unit =
+  private def auditRateLimit()(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]): Unit = {
+    logger.info(s"[GuaranteeBalanceResponseHandler][auditRateLimit]Failed to process Response")
     auditService.audit(
       UnsuccessfulBalanceAuditModel.build(
         AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT,
@@ -162,6 +169,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
         ErrorMessage(AUDIT_ERROR_RATE_LIMIT_EXCEEDED, AUDIT_DEST_RATE_LIMITED)
       )
     )
+  }
 
   private def auditError(errorCode: Int, errorMessage: ErrorMessage)(implicit
     hc: HeaderCarrier,

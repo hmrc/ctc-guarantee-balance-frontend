@@ -66,7 +66,6 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
   "CheckYourAnswers Controller" - {
 
     "return OK and the correct view for a GET" in {
-
       val userAnswers = baseAnswers
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
       val request     = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
@@ -109,7 +108,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
       val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
       val request     = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
 
-      when(mockGuaranteeBalanceService.submitBalanceRequest()(any(), any()))
+      when(mockGuaranteeBalanceService.submitRequestOrPollForResponse()(any(), any()))
         .thenReturn(Future.successful(Right(BalanceRequestSuccess(123.45, CurrencyCode("GBP")))))
 
       val result = route(application, request).value
@@ -118,8 +117,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
       redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
 
-      verify(mockGuaranteeBalanceService).submitBalanceRequest()(any(), any())
+      verify(mockGuaranteeBalanceService).submitRequestOrPollForResponse()(any(), any())
     }
-
   }
 }
