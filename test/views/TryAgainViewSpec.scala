@@ -18,42 +18,35 @@ package views
 
 import java.util.UUID
 import controllers.routes
-import models.PollMode
 import models.values.BalanceId
 import org.jsoup.nodes.Document
 import play.api.libs.json.Json
 
-class WaitOnGuaranteeBalanceViewSpec extends SingleViewSpec("waitOnGuaranteeBalance.njk") {
+class TryAgainViewSpec extends SingleViewSpec("tryAgain.njk") {
 
   val expectedUuid = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
   val balanceId    = BalanceId(expectedUuid)
 
   val json = Json.obj(
-    "balanceId"         -> balanceId,
-    "waitTimeInSeconds" -> 10,
-    "submissionMode"    -> PollMode
+    "waitTimeInSeconds" -> 10
   )
 
   override lazy val doc: Document = renderDocument(json).futureValue
 
   "must render correct heading" in {
-    assertPageTitleEqualsMessage(doc, "waitOnGuaranteeBalance.heading")
+    assertPageTitleEqualsMessage(doc, "tryAgain.heading")
   }
 
   "must render waitOnGuaranteeBalance prelink text" in {
-    assertContainsText(doc, "waitOnGuaranteeBalance.checkDetails.prelink")
+    assertContainsText(doc, "tryAgain.checkDetails.prelink")
   }
 
   "display link with id check-details" in {
-    assertPageHasLink(doc,
-                      "check-details",
-                      "waitOnGuaranteeBalance.checkDetails.link",
-                      routes.WaitOnGuaranteeBalanceController.checkDetails(balanceId, PollMode).url
-    )
+    assertPageHasLink(doc, "check-details", "tryAgain.checkDetails.link", routes.CheckYourAnswersController.onPageLoad().url)
   }
 
   "must render waitOnGuaranteeBalance postlink text" in {
-    assertContainsText(doc, "waitOnGuaranteeBalance.checkDetails.postlink")
+    assertContainsText(doc, "tryAgain.checkDetails.postlink")
   }
 
   "behave like a page with a submit button" in {
