@@ -17,12 +17,11 @@
 package handlers
 
 import config.FrontendAppConfig
-
 import javax.inject.Inject
 import models.backend._
 import models.requests.DataRequest
 import org.joda.time.LocalDateTime
-import pages.{AccessCodePage, BalancePage, EoriNumberPage, GuaranteeReferenceNumberPage}
+import pages.{AccessCodePage, BalanceIdPage, BalancePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.Json
@@ -59,9 +58,8 @@ class GuaranteeBalanceResponseHandler @Inject() (
     request: DataRequest[_]
   ): Future[Result] =
     response match {
-      case BalanceRequestPending(_) =>
-        logger.info("[GuaranteeBalanceResponseHandler][processBalanceRequestResponse] BalanceRequestPending")
-        Future.successful(Redirect(controllers.routes.TryAgainController.onPageLoad()))
+      case pendingResponse: BalanceRequestPending =>
+        processPendingResponse(pendingResponse)
 
       case successResponse: BalanceRequestSuccess =>
         auditSuccess(successResponse)
@@ -109,6 +107,14 @@ class GuaranteeBalanceResponseHandler @Inject() (
       ErrorMessage(s"Failed to process Response: $failureResponse", AUDIT_DEST_TECHNICAL_DIFFICULTIES)
     )
     technicalDifficulties()
+  }
+
+  private def processPendingResponse(balanceResponse: BalanceRequestPending)(implicit request: DataRequest[_]): Future[Result] = {
+    logger.info("[GuaranteeBalanceResponseHandler][processBalanceRequestResponse] BalanceRequestPending")
+    for {
+      updatedAnswers <- Future.fromTry(request.userAnswers.set(BalanceIdPage, balanceResponse.balanceId))
+      _              <- sessionRepository.set(updatedAnswers)
+    } yield Redirect(controllers.routes.TryAgainController.onPageLoad())
   }
 
   private def processSuccessResponse(balanceResponse: BalanceRequestSuccess)(implicit request: DataRequest[_]): Future[Result] =
