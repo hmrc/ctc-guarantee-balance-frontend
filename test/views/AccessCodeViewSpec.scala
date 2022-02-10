@@ -35,8 +35,7 @@ class AccessCodeViewSpec extends SingleViewSpec("accessCode.njk") {
   }
 
   "must render hint text" in {
-    val hint = doc.getElementsByClass("govuk-hint").first()
-    hint.text() mustEqual "accessCode.hintText"
+    assertPageHasHint(doc, "accessCode.hint")
   }
 
   "must have autocomplete off" in {
@@ -45,6 +44,22 @@ class AccessCodeViewSpec extends SingleViewSpec("accessCode.njk") {
 
   "must render a continue button" in {
     assertPageHasButton(doc, "site.continue")
+  }
+
+  "must render paragraph" in {
+    assertContainsText(doc, messages("accessCode.paragraph"))
+  }
+
+  "must render correct title" in {
+    assertPageHasTitle(doc, "accessCode")
+  }
+
+  "must render correct heading" in {
+    assertPageTitleEqualsMessage(doc, "accessCode.heading")
+  }
+
+  "must render correct label" in {
+    assertPageHasLabel(doc, "accessCode")
   }
 
 }

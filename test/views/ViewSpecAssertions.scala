@@ -141,4 +141,10 @@ trait ViewSpecAssertions extends Matchers {
     val caption = doc.getElementsByTag("title").first()
     caption.text() mustBe messages(s"$prefix.title site.title.suffix")
   }
+
+  def assertPageHasLabel(doc: Document, prefix: String): Assertion = {
+    val label = doc.getElementsByClass("govuk-label").first()
+    assert(label.hasClass("govuk-label--m"))
+    label.text() mustBe messages(s"$prefix.label")
+  }
 }
