@@ -77,7 +77,7 @@ class TryAgainControllerSpec extends SpecBase with JsonMatchers with AppWithDefa
 
         val config = application.injector.instanceOf[FrontendAppConfig]
         val expectedJson = Json.obj(
-          "waitTimeInSeconds" -> config.guaranteeBalanceDisplayDelay
+          "waitTimeInSeconds" -> config.rateLimitDuration
         )
 
         jsonCaptor.getValue must containJson(expectedJson)

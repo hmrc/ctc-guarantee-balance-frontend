@@ -45,7 +45,7 @@ class TryAgainController @Inject() (
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       val json = Json.obj(
-        "waitTimeInSeconds" -> config.guaranteeBalanceDisplayDelay
+        "waitTimeInSeconds" -> config.rateLimitDuration
       )
       renderer.render("tryAgain.njk", json).map(Ok(_))
   }
