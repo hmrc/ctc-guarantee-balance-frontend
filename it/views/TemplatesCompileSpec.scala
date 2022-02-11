@@ -16,7 +16,7 @@
 
 package views
 
-import models.{Mode, NormalMode, SubmissionMode, SubmitMode}
+import models.{Mode, NormalMode}
 import org.jsoup.Jsoup
 import org.jsoup.select.Elements
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
@@ -47,8 +47,7 @@ class TemplatesCompileSpec extends AnyFreeSpec with Matchers with ScalaFutures w
     }
   }
 
-  private val mode: Mode                     = NormalMode
-  private val submissionMode: SubmissionMode = SubmitMode
+  private val mode: Mode = NormalMode
 
   "must render all the templates" in {
 
@@ -65,9 +64,8 @@ class TemplatesCompileSpec extends AnyFreeSpec with Matchers with ScalaFutures w
         val result = renderer.render(
           pathInsideViews.toString,
           Json.obj(
-            "mode"           -> mode,
-            "balanceId"      -> "testBalanceId",
-            "submissionMode" -> submissionMode
+            "mode"      -> mode,
+            "balanceId" -> "testBalanceId"
           )
         )
         val html: Html = result.futureValue
