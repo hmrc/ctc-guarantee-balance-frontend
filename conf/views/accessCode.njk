@@ -30,18 +30,22 @@
           }) }}
         {% endif %}
 
+        <h1 class="govuk-heading-xl">{{ messages("accessCode.heading") }}</h1>
+
+        <p class="govuk-body">{{ messages("accessCode.paragraph") }}</p>
+
         <form action="{{ routes.controllers.AccessCodeController.onSubmit(mode).url }}" method="post">
 
           {{ csrf() | safe }}
 
           {{ govukInput({
             hint: {
-              text: messages('accessCode.hintText')
+              text: messages('accessCode.hint')
             },
             label: {
-              text: messages('accessCode.heading'),
-              isPageHeading: true,
-              classes: "govuk-label--xl"
+              text: messages('accessCode.label'),
+              isPageHeading: false,
+              classes: "govuk-label--m"
             },
             type: "password",
             id: "value",

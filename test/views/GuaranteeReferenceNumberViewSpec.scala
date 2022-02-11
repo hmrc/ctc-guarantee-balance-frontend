@@ -51,9 +51,7 @@ class GuaranteeReferenceNumberViewSpec extends SingleViewSpec("guaranteeReferenc
   }
 
   "must render correct label" in {
-    val label = doc.getElementsByClass("govuk-label").first()
-    assert(label.hasClass("govuk-label--m"))
-    label.text() mustBe messages("guaranteeReferenceNumber.label")
+    assertPageHasLabel(doc, "guaranteeReferenceNumber")
   }
 
 }
