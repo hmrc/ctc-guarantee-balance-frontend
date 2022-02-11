@@ -232,12 +232,11 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       val result: Future[Result] = handler.processResponse(balanceErrorResponse)
 
       val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-      verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
-
       status(result) mustEqual INTERNAL_SERVER_ERROR
-      templateCaptor.getValue mustBe "technicalDifficulties.njk"
 
       verify(mockSessionRepository, times(1)).set(any())
+      verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
+      templateCaptor.getValue mustBe "technicalDifficulties.njk"
     }
 
     "must Redirect to the rate limit page if we have a RateLimit Response" in {
@@ -260,11 +259,11 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       val result: Future[Result] = handler.processResponse(httpErrorResponse)
 
       val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-      verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
-
       status(result) mustEqual INTERNAL_SERVER_ERROR
-      templateCaptor.getValue mustBe "technicalDifficulties.njk"
+
       verify(mockSessionRepository, times(1)).set(any())
+      verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
+      templateCaptor.getValue mustBe "technicalDifficulties.njk"
     }
   }
 
