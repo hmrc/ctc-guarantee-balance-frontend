@@ -29,7 +29,7 @@ import models.values.{BalanceId, CurrencyCode, ErrorType}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify}
-import pages.{BalanceIdPage, BalancePage, GuaranteeReferenceNumberPage}
+import pages.{AccessCodePage, BalanceIdPage, BalancePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.http.Status.{OK, SEE_OTHER}
 import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.Helpers._
@@ -42,11 +42,25 @@ import scala.concurrent.Future
 
 class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers with AppWithDefaultMockFixtures {
 
-  val expectedUuid         = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
-  val balanceId            = BalanceId(expectedUuid)
-  val balanceResponse      = BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP"))
-  private val grn: String  = "grn"
-  val populatedUserAnswers = emptyUserAnswers.set(GuaranteeReferenceNumberPage, grn).success.value
+  val expectedUuid           = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
+  val balanceId              = BalanceId(expectedUuid)
+  val balanceResponse        = BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP"))
+  private val grn: String    = "grn"
+  private val access: String = "access"
+  private val taxId: String  = "taxId"
+
+  // format: off
+  private val baseAnswers: UserAnswers = emptyUserAnswers
+    .set(GuaranteeReferenceNumberPage, grn).success.value
+    .set(AccessCodePage, access).success.value
+    .set(EoriNumberPage, taxId).success.value
+
+  private val baseAnswersWithBalanceId: UserAnswers = emptyUserAnswers
+    .set(GuaranteeReferenceNumberPage, grn).success.value
+    .set(AccessCodePage, access).success.value
+    .set(EoriNumberPage, taxId).success.value
+    .set(BalanceIdPage, balanceId).success.value
+  // format: on
 
   val noMatchResponse           = Right(BalanceRequestNotMatched("test"))
   val eoriNoMatchResponse       = Right(BalanceRequestNotMatched("RC1.TIN"))
@@ -67,7 +81,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
   implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
 
   val mockRequest      = mock[Request[AnyContent]]
-  implicit val request = DataRequest(mockRequest, "eoriNumber", populatedUserAnswers)
+  implicit val request = DataRequest(mockRequest, "eoriNumber", baseAnswers)
 
   private lazy val handler: GuaranteeBalanceResponseHandler = app.injector.instanceOf[GuaranteeBalanceResponseHandler]
   private lazy val auditService: AuditService               = app.injector.instanceOf[AuditService]
@@ -80,7 +94,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value mustEqual controllers.routes.TryAgainController.onPageLoad().url
 
-      verify(mockSessionRepository, times(0)).set(any())
+      verify(mockSessionRepository, times(1)).set(any())
     }
 
     "must Redirect to the DetailsDontMatchController if the status is NoMatch " in {
@@ -91,7 +105,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       val jsonCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
-      verify(mockSessionRepository, times(0)).set(any())
+      verify(mockSessionRepository, times(1)).set(any())
 
       jsonCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION
       jsonCaptor.getValue.detail.toString.contains(AUDIT_ERROR_DO_NOT_MATCH) mustEqual true
@@ -106,7 +120,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       val jsonCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
-      verify(mockSessionRepository, times(0)).set(any())
+      verify(mockSessionRepository, times(1)).set(any())
 
       jsonCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION
       jsonCaptor.getValue.detail.toString.contains(AUDIT_ERROR_INCORRECT_EORI) mustEqual true
@@ -121,7 +135,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       val jsonCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
-      verify(mockSessionRepository, times(0)).set(any())
+      verify(mockSessionRepository, times(1)).set(any())
 
       jsonCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION
       jsonCaptor.getValue.detail.toString.contains(AUDIT_ERROR_INCORRECT_GRN) mustEqual true
@@ -136,7 +150,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       val jsonCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
-      verify(mockSessionRepository, times(0)).set(any())
+      verify(mockSessionRepository, times(1)).set(any())
 
       jsonCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION
       jsonCaptor.getValue.detail.toString.contains(AUDIT_ERROR_INCORRECT_ACCESS_CODE) mustEqual true
@@ -151,7 +165,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       val jsonCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
-      verify(mockSessionRepository, times(0)).set(any())
+      verify(mockSessionRepository, times(1)).set(any())
 
       jsonCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION
       jsonCaptor.getValue.detail.toString.contains(AUDIT_ERROR_EORI_GRN_DO_NOT_MATCH) mustEqual true
@@ -164,7 +178,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value mustEqual controllers.routes.UnsupportedGuaranteeTypeController.onPageLoad().url
 
-      verify(mockSessionRepository, times(0)).set(any())
+      verify(mockSessionRepository, times(1)).set(any())
     }
 
     "must return back to the wait page if the status is still pending " in {
@@ -174,12 +188,16 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       redirectLocation(result).value mustEqual controllers.routes.TryAgainController.onPageLoad().url
 
       val userAnswersCapture: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
-      verify(mockSessionRepository, times(1)).set(userAnswersCapture.capture())
-      userAnswersCapture.getValue.get(BalanceIdPage) mustEqual Some(balanceId)
+      verify(mockSessionRepository, times(2)).set(userAnswersCapture.capture())
+      userAnswersCapture.getAllValues.get(1).get(BalanceIdPage) mustEqual Some(balanceId)
+
       verify(auditService, times(0)).audit(any())(any(), any(), any())
     }
 
     "must Redirect to the Balance Confirmation Controller if the status is DataReturned " in {
+      val mockRequest      = mock[Request[AnyContent]]
+      implicit val request = DataRequest(mockRequest, "eoriNumber", baseAnswersWithBalanceId)
+
       val result: Future[Result] = handler.processResponse(successResponse)
 
       status(result) mustEqual SEE_OTHER
@@ -193,8 +211,10 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       jsonCaptor.getValue.status mustEqual OK
 
       val userAnswersCapture: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
-      verify(mockSessionRepository, times(1)).set(userAnswersCapture.capture())
-      userAnswersCapture.getValue.get(BalancePage) mustEqual Some(balanceResponse.formatForDisplay)
+      verify(mockSessionRepository, times(2)).set(userAnswersCapture.capture())
+      val finalUserAnswers = userAnswersCapture.getAllValues.get(1)
+      finalUserAnswers.get(BalanceIdPage).isDefined mustEqual false
+      finalUserAnswers.get(BalancePage) mustEqual Some(balanceResponse.formatForDisplay)
     }
 
     "must Redirect to the session expires page if we have a session expired response" in {
@@ -204,7 +224,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       redirectLocation(result).value mustEqual controllers.routes.SessionExpiredController.onPageLoad().url
 
       verify(auditService, times(0)).audit(any())(any(), any(), any())
-      verify(mockSessionRepository, times(0)).set(any())
+      verify(mockSessionRepository, times(1)).set(any())
 
     }
 
@@ -216,6 +236,8 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
 
       status(result) mustEqual INTERNAL_SERVER_ERROR
       templateCaptor.getValue mustBe "technicalDifficulties.njk"
+
+      verify(mockSessionRepository, times(1)).set(any())
     }
 
     "must Redirect to the rate limit page if we have a RateLimit Response" in {
@@ -227,7 +249,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
       val jsonCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
       verify(auditService, times(1)).audit(jsonCaptor.capture())(any(), any(), any())
-      verify(mockSessionRepository, times(0)).set(any())
+      verify(mockSessionRepository, times(1)).set(any())
 
       jsonCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT
       jsonCaptor.getValue.detail.toString.contains(AUDIT_ERROR_RATE_LIMIT_EXCEEDED) mustEqual true
@@ -242,6 +264,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
 
       status(result) mustEqual INTERNAL_SERVER_ERROR
       templateCaptor.getValue mustBe "technicalDifficulties.njk"
+      verify(mockSessionRepository, times(1)).set(any())
     }
   }
 

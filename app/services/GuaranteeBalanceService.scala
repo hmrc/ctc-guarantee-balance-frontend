@@ -21,13 +21,11 @@ import akka.pattern.after
 import config.FrontendAppConfig
 import connectors.GuaranteeBalanceConnector
 import javax.inject.Inject
-import models.UserAnswers
 import models.backend.{BalanceRequestPending, BalanceRequestRateLimit, BalanceRequestResponse, BalanceRequestSessionExpired}
 import models.requests.{BalanceRequest, DataRequest}
 import models.values._
 import pages.{AccessCodePage, BalanceIdPage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.Logging
-import repositories.SessionRepository
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
 
@@ -37,8 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
                                          connector: GuaranteeBalanceConnector,
                                          mongoLockRepository: MongoLockRepository,
-                                         config: FrontendAppConfig,
-                                         sessionRepository: SessionRepository
+                                         config: FrontendAppConfig
 )(implicit ec: ExecutionContext)
     extends Logging {
 
@@ -82,14 +79,10 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
   }
 
   private def pollForGuaranteeBalance(balanceId: BalanceId)(implicit
-    hc: HeaderCarrier,
-    request: DataRequest[_]
+    hc: HeaderCarrier
   ): Future[Either[HttpResponse, BalanceRequestResponse]] = {
     logger.info("[GuaranteeBalanceService][pollForGuaranteeBalance] poll for response")
-    for {
-      _                   <- removeBalanceIdFromUserAnswers
-      responseFromPolling <- retryGuaranteeBalance(balanceId, System.nanoTime())
-    } yield responseFromPolling
+    retryGuaranteeBalance(balanceId, System.nanoTime())
   }
 
   private def retryGuaranteeBalance(balanceId: BalanceId, startTimeMillis: Long)(implicit
@@ -109,10 +102,4 @@ class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
     val durationInSeconds       = (currentTimeMillis - startTimeMillis) / 1e9d
     durationInSeconds < maxTime.toSeconds
   }
-
-  def removeBalanceIdFromUserAnswers()(implicit request: DataRequest[_]): Future[UserAnswers] =
-    for {
-      updatedAnswers <- Future.fromTry(request.userAnswers.remove(BalanceIdPage))
-      _              <- sessionRepository.set(updatedAnswers)
-    } yield updatedAnswers
 }
