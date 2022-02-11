@@ -27,7 +27,6 @@ import models.UserAnswers
 import models.backend._
 import models.requests.{BalanceRequest, DataRequest}
 import models.values._
-import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalacheck.Arbitrary.arbitrary
@@ -78,127 +77,78 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
     super.beforeEach
   }
 
-  "submitRequestOrPollForResponse" - {
-    "must submit the request when we have a balance id in the UserAnswers" in {
-      val userAnswers          = baseAnswers
-      val request              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-      implicit val dataRequest = DataRequest(request, userAnswers.id, baseAnswers)
+  "retrieveBalanceResponse" - {
+    "submitBalanceRequest" - {
+      "must submit the return the balance response for a successful call" in {
+        val userAnswers          = baseAnswers
+        val request              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+        implicit val dataRequest = DataRequest(request, userAnswers.id, baseAnswers)
 
-      when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
-      when(mockGuaranteeBalanceConnector.submitBalanceRequest(any())(any()))
-        .thenReturn(Future.successful(Right(balance)))
+        when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
+        when(mockGuaranteeBalanceConnector.submitBalanceRequest(any())(any()))
+          .thenReturn(Future.successful(Right(balance)))
 
-      val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config, mockSessionRepository)
-      val result  = service.submitRequestOrPollForResponse.futureValue
-      result mustEqual Right(balance)
+        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config)
+        val result  = service.retrieveBalanceResponse.futureValue
+        result mustEqual Right(balance)
 
-      verify(mockMongoLockRepository).takeLock(any(), any(), any())
-      verify(mockGuaranteeBalanceConnector).submitBalanceRequest(eqTo(BalanceRequest(TaxIdentifier(taxId), GuaranteeReference(grn), AccessCode(access))))(
-        any()
-      )
-      val userAnswersCapture: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
-      verify(mockSessionRepository, times(1)).set(userAnswersCapture.capture())
-      userAnswersCapture.getValue.get(BalanceIdPage).isDefined mustEqual false
-    }
-
-    "return poll for response when we have a balanceId in the UserAnswers" in {
-      val userAnswers          = baseAnswersWithBalanceId
-      val request              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-      implicit val dataRequest = DataRequest(request, userAnswers.id, userAnswers)
-
-      val mockGuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
-      when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any())).thenReturn(Future.successful(successResponse))
-      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
-
-      val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config, mockSessionRepository)
-
-      val result = service.submitRequestOrPollForResponse
-      whenReady(result) {
-        _ mustEqual successResponse
+        verify(mockMongoLockRepository).takeLock(any(), any(), any())
+        verify(mockGuaranteeBalanceConnector).submitBalanceRequest(eqTo(BalanceRequest(TaxIdentifier(taxId), GuaranteeReference(grn), AccessCode(access))))(
+          any()
+        )
       }
 
-      verify(mockGuaranteeBalanceConnector, times(1)).queryPendingBalance(any())(any())
-      val userAnswersCapture: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
-      verify(mockSessionRepository, times(1)).set(userAnswersCapture.capture())
-      userAnswersCapture.getValue.get(BalanceIdPage).isDefined mustEqual false
-    }
-  }
+      "must redirect to Session Expired if no existing data is found" in {
+        val userAnswers          = emptyUserAnswers
+        val request              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+        implicit val dataRequest = DataRequest(request, userAnswers.id, userAnswers)
 
-  "submitBalanceRequest" - {
-    "must redirect to Session Expired if no existing data is found" in {
-      val userAnswers          = emptyUserAnswers
-      val request              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-      implicit val dataRequest = DataRequest(request, userAnswers.id, userAnswers)
-
-      val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config, mockSessionRepository)
-      val result  = service.submitBalanceRequest().futureValue
-      result mustEqual Right(BalanceRequestSessionExpired)
-    }
-
-    "must redirect to Balance Confirmation and remove the balanceid from UserAnswers if no lock in mongo repository for that user and GRN" in {
-      val userAnswers          = baseAnswersWithBalanceId
-      val request              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-      implicit val dataRequest = DataRequest(request, userAnswers.id, userAnswers)
-
-      val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
-
-      when(mockMongoLockRepository.takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())).thenReturn(Future.successful(true))
-      when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
-      when(mockGuaranteeBalanceConnector.submitBalanceRequest(any())(any()))
-        .thenReturn(Future.successful(Right(balance)))
-
-      val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config, mockSessionRepository)
-      val result  = service.submitBalanceRequest.futureValue
-      result mustEqual Right(balance)
-
-      verify(mockMongoLockRepository).takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())
-      verify(mockGuaranteeBalanceConnector).submitBalanceRequest(eqTo(BalanceRequest(TaxIdentifier(taxId), GuaranteeReference(grn), AccessCode(access))))(
-        any()
-      )
-      val userAnswersCapture: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
-      verify(mockSessionRepository, times(1)).set(userAnswersCapture.capture())
-      userAnswersCapture.getValue.get(BalanceIdPage).isDefined mustEqual false
-    }
-
-    "must redirect to rate limit if lock in mongo repository for that user and GRN" in {
-      val userAnswers          = baseAnswers
-      val request              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-      implicit val dataRequest = DataRequest(request, userAnswers.id, userAnswers)
-
-      val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
-
-      when(mockMongoLockRepository.takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())).thenReturn(Future.successful(false))
-      val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config, mockSessionRepository)
-      val result  = service.submitBalanceRequest.futureValue
-      result mustEqual Right(BalanceRequestRateLimit)
-
-      verify(mockMongoLockRepository).takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())
-    }
-
-    "must redirect to session timeout if at least one of EORI, GRN and access code are undefined" in {
-
-      forAll(arbitrary[(Option[String], Option[String], Option[String])].retryUntil {
-        case (eoriNumber, grn, accessCode) => !(eoriNumber.isDefined && grn.isDefined && accessCode.isDefined)
-      }) {
-        case (eoriNumber, grn, accessCode) =>
-          // format: off
-          val userAnswers = emptyUserAnswers
-            .setOption(EoriNumberPage, eoriNumber).success.value
-            .setOption(GuaranteeReferenceNumberPage, grn).success.value
-            .setOption(AccessCodePage, accessCode).success.value
-          // format: on
-          val request              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-          implicit val dataRequest = DataRequest(request, "id", userAnswers)
-
-          when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
-
-          when(mockGuaranteeBalanceConnector.submitBalanceRequest(any())(any()))
-            .thenReturn(Future.successful(Right(balance)))
-
-          val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config, mockSessionRepository)
-          val result  = service.submitBalanceRequest.futureValue
-          result mustEqual Right(BalanceRequestSessionExpired)
+        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config)
+        val result  = service.retrieveBalanceResponse().futureValue
+        result mustEqual Right(BalanceRequestSessionExpired)
       }
+
+      "must redirect to rate limit if lock in mongo repository for that user and GRN" in {
+        val userAnswers          = baseAnswers
+        val request              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+        implicit val dataRequest = DataRequest(request, userAnswers.id, userAnswers)
+
+        val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
+
+        when(mockMongoLockRepository.takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())).thenReturn(Future.successful(false))
+        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config)
+        val result  = service.retrieveBalanceResponse.futureValue
+        result mustEqual Right(BalanceRequestRateLimit)
+
+        verify(mockMongoLockRepository).takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())
+      }
+
+      "must redirect to session timeout if at least one of EORI, GRN and access code are undefined" in {
+
+        forAll(arbitrary[(Option[String], Option[String], Option[String])].retryUntil {
+          case (eoriNumber, grn, accessCode) => !(eoriNumber.isDefined && grn.isDefined && accessCode.isDefined)
+        }) {
+          case (eoriNumber, grn, accessCode) =>
+            // format: off
+            val userAnswers = emptyUserAnswers
+              .setOption(EoriNumberPage, eoriNumber).success.value
+              .setOption(GuaranteeReferenceNumberPage, grn).success.value
+              .setOption(AccessCodePage, accessCode).success.value
+            // format: on
+            val request              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+            implicit val dataRequest = DataRequest(request, "id", userAnswers)
+
+            when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
+
+            when(mockGuaranteeBalanceConnector.submitBalanceRequest(any())(any()))
+              .thenReturn(Future.successful(Right(balance)))
+
+            val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config)
+            val result  = service.retrieveBalanceResponse.futureValue
+            result mustEqual Right(BalanceRequestSessionExpired)
+        }
+      }
+
     }
 
     "pollForGuaranteeBalance" - {
@@ -208,73 +158,43 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
       "return successResponse first time with a single call when we have a balanceId in the UserAnswers" in {
         val mockGuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
         when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any())).thenReturn(Future.successful(successResponse))
-        when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
 
-        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config, mockSessionRepository)
+        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config)
 
-        val result = service.pollForGuaranteeBalance(balanceId)
+        val result = service.retrieveBalanceResponse
         whenReady(result) {
           _ mustEqual successResponse
         }
 
         verify(mockGuaranteeBalanceConnector, times(1)).queryPendingBalance(any())(any())
-        val userAnswersCapture: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
-        verify(mockSessionRepository, times(1)).set(userAnswersCapture.capture())
-        userAnswersCapture.getValue.get(BalanceIdPage).isDefined mustEqual false
-      }
-
-      "return successResponse first time with a single call when we don't have a balanceId in the UserAnswers" in {
-        val request              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
-        implicit val dataRequest = DataRequest(request, baseAnswers.id, baseAnswers)
-
-        val mockGuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
-        when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any())).thenReturn(Future.successful(successResponse))
-
-        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config, mockSessionRepository)
-
-        val result = service.pollForGuaranteeBalance(balanceId)
-        whenReady(result) {
-          _ mustEqual successResponse
-        }
-
-        verify(mockGuaranteeBalanceConnector, times(1)).queryPendingBalance(any())(any())
-        val userAnswersCapture: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
-        verify(mockSessionRepository, times(1)).set(userAnswersCapture.capture())
-        userAnswersCapture.getValue.get(BalanceIdPage).isDefined mustEqual false
       }
 
       "return successResponse first time with a single call when we Dont have a balanceId in the UserAnswers" in {
         val mockGuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
         when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any())).thenReturn(Future.successful(successResponse))
-        when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
 
-        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config, mockSessionRepository)
+        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config)
 
-        val result = service.pollForGuaranteeBalance(balanceId)
+        val result = service.retrieveBalanceResponse
         whenReady(result) {
           _ mustEqual successResponse
         }
 
         verify(mockGuaranteeBalanceConnector, times(1)).queryPendingBalance(any())(any())
-        val userAnswersCapture: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
-        verify(mockSessionRepository, times(1)).set(userAnswersCapture.capture())
-        userAnswersCapture.getValue.get(BalanceIdPage).isDefined mustEqual false
       }
 
       "return tryAgainResponse first time with a single call" in {
         val mockGuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
         when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any())).thenReturn(Future.successful(tryAgainResponse))
-        when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
 
-        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config, mockSessionRepository)
+        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config)
 
-        val result = service.pollForGuaranteeBalance(balanceId)
+        val result = service.retrieveBalanceResponse
         whenReady(result) {
           _ mustEqual tryAgainResponse
         }
 
         verify(mockGuaranteeBalanceConnector, times(1)).queryPendingBalance(any())(any())
-        verify(mockSessionRepository, times(1)).set(any())
       }
 
       "first return a PendingResponse then a successResponse" in {
@@ -282,17 +202,15 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
         when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any()))
           .thenReturn(Future.successful(pendingResponse))
           .thenReturn(Future.successful(successResponse))
-        when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
 
-        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config, mockSessionRepository)
+        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config)
 
-        val result = service.pollForGuaranteeBalance(balanceId)
+        val result = service.retrieveBalanceResponse
         whenReady(result) {
           _ mustEqual successResponse
         }
 
         verify(mockGuaranteeBalanceConnector, times(2)).queryPendingBalance(any())(any())
-        verify(mockSessionRepository, times(1)).set(any())
       }
 
       "return PendingResponse twice then a tryAgainResponse" in {
@@ -301,34 +219,30 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
           .thenReturn(Future.successful(pendingResponse))
           .thenReturn(Future.successful(pendingResponse))
           .thenReturn(Future.successful(tryAgainResponse))
-        when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
 
-        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config, mockSessionRepository)
+        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config)
 
-        val result = service.pollForGuaranteeBalance(balanceId)
+        val result = service.retrieveBalanceResponse
 
         whenReady(result) {
           _ mustEqual tryAgainResponse
         }
 
         verify(mockGuaranteeBalanceConnector, times(3)).queryPendingBalance(any())(any())
-        verify(mockSessionRepository, times(1)).set(any())
       }
 
       "keep returning pending until we time out, then return that status" in {
         when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any()))
           .thenReturn(Future.successful(pendingResponse))
-        when(mockSessionRepository.set(any())).thenReturn(Future.successful(true))
 
-        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config, mockSessionRepository)
+        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, config)
 
-        val result = service.pollForGuaranteeBalance(balanceId)
+        val result = service.retrieveBalanceResponse
         whenReady(result) {
           _ mustEqual pendingResponse
         }
         //With test.application.conf waitTimeInSeconds = 1 and  maxTimeInSeconds = 3
         verify(mockGuaranteeBalanceConnector, times(4)).queryPendingBalance(any())(any())
-        verify(mockSessionRepository, times(1)).set(any())
       }
     }
   }

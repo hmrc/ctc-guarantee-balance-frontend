@@ -16,38 +16,43 @@
 
 package controllers
 
-import controllers.actions._
+import config.FrontendAppConfig
+import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import handlers.GuaranteeBalanceResponseHandler
-import javax.inject.Inject
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.i18n.I18nSupport
+import play.api.libs.json.Json
+import play.api.mvc._
 import renderer.Renderer
 import services.GuaranteeBalanceService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class RateLimitController @Inject() (
-  override val messagesApi: MessagesApi,
-  identify: IdentifierAction,
-  getData: DataRetrievalAction,
+class TryAgainController @Inject() (
+  balanceService: GuaranteeBalanceService,
   val controllerComponents: MessagesControllerComponents,
+  responseHandler: GuaranteeBalanceResponseHandler,
+  config: FrontendAppConfig,
+  identify: IdentifierAction,
   renderer: Renderer,
-  requireData: DataRequiredAction,
-  guaranteeBalanceService: GuaranteeBalanceService,
-  responseHandler: GuaranteeBalanceResponseHandler
+  getData: DataRetrievalAction,
+  requireData: DataRequiredAction
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = (identify andThen getData).async {
+  def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      renderer.render("rateLimit.njk").map(Ok(_))
+      val json = Json.obj(
+        "waitTimeInSeconds" -> config.guaranteeBalanceDisplayDelay
+      )
+      renderer.render("tryAgain.njk", json).map(Ok(_))
   }
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      guaranteeBalanceService.submitBalanceRequest
+      balanceService.retrieveBalanceResponse
         .flatMap(responseHandler.processResponse(_))
   }
 }

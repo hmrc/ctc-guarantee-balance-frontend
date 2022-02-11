@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package views
+package services
 
-class RateLimitViewSpec extends SingleViewSpec("rateLimit.njk") {
+import models.Referral
+import play.api.mvc.{Request, Result}
 
-  "must render correct heading" in {
-    assertPageTitleEqualsMessage(doc, "rateLimit.heading")
-  }
+class ReferralService {
 
-  "must render paragraph" in {
-    assertContainsText(doc, "rateLimit.paragraph")
-  }
+  def getReferralFromSession[A <: Request[_]](implicit request: A): Option[String] =
+    request.session.get(Referral.key)
 
-  "behave like a page with a submit button" in {
-    assertPageHasButton(doc, "site.tryAgain")
-  }
+  def setReferralInSession[A <: Request[_]](result: Result, referral: Referral)(implicit request: A): Result =
+    result.addingToSession(Referral.key -> referral.toString)(request)
+
 }

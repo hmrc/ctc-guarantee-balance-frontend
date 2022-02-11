@@ -19,10 +19,10 @@ package controllers.actions
 import com.google.inject.Inject
 import config.FrontendAppConfig
 import controllers.routes
-import models.Referral
 import models.requests.IdentifierRequest
 import play.api.mvc.Results._
 import play.api.mvc._
+import services.ReferralService
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
@@ -36,7 +36,8 @@ trait IdentifierAction extends ActionBuilder[IdentifierRequest, AnyContent] with
 class AuthenticatedIdentifierAction @Inject() (
   override val authConnector: AuthConnector,
   config: FrontendAppConfig,
-  val parser: BodyParsers.Default
+  val parser: BodyParsers.Default,
+  referralService: ReferralService
 )(implicit val executionContext: ExecutionContext)
     extends IdentifierAction
     with AuthorisedFunctions {
@@ -52,7 +53,7 @@ class AuthenticatedIdentifierAction @Inject() (
       }.getOrElse(throw new UnauthorizedException("Unable to retrieve internal Id"))
     } recover {
       case _: NoActiveSession =>
-        val referral = request.cookies.get(Referral.cookieName).map(_.value)
+        val referral = referralService.getReferralFromSession(request)
         val loginContinueUrl = config.loginContinueUrl + referral.fold("")(
           r => s"?referral=$r"
         )

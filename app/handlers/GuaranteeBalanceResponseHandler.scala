@@ -17,13 +17,12 @@
 package handlers
 
 import config.FrontendAppConfig
-import models.{PollMode, SubmitMode}
-
 import javax.inject.Inject
+import models.UserAnswers
 import models.backend._
 import models.requests.DataRequest
 import org.joda.time.LocalDateTime
-import pages.{AccessCodePage, BalancePage, EoriNumberPage, GuaranteeReferenceNumberPage}
+import pages.{AccessCodePage, BalanceIdPage, BalancePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.Logging
 import play.api.http.Status._
 import play.api.libs.json.Json
@@ -50,23 +49,25 @@ class GuaranteeBalanceResponseHandler @Inject() (
     hc: HeaderCarrier,
     request: DataRequest[_]
   ): Future[Result] =
-    response match {
-      case Right(balanceRequestResponse) => processBalanceRequestResponse(balanceRequestResponse)
-      case Left(failureResponse)         => processHttpResponse(failureResponse)
-    }
+    for {
+      updateAnswers <- removeBalanceIdFromUserAnswers
+      handlerResponse <- response match {
+        case Right(balanceRequestResponse) => processBalanceRequestResponse(balanceRequestResponse, updateAnswers)
+        case Left(failureResponse)         => processHttpResponse(failureResponse)
+      }
+    } yield handlerResponse
 
-  private def processBalanceRequestResponse(response: BalanceRequestResponse)(implicit
+  private def processBalanceRequestResponse(response: BalanceRequestResponse, userAnswers: UserAnswers)(implicit
     hc: HeaderCarrier,
     request: DataRequest[_]
   ): Future[Result] =
     response match {
-      case BalanceRequestPending(balanceId) =>
-        logger.info("[GuaranteeBalanceResponseHandler][processBalanceRequestResponse] BalanceRequestPending")
-        Future.successful(Redirect(controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId, PollMode)))
+      case pendingResponse: BalanceRequestPending =>
+        processPendingResponse(pendingResponse, userAnswers)
 
       case successResponse: BalanceRequestSuccess =>
         auditSuccess(successResponse)
-        processSuccessResponse(successResponse)
+        processSuccessResponse(successResponse, userAnswers)
 
       case BalanceRequestSessionExpired =>
         logger.info("[GuaranteeBalanceResponseHandler][processBalanceRequestResponse] BalanceRequestSessionExpired")
@@ -78,14 +79,14 @@ class GuaranteeBalanceResponseHandler @Inject() (
 
       case BalanceRequestRateLimit =>
         auditRateLimit
-        Future.successful(Redirect(controllers.routes.RateLimitController.onPageLoad()))
+        Future.successful(Redirect(controllers.routes.TryAgainController.onPageLoad()))
 
-      case BalanceRequestPendingExpired(balanceId) =>
+      case BalanceRequestPendingExpired(_) =>
         auditError(
           SEE_OTHER,
           ErrorMessage(AUDIT_ERROR_REQUEST_EXPIRED, AUDIT_DEST_TRY_AGAIN)
         )
-        Future.successful(Redirect(controllers.routes.WaitOnGuaranteeBalanceController.onPageLoad(balanceId, SubmitMode)))
+        Future.successful(Redirect(controllers.routes.TryAgainController.onPageLoad()))
 
       case BalanceRequestUnsupportedGuaranteeType =>
         auditError(
@@ -112,11 +113,25 @@ class GuaranteeBalanceResponseHandler @Inject() (
     technicalDifficulties()
   }
 
-  private def processSuccessResponse(balanceResponse: BalanceRequestSuccess)(implicit request: DataRequest[_]): Future[Result] =
+  private def processPendingResponse(balanceResponse: BalanceRequestPending, userAnswers: UserAnswers): Future[Result] = {
+    logger.info("[GuaranteeBalanceResponseHandler][processBalanceRequestResponse] BalanceRequestPending")
     for {
-      updatedAnswers <- Future.fromTry(request.userAnswers.set(BalancePage, balanceResponse.formatForDisplay))
+      updatedAnswers <- Future.fromTry(userAnswers.set(BalanceIdPage, balanceResponse.balanceId))
+      _              <- sessionRepository.set(updatedAnswers)
+    } yield Redirect(controllers.routes.TryAgainController.onPageLoad())
+  }
+
+  private def processSuccessResponse(balanceResponse: BalanceRequestSuccess, userAnswers: UserAnswers): Future[Result] =
+    for {
+      updatedAnswers <- Future.fromTry(userAnswers.set(BalancePage, balanceResponse.formatForDisplay))
       _              <- sessionRepository.set(updatedAnswers)
     } yield Redirect(controllers.routes.BalanceConfirmationController.onPageLoad())
+
+  private def removeBalanceIdFromUserAnswers()(implicit request: DataRequest[_]): Future[UserAnswers] =
+    for {
+      updatedAnswers <- Future.fromTry(request.userAnswers.remove(BalanceIdPage))
+      _              <- sessionRepository.set(updatedAnswers)
+    } yield updatedAnswers
 
   private def technicalDifficulties()(implicit request: Request[_]): Future[Result] = {
     val json = Json.obj(

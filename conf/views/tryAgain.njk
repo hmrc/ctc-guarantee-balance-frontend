@@ -1,0 +1,34 @@
+{% extends 'error.njk' %}
+{% extends "includes/layout.njk" %}
+
+{% from "govuk/components/button/macro.njk"        import govukButton %}
+{% from "macros/title.njk"                         import title %}
+
+{% block pageTitle %}
+  {{ title(messages("tryAgain.title")) }}
+{% endblock %}
+
+{% block mainContent %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+
+      <h1 class="govuk-heading-xl">{{ messages("tryAgain.heading") }}</h1>
+      <p class="govuk-body">{{ messages("tryAgain.checkDetails.prelink") }}
+        <a class="govuk-link" id="check-details" href="{{ routes.controllers.CheckYourAnswersController.onPageLoad().url }}">
+            {{ messages("tryAgain.checkDetails.link") }}
+        </a>
+        {{ messages("tryAgain.checkDetails.postlink", waitTimeInSeconds) }}
+      </p>
+
+      <form action="{{ routes.controllers.TryAgainController.onSubmit().url }}" method="post">
+         {{ csrf() | safe }}
+
+         {{ govukButton({
+            text: messages("site.tryAgain"),
+            preventDoubleClick: true,
+            attributes: {id: "submit"}
+         }) }}
+      </form>
+   </div>
+  </div>
+{% endblock %}

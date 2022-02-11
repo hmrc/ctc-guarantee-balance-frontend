@@ -91,7 +91,7 @@ class BalanceConfirmationViewSpec extends SingleViewSpec("balanceConfirmation.nj
       )
     }
 
-    "when referral is undefined (i.e. cookie not set)" in {
+    "when referral is undefined" in {
 
       val json = Json.obj(
         "referral"                        -> None,

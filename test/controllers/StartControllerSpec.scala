@@ -23,12 +23,12 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.verify
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.mvc.Cookie
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 
 import java.time.LocalDateTime
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class StartControllerSpec extends SpecBase with MockitoSugar with NunjucksSupport with JsonMatchers with AppWithDefaultMockFixtures {
 
@@ -52,7 +52,7 @@ class StartControllerSpec extends SpecBase with MockitoSugar with NunjucksSuppor
 
               status(result) mustEqual SEE_OTHER
               redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
-              cookies(result) must contain(Cookie(Referral.cookieName, referral.toString))
+              result.map(_.session(request).get(Referral.key).get mustEqual referral.toString)
 
               val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
               verify(mockSessionRepository).set(uaCaptor.capture)
@@ -76,7 +76,7 @@ class StartControllerSpec extends SpecBase with MockitoSugar with NunjucksSuppor
 
               status(result) mustEqual SEE_OTHER
               redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
-              cookies(result).map(_.name) mustNot contain(Referral.cookieName)
+              result.map(_.session(request).get(Referral.key) mustNot be(defined))
 
               val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
               verify(mockSessionRepository).set(uaCaptor.capture)
