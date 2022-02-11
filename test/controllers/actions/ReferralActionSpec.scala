@@ -21,6 +21,7 @@ import models.Referral
 import org.scalacheck.Arbitrary.arbitrary
 import play.api.mvc._
 import play.api.test.Helpers._
+import services.ReferralService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -34,35 +35,36 @@ class ReferralActionSpec extends SpecBase with AppWithDefaultMockFixtures {
   }
 
   implicit val bodyParsers: BodyParsers.Default = injector.instanceOf[BodyParsers.Default]
+  private val referralService                   = app.injector.instanceOf[ReferralService]
 
   "Referral Action" - {
 
     "when referral provided" - {
-      "must store referral in a cookie" in {
+      "must store referral in session" in {
 
         forAll(arbitrary[Referral]) {
           referral =>
-            val referralAction = new ReferralAction(Some(referral))
+            val referralAction = new ReferralAction(Some(referral))(referralService)
 
             val harness = new Harness(referralAction)
             val result  = harness.test()(fakeRequest)
 
             status(result) mustBe OK
-            cookies(result) must contain(Cookie(Referral.cookieName, referral.toString))
+            result.map(_.session(fakeRequest).get(Referral.key).get mustEqual referral.toString)
         }
       }
     }
 
     "when referral not provided" - {
-      "must not store referral in a cookie" in {
+      "must not store referral in session" in {
 
-        val referralAction = new ReferralAction(None)
+        val referralAction = new ReferralAction(None)(referralService)
 
         val harness = new Harness(referralAction)
         val result  = harness.test()(fakeRequest)
 
         status(result) mustBe OK
-        cookies(result).map(_.name) mustNot contain(Referral.cookieName)
+        result.map(_.session(fakeRequest).get(Referral.key) mustNot be(defined))
       }
     }
   }

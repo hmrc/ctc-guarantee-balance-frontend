@@ -14,24 +14,17 @@
  * limitations under the License.
  */
 
-package models
+package services
 
-import java.time.{Instant, LocalDateTime, ZoneOffset}
+import models.Referral
+import play.api.mvc.{Request, Result}
 
-import play.api.libs.json._
+class ReferralService {
 
-trait MongoDateTimeFormats {
+  def getReferralFromSession[A <: Request[_]](implicit request: A): Option[String] =
+    request.session.get(Referral.key)
 
-  implicit val localDateTimeRead: Reads[LocalDateTime] =
-    (__ \ "$date").read[Long].map {
-      millis =>
-        LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneOffset.UTC)
-    }
+  def setReferralInSession[A <: Request[_]](result: Result, referral: Referral)(implicit request: A): Result =
+    result.addingToSession(Referral.key -> referral.toString)(request)
 
-  implicit val localDateTimeWrite: Writes[LocalDateTime] = (dateTime: LocalDateTime) =>
-    Json.obj(
-      "$date" -> dateTime.atZone(ZoneOffset.UTC).toInstant.toEpochMilli
-    )
 }
-
-object MongoDateTimeFormats extends MongoDateTimeFormats
