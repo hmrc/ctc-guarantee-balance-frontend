@@ -20,22 +20,23 @@ import akka.actor.ActorSystem
 import akka.pattern.after
 import config.FrontendAppConfig
 import connectors.GuaranteeBalanceConnector
-import javax.inject.Inject
 import models.backend.{BalanceRequestPending, BalanceRequestRateLimit, BalanceRequestResponse, BalanceRequestSessionExpired}
 import models.requests.{BalanceRequest, DataRequest}
 import models.values._
 import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.Logging
+import repositories.MongoLockRepository
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.mongo.lock.MongoLockRepository
 
+import javax.inject.Inject
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
-class GuaranteeBalanceService @Inject() (actorSystem: ActorSystem,
-                                         connector: GuaranteeBalanceConnector,
-                                         mongoLockRepository: MongoLockRepository,
-                                         config: FrontendAppConfig
+class GuaranteeBalanceService @Inject() (
+  actorSystem: ActorSystem,
+  connector: GuaranteeBalanceConnector,
+  mongoLockRepository: MongoLockRepository,
+  config: FrontendAppConfig
 )(implicit ec: ExecutionContext)
     extends Logging {
 

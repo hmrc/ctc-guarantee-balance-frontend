@@ -16,18 +16,15 @@
 
 package controllers.testOnly
 
-import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import play.modules.reactivemongo.ReactiveMongoApi
-import reactivemongo.play.json.collection.JSONCollection
+import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class TestOnlyMongoController @Inject() (
-  override val messagesApi: MessagesApi,
-  mongo: ReactiveMongoApi,
+  mongo: MongoComponent,
   val controllerComponents: MessagesControllerComponents
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController {
@@ -35,14 +32,14 @@ class TestOnlyMongoController @Inject() (
   def dropMongoCollections(): Action[AnyContent] = Action.async {
     _ =>
       val collectionNames: Seq[String] = Seq("user-answers", "locks")
-      Future.sequence(collectionNames.map(dropMongoCollection)).map {
-        x =>
-          if (x.forall(identity)) Ok else InternalServerError
-      }
+      Future
+        .sequence(collectionNames.map {
+          collection =>
+            mongo.database.getCollection(collection).drop().toFuture()
+        })
+        .map {
+          _ => Ok
+        }
   }
 
-  private def dropMongoCollection(name: String): Future[Boolean] = {
-    val collection: Future[JSONCollection] = mongo.database.map(_.collection[JSONCollection](name))
-    collection.flatMap(_.drop(failIfNotFound = false))
-  }
 }

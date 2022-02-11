@@ -32,9 +32,8 @@ import play.api.inject.{bind, Injector}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{FakeRequest, Helpers}
 import play.twirl.api.Html
-import repositories.SessionRepository
+import repositories.{MongoLockRepository, SessionRepository}
 import services.{AuditService, GuaranteeBalanceService}
-import uk.gov.hmrc.mongo.lock.MongoLockRepository
 import uk.gov.hmrc.nunjucks.NunjucksRenderer
 
 import scala.concurrent.Future
@@ -57,9 +56,6 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
 
     when(mockSessionRepository.set(any()))
       .thenReturn(Future.successful(true))
-
-    when(mockMongoLockRepository.releaseLock(any(), any()))
-      .thenReturn(Future.successful(()))
   }
 
   val mockRenderer: NunjucksRenderer                       = mock[NunjucksRenderer]
