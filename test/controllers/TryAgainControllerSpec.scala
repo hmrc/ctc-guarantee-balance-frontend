@@ -87,7 +87,7 @@ class TryAgainControllerSpec extends SpecBase with JsonMatchers with AppWithDefa
 
     "onSubmit" - {
       "must submit a request and then Redirect to the Balance Confirmation Controller if the status is DataReturned and Submit Mode" in {
-        when(mockGuaranteeBalanceService.submitRequestOrPollForResponse()(any(), any())).thenReturn(Future.successful(successResponse))
+        when(mockGuaranteeBalanceService.retrieveBalanceResponse()(any(), any())).thenReturn(Future.successful(successResponse))
 
         val request     = FakeRequest(POST, routes.TryAgainController.onSubmit().url)
         val application = applicationBuilder(userAnswers = Some(baseAnswersWithBalanceId)).build()
@@ -96,11 +96,11 @@ class TryAgainControllerSpec extends SpecBase with JsonMatchers with AppWithDefa
         status(result) mustEqual SEE_OTHER
 
         redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
-        verify(mockGuaranteeBalanceService, times(1)).submitRequestOrPollForResponse()(any(), any())
+        verify(mockGuaranteeBalanceService, times(1)).retrieveBalanceResponse()(any(), any())
       }
 
       "must show the technical difficulties page if we have an error " in {
-        when(mockGuaranteeBalanceService.submitRequestOrPollForResponse()(any(), any())).thenReturn(Future.successful(errorResponse))
+        when(mockGuaranteeBalanceService.retrieveBalanceResponse()(any(), any())).thenReturn(Future.successful(errorResponse))
 
         val request = FakeRequest(POST, routes.TryAgainController.onSubmit().url)
 
@@ -110,7 +110,7 @@ class TryAgainControllerSpec extends SpecBase with JsonMatchers with AppWithDefa
 
         status(result) mustEqual INTERNAL_SERVER_ERROR
 
-        verify(mockGuaranteeBalanceService, times(1)).submitRequestOrPollForResponse()(any(), any())
+        verify(mockGuaranteeBalanceService, times(1)).retrieveBalanceResponse()(any(), any())
         verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
         templateCaptor.getValue mustEqual "technicalDifficulties.njk"
       }

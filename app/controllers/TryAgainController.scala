@@ -52,7 +52,7 @@ class TryAgainController @Inject() (
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      balanceService.submitRequestOrPollForResponse
+      balanceService.retrieveBalanceResponse
         .flatMap(responseHandler.processResponse(_))
   }
 }

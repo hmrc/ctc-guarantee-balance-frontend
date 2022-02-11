@@ -60,7 +60,7 @@ class CheckYourAnswersController @Inject() (
 
   def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
-      guaranteeBalanceService.submitRequestOrPollForResponse
+      guaranteeBalanceService.retrieveBalanceResponse
         .flatMap(responseHandler.processResponse(_))
   }
 }
