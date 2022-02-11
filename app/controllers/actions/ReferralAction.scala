@@ -19,6 +19,7 @@ package controllers.actions
 import com.google.inject.Inject
 import models.Referral
 import play.api.mvc._
+import services.ReferralService
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -27,17 +28,20 @@ trait ReferralActionProvider {
   def apply(referral: Option[Referral]): ReferralAction
 }
 
-class ReferralActionProviderImpl @Inject() (implicit executionContext: ExecutionContext, parser: BodyParsers.Default) extends ReferralActionProvider {
+class ReferralActionProviderImpl @Inject() (referralService: ReferralService)(implicit executionContext: ExecutionContext, parser: BodyParsers.Default)
+    extends ReferralActionProvider {
 
-  override def apply(referral: Option[Referral]): ReferralAction = new ReferralAction(referral)
+  override def apply(referral: Option[Referral]): ReferralAction = new ReferralAction(referral)(referralService)
 }
 
-class ReferralAction(referral: Option[Referral])(implicit val executionContext: ExecutionContext, val parser: BodyParsers.Default)
-    extends ActionBuilder[Request, AnyContent] {
+class ReferralAction(referral: Option[Referral])(referralService: ReferralService)(implicit
+  val executionContext: ExecutionContext,
+  val parser: BodyParsers.Default
+) extends ActionBuilder[Request, AnyContent] {
 
   override def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] =
     referral match {
-      case Some(value) => block(request).map(_.withCookies(Cookie(Referral.cookieName, value.toString)))
+      case Some(value) => block(request).map(referralService.setReferralInSession(_, value)(request))
       case None        => block(request)
     }
 }

@@ -30,7 +30,7 @@ import scala.concurrent.ExecutionContext
 class StartController @Inject() (
   override val messagesApi: MessagesApi,
   sessionRepository: SessionRepository,
-  setCookie: ReferralActionProvider,
+  updateSession: ReferralActionProvider,
   identify: IdentifierAction,
   getData: DataRetrievalAction,
   requireData: DataRequiredAction,
@@ -40,7 +40,7 @@ class StartController @Inject() (
     with I18nSupport
     with NunjucksSupport {
 
-  def start(referral: Option[Referral]): Action[AnyContent] = (setCookie(referral) andThen identify andThen getData).async {
+  def start(referral: Option[Referral]): Action[AnyContent] = (updateSession(referral) andThen identify andThen getData).async {
     implicit request =>
       sessionRepository.set(UserAnswers(id = request.internalId)) map {
         _ => Redirect(routes.EoriNumberController.onPageLoad(NormalMode))
