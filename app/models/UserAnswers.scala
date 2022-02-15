@@ -32,9 +32,11 @@ final case class UserAnswers(
   def get[A](page: Gettable[A])(implicit rds: Reads[A]): Option[A] =
     Reads.optionNoError(Reads.at(page.path)).reads(data).getOrElse(None)
 
-  def set[A](page: Settable[A], value: A)(implicit writes: Writes[A]): Try[UserAnswers] = {
+  def set[A](page: Settable[A] with Gettable[A], newValue: A)(implicit writes: Writes[A], rds: Reads[A]): Try[UserAnswers] = {
 
-    val updatedData = data.setObject(page.path, Json.toJson(value)) match {
+    val hasChanged = !get(page).contains(newValue)
+
+    val updatedData = data.setObject(page.path, Json.toJson(newValue)) match {
       case JsSuccess(jsValue, _) =>
         Success(jsValue)
       case JsError(errors) =>
@@ -44,7 +46,7 @@ final case class UserAnswers(
     updatedData.flatMap {
       d =>
         val updatedAnswers = copy(data = d)
-        page.cleanup(Some(value), updatedAnswers)
+        page.cleanup(Some(newValue), updatedAnswers, hasChanged)
     }
   }
 
@@ -60,7 +62,7 @@ final case class UserAnswers(
     updatedData.flatMap {
       d =>
         val updatedAnswers = copy(data = d)
-        page.cleanup(None, updatedAnswers)
+        page.cleanup(None, updatedAnswers, hasChanged = true)
     }
   }
 

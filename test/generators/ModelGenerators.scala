@@ -16,7 +16,11 @@
 
 package generators
 
+import java.util.UUID
+
 import models._
+import models.values.BalanceId
+import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 
 trait ModelGenerators {
@@ -29,5 +33,10 @@ trait ModelGenerators {
   implicit lazy val arbitraryReferral: Arbitrary[Referral] =
     Arbitrary {
       Gen.oneOf(Referral.values)
+    }
+
+  implicit lazy val arbitraryBalanceId: Arbitrary[BalanceId] =
+    Arbitrary {
+      BalanceId(arbitrary[UUID].sample.get)
     }
 }

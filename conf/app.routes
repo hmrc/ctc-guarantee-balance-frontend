@@ -30,14 +30,8 @@ POST       /change-access-code                      controllers.AccessCodeContro
 GET        /check-your-answers                      controllers.CheckYourAnswersController.onPageLoad()
 POST       /check-your-answers                      controllers.CheckYourAnswersController.onSubmit()
 
-GET        /:balanceId/wait-on-balance              controllers.WaitOnGuaranteeBalanceController.onPageLoad(balanceId: models.values.BalanceId)
-POST       /:balanceId/wait-on-balance              controllers.WaitOnGuaranteeBalanceController.onSubmit(balanceId: models.values.BalanceId)
-
-GET        /try-again                               controllers.TryGuaranteeBalanceAgainController.onPageLoad()
-POST       /try-again                               controllers.TryGuaranteeBalanceAgainController.onSubmit()
-
-GET        /rate-limit                              controllers.RateLimitController.onPageLoad()
-POST       /rate-limit                              controllers.RateLimitController.onSubmit()
+GET        /try-again                               controllers.TryAgainController.onPageLoad()
+POST       /try-again                               controllers.TryAgainController.onSubmit()
 
 GET        /balance                                 controllers.BalanceConfirmationController.onPageLoad()
 GET        /check-another-guarantee-balance         controllers.BalanceConfirmationController.checkAnotherGuaranteeBalance()

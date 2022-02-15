@@ -23,7 +23,7 @@ import connectors.GuaranteeBalanceConnector
 import models.backend.{BalanceRequestPending, BalanceRequestRateLimit, BalanceRequestResponse, BalanceRequestSessionExpired}
 import models.requests.{BalanceRequest, DataRequest}
 import models.values._
-import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
+import pages.{AccessCodePage, BalanceIdPage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.Logging
 import repositories.MongoLockRepository
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -40,7 +40,14 @@ class GuaranteeBalanceService @Inject() (
 )(implicit ec: ExecutionContext)
     extends Logging {
 
-  def submitBalanceRequest()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] =
+  def retrieveBalanceResponse()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] =
+    request.userAnswers.get(BalanceIdPage) match {
+      case Some(balanceId: BalanceId) => pollForGuaranteeBalance(balanceId)
+      case None                       => submitBalanceRequest
+    }
+
+  private def submitBalanceRequest()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] = {
+    logger.info("[GuaranteeBalanceService][submitBalanceRequest] submit balance request")
     (for {
       guaranteeReferenceNumber <- request.userAnswers.get(GuaranteeReferenceNumberPage)
       taxIdentifier            <- request.userAnswers.get(EoriNumberPage)
@@ -64,6 +71,7 @@ class GuaranteeBalanceService @Inject() (
       logger.warn("[GuaranteeBalanceService][submit] Insufficient data in user answers.")
       Future.successful(Right(BalanceRequestSessionExpired))
     }
+  }
 
   private def checkRateLimit(internalId: String, guaranteeReferenceNumber: String): Future[Boolean] = {
     val lockId   = LockId(internalId, guaranteeReferenceNumber).toString
@@ -71,27 +79,24 @@ class GuaranteeBalanceService @Inject() (
     mongoLockRepository.takeLock(lockId, internalId, duration)
   }
 
-  def pollForGuaranteeBalance(balanceId: BalanceId)(implicit
+  private def pollForGuaranteeBalance(balanceId: BalanceId)(implicit
     hc: HeaderCarrier
   ): Future[Either[HttpResponse, BalanceRequestResponse]] = {
-    val startTimeMillis: Long = System.nanoTime()
-    retryGuaranteeBalance(balanceId, startTimeMillis)
+    logger.info("[GuaranteeBalanceService][pollForGuaranteeBalance] poll for response")
+    retryGuaranteeBalance(balanceId, System.nanoTime())
   }
 
-  def retryGuaranteeBalance(balanceId: BalanceId, startTimeMillis: Long)(implicit
+  private def retryGuaranteeBalance(balanceId: BalanceId, startTimeMillis: Long)(implicit
     hc: HeaderCarrier
   ): Future[Either[HttpResponse, BalanceRequestResponse]] = {
     val delay   = config.guaranteeBalanceDelayInSecond.seconds
     val maxTime = config.guaranteeBalanceMaxTimeInSecond.seconds
-    queryPendingBalance(balanceId).flatMap {
+    connector.queryPendingBalance(balanceId).flatMap {
       case Right(BalanceRequestPending(_)) if remainingProcessingTime(startTimeMillis, maxTime) =>
         after(delay, actorSystem.scheduler)(retryGuaranteeBalance(balanceId, startTimeMillis))
       case result => Future.successful(result)
     }
   }
-
-  private def queryPendingBalance(balanceId: BalanceId)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] =
-    connector.queryPendingBalance(balanceId)
 
   private def remainingProcessingTime(startTimeMillis: Long, maxTime: FiniteDuration): Boolean = {
     val currentTimeMillis: Long = System.nanoTime()

@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package views
+package pages
 
-import controllers.routes
+import models.UserAnswers
+import scala.util.Try
+import queries.Settable
 
-class TryGuaranteeBalanceAgainViewSpec extends SingleViewSpec("tryGuaranteeBalanceAgain.njk") {
+trait ClearValueOnChangePage[A] extends QuestionPage[A] {
 
-  "must render correct heading" in {
-    assertPageTitleEqualsMessage(doc, "tryGuaranteeBalanceAgain.heading")
-  }
+  val pageToClear: Settable[_]
 
-  "display link with id checkDetails-link" in {
-    assertPageHasLink(doc, "checkDetails-link", "tryGuaranteeBalanceAgain.checkDetails.link", routes.CheckYourAnswersController.onPageLoad().url)
-  }
-
-  "behave like a page with a submit button" in {
-    assertPageHasButton(doc, "site.tryAgain")
-  }
+  override def cleanup(value: Option[A], userAnswers: UserAnswers, hasChanged: Boolean): Try[UserAnswers] =
+    if (hasChanged) {
+      userAnswers.remove(pageToClear)
+    } else {
+      super.cleanup(value, userAnswers, hasChanged)
+    }
 }

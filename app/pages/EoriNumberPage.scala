@@ -18,9 +18,9 @@ package pages
 
 import play.api.libs.json.JsPath
 
-case object EoriNumberPage extends QuestionPage[String] {
+case object EoriNumberPage extends ClearValueOnChangePage[String] {
 
-  override def path: JsPath = JsPath \ toString
-
+  override val pageToClear      = BalanceIdPage
+  override def path: JsPath     = JsPath \ toString
   override def toString: String = "eoriNumber"
 }
