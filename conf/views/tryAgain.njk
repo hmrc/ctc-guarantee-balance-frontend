@@ -20,8 +20,11 @@
         {{ messages("tryAgain.checkDetails.postlink", waitTimeInSeconds) }}
       </p>
 
+
       <form action="{{ routes.controllers.TryAgainController.onSubmit().url }}" method="post">
          {{ csrf() | safe }}
+
+      <input type="hidden" id="balanceId" value="{{balanceId}}"/>
 
          {{ govukButton({
             text: messages("site.tryAgain"),

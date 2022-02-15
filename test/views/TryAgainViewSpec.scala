@@ -28,7 +28,8 @@ class TryAgainViewSpec extends SingleViewSpec("tryAgain.njk") {
   val balanceId    = BalanceId(expectedUuid)
 
   val json = Json.obj(
-    "waitTimeInSeconds" -> 10
+    "waitTimeInSeconds" -> 10,
+    "balanceId"         -> balanceId
   )
 
   override lazy val doc: Document = renderDocument(json).futureValue
@@ -39,6 +40,11 @@ class TryAgainViewSpec extends SingleViewSpec("tryAgain.njk") {
 
   "must render waitOnGuaranteeBalance prelink text" in {
     assertContainsText(doc, "tryAgain.checkDetails.prelink")
+  }
+
+  "must contain balanceId" in {
+    assertContainsText(doc, balanceId.value.toString)
+    assertRenderedById(doc, "balanceId")
   }
 
   "display link with id check-details" in {

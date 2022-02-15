@@ -19,6 +19,7 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
 import handlers.GuaranteeBalanceResponseHandler
+import pages.BalanceIdPage
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json
 import play.api.mvc._
@@ -45,7 +46,8 @@ class TryAgainController @Inject() (
   def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
     implicit request =>
       val json = Json.obj(
-        "waitTimeInSeconds" -> config.rateLimitDuration
+        "waitTimeInSeconds" -> config.rateLimitDuration,
+        "balanceId"         -> request.userAnswers.get(BalanceIdPage)
       )
       renderer.render("tryAgain.njk", json).map(Ok(_))
   }
