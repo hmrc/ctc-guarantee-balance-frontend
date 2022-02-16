@@ -1,5 +1,5 @@
 $govuk-assets-path: "/check-transit-guarantee-balance/assets/lib/govuk-frontend/govuk/assets/";
-$hmrc-assets-path: "/check-transit-guarantee-balance/assets/lib/hmrc-frontend/hmrc/assets";
+$hmrc-assets-path: "/check-transit-guarantee-balance/assets/lib/hmrc-frontend/hmrc/assets/";
 
 @import "lib/govuk-frontend/govuk/all";
 @import "lib/hmrc-frontend/hmrc/all";
@@ -10,19 +10,14 @@ $hmrc-assets-path: "/check-transit-guarantee-balance/assets/lib/hmrc-frontend/hm
 @import "partials/timeout-dialog";
 
 .govuk-summary-list__actions-list-item {
-    display: inline-block;
-}
-
-.hint-as-label {
-    @extend .govuk-label;
-    @extend #{'.govuk-\\!-padding-bottom-2'};
+  display: inline-block;
 }
 
 p {
-    @extend .govuk-body;
+  @extend .govuk-body;
 }
 
-.breakAll {
+.break-all {
   display: inline-block;
   word-break: break-all;
 }
