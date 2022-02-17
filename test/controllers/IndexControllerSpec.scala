@@ -17,7 +17,7 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import models.UserAnswers
+import models.{Referral, UserAnswers}
 import org.scalacheck.Arbitrary.arbitrary
 import play.api.http.Status.SEE_OTHER
 import play.api.test.FakeRequest
@@ -30,11 +30,11 @@ class IndexControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
     forAll(arbitrary[Option[UserAnswers]]) {
       userAnswers =>
         val application = applicationBuilder(userAnswers = userAnswers).build()
-        val request     = FakeRequest(GET, routes.IndexController.onPageLoad().url)
+        val request     = FakeRequest(GET, routes.IndexController.onPageLoad(Some(Referral.GovUK)).url)
         val result      = route(application, request).value
 
         status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual routes.StartController.start().url
+        redirectLocation(result).value mustEqual routes.StartController.start(Some(Referral.GovUK)).url
     }
   }
 
