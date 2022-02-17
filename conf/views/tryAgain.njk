@@ -14,9 +14,8 @@
 
       <h1 class="govuk-heading-xl">{{ messages("tryAgain.heading") }}</h1>
       <p class="govuk-body">{{ messages("tryAgain.checkDetails.prelink") }}
-        <a class="govuk-link" id="check-details" href="{{ routes.controllers.CheckYourAnswersController.onPageLoad().url }}">
-            {{ messages("tryAgain.checkDetails.link") }}
-        </a>
+        <a class="govuk-link" id="check-details"
+           href="{{ routes.controllers.CheckYourAnswersController.onPageLoad().url }}">{{ messages("tryAgain.checkDetails.link") }}</a>
         {{ messages("tryAgain.checkDetails.postlink", waitTimeInSeconds) }}
       </p>
 
