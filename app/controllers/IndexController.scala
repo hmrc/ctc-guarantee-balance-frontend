@@ -16,6 +16,7 @@
 
 package controllers
 
+import models.Referral
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -28,7 +29,7 @@ class IndexController @Inject() (
 ) extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = Action {
-    Redirect(routes.StartController.start())
+  def onPageLoad(referral: Option[Referral]): Action[AnyContent] = Action {
+    Redirect(routes.StartController.start(referral = referral))
   }
 }
