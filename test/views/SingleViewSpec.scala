@@ -101,8 +101,7 @@ abstract class SingleViewSpec(protected val viewUnderTest: String, hasSignOutLin
   }
 
   "must append service to feedback link" in {
-    val doc: Document = renderDocument().futureValue
-    val link          = doc.getElementsByClass("govuk-phase-banner__text").first().getElementsByClass("govuk-link").first()
+    val link = doc.getElementsByClass("govuk-phase-banner__text").first().getElementsByClass("govuk-link").first()
     link.attr("href") must include("?service=CTCTraders")
   }
 
