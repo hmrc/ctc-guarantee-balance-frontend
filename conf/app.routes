@@ -9,6 +9,11 @@ GET        /keep-alive                              controllers.KeepAliveControl
 GET        /this-service-has-been-reset             controllers.SessionExpiredController.onPageLoad()
 POST       /this-service-has-been-reset             controllers.SessionExpiredController.onSubmit()
 
+GET        /bad-request                             controllers.ErrorController.badRequest()
+GET        /not-found                               controllers.ErrorController.notFound()
+GET        /technical-difficulties                  controllers.ErrorController.technicalDifficulties()
+GET        /internal-server-error                   controllers.ErrorController.internalServerError()
+
 GET        /                                        controllers.IndexController.onPageLoad(referral: Option[Referral] ?= None)
 
 GET        /start                                   controllers.StartController.start(referral: Option[Referral] ?= None)
