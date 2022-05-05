@@ -29,7 +29,7 @@ import models.values.{BalanceId, CurrencyCode, ErrorType}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify}
-import pages.{AccessCodePage, BalanceIdPage, BalancePage, EoriNumberPage, GuaranteeReferenceNumberPage}
+import pages._
 import play.api.http.Status.{OK, SEE_OTHER}
 import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.Helpers._
@@ -231,12 +231,10 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
     "must Redirect show the technical difficulties page if it has a processErrorResponse " in {
       val result: Future[Result] = handler.processResponse(balanceErrorResponse)
 
-      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-      status(result) mustEqual INTERNAL_SERVER_ERROR
+      status(result) mustEqual SEE_OTHER
+      redirectLocation(result).value mustEqual controllers.routes.ErrorController.technicalDifficulties().url
 
       verify(mockSessionRepository, times(1)).set(any())
-      verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
-      templateCaptor.getValue mustBe "technicalDifficulties.njk"
     }
 
     "must Redirect to the rate limit page if we have a RateLimit Response" in {
@@ -258,12 +256,10 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
     "must Redirect show the technical difficulties page if it has a httpResponseError " in {
       val result: Future[Result] = handler.processResponse(httpErrorResponse)
 
-      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-      status(result) mustEqual INTERNAL_SERVER_ERROR
+      status(result) mustEqual SEE_OTHER
+      redirectLocation(result).value mustEqual controllers.routes.ErrorController.technicalDifficulties().url
 
       verify(mockSessionRepository, times(1)).set(any())
-      verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
-      templateCaptor.getValue mustBe "technicalDifficulties.njk"
     }
   }
 

@@ -16,19 +16,16 @@
 
 package handlers
 
-import config.FrontendAppConfig
 import javax.inject.Inject
 import models.UserAnswers
 import models.backend._
 import models.requests.DataRequest
 import org.joda.time.LocalDateTime
-import pages.{AccessCodePage, BalanceIdPage, BalancePage, EoriNumberPage, GuaranteeReferenceNumberPage}
+import pages._
 import play.api.Logging
 import play.api.http.Status._
-import play.api.libs.json.Json
-import play.api.mvc.Results.{InternalServerError, Redirect}
+import play.api.mvc.Results.Redirect
 import play.api.mvc._
-import renderer.Renderer
 import repositories.SessionRepository
 import services.AuditService
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -39,8 +36,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class GuaranteeBalanceResponseHandler @Inject() (
   sessionRepository: SessionRepository,
-  renderer: Renderer,
-  appConfig: FrontendAppConfig,
   auditService: AuditService
 )(implicit ec: ExecutionContext)
     extends Logging {
@@ -133,12 +128,8 @@ class GuaranteeBalanceResponseHandler @Inject() (
       _              <- sessionRepository.set(updatedAnswers)
     } yield updatedAnswers
 
-  private def technicalDifficulties()(implicit request: Request[_]): Future[Result] = {
-    val json = Json.obj(
-      "contactUrl" -> appConfig.nctsEnquiriesUrl
-    )
-    renderer.render("technicalDifficulties.njk", json).map(InternalServerError(_))
-  }
+  private def technicalDifficulties(): Future[Result] =
+    Future.successful(Redirect(controllers.routes.ErrorController.technicalDifficulties()))
 
   private def auditBalanceRequestNotMatched(errorPointer: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]): Unit = {
     val balanceRequestNotMatchedMessage = errorPointer match {

@@ -16,18 +16,31 @@
 
 package views
 
-class NotFoundViewSpec extends SingleViewSpec("notFound.njk") {
+import play.twirl.api.HtmlFormat
+import views.behaviours.ViewBehaviours
+import views.html.NotFoundView
 
-  "must render correct heading" in {
-    assertPageTitleEqualsMessage(doc, "pageNotFound.heading")
-  }
+class NotFoundViewSpec extends ViewBehaviours {
 
-  "must render correct content" in {
-    assertContainsText(doc, "pageNotFound.paragraph1")
+  override def view: HtmlFormat.Appendable =
+    injector.instanceOf[NotFoundView].apply()(fakeRequest, messages)
 
-    assertContainsText(doc, "pageNotFound.paragraph2")
+  override val prefix: String = "pageNotFound"
 
-    assertContainsText(doc, "pageNotFound.paragraph3Start")
-    assertPageHasLink(doc, "contact", "pageNotFound.contactLink", frontendAppConfig.nctsEnquiriesUrl)
-  }
+  private val contactUrl = "https://www.gov.uk/government/organisations/hm-revenue-customs/contact/new-computerised-transit-system-enquiries"
+
+  behave like pageWithTitle()
+
+  behave like pageWithBackLink
+
+  behave like pageWithHeading()
+
+  behave like pageWithContent("p", "If you typed the web address, check it is correct.")
+  behave like pageWithContent("p", "If you pasted the web address, check you copied the entire address.")
+  behave like pageWithPartialContent("p", "If the web address is correct or you selected a link or button, ")
+  behave like pageWithLink(
+    "contact",
+    "contact the New Computerised Transit System (NCTS) helpdesk if you need to speak to someone about your guarantee balance (opens in a new tab)",
+    contactUrl
+  )
 }

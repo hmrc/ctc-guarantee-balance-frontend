@@ -1,4 +1,5 @@
 # microservice specific routes
+->         /hmrc-frontend                           hmrcfrontend.Routes
 
 GET        /assets/*file                            controllers.Assets.versioned(path="/public", file: Asset)
 
@@ -6,6 +7,12 @@ GET        /error/cannot-use-service-no-eori        controllers.UnauthorisedCont
 GET        /keep-alive                              controllers.KeepAliveController.keepAlive()
 
 GET        /this-service-has-been-reset             controllers.SessionExpiredController.onPageLoad()
+POST       /this-service-has-been-reset             controllers.SessionExpiredController.onSubmit()
+
+GET        /bad-request                             controllers.ErrorController.badRequest()
+GET        /not-found                               controllers.ErrorController.notFound()
+GET        /technical-difficulties                  controllers.ErrorController.technicalDifficulties()
+GET        /internal-server-error                   controllers.ErrorController.internalServerError()
 
 GET        /                                        controllers.IndexController.onPageLoad(referral: Option[Referral] ?= None)
 

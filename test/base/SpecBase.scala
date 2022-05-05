@@ -16,6 +16,7 @@
 
 package base
 
+import config.FrontendAppConfig
 import generators.Generators
 import models.UserAnswers
 import org.scalatest._
@@ -23,8 +24,13 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import play.api.i18n.{Messages, MessagesApi}
+import play.api.inject.Injector
 import play.api.libs.json.{Json, Reads, Writes}
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.FakeRequest
 import queries.{Gettable, Settable}
 
 import scala.util.{Success, Try}
@@ -34,6 +40,7 @@ trait SpecBase
     with Matchers
     with ScalaCheckPropertyChecks
     with OptionValues
+    with GuiceOneAppPerSuite
     with TryValues
     with ScalaFutures
     with IntegrationPatience
@@ -45,6 +52,14 @@ trait SpecBase
   val userAnswersId = "id"
 
   def emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId, Json.obj())
+
+  def injector: Injector                               = app.injector
+  def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")
+
+  def messagesApi: MessagesApi    = injector.instanceOf[MessagesApi]
+  implicit def messages: Messages = messagesApi.preferred(fakeRequest)
+
+  def frontendAppConfig: FrontendAppConfig = injector.instanceOf[FrontendAppConfig]
 
   implicit class RichUserAnswers(userAnswers: UserAnswers) {
 

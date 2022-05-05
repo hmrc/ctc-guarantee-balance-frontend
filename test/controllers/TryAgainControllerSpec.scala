@@ -104,15 +104,13 @@ class TryAgainControllerSpec extends SpecBase with JsonMatchers with AppWithDefa
 
         val request = FakeRequest(POST, routes.TryAgainController.onSubmit().url)
 
-        val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-        val application                            = applicationBuilder(userAnswers = Some(baseAnswersWithBalanceId)).build()
-        val result                                 = route(application, request).value
+        val application = applicationBuilder(userAnswers = Some(baseAnswersWithBalanceId)).build()
+        val result      = route(application, request).value
 
-        status(result) mustEqual INTERNAL_SERVER_ERROR
+        status(result) mustEqual SEE_OTHER
+        redirectLocation(result).value mustEqual controllers.routes.ErrorController.technicalDifficulties().url
 
         verify(mockGuaranteeBalanceService, times(1)).retrieveBalanceResponse()(any(), any())
-        verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
-        templateCaptor.getValue mustEqual "technicalDifficulties.njk"
       }
     }
   }
