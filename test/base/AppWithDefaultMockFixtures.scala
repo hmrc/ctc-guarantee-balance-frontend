@@ -16,7 +16,6 @@
 
 package base
 
-import config.FrontendAppConfig
 import controllers.actions._
 import models.UserAnswers
 import org.mockito.ArgumentMatchers.any
@@ -26,11 +25,10 @@ import org.scalatest.{BeforeAndAfterEach, TestSuite}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.{GuiceFakeApplicationFactory, GuiceOneAppPerSuite}
 import play.api.Application
-import play.api.i18n.{Messages, MessagesApi}
+import play.api.i18n.MessagesApi
+import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.inject.{bind, Injector}
-import play.api.mvc.AnyContentAsEmpty
-import play.api.test.{FakeRequest, Helpers}
+import play.api.test.Helpers
 import play.twirl.api.Html
 import repositories.{MongoLockRepository, SessionRepository}
 import services.{AuditService, GuaranteeBalanceService}
@@ -82,14 +80,4 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
         bind[GuaranteeBalanceService].toInstance(mockGuaranteeBalanceService),
         bind[AuditService].toInstance(mockAuditService)
       )
-
-  def injector: Injector = app.injector
-
-  def frontendAppConfig: FrontendAppConfig = injector.instanceOf[FrontendAppConfig]
-
-  def messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
-
-  def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")
-
-  implicit def messages: Messages = messagesApi.preferred(fakeRequest)
 }

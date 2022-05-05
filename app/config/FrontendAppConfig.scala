@@ -39,9 +39,9 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val userResearchUrl: String         = configuration.get[String]("urls.userResearch")
   val showUserResearchBanner: Boolean = configuration.get[Boolean]("banners.showUserResearch")
 
-  lazy val timeoutSeconds: String   = configuration.get[String]("session.timeoutSeconds")
-  lazy val countdownSeconds: String = configuration.get[String]("session.countdownSeconds")
-  lazy val mongoDbTtl: Int          = configuration.get[Int]("mongodb.timeToLiveInSeconds")
+  lazy val timeoutSeconds: Int   = configuration.get[Int]("session.timeoutSeconds")
+  lazy val countdownSeconds: Int = configuration.get[Int]("session.countdownSeconds")
+  lazy val mongoDbTtl: Int       = configuration.get[Int]("mongodb.timeToLiveInSeconds")
 
   lazy val rateLimitDuration: Int               = configuration.get[Int]("rateLimit.duration")
   lazy val guaranteeBalanceDelayInSecond: Int   = configuration.get[Int]("guaranteeBalanceLookup.waitTimeInSeconds")

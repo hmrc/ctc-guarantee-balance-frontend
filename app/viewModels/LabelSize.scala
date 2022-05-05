@@ -14,28 +14,21 @@
  * limitations under the License.
  */
 
-package views
+package viewModels
 
-import play.twirl.api.HtmlFormat
-import views.behaviours.ViewBehaviours
-import views.html.SessionExpiredView
+import scala.language.implicitConversions
 
-class SessionExpiredViewSpec extends ViewBehaviours {
+sealed abstract class LabelSize(val className: String) {
 
-  override def view: HtmlFormat.Appendable =
-    injector.instanceOf[SessionExpiredView].apply()(fakeRequest, messages)
+  override val toString: String = className
 
-  override val prefix: String = "session_expired"
+}
 
-  override val hasSignOutLink: Boolean = false
+object LabelSize {
+  case object XL extends LabelSize("govuk-label--xl")
+  case object L extends LabelSize("govuk-label--l")
+  case object M extends LabelSize("govuk-label--m")
+  case object S extends LabelSize("govuk-label--s")
 
-  behave like pageWithTitle()
-
-  behave like pageWithoutBackLink
-
-  behave like pageWithHeading()
-
-  behave like pageWithContent("p", "We did not save your answers.")
-
-  behave like pageWithSubmitButton("Sign in")
+  implicit def sizeToOptionString(size: LabelSize): Option[String] = Some(size.toString)
 }

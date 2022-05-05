@@ -1,0 +1,59 @@
+// ******************************************************
+// ******************************************************
+// Makes the autocomplete dropdown arrow visible (arrow is part of an option to show contents of list on click)
+// ******************************************************
+// this normally sits behind the input and is viewable through it using a z-index of -1
+// WCAG 2.1 updates added a page background color so the arrow was no longer visible
+// "z-index: 0" places the arrow in front of the input so it is again visible
+// "pointer-events: none" allow mouse clicks to pass through it to the input, otherwise there would be a dead zone for clicks on the arrow which would be counter-intuitive
+// ******************************************************
+// ******************************************************
+.autocomplete__wrapper .autocomplete__dropdown-arrow-down {
+    z-index: 0;
+    pointer-events: none;
+}
+
+// ******************************************************
+// ******************************************************
+// hide back link if no js is enabled as link is js powered
+// ******************************************************
+// ******************************************************
+.govuk-back-link {
+    display: none;
+}
+.js-enabled .govuk-back-link {
+    display: inline-block;
+}
+
+// ******************************************************
+// ******************************************************
+// add-to-a-list pattern
+// remove set widths to favour action links
+// ******************************************************
+// ******************************************************
+.ctc-add-to-a-list .govuk-summary-list__key,
+.ctc-add-to-a-list .govuk-summary-list__value {
+    width: auto;
+}
+.ctc-add-to-a-list .govuk-summary-list__actions {
+    width: 40%;
+}
+.ctc-add-to-a-list .govuk-summary-list__key,
+.ctc-add-to-a-list .govuk-summary-list__value {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+
+
+
+// make numbers easier to read
+@supports (font-variant-numeric: tabular-nums) {
+    table,
+    input,
+    .ctc-format-ref {
+        -webkit-font-feature-settings:normal;
+        font-feature-settings: normal;
+        font-variant-numeric: tabular-nums;
+    }
+}

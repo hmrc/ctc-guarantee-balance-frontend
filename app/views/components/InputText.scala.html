@@ -1,0 +1,55 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+
+@this(govukInput: GovukInput)
+
+@(
+    field: Field,
+    label: String,
+    labelIsHeading: Boolean = true,
+    inputClass: Option[String] = None,
+    hint: Option[String] = None,
+    prefix: Option[String] = None,
+    suffix: Option[String] = None,
+    autocomplete: Option[String] = None,
+    inputMode: Option[String] = None
+)(implicit messages: Messages)
+
+@input = @{
+    Input(
+        autocomplete = autocomplete,
+        hint = hint.map(x => Hint(content = Text(x))),
+        errorMessage = field.error.map { e =>
+            ErrorMessage.errorMessageWithDefaultStringsTranslated(content = Text(messages(e.message, e.args: _*)))
+        },
+        spellcheck = Some(false),
+        inputmode = inputMode,
+        prefix = prefix.map(x => PrefixOrSuffix(content = Text(x))),
+        suffix = suffix.map(x => PrefixOrSuffix(content = Text(x))),
+        classes = inputClass.getOrElse("")
+    )
+    .withFormField(field)
+}
+
+@govukInput(
+    if (labelIsHeading) {
+        input.withHeading(heading = Text(label))
+    } else {
+        input.copy(label = Label(isPageHeading = false, content = Text(label)))
+    }
+)
