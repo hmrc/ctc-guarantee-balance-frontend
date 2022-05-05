@@ -39,8 +39,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class GuaranteeBalanceResponseHandler @Inject() (
   sessionRepository: SessionRepository,
-  renderer: Renderer,
-  appConfig: FrontendAppConfig,
   auditService: AuditService
 )(implicit ec: ExecutionContext)
     extends Logging {
@@ -133,12 +131,8 @@ class GuaranteeBalanceResponseHandler @Inject() (
       _              <- sessionRepository.set(updatedAnswers)
     } yield updatedAnswers
 
-  private def technicalDifficulties()(implicit request: Request[_]): Future[Result] = {
-    val json = Json.obj(
-      "contactUrl" -> appConfig.nctsEnquiriesUrl
-    )
-    renderer.render("technicalDifficulties.njk", json).map(InternalServerError(_))
-  }
+  private def technicalDifficulties(): Future[Result] =
+    Future.successful(Redirect(controllers.routes.ErrorController.technicalDifficulties()))
 
   private def auditBalanceRequestNotMatched(errorPointer: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]): Unit = {
     val balanceRequestNotMatchedMessage = errorPointer match {

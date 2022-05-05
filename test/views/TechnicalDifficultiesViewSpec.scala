@@ -16,17 +16,31 @@
 
 package views
 
-class TechnicalDifficultiesViewSpec extends SingleViewSpec("technicalDifficulties.njk") {
+import play.twirl.api.HtmlFormat
+import views.behaviours.ViewBehaviours
+import views.html.TechnicalDifficultiesView
 
-  "must render tryAgain text" in {
-    assertContainsText(doc, "technicalDifficulties.tryAgain")
-  }
+class TechnicalDifficultiesViewSpec extends ViewBehaviours {
 
-  "must render savedAnswers text" in {
-    assertContainsText(doc, "technicalDifficulties.savedAnswers")
-  }
+  private val contactUrl = "https://www.gov.uk/government/organisations/hm-revenue-customs/contact/new-computerised-transit-system-enquiries"
 
-  "display link with id contact-link" in {
-    assertPageHasLink(doc, "contact-link", "technicalDifficulties.contact.link", frontendAppConfig.nctsEnquiriesUrl)
-  }
+  override def view: HtmlFormat.Appendable =
+    injector.instanceOf[TechnicalDifficultiesView].apply()(fakeRequest, messages)
+
+  override val prefix: String = "technicalDifficulties"
+
+  behave like pageWithTitle()
+
+  behave like pageWithBackLink
+
+  behave like pageWithHeading()
+
+  behave like pageWithContent("p", "Try again later.")
+
+  behave like pageWithPartialContent("p", "You can ")
+  behave like pageWithLink(
+    "contact",
+    "contact the New Computerised Transit System helpdesk if you need to speak to someone about your guarantee balance (opens in a new tab)",
+    contactUrl
+  )
 }
