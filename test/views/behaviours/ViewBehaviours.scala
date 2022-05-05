@@ -50,7 +50,7 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
     "must render timeout dialog" in {
       val metas = getElementsByTag(doc, "meta")
       assertElementExists(metas, _.attr("name") == "hmrc-timeout-dialog")
-      assertElementExists(metas, _.attr("data-keep-alive-url") == "/manage-transit-movements/arrival/keep-alive")
+      assertElementExists(metas, _.attr("data-keep-alive-url") == "/check-transit-guarantee-balance/keep-alive")
     }
   } else {
     "must not render sign out link in header" in {

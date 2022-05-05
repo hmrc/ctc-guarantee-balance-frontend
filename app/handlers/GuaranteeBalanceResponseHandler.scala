@@ -16,19 +16,16 @@
 
 package handlers
 
-import config.FrontendAppConfig
 import javax.inject.Inject
 import models.UserAnswers
 import models.backend._
 import models.requests.DataRequest
 import org.joda.time.LocalDateTime
-import pages.{AccessCodePage, BalanceIdPage, BalancePage, EoriNumberPage, GuaranteeReferenceNumberPage}
+import pages._
 import play.api.Logging
 import play.api.http.Status._
-import play.api.libs.json.Json
-import play.api.mvc.Results.{InternalServerError, Redirect}
+import play.api.mvc.Results.Redirect
 import play.api.mvc._
-import renderer.Renderer
 import repositories.SessionRepository
 import services.AuditService
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
