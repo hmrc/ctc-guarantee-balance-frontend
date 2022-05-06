@@ -36,7 +36,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class GuaranteeBalanceResponseHandler @Inject() (
   sessionRepository: SessionRepository,
-  auditService: AuditService
+  auditService: AuditService,
+  errorHandler: ErrorHandler
 )(implicit ec: ExecutionContext)
     extends Logging {
 
@@ -95,7 +96,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
           INTERNAL_SERVER_ERROR,
           ErrorMessage(s"Failed to process Response: ${fe.errors}", AUDIT_DEST_TECHNICAL_DIFFICULTIES)
         )
-        technicalDifficulties()
+        errorHandler.onClientError(request, INTERNAL_SERVER_ERROR)
     }
 
   private def processHttpResponse(failureResponse: HttpResponse)(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
@@ -105,7 +106,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
       INTERNAL_SERVER_ERROR,
       ErrorMessage(s"Failed to process Response: $failureResponse", AUDIT_DEST_TECHNICAL_DIFFICULTIES)
     )
-    technicalDifficulties()
+    errorHandler.onClientError(request, INTERNAL_SERVER_ERROR)
   }
 
   private def processPendingResponse(balanceResponse: BalanceRequestPending, userAnswers: UserAnswers): Future[Result] = {
@@ -127,9 +128,6 @@ class GuaranteeBalanceResponseHandler @Inject() (
       updatedAnswers <- Future.fromTry(request.userAnswers.remove(BalanceIdPage))
       _              <- sessionRepository.set(updatedAnswers)
     } yield updatedAnswers
-
-  private def technicalDifficulties(): Future[Result] =
-    Future.successful(Redirect(controllers.routes.ErrorController.technicalDifficulties()))
 
   private def auditBalanceRequestNotMatched(errorPointer: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]): Unit = {
     val balanceRequestNotMatchedMessage = errorPointer match {
