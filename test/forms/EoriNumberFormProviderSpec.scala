@@ -17,17 +17,17 @@
 package forms
 
 import forms.Constants._
-import forms.behaviours.StringFieldBehaviours
-import play.api.data.FormError
-import wolfendale.scalacheck.regexp.RegexpGen
+import forms.behaviours.{FieldBehaviours, StringFieldBehaviours}
+import play.api.data.{Field, FormError}
 
-class EoriNumberFormProviderSpec extends StringFieldBehaviours {
+class EoriNumberFormProviderSpec extends StringFieldBehaviours with FieldBehaviours {
 
-  val requiredKey          = "eoriNumber.error.required"
-  val maxLengthKey         = "eoriNumber.error.maxLength"
-  val minLengthKey         = "eoriNumber.error.minLength"
-  val invalidCharactersKey = "eoriNumber.error.invalidCharacters"
-  val invalidFormatKey     = "eoriNumber.error.invalidFormat"
+  val requiredKey            = "eoriNumber.error.required"
+  val maxLengthKey           = "eoriNumber.error.maxLength"
+  val minLengthKey           = "eoriNumber.error.minLength"
+  val invalidCharactersKey   = "eoriNumber.error.invalidCharacters"
+  val invalidFormatKey       = "eoriNumber.error.invalidFormat"
+  val invalidPrefixFormatKey = "eoriNumber.error.prefix"
 
   val form = new EoriNumberFormProvider()()
 
@@ -39,20 +39,6 @@ class EoriNumberFormProviderSpec extends StringFieldBehaviours {
       form = form,
       fieldName = fieldName,
       validDataGenerator = stringsWithMaxLength(maxEoriNumberLength)
-    )
-
-    behave like fieldWithMaxLength(
-      form = form,
-      fieldName = fieldName,
-      maxLength = maxEoriNumberLength,
-      lengthError = FormError(fieldName, maxLengthKey, Seq(maxEoriNumberLength))
-    )
-
-    behave like fieldWithMinLength(
-      form = form,
-      fieldName = fieldName,
-      minLength = minEoriNumberLength,
-      lengthError = FormError(fieldName, minLengthKey, Seq(minEoriNumberLength))
     )
 
     behave like mandatoryField(
@@ -69,18 +55,42 @@ class EoriNumberFormProviderSpec extends StringFieldBehaviours {
       invalidKey = invalidCharactersKey
     )
 
-    behave like fieldThatDoesNotBindInvalidData(
-      form = form,
-      fieldName = fieldName,
-      regex = eoriNumberRegex,
-      gen = RegexpGen.from(alphaNumericRegex.replace("*", s"{$maxEoriNumberLength}")),
-      invalidKey = invalidFormatKey
-    )
+    s"must not bind strings with correct prefix and suffix but over max length" in {
+
+      val expectedError = FormError(fieldName, maxLengthKey, Seq(maxEoriNumberLength))
+      val invalidString = "xi1234567890123432"
+      val result: Field = form.bind(Map(fieldName -> invalidString)).apply(fieldName)
+      result.errors must contain(expectedError)
+    }
+
+    s"must not bind strings with correct prefix and suffix but under min length" in {
+
+      val expectedError = FormError(fieldName, minLengthKey, Seq(minEoriNumberLength))
+      val invalidString = "xi123456789"
+      val result: Field = form.bind(Map(fieldName -> invalidString)).apply(fieldName)
+      result.errors must contain(expectedError)
+    }
+
+    s"must not bind strings with wrong correct prefix but invalid suffix" in {
+
+      val expectedError = FormError(fieldName, invalidFormatKey, Seq(eoriNumberRegex))
+      val invalidString = "xixi1234567890"
+      val result: Field = form.bind(Map(fieldName -> invalidString)).apply(fieldName)
+      result.errors must contain(expectedError)
+    }
+
+    s"must not bind strings with wrong Prefix" in {
+
+      val expectedError = FormError(fieldName, invalidPrefixFormatKey, Seq(eoriNumberPrefixRegex))
+      val invalidString = "AB123456789876"
+      val result: Field = form.bind(Map(fieldName -> invalidString)).apply(fieldName)
+      result.errors must contain(expectedError)
+    }
 
     "must remove spaces on bound strings" in {
-      val result = form.bind(Map(fieldName -> " GB 123 456 789"))
+      val result = form.bind(Map(fieldName -> " GB 123 456 789 123"))
       result.errors mustEqual Nil
-      result.get mustEqual "GB123456789"
+      result.get mustEqual "GB123456789123"
     }
 
   }

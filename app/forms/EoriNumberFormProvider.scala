@@ -29,10 +29,11 @@ class EoriNumberFormProvider @Inject() extends Mappings {
       "value" -> textWithSpacesRemoved("eoriNumber.error.required")
         .verifying(
           forms.StopOnFirstFail[String](
-            maxLength(maxEoriNumberLength, "eoriNumber.error.maxLength"),
-            minLength(minEoriNumberLength, "eoriNumber.error.minLength"),
             regexp(alphaNumericRegex, "eoriNumber.error.invalidCharacters"),
-            regexp(eoriNumberRegex, "eoriNumber.error.invalidFormat")
+            regexp(eoriNumberPrefixRegex, "eoriNumber.error.prefix"),
+            regexp(eoriNumberRegex, "eoriNumber.error.invalidFormat"),
+            minLength(minEoriNumberLength, "eoriNumber.error.minLength"),
+            maxLength(maxEoriNumberLength, "eoriNumber.error.maxLength")
           )
         )
     )
