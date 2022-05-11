@@ -44,6 +44,8 @@ trait SpecBase
 
   val userAnswersId = "id"
 
+  lazy val validEori: String = "GB1234567891234"
+
   def emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId, Json.obj())
 
   implicit class RichUserAnswers(userAnswers: UserAnswers) {

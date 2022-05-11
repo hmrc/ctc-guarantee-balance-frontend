@@ -68,12 +68,13 @@ technicalDifficulties.contact.link = contact the New Computerised Transit System
 eoriNumber.title = What is your EORI number?
 eoriNumber.heading = What is your EORI number?
 eoriNumber.checkYourAnswersLabel = EORI number
-eoriNumber.hint = This starts with GB or XI only. This is followed by 12 numbers, like GB123456123456.
+eoriNumber.hint = This will start GB or XI followed by 12 or 15 numbers, for example GB123456789000.
 eoriNumber.error.required = Enter your EORI number
 eoriNumber.error.maxLength = Your EORI number must be 17 characters or less
-eoriNumber.error.minLength = Your EORI number must be 10 characters or more
+eoriNumber.error.minLength = Your EORI number must be 14 characters or more
 eoriNumber.error.invalidCharacters = Your EORI number must only include letters a to z without accents and numbers 0 to 9
-eoriNumber.error.invalidFormat = Your EORI number must start with ‘GB’ or ‘XI’, like GB123456123456
+eoriNumber.error.invalidFormat = Your EORI number must start GB or XI followed by 12 or 15 numbers, for example GB123456789000
+eoriNumber.error.prefix = Your EORI number must start with GB or XI, like GB123456789000
 
 tryAgain.title = We have not been able to get your guarantee balance
 tryAgain.heading = We have not been able to get your guarantee balance
