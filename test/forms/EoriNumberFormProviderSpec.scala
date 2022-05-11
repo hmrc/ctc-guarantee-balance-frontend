@@ -71,7 +71,7 @@ class EoriNumberFormProviderSpec extends StringFieldBehaviours with FieldBehavio
       result.errors must contain(expectedError)
     }
 
-    s"must not bind strings with wrong correct prefix but invalid suffix" in {
+    s"must not bind strings with correct prefix but invalid suffix" in {
 
       val expectedError = FormError(fieldName, invalidFormatKey, Seq(eoriNumberRegex))
       val invalidString = "xixi1234567890"
