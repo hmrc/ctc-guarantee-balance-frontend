@@ -18,5 +18,5 @@
 
 @()(implicit request: Request[_])
 
-<script src='https://code.jquery.com/jquery-3.6.0.min.js' type='text/javascript' integrity='sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=' crossorigin='anonymous' @{CSPNonce.attr}></script>
-<script src='@routes.Assets.versioned("javascripts/application.min.js")' type='text/javascript' @{CSPNonce.attr}></script>
+<script src='https://code.jquery.com/jquery-3.6.0.min.js' integrity='sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=' crossorigin='anonymous' @{CSPNonce.attr}></script>
+<script src='@routes.Assets.versioned("javascripts/application.min.js")' @{CSPNonce.attr}></script>
