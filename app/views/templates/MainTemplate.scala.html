@@ -53,19 +53,6 @@
     @stylesheets()
 }
 
-@beforeContentBlock = {
-    @if(showBackLink) {
-        @govukBackLink(
-            BackLink(
-                attributes = Map("id" -> "back-link"),
-                classes = "js-enabled",
-                href = "javascript:history.back()",
-                content = HtmlContent(messages("site.back"))
-            )
-        )
-    }
-}
-
 @mainContentWithGetHelp = {
     @mainContent
     @hmrcReportTechnicalIssueHelper()
@@ -81,6 +68,6 @@
     serviceUrl = Some(routes.StartController.startAgain().url),
     signOutUrl = if (canSignOut) Some(appConfig.signOutUrl) else None,
     phaseBanner = Some(standardBetaBanner(url = appConfig.betaFeedbackUnauthenticatedUrl)),
-    beforeContentBlock = Some(beforeContentBlock),
+    backLinkUrl = if (showBackLink) Some("javascript:history.back()") else None,
     nonce = CSPNonce.get
 )(mainContentWithGetHelp)
