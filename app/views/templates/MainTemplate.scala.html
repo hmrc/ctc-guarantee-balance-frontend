@@ -69,7 +69,7 @@
     serviceUrl = Some(routes.StartController.startAgain().url),
     signOutUrl = if (canSignOut) Some(appConfig.signOutUrl) else None,
     phaseBanner = Some(standardBetaBanner(url = appConfig.betaFeedbackUnauthenticatedUrl)),
-    backLinkUrl = if (showBackLink) Some("javascript:history.back()") else None,
+    backLinkUrl = if (showBackLink) Some("#") else None, // This is overridden in ctc.js
     nonce = CSPNonce.get,
     additionalScriptsBlock = Some(javascripts())
 )(mainContentWithGetHelp)
