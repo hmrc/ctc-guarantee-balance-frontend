@@ -86,22 +86,23 @@ trait Generators extends UserAnswersGenerator with PageGenerators with ModelGene
   def nonEmptyString: Gen[String] =
     arbitrary[String] suchThat (_.nonEmpty)
 
-  def stringsWithLengthInRange(minLength: Int, maxLength: Int): Gen[String] =
+  def stringsWithLengthInRange(minLength: Int, maxLength: Int, charGen: Gen[Char] = arbitrary[Char]): Gen[String] =
     for {
       length <- choose(minLength, maxLength)
-      chars  <- listOfN(length, arbitrary[Char])
+      chars  <- listOfN(length, charGen)
     } yield chars.mkString
 
-  def stringsWithMaxLength(maxLength: Int): Gen[String] = stringsWithLengthInRange(1, maxLength)
+  def stringsWithMaxLength(maxLength: Int, charGen: Gen[Char] = arbitrary[Char]): Gen[String] =
+    stringsWithLengthInRange(1, maxLength, charGen)
 
-  def stringsLongerThan(minLength: Int): Gen[String] = for {
+  def stringsLongerThan(minLength: Int, charGen: Gen[Char] = arbitrary[Char]): Gen[String] = for {
     maxLength <- (minLength * 2).max(100)
     length    <- Gen.chooseNum(minLength + 1, maxLength)
-    chars     <- listOfN(length, arbitrary[Char])
+    chars     <- listOfN(length, charGen)
   } yield chars.mkString
 
-  def stringsOfLength(length: Int): Gen[String] = for {
-    chars <- listOfN(length, arbitrary[Char])
+  def stringsOfLength(length: Int, charGen: Gen[Char] = arbitrary[Char]): Gen[String] = for {
+    chars <- listOfN(length, charGen)
   } yield chars.mkString
 
   def stringsExceptSpecificValues(excluded: Seq[String]): Gen[String] =

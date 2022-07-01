@@ -41,8 +41,6 @@ class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksS
   val formProvider = new EoriNumberFormProvider()
   val form         = formProvider()
 
-  val validAnswer: String = "GB123456789"
-
   def eoriNumberRoute(mode: Mode = NormalMode): String = routes.EoriNumberController.onPageLoad(mode).url
 
   "EoriNumber Controller" - {
@@ -82,7 +80,7 @@ class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksS
         mode =>
           beforeEach()
 
-          val userAnswers = UserAnswers(userAnswersId).set(EoriNumberPage, validAnswer).success.value
+          val userAnswers = UserAnswers(userAnswersId).set(EoriNumberPage, validEori).success.value
 
           val application                            = applicationBuilder(userAnswers = Some(userAnswers)).build()
           val request                                = FakeRequest(GET, eoriNumberRoute(mode))
@@ -95,7 +93,7 @@ class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksS
 
           verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
-          val filledForm = form.bind(Map("value" -> validAnswer))
+          val filledForm = form.bind(Map("value" -> validEori))
 
           val expectedJson = Json.obj(
             "form" -> filledForm,
@@ -120,7 +118,7 @@ class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksS
 
       val request =
         FakeRequest(POST, eoriNumberRoute())
-          .withFormUrlEncodedBody(("value", validAnswer))
+          .withFormUrlEncodedBody(("value", validEori))
 
       val result = route(application, request).value
 
@@ -129,7 +127,7 @@ class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksS
 
       val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
       verify(mockSessionRepository).set(uaCaptor.capture)
-      uaCaptor.getValue.get(EoriNumberPage).get mustBe validAnswer
+      uaCaptor.getValue.get(EoriNumberPage).get mustBe validEori
 
       application.stop()
     }
@@ -185,7 +183,7 @@ class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksS
 
       val request =
         FakeRequest(POST, eoriNumberRoute())
-          .withFormUrlEncodedBody(("value", validAnswer))
+          .withFormUrlEncodedBody(("value", validEori))
 
       val result = route(application, request).value
 
