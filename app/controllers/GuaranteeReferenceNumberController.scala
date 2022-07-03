@@ -18,66 +18,48 @@ package controllers
 
 import controllers.actions._
 import forms.GuaranteeReferenceNumberFormProvider
-import javax.inject.Inject
 import models.Mode
 import navigation.Navigator
 import pages.GuaranteeReferenceNumberPage
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import renderer.Renderer
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import uk.gov.hmrc.viewmodels.NunjucksSupport
+import views.html.GuaranteeReferenceNumberView
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class GuaranteeReferenceNumberController @Inject() (
   override val messagesApi: MessagesApi,
   sessionRepository: SessionRepository,
   navigator: Navigator,
-  identify: IdentifierAction,
-  getData: DataRetrievalAction,
-  requireData: DataRequiredAction,
+  actions: Actions,
   formProvider: GuaranteeReferenceNumberFormProvider,
   val controllerComponents: MessagesControllerComponents,
-  renderer: Renderer
+  view: GuaranteeReferenceNumberView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
-    with I18nSupport
-    with NunjucksSupport {
+    with I18nSupport {
 
   private val form = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onPageLoad(mode: Mode): Action[AnyContent] = actions.requireData {
     implicit request =>
       val preparedForm = request.userAnswers.get(GuaranteeReferenceNumberPage) match {
         case None        => form
         case Some(value) => form.fill(value)
       }
 
-      val json = Json.obj(
-        "form" -> preparedForm,
-        "mode" -> mode
-      )
-
-      renderer.render("guaranteeReferenceNumber.njk", json).map(Ok(_))
+      Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = actions.requireData.async {
     implicit request =>
       form
         .bindFromRequest()
         .fold(
-          formWithErrors => {
-
-            val json = Json.obj(
-              "form" -> formWithErrors,
-              "mode" -> mode
-            )
-
-            renderer.render("guaranteeReferenceNumber.njk", json).map(BadRequest(_))
-          },
+          formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
           value =>
             for {
               updatedAnswers <- Future.fromTry(request.userAnswers.set(GuaranteeReferenceNumberPage, value))

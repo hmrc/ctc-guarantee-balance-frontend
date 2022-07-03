@@ -17,18 +17,16 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import matchers.JsonMatchers.containJson
-import models.Referral._
 import models.{Referral, UserAnswers}
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{times, verify}
+import org.mockito.Mockito.verify
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{BalancePage, EoriNumberPage}
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import views.html.BalanceConfirmationView
 
 class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with AppWithDefaultMockFixtures {
 
@@ -48,29 +46,17 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
                 beforeEach()
 
                 val userAnswers = emptyUserAnswers.setValue(BalancePage, balance)
-
                 setExistingUserAnswers(userAnswers)
 
                 val request = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
                   .withSession(Referral.key -> referral.toString)
-
-                val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-                val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
-
+                val view   = injector.instanceOf[BalanceConfirmationView]
                 val result = route(app, request).value
 
                 status(result) mustEqual OK
 
-                verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
-
-                val expectedJson = Json.obj(
-                  "balance"                         -> balance,
-                  "referral"                        -> referral,
-                  "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
-                )
-
-                templateCaptor.getValue mustEqual "balanceConfirmation.njk"
-                jsonCaptor.getValue must containJson(expectedJson)
+                contentAsString(result) mustEqual
+                  view(balance, Some(referral.toString))(request, messages).toString
             }
           }
 
@@ -81,29 +67,18 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
             setExistingUserAnswers(userAnswers)
 
             val request = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
-
-            val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-            val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
-
-            val result = route(app, request).value
+            val view    = injector.instanceOf[BalanceConfirmationView]
+            val result  = route(app, request).value
 
             status(result) mustEqual OK
 
-            verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
-
-            val expectedJson = Json.obj(
-              "balance"                         -> balance,
-              "referral"                        -> None,
-              "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
-            )
-
-            templateCaptor.getValue mustEqual "balanceConfirmation.njk"
-            jsonCaptor.getValue must containJson(expectedJson)
+            contentAsString(result) mustEqual
+              view(balance, None)(request, messages).toString
           }
         }
       }
 
-      "must redirect to start controller" - {
+      "must redirect to session expired" - {
         "when balance not found in user answers" in {
 
           setExistingUserAnswers(emptyUserAnswers)
@@ -113,7 +88,7 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
 
           status(result) mustEqual SEE_OTHER
 
-          redirectLocation(result).value mustEqual routes.StartController.startAgain().url
+          redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
         }
       }
     }

@@ -27,7 +27,7 @@ import views.html.BalanceConfirmationView
 class BalanceConfirmationViewSpec extends PanelViewBehaviours {
 
   private val balance  = Gen.numStr.sample.value
-  private val referral = arbitrary[Referral].sample.value.toString
+  private val referral = arbitrary[Option[Referral]].sample.value.map(_.toString)
 
   override def view: HtmlFormat.Appendable =
     injector.instanceOf[BalanceConfirmationView].apply(balance, referral)(fakeRequest, messages)
@@ -43,7 +43,7 @@ class BalanceConfirmationViewSpec extends PanelViewBehaviours {
   behave like pageWithPanel(balance)
 
   "when NCTS referral" - {
-    val view = injector.instanceOf[BalanceConfirmationView].apply(balance, NCTS.toString)(fakeRequest, messages)
+    val view = injector.instanceOf[BalanceConfirmationView].apply(balance, Some(NCTS.toString))(fakeRequest, messages)
     val doc  = parseView(view)
 
     behave like pageWithContent(doc, "p", "You can:")
@@ -63,9 +63,10 @@ class BalanceConfirmationViewSpec extends PanelViewBehaviours {
     )
   }
 
-  "when GovUK referral" - {
-    val view = injector.instanceOf[BalanceConfirmationView].apply(balance, GovUK.toString)(fakeRequest, messages)
-    val doc  = parseView(view)
+  "when GovUK or no referral" - {
+    val referral = Gen.oneOf(Some(GovUK.toString), None).sample.value
+    val view     = injector.instanceOf[BalanceConfirmationView].apply(balance, referral)(fakeRequest, messages)
+    val doc      = parseView(view)
 
     behave like pageWithPartialContent(doc, "p", "You can")
     behave like pageWithLink(

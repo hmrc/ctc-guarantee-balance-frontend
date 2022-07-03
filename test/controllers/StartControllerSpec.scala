@@ -17,20 +17,17 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import matchers.JsonMatchers
 import models.{NormalMode, Referral, UserAnswers}
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.verify
 import org.scalacheck.Arbitrary.arbitrary
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.viewmodels.NunjucksSupport
 
 import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class StartControllerSpec extends SpecBase with MockitoSugar with NunjucksSupport with JsonMatchers with AppWithDefaultMockFixtures {
+class StartControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   "Start Controller" - {
 

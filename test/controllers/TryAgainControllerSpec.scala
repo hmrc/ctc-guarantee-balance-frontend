@@ -17,41 +17,30 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import matchers.JsonMatchers
 import models.UserAnswers
 import models.backend.BalanceRequestSuccess
 import models.values.{BalanceId, CurrencyCode}
-import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
-import pages.{AccessCodePage, BalanceIdPage, EoriNumberPage, GuaranteeReferenceNumberPage}
-import play.api.libs.json.{JsObject, Json}
+import org.scalacheck.Arbitrary.arbitrary
+import pages.BalanceIdPage
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpResponse}
+import views.html.TryAgainView
 
 import java.util.UUID
 import scala.concurrent.Future
 
-class TryAgainControllerSpec extends SpecBase with JsonMatchers with AppWithDefaultMockFixtures {
+class TryAgainControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
-  private val expectedUuid: UUID   = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
+  private val expectedUuid: UUID   = arbitrary[UUID].sample.value
   private val balanceId: BalanceId = BalanceId(expectedUuid)
 
-  private val grn: String    = "grn"
-  private val access: String = "access"
-  private val taxId: String  = "taxId"
-
-  private val baseAnswers: UserAnswers = emptyUserAnswers
-    .setValue(GuaranteeReferenceNumberPage, grn)
-    .setValue(AccessCodePage, access)
-    .setValue(EoriNumberPage, taxId)
-
-  private val baseAnswersWithBalanceId: UserAnswers = baseAnswers
-    .setValue(BalanceIdPage, balanceId)
+  private val baseAnswers: UserAnswers = emptyUserAnswers.setValue(BalanceIdPage, balanceId)
 
   private val successResponse = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
-  private val errorResponse   = Left(HttpResponse(404, ""))
+  private val errorResponse   = Left(HttpResponse(404: Int, ""))
 
   implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
 
@@ -59,53 +48,48 @@ class TryAgainControllerSpec extends SpecBase with JsonMatchers with AppWithDefa
 
     "onLoad" - {
       "must return OK and the correct view for a GET" in {
-        val request = FakeRequest(GET, routes.TryAgainController.onPageLoad().url)
-
         setExistingUserAnswers(baseAnswers)
-        val result = route(app, request).value
+
+        val request = FakeRequest(GET, routes.TryAgainController.onPageLoad().url)
+        val view    = injector.instanceOf[TryAgainView]
+        val result  = route(app, request).value
 
         status(result) mustEqual OK
 
-        val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-        val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
-
-        verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
-
-        val expectedJson = Json.obj(
-          "waitTimeInSeconds" -> frontendAppConfig.rateLimitDuration
-        )
-
-        jsonCaptor.getValue must containJson(expectedJson)
-        templateCaptor.getValue mustBe "tryAgain.njk"
+        contentAsString(result) mustEqual
+          view(balanceId.value)(request, messages).toString
       }
     }
 
     "onSubmit" - {
-      "must submit a request and then Redirect to the Balance Confirmation Controller if the status is DataReturned and Submit Mode" in {
-        when(mockGuaranteeBalanceService.retrieveBalanceResponse()(any(), any())).thenReturn(Future.successful(successResponse))
+      "when balance retrieval successful" - {
+        "must redirect to the balance confirmation controller" in {
+          when(mockGuaranteeBalanceService.retrieveBalanceResponse()(any(), any())).thenReturn(Future.successful(successResponse))
+          setExistingUserAnswers(baseAnswers)
 
-        val request = FakeRequest(POST, routes.TryAgainController.onSubmit().url)
-        setExistingUserAnswers(baseAnswersWithBalanceId)
-        val result = route(app, request).value
+          val request = FakeRequest(POST, routes.TryAgainController.onSubmit().url)
+          val result  = route(app, request).value
 
-        status(result) mustEqual SEE_OTHER
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
 
-        redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
-        verify(mockGuaranteeBalanceService, times(1)).retrieveBalanceResponse()(any(), any())
+          verify(mockGuaranteeBalanceService, times(1)).retrieveBalanceResponse()(any(), any())
+        }
       }
 
-      "must show the technical difficulties page if we have an error " in {
-        when(mockGuaranteeBalanceService.retrieveBalanceResponse()(any(), any())).thenReturn(Future.successful(errorResponse))
+      "when balance retrieval unsuccessful" - {
+        "must show the technical difficulties page" in {
+          when(mockGuaranteeBalanceService.retrieveBalanceResponse()(any(), any())).thenReturn(Future.successful(errorResponse))
+          setExistingUserAnswers(baseAnswers)
 
-        val request = FakeRequest(POST, routes.TryAgainController.onSubmit().url)
+          val request = FakeRequest(POST, routes.TryAgainController.onSubmit().url)
+          val result  = route(app, request).value
 
-        setExistingUserAnswers(baseAnswersWithBalanceId)
-        val result = route(app, request).value
+          status(result) mustEqual SEE_OTHER
+          redirectLocation(result).value mustEqual controllers.routes.ErrorController.technicalDifficulties().url
 
-        status(result) mustEqual SEE_OTHER
-        redirectLocation(result).value mustEqual controllers.routes.ErrorController.technicalDifficulties().url
-
-        verify(mockGuaranteeBalanceService, times(1)).retrieveBalanceResponse()(any(), any())
+          verify(mockGuaranteeBalanceService, times(1)).retrieveBalanceResponse()(any(), any())
+        }
       }
     }
   }

@@ -18,20 +18,16 @@ package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import forms.EoriNumberFormProvider
-import matchers.JsonMatchers
 import models.{Mode, NormalMode, UserAnswers}
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{times, verify}
+import org.mockito.Mockito.verify
 import org.scalacheck.Arbitrary.arbitrary
-import org.scalatestplus.mockito.MockitoSugar
 import pages.EoriNumberPage
-import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.viewmodels.NunjucksSupport
+import views.html.EoriNumberView
 
-class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksSupport with JsonMatchers with AppWithDefaultMockFixtures {
+class EoriNumberControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   private val formProvider = new EoriNumberFormProvider()
   private val form         = formProvider()
@@ -45,25 +41,16 @@ class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksS
       forAll(arbitrary[Mode]) {
         mode =>
           beforeEach()
-
           setExistingUserAnswers(emptyUserAnswers)
-          val request                                = FakeRequest(GET, eoriNumberRoute(mode))
-          val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-          val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
 
-          val result = route(app, request).value
+          val request = FakeRequest(GET, eoriNumberRoute(mode))
+          val view    = injector.instanceOf[EoriNumberView]
+          val result  = route(app, request).value
 
           status(result) mustEqual OK
 
-          verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
-
-          val expectedJson = Json.obj(
-            "form" -> form,
-            "mode" -> mode
-          )
-
-          templateCaptor.getValue mustEqual "eoriNumber.njk"
-          jsonCaptor.getValue must containJson(expectedJson)
+          contentAsString(result) mustEqual
+            view(form, mode)(request, messages).toString
       }
     }
 
@@ -72,29 +59,19 @@ class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksS
       forAll(arbitrary[Mode]) {
         mode =>
           beforeEach()
-
           val userAnswers = emptyUserAnswers.setValue(EoriNumberPage, validEori)
           setExistingUserAnswers(userAnswers)
 
-          val request                                = FakeRequest(GET, eoriNumberRoute(mode))
-          val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-          val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
-
-          val result = route(app, request).value
+          val request = FakeRequest(GET, eoriNumberRoute(mode))
+          val view    = injector.instanceOf[EoriNumberView]
+          val result  = route(app, request).value
 
           status(result) mustEqual OK
 
-          verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
-
           val filledForm = form.bind(Map("value" -> validEori))
 
-          val expectedJson = Json.obj(
-            "form" -> filledForm,
-            "mode" -> mode
-          )
-
-          templateCaptor.getValue mustEqual "eoriNumber.njk"
-          jsonCaptor.getValue must containJson(expectedJson)
+          contentAsString(result) mustEqual
+            view(filledForm, mode)(request, messages).toString
       }
     }
 
@@ -120,26 +97,19 @@ class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksS
       forAll(arbitrary[Mode]) {
         mode =>
           beforeEach()
-
           setExistingUserAnswers(emptyUserAnswers)
-          val request                                = FakeRequest(POST, eoriNumberRoute(mode)).withFormUrlEncodedBody(("value", ""))
-          val boundForm                              = form.bind(Map("value" -> ""))
-          val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-          val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
+          val invalidAnswer = ""
 
-          val result = route(app, request).value
+          val request = FakeRequest(POST, eoriNumberRoute(mode)).withFormUrlEncodedBody(("value", invalidAnswer))
+          val view    = injector.instanceOf[EoriNumberView]
+          val result  = route(app, request).value
 
           status(result) mustEqual BAD_REQUEST
 
-          verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
+          val boundForm = form.bind(Map("value" -> invalidAnswer))
 
-          val expectedJson = Json.obj(
-            "form" -> boundForm,
-            "mode" -> mode
-          )
-
-          templateCaptor.getValue mustEqual "eoriNumber.njk"
-          jsonCaptor.getValue must containJson(expectedJson)
+          contentAsString(result) mustEqual
+            view(boundForm, mode)(request, messages).toString
       }
     }
 

@@ -33,7 +33,6 @@ class AccessCodeControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
   private lazy val accessCodeRoute: String = routes.AccessCodeController.onPageLoad(mode).url
 
   private val validAnswer: String = "1111"
-  private val invalidAnswer       = ""
 
   "AccessCode Controller" - {
 
@@ -84,6 +83,7 @@ class AccessCodeControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
       setExistingUserAnswers(emptyUserAnswers)
+      val invalidAnswer = ""
 
       val request = FakeRequest(POST, accessCodeRoute).withFormUrlEncodedBody(("value", invalidAnswer))
       val view    = injector.instanceOf[AccessCodeView]
