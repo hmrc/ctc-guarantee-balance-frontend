@@ -31,27 +31,25 @@ class UnsupportedGuaranteeTypeControllerSpec extends SpecBase with MockitoSugar 
     "onPageLoad" - {
       "return OK and the correct view for a GET" in {
 
-        val application                            = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+        setExistingUserAnswers(emptyUserAnswers)
         val request                                = FakeRequest(GET, routes.UnsupportedGuaranteeTypeController.onPageLoad().url)
         val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
 
-        val result = route(application, request).value
+        val result = route(app, request).value
 
         status(result) mustEqual OK
 
         verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
 
         templateCaptor.getValue mustEqual "unsupportedGuaranteeType.njk"
-
-        application.stop()
       }
     }
 
     "onSubmit" - {
       "must Redirect to the StartController DataReturned " in {
-        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-        val request     = FakeRequest(POST, routes.UnsupportedGuaranteeTypeController.onSubmit().url)
-        val result      = route(application, request).value
+        setExistingUserAnswers(emptyUserAnswers)
+        val request = FakeRequest(POST, routes.UnsupportedGuaranteeTypeController.onSubmit().url)
+        val result  = route(app, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.StartController.startAgain().url

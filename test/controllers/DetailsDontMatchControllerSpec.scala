@@ -30,19 +30,17 @@ class DetailsDontMatchControllerSpec extends SpecBase with MockitoSugar with App
 
     "return OK and the correct view for a GET" in {
 
-      val application                            = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      setExistingUserAnswers(emptyUserAnswers)
       val request                                = FakeRequest(GET, routes.DetailsDontMatchController.onPageLoad().url)
       val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
 
-      val result = route(application, request).value
+      val result = route(app, request).value
 
       status(result) mustEqual OK
 
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
 
       templateCaptor.getValue mustEqual "detailsDontMatch.njk"
-
-      application.stop()
     }
   }
 }

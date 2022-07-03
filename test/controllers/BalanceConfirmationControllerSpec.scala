@@ -47,9 +47,9 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
               referral =>
                 beforeEach()
 
-                val userAnswers = emptyUserAnswers.set(BalancePage, balance).success.value
+                val userAnswers = emptyUserAnswers.setValue(BalancePage, balance)
 
-                val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+                setExistingUserAnswers(userAnswers)
 
                 val request = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
                   .withSession(Referral.key -> referral.toString)
@@ -57,7 +57,7 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
                 val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
                 val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
 
-                val result = route(application, request).value
+                val result = route(app, request).value
 
                 status(result) mustEqual OK
 
@@ -71,23 +71,21 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
 
                 templateCaptor.getValue mustEqual "balanceConfirmation.njk"
                 jsonCaptor.getValue must containJson(expectedJson)
-
-                application.stop()
             }
           }
 
           "when session does not have referral value" in {
 
-            val userAnswers = emptyUserAnswers.set(BalancePage, balance).success.value
+            val userAnswers = emptyUserAnswers.setValue(BalancePage, balance)
 
-            val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+            setExistingUserAnswers(userAnswers)
 
             val request = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
 
             val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
             val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
 
-            val result = route(application, request).value
+            val result = route(app, request).value
 
             status(result) mustEqual OK
 
@@ -101,8 +99,6 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
 
             templateCaptor.getValue mustEqual "balanceConfirmation.njk"
             jsonCaptor.getValue must containJson(expectedJson)
-
-            application.stop()
           }
         }
       }
@@ -110,16 +106,14 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
       "must redirect to start controller" - {
         "when balance not found in user answers" in {
 
-          val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-          val request     = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
+          setExistingUserAnswers(emptyUserAnswers)
+          val request = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
 
-          val result = route(application, request).value
+          val result = route(app, request).value
 
           status(result) mustEqual SEE_OTHER
 
           redirectLocation(result).value mustEqual routes.StartController.startAgain().url
-
-          application.stop()
         }
       }
     }
@@ -127,12 +121,12 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
     ".checkAnotherGuaranteeBalance" - {
       "must clear user answers and redirect to EORI Number page" in {
 
-        val userAnswers = emptyUserAnswers.set(EoriNumberPage, "eori").success.value
+        val userAnswers = emptyUserAnswers.setValue(EoriNumberPage, "eori")
 
-        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
-        val request     = FakeRequest(GET, routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url)
+        setExistingUserAnswers(userAnswers)
+        val request = FakeRequest(GET, routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url)
 
-        val result = route(application, request).value
+        val result = route(app, request).value
 
         status(result) mustEqual SEE_OTHER
 
@@ -141,20 +135,18 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
         val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
         verify(mockSessionRepository).set(uaCaptor.capture)
         uaCaptor.getValue.data mustEqual Json.obj()
-
-        application.stop()
       }
     }
 
     ".manageTransitMovements" - {
       "must clear user answers and redirect to manage transit movements" in {
 
-        val userAnswers = emptyUserAnswers.set(EoriNumberPage, "eori").success.value
+        val userAnswers = emptyUserAnswers.setValue(EoriNumberPage, "eori")
 
-        val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
-        val request     = FakeRequest(GET, routes.BalanceConfirmationController.manageTransitMovements().url)
+        setExistingUserAnswers(userAnswers)
+        val request = FakeRequest(GET, routes.BalanceConfirmationController.manageTransitMovements().url)
 
-        val result = route(application, request).value
+        val result = route(app, request).value
 
         status(result) mustEqual SEE_OTHER
 
@@ -163,8 +155,6 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
         val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
         verify(mockSessionRepository).set(uaCaptor.capture)
         uaCaptor.getValue.data mustEqual Json.obj()
-
-        application.stop()
       }
     }
 

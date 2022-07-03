@@ -16,10 +16,7 @@
 
 package controllers
 
-import java.util.UUID
-
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import config.FrontendAppConfig
 import matchers.JsonMatchers
 import models.UserAnswers
 import models.backend.BalanceRequestSuccess
@@ -33,6 +30,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpResponse}
 
+import java.util.UUID
 import scala.concurrent.Future
 
 class TryAgainControllerSpec extends SpecBase with JsonMatchers with AppWithDefaultMockFixtures {
@@ -44,15 +42,13 @@ class TryAgainControllerSpec extends SpecBase with JsonMatchers with AppWithDefa
   private val access: String = "access"
   private val taxId: String  = "taxId"
 
-  // format: off
   private val baseAnswers: UserAnswers = emptyUserAnswers
-    .set(GuaranteeReferenceNumberPage, grn).success.value
-    .set(AccessCodePage, access).success.value
-    .set(EoriNumberPage, taxId).success.value
+    .setValue(GuaranteeReferenceNumberPage, grn)
+    .setValue(AccessCodePage, access)
+    .setValue(EoriNumberPage, taxId)
 
   private val baseAnswersWithBalanceId: UserAnswers = baseAnswers
-    .set(BalanceIdPage, balanceId).success.value
-  // format: on
+    .setValue(BalanceIdPage, balanceId)
 
   private val successResponse = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
   private val errorResponse   = Left(HttpResponse(404, ""))
@@ -65,8 +61,8 @@ class TryAgainControllerSpec extends SpecBase with JsonMatchers with AppWithDefa
       "must return OK and the correct view for a GET" in {
         val request = FakeRequest(GET, routes.TryAgainController.onPageLoad().url)
 
-        val application = applicationBuilder(userAnswers = Some(baseAnswers)).build()
-        val result      = route(application, request).value
+        setExistingUserAnswers(baseAnswers)
+        val result = route(app, request).value
 
         status(result) mustEqual OK
 
@@ -75,9 +71,8 @@ class TryAgainControllerSpec extends SpecBase with JsonMatchers with AppWithDefa
 
         verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
-        val config = application.injector.instanceOf[FrontendAppConfig]
         val expectedJson = Json.obj(
-          "waitTimeInSeconds" -> config.rateLimitDuration
+          "waitTimeInSeconds" -> frontendAppConfig.rateLimitDuration
         )
 
         jsonCaptor.getValue must containJson(expectedJson)
@@ -89,9 +84,9 @@ class TryAgainControllerSpec extends SpecBase with JsonMatchers with AppWithDefa
       "must submit a request and then Redirect to the Balance Confirmation Controller if the status is DataReturned and Submit Mode" in {
         when(mockGuaranteeBalanceService.retrieveBalanceResponse()(any(), any())).thenReturn(Future.successful(successResponse))
 
-        val request     = FakeRequest(POST, routes.TryAgainController.onSubmit().url)
-        val application = applicationBuilder(userAnswers = Some(baseAnswersWithBalanceId)).build()
-        val result      = route(application, request).value
+        val request = FakeRequest(POST, routes.TryAgainController.onSubmit().url)
+        setExistingUserAnswers(baseAnswersWithBalanceId)
+        val result = route(app, request).value
 
         status(result) mustEqual SEE_OTHER
 
@@ -104,8 +99,8 @@ class TryAgainControllerSpec extends SpecBase with JsonMatchers with AppWithDefa
 
         val request = FakeRequest(POST, routes.TryAgainController.onSubmit().url)
 
-        val application = applicationBuilder(userAnswers = Some(baseAnswersWithBalanceId)).build()
-        val result      = route(application, request).value
+        setExistingUserAnswers(baseAnswersWithBalanceId)
+        val result = route(app, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual controllers.routes.ErrorController.technicalDifficulties().url

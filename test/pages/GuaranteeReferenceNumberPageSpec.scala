@@ -16,12 +16,12 @@
 
 package pages
 
-import java.util.UUID
-
 import models.UserAnswers
 import models.values.BalanceId
 import pages.behaviours.PageBehaviours
 import play.api.libs.json.Json
+
+import java.util.UUID
 
 class GuaranteeReferenceNumberPageSpec extends PageBehaviours {
 
@@ -29,11 +29,8 @@ class GuaranteeReferenceNumberPageSpec extends PageBehaviours {
   private val expectedUuid = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
   private val balanceId    = BalanceId(expectedUuid)
 
-  // format: off
-
   val baseUserAnswers: UserAnswers = UserAnswers("id", Json.obj())
-    .set(GuaranteeReferenceNumberPage, grn).success.value
-  // format: on
+    .setValue(GuaranteeReferenceNumberPage, grn)
 
   "GuaranteeReferenceNumberPage" - {
 
@@ -46,19 +43,19 @@ class GuaranteeReferenceNumberPageSpec extends PageBehaviours {
     "cleanup" - {
 
       "must remove BalanceId when GRN changes" in {
-        val answersWithBalanceId = baseUserAnswers.set(BalanceIdPage, balanceId).success.value
+        val answersWithBalanceId = baseUserAnswers.setValue(BalanceIdPage, balanceId)
         answersWithBalanceId.get(BalanceIdPage).isDefined mustEqual true
 
-        val result = answersWithBalanceId.set(GuaranteeReferenceNumberPage, "newValue")
-        result.success.value.get(BalanceIdPage).isDefined mustEqual false
+        val result = answersWithBalanceId.setValue(GuaranteeReferenceNumberPage, "newValue")
+        result.get(BalanceIdPage).isDefined mustEqual false
       }
 
       "must NOT remove BalanceId when GRN hasn't changed" in {
-        val answersWithBalanceId = baseUserAnswers.set(BalanceIdPage, balanceId).success.value
+        val answersWithBalanceId = baseUserAnswers.setValue(BalanceIdPage, balanceId)
         answersWithBalanceId.get(BalanceIdPage).isDefined mustEqual true
 
-        val result = answersWithBalanceId.set(GuaranteeReferenceNumberPage, grn)
-        result.success.value.get(BalanceIdPage).isDefined mustEqual true
+        val result = answersWithBalanceId.setValue(GuaranteeReferenceNumberPage, grn)
+        result.get(BalanceIdPage).isDefined mustEqual true
       }
     }
   }

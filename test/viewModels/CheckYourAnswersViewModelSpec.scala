@@ -43,12 +43,10 @@ class CheckYourAnswersViewModelSpec extends SpecBase with AppWithDefaultMockFixt
     val grn  = "grn"
     val code = "••••"
 
-    // format: off
     val userAnswers = emptyUserAnswers
-      .set(EoriNumberPage, eori).success.value
-      .set(GuaranteeReferenceNumberPage, grn).success.value
-      .set(AccessCodePage, code).success.value
-    // format: on
+      .setValue(EoriNumberPage, eori)
+      .setValue(GuaranteeReferenceNumberPage, grn)
+      .setValue(AccessCodePage, code)
 
     val result = viewModelProvider(userAnswers)
 

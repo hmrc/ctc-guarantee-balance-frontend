@@ -70,17 +70,25 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
     applicationBuilder()
       .build()
 
-  protected def applicationBuilder(userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
+  protected def setExistingUserAnswers(userAnswers: UserAnswers): Unit         = setExistingUserAnswers(Some(userAnswers))
+  protected def setExistingUserAnswers(userAnswers: Option[UserAnswers]): Unit = setUserAnswers(userAnswers)
+
+  protected def setNoExistingUserAnswers(): Unit = setUserAnswers(None)
+
+  private def setUserAnswers(userAnswers: Option[UserAnswers]): Unit =
+    when(mockSessionRepository.get(any())).thenReturn(Future.successful(userAnswers))
+
+  protected def applicationBuilder(): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
-        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers)),
         bind[NunjucksRenderer].toInstance(mockRenderer),
         bind[MessagesApi].toInstance(Helpers.stubMessagesApi()),
         bind[SessionRepository].toInstance(mockSessionRepository),
         bind[MongoLockRepository].toInstance(mockMongoLockRepository),
         bind[GuaranteeBalanceService].toInstance(mockGuaranteeBalanceService),
-        bind[AuditService].toInstance(mockAuditService)
+        bind[AuditService].toInstance(mockAuditService),
+        bind[Navigator].toInstance(fakeNavigator)
       )
 }

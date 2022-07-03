@@ -45,10 +45,10 @@ class StartControllerSpec extends SpecBase with MockitoSugar with NunjucksSuppor
             (userAnswers, referral) =>
               beforeEach()
 
-              val time        = LocalDateTime.now()
-              val application = applicationBuilder(userAnswers = userAnswers.map(_.copy(lastUpdated = time))).build()
-              val request     = FakeRequest(GET, startRoute(Some(referral)))
-              val result      = route(application, request).value
+              val time = LocalDateTime.now()
+              setExistingUserAnswers(userAnswers.map(_.copy(lastUpdated = time)))
+              val request = FakeRequest(GET, startRoute(Some(referral)))
+              val result  = route(app, request).value
 
               status(result) mustEqual SEE_OTHER
               redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
@@ -58,8 +58,6 @@ class StartControllerSpec extends SpecBase with MockitoSugar with NunjucksSuppor
               verify(mockSessionRepository).set(uaCaptor.capture)
 
               uaCaptor.getValue.lastUpdated.isAfter(time) mustBe true // check that new user answers have been created
-
-              application.stop()
           }
         }
 
@@ -69,10 +67,10 @@ class StartControllerSpec extends SpecBase with MockitoSugar with NunjucksSuppor
             userAnswers =>
               beforeEach()
 
-              val time        = LocalDateTime.now()
-              val application = applicationBuilder(userAnswers = userAnswers.map(_.copy(lastUpdated = time))).build()
-              val request     = FakeRequest(GET, startRoute(None))
-              val result      = route(application, request).value
+              val time = LocalDateTime.now()
+              setExistingUserAnswers(userAnswers.map(_.copy(lastUpdated = time)))
+              val request = FakeRequest(GET, startRoute(None))
+              val result  = route(app, request).value
 
               status(result) mustEqual SEE_OTHER
               redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
@@ -82,8 +80,6 @@ class StartControllerSpec extends SpecBase with MockitoSugar with NunjucksSuppor
               verify(mockSessionRepository).set(uaCaptor.capture)
 
               uaCaptor.getValue.lastUpdated.isAfter(time) mustBe true // check that new user answers have been created
-
-              application.stop()
           }
         }
       }
@@ -96,28 +92,24 @@ class StartControllerSpec extends SpecBase with MockitoSugar with NunjucksSuppor
       "when session exists" - {
         "must redirect to EORI page" in {
 
-          val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-          val request     = FakeRequest(GET, startAgainRoute)
-          val result      = route(application, request).value
+          setExistingUserAnswers(emptyUserAnswers)
+          val request = FakeRequest(GET, startAgainRoute)
+          val result  = route(app, request).value
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
-
-          application.stop()
         }
       }
 
       "when no session exists" - {
         "must redirect to session expired" in {
 
-          val application = applicationBuilder(userAnswers = None).build()
-          val request     = FakeRequest(GET, startAgainRoute)
-          val result      = route(application, request).value
+          setNoExistingUserAnswers()
+          val request = FakeRequest(GET, startAgainRoute)
+          val result  = route(app, request).value
 
           status(result) mustEqual SEE_OTHER
           redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
-
-          application.stop()
         }
       }
     }

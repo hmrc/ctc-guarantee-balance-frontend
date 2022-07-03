@@ -19,10 +19,8 @@ package controllers
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import forms.AccessCodeFormProvider
 import models.NormalMode
-import navigation.Navigator
 import pages.AccessCodePage
 import play.api.data.Form
-import play.api.inject.bind
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import views.html.AccessCodeView
@@ -41,28 +39,26 @@ class AccessCodeControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
     "must return OK and the correct view for a GET" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      setExistingUserAnswers(emptyUserAnswers)
 
       val request = FakeRequest(GET, accessCodeRoute)
       val view    = injector.instanceOf[AccessCodeView]
-      val result  = route(application, request).value
+      val result  = route(app, request).value
 
       status(result) mustEqual OK
 
       contentAsString(result) mustEqual
         view(form, mode)(request, messages).toString
-
-      application.stop()
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
       val userAnswers = emptyUserAnswers.setValue(AccessCodePage, validAnswer)
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
+      setExistingUserAnswers(userAnswers)
 
       val request = FakeRequest(GET, accessCodeRoute)
       val view    = injector.instanceOf[AccessCodeView]
-      val result  = route(application, request).value
+      val result  = route(app, request).value
 
       status(result) mustEqual OK
 
@@ -70,34 +66,28 @@ class AccessCodeControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
       contentAsString(result) mustEqual
         view(filledForm, mode)(request, messages).toString
-
-      application.stop()
     }
 
     "must redirect to the next page when valid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(bind[Navigator].toInstance(fakeNavigator))
-        .build()
+      setExistingUserAnswers(emptyUserAnswers)
 
       val request = FakeRequest(POST, accessCodeRoute)
         .withFormUrlEncodedBody(("value", validAnswer))
 
-      val result = route(application, request).value
+      val result = route(app, request).value
 
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value mustEqual onwardRoute.url
-
-      application.stop()
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
+      setExistingUserAnswers(emptyUserAnswers)
 
       val request = FakeRequest(POST, accessCodeRoute).withFormUrlEncodedBody(("value", invalidAnswer))
       val view    = injector.instanceOf[AccessCodeView]
-      val result  = route(application, request).value
+      val result  = route(app, request).value
 
       status(result) mustEqual BAD_REQUEST
 
@@ -105,39 +95,33 @@ class AccessCodeControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
       contentAsString(result) mustEqual
         view(boundForm, mode)(request, messages).toString
-
-      application.stop()
     }
 
     "must redirect to Session Expired for a GET if no existing data is found" in {
 
-      val application = applicationBuilder(userAnswers = None).build()
+      setNoExistingUserAnswers()
 
       val request = FakeRequest(GET, accessCodeRoute)
 
-      val result = route(application, request).value
+      val result = route(app, request).value
 
       status(result) mustEqual SEE_OTHER
 
       redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
-
-      application.stop()
     }
 
     "must redirect to Session Expired for a POST if no existing data is found" in {
 
-      val application = applicationBuilder(userAnswers = None).build()
+      setNoExistingUserAnswers()
 
       val request = FakeRequest(POST, accessCodeRoute)
         .withFormUrlEncodedBody(("value", validAnswer))
 
-      val result = route(application, request).value
+      val result = route(app, request).value
 
       status(result) mustEqual SEE_OTHER
 
       redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
-
-      application.stop()
     }
   }
 }

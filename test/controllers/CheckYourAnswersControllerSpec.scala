@@ -41,18 +41,16 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
   private val access: String = "access"
   private val taxId: String  = "taxId"
 
-  // format: off
   private val baseAnswers: UserAnswers = emptyUserAnswers
-    .set(GuaranteeReferenceNumberPage, grn).success.value
-    .set(AccessCodePage, access).success.value
-    .set(EoriNumberPage, taxId).success.value
-  // format: on
+    .setValue(GuaranteeReferenceNumberPage, grn)
+    .setValue(AccessCodePage, access)
+    .setValue(EoriNumberPage, taxId)
 
   private val mockViewModelProvider: CheckYourAnswersViewModelProvider = mock[CheckYourAnswersViewModelProvider]
 
-  override protected def applicationBuilder(userAnswers: Option[UserAnswers]): GuiceApplicationBuilder =
+  override protected def applicationBuilder(): GuiceApplicationBuilder =
     super
-      .applicationBuilder(userAnswers)
+      .applicationBuilder()
       .overrides(bind[CheckYourAnswersViewModelProvider].toInstance(mockViewModelProvider))
 
   private val emptySection: Section = Section(Nil)
@@ -67,13 +65,13 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
 
     "return OK and the correct view for a GET" in {
       val userAnswers = baseAnswers
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
-      val request     = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+      setExistingUserAnswers(userAnswers)
+      val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
 
       val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
       val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
 
-      val result = route(application, request).value
+      val result = route(app, request).value
 
       status(result) mustEqual OK
 
@@ -87,12 +85,11 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
       jsonCaptor.getValue must containJson(expectedJson)
 
       verify(mockViewModelProvider)(userAnswers)
-
-      application.stop()
     }
 
     "must redirect to Session Expired for a GET if no existing data is found" in {
 
+      setNoExistingUserAnswers()
       val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
 
       val result = route(app, request).value
@@ -105,13 +102,13 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
     "must pass the response from the submit onto the processor" in {
 
       val userAnswers = baseAnswers
-      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
-      val request     = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+      setExistingUserAnswers(userAnswers)
+      val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
 
       when(mockGuaranteeBalanceService.retrieveBalanceResponse()(any(), any()))
         .thenReturn(Future.successful(Right(BalanceRequestSuccess(123.45, CurrencyCode("GBP")))))
 
-      val result = route(application, request).value
+      val result = route(app, request).value
 
       status(result) mustEqual SEE_OTHER
 

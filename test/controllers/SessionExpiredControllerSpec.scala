@@ -34,9 +34,8 @@ class SessionExpiredControllerSpec extends SpecBase with AppWithDefaultMockFixtu
     }
 
     "must redirect to a new page for a POST" in {
-      val request =
-        FakeRequest(POST, routes.SessionExpiredController.onSubmit().url)
-          .withFormUrlEncodedBody()
+      val request = FakeRequest(POST, routes.SessionExpiredController.onSubmit().url)
+        .withFormUrlEncodedBody()
 
       val result = route(app, request).value
 

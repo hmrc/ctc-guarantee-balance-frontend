@@ -43,7 +43,8 @@ trait SpecBase
     with ScalaFutures
     with IntegrationPatience
     with MockitoSugar
-    with Generators {
+    with Generators
+    with EitherValues {
 
   val configKey = "config"
 

@@ -46,7 +46,7 @@ class CheckYourAnswersHelperSpec extends SpecBase {
 
         forAll(arbitrary[Mode], arbitrary[String]) {
           (mode, answer) =>
-            val answers: UserAnswers = emptyUserAnswers.set(EoriNumberPage, answer).success.value
+            val answers: UserAnswers = emptyUserAnswers.setValue(EoriNumberPage, answer)
 
             val helper = new CheckYourAnswersHelper(answers, mode)
             val result = helper.eoriNumber
@@ -91,7 +91,7 @@ class CheckYourAnswersHelperSpec extends SpecBase {
 
         forAll(arbitrary[Mode], arbitrary[String]) {
           (mode, answer) =>
-            val answers: UserAnswers = emptyUserAnswers.set(GuaranteeReferenceNumberPage, answer).success.value
+            val answers: UserAnswers = emptyUserAnswers.setValue(GuaranteeReferenceNumberPage, answer)
 
             val helper = new CheckYourAnswersHelper(answers, mode)
             val result = helper.guaranteeReferenceNumber
@@ -136,7 +136,7 @@ class CheckYourAnswersHelperSpec extends SpecBase {
 
         forAll(arbitrary[Mode], stringsOfLength(accessCodeLength)) {
           (mode, answer) =>
-            val answers: UserAnswers = emptyUserAnswers.set(AccessCodePage, answer).success.value
+            val answers: UserAnswers = emptyUserAnswers.setValue(AccessCodePage, answer)
 
             val helper = new CheckYourAnswersHelper(answers, mode)
             val result = helper.accessCode

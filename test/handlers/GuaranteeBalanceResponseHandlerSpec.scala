@@ -16,8 +16,6 @@
 
 package handlers
 
-import java.util.UUID
-
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import cats.data.NonEmptyList
 import matchers.JsonMatchers
@@ -38,6 +36,7 @@ import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpResponse}
 import viewModels.audit.AuditConstants._
 import viewModels.audit.{SuccessfulBalanceAuditModel, UnsuccessfulBalanceAuditModel}
 
+import java.util.UUID
 import scala.concurrent.Future
 
 class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers with AppWithDefaultMockFixtures {
@@ -49,18 +48,16 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with JsonMatchers wit
   private val access: String = "access"
   private val taxId: String  = "taxId"
 
-  // format: off
   private val baseAnswers: UserAnswers = emptyUserAnswers
-    .set(GuaranteeReferenceNumberPage, grn).success.value
-    .set(AccessCodePage, access).success.value
-    .set(EoriNumberPage, taxId).success.value
+    .setValue(GuaranteeReferenceNumberPage, grn)
+    .setValue(AccessCodePage, access)
+    .setValue(EoriNumberPage, taxId)
 
   private val baseAnswersWithBalanceId: UserAnswers = emptyUserAnswers
-    .set(GuaranteeReferenceNumberPage, grn).success.value
-    .set(AccessCodePage, access).success.value
-    .set(EoriNumberPage, taxId).success.value
-    .set(BalanceIdPage, balanceId).success.value
-  // format: on
+    .setValue(GuaranteeReferenceNumberPage, grn)
+    .setValue(AccessCodePage, access)
+    .setValue(EoriNumberPage, taxId)
+    .setValue(BalanceIdPage, balanceId)
 
   val noMatchResponse           = Right(BalanceRequestNotMatched("test"))
   val eoriNoMatchResponse       = Right(BalanceRequestNotMatched("RC1.TIN"))
