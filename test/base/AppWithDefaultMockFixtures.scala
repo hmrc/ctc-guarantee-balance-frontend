@@ -31,10 +31,8 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.Call
 import play.api.test.Helpers
-import play.twirl.api.Html
 import repositories.{MongoLockRepository, SessionRepository}
 import services.{AuditService, GuaranteeBalanceService}
-import uk.gov.hmrc.nunjucks.NunjucksRenderer
 
 import scala.concurrent.Future
 
@@ -43,21 +41,16 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
 
   override def beforeEach(): Unit = {
     Mockito.reset(
-      mockRenderer,
       mockSessionRepository,
       mockMongoLockRepository,
       mockGuaranteeBalanceService,
       mockAuditService
     )
 
-    when(mockRenderer.render(any(), any())(any()))
-      .thenReturn(Future.successful(Html("")))
-
     when(mockSessionRepository.set(any()))
       .thenReturn(Future.successful(true))
   }
 
-  val mockRenderer: NunjucksRenderer                       = mock[NunjucksRenderer]
   val mockSessionRepository: SessionRepository             = mock[SessionRepository]
   val mockMongoLockRepository: MongoLockRepository         = mock[MongoLockRepository]
   val mockGuaranteeBalanceService: GuaranteeBalanceService = mock[GuaranteeBalanceService]
@@ -83,7 +76,6 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
-        bind[NunjucksRenderer].toInstance(mockRenderer),
         bind[MessagesApi].toInstance(Helpers.stubMessagesApi()),
         bind[SessionRepository].toInstance(mockSessionRepository),
         bind[MongoLockRepository].toInstance(mockMongoLockRepository),

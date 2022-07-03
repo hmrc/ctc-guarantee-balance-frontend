@@ -23,7 +23,6 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.GuaranteeBalanceService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import uk.gov.hmrc.viewmodels.NunjucksSupport
 import viewModels.CheckYourAnswersViewModel.CheckYourAnswersViewModelProvider
 import views.html.CheckYourAnswersView
 
@@ -41,7 +40,6 @@ class CheckYourAnswersController @Inject() (
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
-    with NunjucksSupport
     with Logging {
 
   def onPageLoad(): Action[AnyContent] = actions.requireData {

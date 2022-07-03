@@ -15,12 +15,12 @@
  *@
 
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import viewModels.TwirlSection
+@import viewModels.Section
 
 @this(govukSummaryList: GovukSummaryList)
 
 @(
-    sections: Seq[TwirlSection]
+    sections: Seq[Section]
 )(implicit messages: Messages)
 
 @for(section <- sections) {

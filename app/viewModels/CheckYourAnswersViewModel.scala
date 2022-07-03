@@ -20,7 +20,7 @@ import models.{CheckMode, UserAnswers}
 import play.api.i18n.Messages
 import utils.CheckYourAnswersHelper
 
-case class CheckYourAnswersViewModel(section: TwirlSection)
+case class CheckYourAnswersViewModel(section: Section)
 
 object CheckYourAnswersViewModel {
 
@@ -30,7 +30,7 @@ object CheckYourAnswersViewModel {
       val helper = new CheckYourAnswersHelper(userAnswers, CheckMode)
 
       CheckYourAnswersViewModel(
-        TwirlSection(
+        Section(
           Seq(
             helper.eoriNumber,
             helper.guaranteeReferenceNumber,

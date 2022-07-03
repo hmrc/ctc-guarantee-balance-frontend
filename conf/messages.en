@@ -2,8 +2,6 @@ site.day.capitalized = Day
 site.month.capitalized = Month
 site.year.capitalized = Year
 
-# TODO - remove site.back once fully migrated to Twirl
-site.back = Back
 site.delete = Remove
 site.edit = Change
 site.delete.hidden = Change {0}

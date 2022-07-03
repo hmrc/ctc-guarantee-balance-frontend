@@ -30,7 +30,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import viewModels.CheckYourAnswersViewModel.CheckYourAnswersViewModelProvider
-import viewModels.{CheckYourAnswersViewModel, TwirlSection}
+import viewModels.{CheckYourAnswersViewModel, Section}
 import views.html.CheckYourAnswersView
 
 import scala.concurrent.Future
@@ -49,7 +49,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with AppWithDefaultMockFix
       .applicationBuilder()
       .overrides(bind[CheckYourAnswersViewModelProvider].toInstance(mockViewModelProvider))
 
-  private val section: TwirlSection = arbitrary[TwirlSection].sample.value
+  private val section: Section = arbitrary[Section].sample.value
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -76,11 +76,10 @@ class CheckYourAnswersControllerSpec extends SpecBase with AppWithDefaultMockFix
     }
 
     "must redirect to Session Expired for a GET if no existing data is found" in {
-
       setNoExistingUserAnswers()
-      val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
 
-      val result = route(app, request).value
+      val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+      val result  = route(app, request).value
 
       status(result) mustEqual SEE_OTHER
 
@@ -88,15 +87,14 @@ class CheckYourAnswersControllerSpec extends SpecBase with AppWithDefaultMockFix
     }
 
     "must pass the response from the submit onto the processor" in {
-
       val userAnswers = baseAnswers
       setExistingUserAnswers(userAnswers)
-      val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
 
       when(mockGuaranteeBalanceService.retrieveBalanceResponse()(any(), any()))
         .thenReturn(Future.successful(Right(BalanceRequestSuccess(123.45, CurrencyCode("GBP")))))
 
-      val result = route(app, request).value
+      val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+      val result  = route(app, request).value
 
       status(result) mustEqual SEE_OTHER
 

@@ -10,11 +10,8 @@ object AppDependencies {
     "uk.gov.hmrc"                %% "play-conditional-form-mapping"   % "1.11.0-play-28",
     "uk.gov.hmrc"                %% "bootstrap-frontend-play-28"      % "5.25.0",
     "uk.gov.hmrc"                %% "play-allowlist-filter"           % "1.1.0",
-    "uk.gov.hmrc"                %% "play-nunjucks"                   % "0.36.0-play-28",
-    "uk.gov.hmrc"                %% "play-nunjucks-viewmodel"         % "0.16.0-play-28",
-    "org.webjars.npm"            %  "govuk-frontend"                  % "4.1.0",
-    "uk.gov.hmrc.webjars"        %  "hmrc-frontend"                   % "5.2.0",
-    "uk.gov.hmrc"                %% "play-frontend-hmrc"              % "3.21.0-play-28"
+    "uk.gov.hmrc"                %% "play-frontend-hmrc"              % "3.21.0-play-28",
+    "org.typelevel"              %% "cats-core"                       % "2.7.0"
   )
 
   val test: Seq[ModuleID] = Seq(

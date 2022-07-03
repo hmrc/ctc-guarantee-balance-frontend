@@ -19,13 +19,13 @@ package views.behaviours
 import generators.Generators
 import play.twirl.api.HtmlFormat
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
-import viewModels.TwirlSection
+import viewModels.Section
 
 trait CheckYourAnswersViewBehaviours extends SummaryListViewBehaviours with Generators {
 
-  lazy val sections: Seq[TwirlSection] = listWithMaxLength[TwirlSection]().sample.value
+  lazy val sections: Seq[Section] = listWithMaxLength[Section]().sample.value
 
-  def viewWithSections(sections: Seq[TwirlSection]): HtmlFormat.Appendable
+  def viewWithSections(sections: Seq[Section]): HtmlFormat.Appendable
 
   override def summaryLists: Seq[SummaryList] = sections.map(
     section => SummaryList(section.rows)

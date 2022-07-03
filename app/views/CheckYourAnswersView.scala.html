@@ -15,7 +15,7 @@
  *@
 
 @import controllers.routes
-@import viewModels.TwirlSection
+@import viewModels.Section
 @import views.html.components.{AnswerSections, Button, Heading}
 
 @this(
@@ -26,7 +26,7 @@
     formHelper: FormWithCSRF
 )
 
-@(sections: Seq[TwirlSection])(implicit request: Request[_], messages: Messages)
+@(sections: Seq[Section])(implicit request: Request[_], messages: Messages)
 
 @mainTemplate(
     title = messages("checkYourAnswers.title")
@@ -37,6 +37,9 @@
     @answerSections(sections)
 
     @formHelper(action = routes.CheckYourAnswersController.onSubmit(), 'autoComplete -> "off") {
-        @button(attributes = Map("id" -> "submit"))
+        @button(
+            attributes = Map("id" -> "submit"),
+            preventDoubleClick = true
+        )
     }
 }

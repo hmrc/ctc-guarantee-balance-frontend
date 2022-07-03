@@ -20,7 +20,7 @@ import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.govukfrontend.views.Aliases._
 import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
-import viewModels.TwirlSection
+import viewModels.Section
 
 trait ViewModelGenerators {
   self: Generators =>
@@ -77,11 +77,11 @@ trait ViewModelGenerators {
     } yield SummaryListRow(key, value, classes, actions)
   }
 
-  implicit lazy val arbitrarySection: Arbitrary[TwirlSection] = Arbitrary {
+  implicit lazy val arbitrarySection: Arbitrary[Section] = Arbitrary {
     for {
       sectionTitle <- nonEmptyString
       length       <- Gen.choose(1, maxSeqLength)
       rows         <- Gen.containerOfN[Seq, SummaryListRow](length, arbitrary[SummaryListRow])
-    } yield TwirlSection(sectionTitle, rows)
+    } yield Section(sectionTitle, rows)
   }
 }
