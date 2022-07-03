@@ -16,26 +16,35 @@
 
 package views
 
-import org.jsoup.nodes.Element
+import forms.EoriNumberFormProvider
+import models.NormalMode
+import org.scalacheck.{Arbitrary, Gen}
+import play.api.data.Form
+import play.twirl.api.HtmlFormat
+import viewModels.InputSize
+import views.behaviours.InputTextViewBehaviours
+import views.html.EoriNumberView
 
-class EoriNumberViewSpec extends SingleViewSpec("eoriNumber.njk") {
+class EoriNumberViewSpec extends InputTextViewBehaviours[String] {
 
-  val input: Element = doc.getElementsByClass("govuk-input").first()
+  override def form: Form[String] = new EoriNumberFormProvider()()
 
-  "must have correct width class" in {
-    input.hasClass("govuk-input--width-20") mustBe true
-  }
+  override def applyView(form: Form[String]): HtmlFormat.Appendable =
+    injector.instanceOf[EoriNumberView].apply(form, NormalMode)(fakeRequest, messages)
 
-  "must have correct ID" in {
-    input.id() mustEqual "value"
-  }
+  override val prefix: String = "eoriNumber"
 
-  "must render a continue button" in {
-    assertPageHasButton(doc, "site.continue")
-  }
+  implicit override val arbitraryT: Arbitrary[String] = Arbitrary(Gen.alphaNumStr)
 
-  "must render a hint" in {
-    assertPageHasHint(doc, "eoriNumber.hint")
-  }
+  behave like pageWithTitle()
 
+  behave like pageWithBackLink
+
+  behave like pageWithHeading()
+
+  behave like pageWithHint("This will start GB or XI followed by 12 or 15 numbers, for example GB123456789000.")
+
+  behave like pageWithInputText(Some(InputSize.Width20))
+
+  behave like pageWithSubmitButton("Continue")
 }

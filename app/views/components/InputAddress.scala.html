@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import viewModels.components.InputTextViewModel._
 @import views.html.components.InputText
 
 @this(
@@ -30,24 +31,27 @@
 @html = {
     @inputText(
         field = form("buildingAndStreet"),
-        label = messages(s"$messageKeyPrefix.buildingAndStreet"),
-        labelIsHeading = false,
+        inputTextType = AddressTextInput(
+            label = messages(s"$messageKeyPrefix.buildingAndStreet")
+        ),
         autocomplete = Some("address-line1"),
         inputClass = Some("govuk-!-width-two-thirds")
     )
 
     @inputText(
         field = form("city"),
-        label = messages(s"$messageKeyPrefix.city"),
-        labelIsHeading = false,
+        inputTextType = AddressTextInput(
+            label = messages(s"$messageKeyPrefix.city")
+        ),
         autocomplete = Some("address-line2"),
         inputClass = Some("govuk-!-width-two-thirds")
     )
 
     @inputText(
         field = form("postcode"),
-        label = messages(s"$messageKeyPrefix.postcode"),
-        labelIsHeading = false,
+        inputTextType = AddressTextInput(
+            label = messages(s"$messageKeyPrefix.postcode")
+        ),
         autocomplete = Some("postal-code"),
         inputClass = InputSize.Width10
     )

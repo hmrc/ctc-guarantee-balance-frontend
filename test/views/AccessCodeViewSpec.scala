@@ -16,50 +16,35 @@
 
 package views
 
-import org.jsoup.nodes.Element
+import forms.AccessCodeFormProvider
+import models.NormalMode
+import org.scalacheck.{Arbitrary, Gen}
+import play.api.data.Form
+import play.twirl.api.HtmlFormat
+import viewModels.InputSize
+import views.behaviours.InputTextViewBehaviours
+import views.html.AccessCodeView
 
-class AccessCodeViewSpec extends SingleViewSpec("accessCode.njk") {
+class AccessCodeViewSpec extends InputTextViewBehaviours[String] {
 
-  val input: Element = doc.getElementsByClass("govuk-input").first()
+  override def form: Form[String] = new AccessCodeFormProvider()()
 
-  "must have password-type input" in {
-    input.attr("type") mustEqual "password"
-  }
+  override def applyView(form: Form[String]): HtmlFormat.Appendable =
+    injector.instanceOf[AccessCodeView].apply(form, NormalMode)(fakeRequest, messages)
 
-  "must have correct width class" in {
-    input.hasClass("govuk-input--width-5") mustBe true
-  }
+  override val prefix: String = "accessCode"
 
-  "must have correct ID" in {
-    input.id() mustEqual "value"
-  }
+  implicit override val arbitraryT: Arbitrary[String] = Arbitrary(Gen.alphaNumStr)
 
-  "must render hint text" in {
-    assertPageHasHint(doc, "accessCode.hint")
-  }
+  behave like pageWithTitle()
 
-  "must have autocomplete off" in {
-    input.attr("autocomplete") mustBe "off"
-  }
+  behave like pageWithBackLink
 
-  "must render a continue button" in {
-    assertPageHasButton(doc, "site.continue")
-  }
+  behave like pageWithHeading()
 
-  "must render paragraph" in {
-    assertContainsText(doc, messages("accessCode.paragraph"))
-  }
+  behave like pageWithContent("p", "The person responsible for your transit movements will have received an email about access codes.")
 
-  "must render correct title" in {
-    assertPageHasTitle(doc, "accessCode")
-  }
+  behave like pageWithInputText(Some(InputSize.Width5), "password")
 
-  "must render correct heading" in {
-    assertPageTitleEqualsMessage(doc, "accessCode.heading")
-  }
-
-  "must render correct label" in {
-    assertPageHasLabel(doc, "accessCode")
-  }
-
+  behave like pageWithSubmitButton("Continue")
 }

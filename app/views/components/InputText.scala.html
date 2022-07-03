@@ -15,19 +15,25 @@
  *@
 
 @import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+@import viewModels.components.InputTextViewModel
+@import viewModels.components.InputTextViewModel._
+@import views.html.components.Heading
 
-@this(govukInput: GovukInput)
+@this(
+    govukInput: GovukInput,
+    headingWithNoCaption: Heading
+)
 
 @(
     field: Field,
-    label: String,
-    labelIsHeading: Boolean = true,
+    inputTextType: InputTextViewModel,
     inputClass: Option[String] = None,
     hint: Option[String] = None,
     prefix: Option[String] = None,
     suffix: Option[String] = None,
     autocomplete: Option[String] = None,
-    inputMode: Option[String] = None
+    inputMode: Option[String] = None,
+    inputType: String = "text"
 )(implicit messages: Messages)
 
 @input = @{
@@ -41,15 +47,27 @@
         inputmode = inputMode,
         prefix = prefix.map(x => PrefixOrSuffix(content = Text(x))),
         suffix = suffix.map(x => PrefixOrSuffix(content = Text(x))),
-        classes = inputClass.getOrElse("")
+        classes = inputClass.getOrElse(""),
+        inputType = inputType
     )
     .withFormField(field)
 }
 
-@govukInput(
-    if (labelIsHeading) {
-        input.withHeading(heading = Text(label))
-    } else {
-        input.copy(label = Label(isPageHeading = false, content = Text(label)))
+@inputTextType match {
+    case OrdinaryTextInput(heading) => {
+        @govukInput(input.withHeading(heading = Text(heading)))
     }
-)
+    case TextInputWithHiddenLabel(heading, label, additionalHtml) => {
+        @headingWithNoCaption(heading)
+        @additionalHtml
+        @govukInput(input.copy(label = Label(isPageHeading = false, content = Text(label), classes = "govuk-visually-hidden")))
+    }
+    case TextInputWithStatementHeading(heading, label, additionalHtml) => {
+        @headingWithNoCaption(heading)
+        @additionalHtml
+        @govukInput(input.copy(label = Label(isPageHeading = false, content = Text(label), classes = "govuk-label--m")))
+    }
+    case AddressTextInput(label) => {
+        @govukInput(input.copy(label = Label(isPageHeading = false, content = Text(label))))
+    }
+}

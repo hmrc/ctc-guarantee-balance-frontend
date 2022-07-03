@@ -14,20 +14,31 @@
  * limitations under the License.
  */
 
-package pages
+package viewModels.components
 
-import models.UserAnswers
-import scala.util.Try
-import queries.Settable
+import play.twirl.api.Html
 
-trait ClearValueOnChangePage[A] extends QuestionPage[A] {
+sealed trait InputTextViewModel
 
-  val pageToClear: Settable[_]
+object InputTextViewModel {
 
-  override def cleanup(value: Option[A], userAnswers: UserAnswers, hasValueChanged: Boolean): Try[UserAnswers] =
-    if (hasValueChanged) {
-      userAnswers.remove(pageToClear)
-    } else {
-      super.cleanup(value, userAnswers, hasValueChanged)
-    }
+  case class OrdinaryTextInput(
+    heading: String
+  ) extends InputTextViewModel
+
+  case class TextInputWithHiddenLabel(
+    heading: String,
+    label: String,
+    additionalHtml: Html
+  ) extends InputTextViewModel
+
+  case class TextInputWithStatementHeading(
+    heading: String,
+    label: String,
+    additionalHtml: Html
+  ) extends InputTextViewModel
+
+  case class AddressTextInput(
+    label: String
+  ) extends InputTextViewModel
 }
