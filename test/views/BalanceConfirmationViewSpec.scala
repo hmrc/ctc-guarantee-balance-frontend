@@ -16,100 +16,63 @@
 
 package views
 
+import models.Referral
 import models.Referral._
-import models.backend.BalanceRequestSuccess
-import models.values.CurrencyCode
 import org.scalacheck.Arbitrary.arbitrary
-import play.api.libs.json.Json
+import org.scalacheck.Gen
+import play.twirl.api.HtmlFormat
+import views.behaviours.PanelViewBehaviours
+import views.html.BalanceConfirmationView
 
-class BalanceConfirmationViewSpec extends SingleViewSpec("balanceConfirmation.njk") {
+class BalanceConfirmationViewSpec extends PanelViewBehaviours {
 
-  "must render balance confirmation" in {
-    forAll(arbitrary[Int]) {
-      balance =>
-        val balanceForDisplay = BalanceRequestSuccess(balance, CurrencyCode("GBP")).toString
+  private val balance  = Gen.numStr.sample.value
+  private val referral = arbitrary[Referral].sample.value.toString
 
-        val json = Json.obj(
-          "balance" -> balanceForDisplay
-        )
+  override def view: HtmlFormat.Appendable =
+    injector.instanceOf[BalanceConfirmationView].apply(balance, referral)(fakeRequest, messages)
 
-        val doc = renderDocument(json).futureValue
+  override val prefix: String = "balanceConfirmation"
 
-        val balanceConfirmation = doc.select(".govuk-panel--confirmation").text()
+  behave like pageWithTitle()
 
-        balanceConfirmation must include("balanceConfirmation.heading")
-        balanceConfirmation must include(balanceForDisplay)
-    }
+  behave like pageWithoutBackLink
+
+  behave like pageWithHeading()
+
+  behave like pageWithPanel(balance)
+
+  "when NCTS referral" - {
+    val view = injector.instanceOf[BalanceConfirmationView].apply(balance, NCTS.toString)(fakeRequest, messages)
+    val doc  = parseView(view)
+
+    behave like pageWithContent(doc, "p", "You can:")
+    behave like pageWithLinkedList(
+      doc,
+      "govuk-list--bullet",
+      (
+        "check-another-guarantee-balance",
+        "check another guarantee balance",
+        controllers.routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
+      ),
+      (
+        "manage-transit-movements",
+        "manage your transit movements",
+        controllers.routes.BalanceConfirmationController.manageTransitMovements().url
+      )
+    )
   }
 
-  private val fakeUrl = "/fake-url"
+  "when GovUK referral" - {
+    val view = injector.instanceOf[BalanceConfirmationView].apply(balance, GovUK.toString)(fakeRequest, messages)
+    val doc  = parseView(view)
 
-  "must render links" - {
-
-    "when user has come from GOV.UK" in {
-
-      val json = Json.obj(
-        "referral"                        -> GovUK,
-        "checkAnotherGuaranteeBalanceUrl" -> fakeUrl
-      )
-
-      val doc = renderDocument(json).futureValue
-
-      doc.text() must include("balanceConfirmation.fromGovUk.p")
-
-      assertPageHasLink(
-        doc = doc,
-        id = "check-another-guarantee-balance",
-        expectedText = "balanceConfirmation.fromGovUk.link",
-        expectedHref = fakeUrl
-      )
-    }
-
-    "when user has come from NCTS" in {
-
-      val json = Json.obj(
-        "referral"                        -> NCTS,
-        "checkAnotherGuaranteeBalanceUrl" -> fakeUrl
-      )
-
-      val doc = renderDocument(json).futureValue
-
-      doc.text() must include("balanceConfirmation.fromNcts.p")
-
-      assertPageHasLink(
-        doc = doc,
-        id = "check-another-guarantee-balance",
-        expectedText = "balanceConfirmation.fromNcts.link1",
-        expectedHref = fakeUrl
-      )
-
-      assertPageHasLink(
-        doc = doc,
-        id = "manage-transit-movements",
-        expectedText = "balanceConfirmation.fromNcts.link2",
-        expectedHref = controllers.routes.BalanceConfirmationController.manageTransitMovements().url
-      )
-    }
-
-    "when referral is undefined" in {
-
-      val json = Json.obj(
-        "referral"                        -> None,
-        "checkAnotherGuaranteeBalanceUrl" -> fakeUrl
-      )
-
-      val doc = renderDocument(json).futureValue
-
-      doc.text() must include("balanceConfirmation.fromGovUk.p")
-
-      assertPageHasLink(
-        doc = doc,
-        id = "check-another-guarantee-balance",
-        expectedText = "balanceConfirmation.fromGovUk.link",
-        expectedHref = fakeUrl
-      )
-    }
-
+    behave like pageWithPartialContent(doc, "p", "You can")
+    behave like pageWithLink(
+      doc,
+      "check-another-guarantee-balance",
+      "check another guarantee balance",
+      controllers.routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
+    )
   }
-
 }

@@ -23,7 +23,7 @@ import org.scalatest.Assertion
 import play.twirl.api.HtmlFormat
 import views.viewBase.ViewSpecAssertions
 
-import scala.collection.JavaConverters._
+import scala.collection.convert.ImplicitConversions._
 
 trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
 
@@ -77,7 +77,7 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
   "must render accessibility statement link" in {
     val link = doc
       .select(".govuk-footer__inline-list-item > .govuk-footer__link")
-      .asScala
+      .toList
       .find(_.text() == "Accessibility statement")
       .get
 
@@ -145,10 +145,12 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
     }
 
   def pageWithLink(id: String, expectedText: String, expectedHref: String): Unit =
+    pageWithLink(doc, id, expectedText, expectedHref)
+
+  def pageWithLink(doc: Document, id: String, expectedText: String, expectedHref: String): Unit =
     s"must render link with id $id" in {
       val link = getElementById(doc, id)
-      assertElementContainsText(link, expectedText)
-      assertElementContainsHref(link, expectedHref)
+      assertElementHasLink(link, expectedText, expectedHref)
     }
 
   def pageWithBackLink(): Unit =
@@ -170,6 +172,9 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
     pageWithContent(doc, tag, expectedText, _ equals _)
 
   def pageWithPartialContent(tag: String, expectedText: String): Unit =
+    pageWithPartialContent(doc, tag, expectedText)
+
+  def pageWithPartialContent(doc: Document, tag: String, expectedText: String): Unit =
     pageWithContent(doc, tag, expectedText, _ contains _)
 
   private def pageWithContent(doc: Document, tag: String, expectedText: String, condition: (String, String) => Boolean): Unit =
@@ -188,12 +193,31 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
     "must render list" in {
       val list      = getElementByClass(doc, listClass)
       val listItems = list.getElementsByTag("li")
-      listItems.asScala.map(_.text()) mustEqual expectedListItems
+      listItems.toList.map(_.text()) mustEqual expectedListItems
+    }
+
+  def pageWithLinkedList(doc: Document, listClass: String, expectedListItems: (String, String, String)*): Unit =
+    "must render list with links" in {
+      val list      = getElementByClass(doc, listClass)
+      val listItems = list.getElementsByTag("li")
+      listItems.toList.zipWithIndex.foreach {
+        case (listItem, index) =>
+          val expectedListItem = expectedListItems.get(index)
+          val link             = listItem.getElementById(expectedListItem._1)
+          assertElementHasLink(link, expectedListItem._2, expectedListItem._3)
+      }
     }
 
   def pageWithFormAction(expectedUrl: String): Unit =
     "must render form with action" in {
       val formAction = getElementByTag(doc, "form").attr("action")
       formAction mustBe expectedUrl
+    }
+
+  def pageWithHiddenInput(value: String): Unit =
+    "must render hidden input" in {
+      val input = getElementsByTag(doc, "input")
+      assert(input.attr("type") == "hidden")
+      assert(input.attr("value") == value)
     }
 }

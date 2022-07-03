@@ -17,13 +17,13 @@
 package controllers
 
 import controllers.actions._
-import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
-import scala.concurrent.{ExecutionContext, Future}
+import javax.inject.Inject
+import scala.concurrent.ExecutionContext
 
 class UnsupportedGuaranteeTypeController @Inject() (
   override val messagesApi: MessagesApi,
@@ -41,8 +41,8 @@ class UnsupportedGuaranteeTypeController @Inject() (
       renderer.render("unsupportedGuaranteeType.njk").map(Ok(_))
   }
 
-  def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
-    Future.successful(Redirect(routes.StartController.startAgain()))
+  def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData) {
+    Redirect(routes.StartController.startAgain())
   }
 
 }

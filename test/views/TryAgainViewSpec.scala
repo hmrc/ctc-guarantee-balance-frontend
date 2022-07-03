@@ -16,46 +16,36 @@
 
 package views
 
-import java.util.UUID
-import controllers.routes
 import models.values.BalanceId
-import org.jsoup.nodes.Document
-import play.api.libs.json.Json
+import org.scalacheck.Arbitrary.arbitrary
+import play.twirl.api.HtmlFormat
+import views.behaviours.ViewBehaviours
+import views.html.TryAgainView
 
-class TryAgainViewSpec extends SingleViewSpec("tryAgain.njk") {
+class TryAgainViewSpec extends ViewBehaviours {
 
-  val expectedUuid = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
-  val balanceId    = BalanceId(expectedUuid)
+  private val balanceId = arbitrary[BalanceId].sample.value
 
-  val json = Json.obj(
-    "waitTimeInSeconds" -> 10,
-    "balanceId"         -> balanceId
+  override def view: HtmlFormat.Appendable =
+    injector.instanceOf[TryAgainView].apply(balanceId.value)(fakeRequest, messages)
+
+  override val prefix: String = "tryAgain"
+
+  behave like pageWithTitle()
+
+  behave like pageWithoutBackLink
+
+  behave like pageWithHeading()
+
+  behave like pageWithHiddenInput(balanceId.value.toString)
+
+  behave like pageWithPartialContent("p", "You can")
+  behave like pageWithLink(
+    "check-details",
+    "check that your details are correct",
+    controllers.routes.CheckYourAnswersController.onPageLoad().url
   )
+  behave like pageWithPartialContent("p", s"or you can try again in ${frontendAppConfig.rateLimitDuration} seconds.")
 
-  override lazy val doc: Document = renderDocument(json).futureValue
-
-  "must render correct heading" in {
-    assertPageTitleEqualsMessage(doc, "tryAgain.heading")
-  }
-
-  "must render waitOnGuaranteeBalance prelink text" in {
-    assertContainsText(doc, "tryAgain.checkDetails.prelink")
-  }
-
-  "must contain balanceId" in {
-    assertContainsText(doc, balanceId.value.toString)
-    assertRenderedById(doc, "balanceId")
-  }
-
-  "display link with id check-details" in {
-    assertPageHasLink(doc, "check-details", "tryAgain.checkDetails.link", routes.CheckYourAnswersController.onPageLoad().url)
-  }
-
-  "must render waitOnGuaranteeBalance postlink text" in {
-    assertContainsText(doc, "tryAgain.checkDetails.postlink")
-  }
-
-  "behave like a page with a submit button" in {
-    assertPageHasButton(doc, "site.tryAgain")
-  }
+  behave like pageWithSubmitButton("Try again")
 }

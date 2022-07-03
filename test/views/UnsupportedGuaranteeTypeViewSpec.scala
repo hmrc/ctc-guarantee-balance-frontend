@@ -16,35 +16,39 @@
 
 package views
 
-import controllers.routes
+import play.twirl.api.HtmlFormat
+import views.behaviours.ViewBehaviours
+import views.html.UnsupportedGuaranteeTypeView
 
-class UnsupportedGuaranteeTypeViewSpec extends SingleViewSpec("unsupportedGuaranteeType.njk") {
+class UnsupportedGuaranteeTypeViewSpec extends ViewBehaviours {
 
-  "must render correct heading" in {
-    assertPageTitleEqualsMessage(doc, "unsupportedGuaranteeType.heading")
-  }
+  override def view: HtmlFormat.Appendable =
+    injector.instanceOf[UnsupportedGuaranteeTypeView].apply()(fakeRequest, messages)
 
-  "must render paragraph" in {
-    assertContainsText(doc, "unsupportedGuaranteeType.paragraph")
-  }
+  override val prefix: String = "unsupportedGuaranteeType"
 
-  "must render paragraph.bullet1" in {
-    assertContainsText(doc, "unsupportedGuaranteeType.paragraph.bullet1")
-  }
+  behave like pageWithTitle()
 
-  "must render paragraph.bullet2" in {
-    assertContainsText(doc, "unsupportedGuaranteeType.paragraph.bullet2")
-  }
+  behave like pageWithoutBackLink
 
-  "must render paragrap.bullet3" in {
-    assertContainsText(doc, "unsupportedGuaranteeType.paragraph.bullet3")
-  }
+  behave like pageWithHeading()
 
-  "display link with id checkDetails-link" in {
-    assertPageHasLink(doc, "checkDetails-link", "unsupportedGuaranteeType.checkDetails.link", routes.CheckYourAnswersController.onPageLoad().url)
-  }
+  behave like pageWithContent("p", "We can only get the balance for:")
 
-  "behave like a page with a submit button" in {
-    assertPageHasButton(doc, "site.startAgain")
-  }
+  behave like pageWithList(
+    "govuk-list--bullet",
+    "comprehensive guarantee",
+    "guarantee waiver",
+    "individual guarantee with multiple usage"
+  )
+
+  behave like pageWithPartialContent("p", "You can")
+  behave like pageWithLink(
+    "checkDetails-link",
+    "change the reference of the guarantee you are checking",
+    controllers.routes.CheckYourAnswersController.onPageLoad().url
+  )
+  behave like pageWithPartialContent("p", "or you can start again.")
+
+  behave like pageWithSubmitButton("Start again")
 }

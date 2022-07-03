@@ -18,11 +18,11 @@ package generators
 
 import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen._
-import org.scalacheck.{Gen, Shrink}
+import org.scalacheck.{Arbitrary, Gen, Shrink}
 
 import java.time.{Instant, LocalDate, ZoneOffset}
 
-trait Generators extends UserAnswersGenerator with PageGenerators with ModelGenerators with UserAnswersEntryGenerators {
+trait Generators extends UserAnswersGenerator with PageGenerators with ModelGenerators with UserAnswersEntryGenerators with ViewModelGenerators {
 
   implicit val dontShrink: Shrink[String] = Shrink.shrinkAny
 
@@ -126,4 +126,10 @@ trait Generators extends UserAnswersGenerator with PageGenerators with ModelGene
         Instant.ofEpochMilli(millis).atOffset(ZoneOffset.UTC).toLocalDate
     }
   }
+
+  def listWithMaxLength[A](maxLength: Int = 10: Int)(implicit a: Arbitrary[A]): Gen[List[A]] =
+    for {
+      length <- choose(1, maxLength)
+      seq    <- listOfN(length, arbitrary[A])
+    } yield seq
 }

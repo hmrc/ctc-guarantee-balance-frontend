@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,24 +12,27 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package views
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import viewModels.TwirlSection
 
-import play.twirl.api.HtmlFormat
-import views.behaviours.ViewBehaviours
-import views.html.UnauthorisedView
+@this(govukSummaryList: GovukSummaryList)
 
-class UnauthorisedViewSpec extends ViewBehaviours {
+@(
+    sections: Seq[TwirlSection]
+)(implicit messages: Messages)
 
-  override def view: HtmlFormat.Appendable =
-    app.injector.instanceOf[UnauthorisedView].apply()(fakeRequest, messages)
+@for(section <- sections) {
+    @if(section.rows.nonEmpty) {
+        @section.sectionTitle.map { title =>
+            <h2 class="govuk-heading-m">@title</h2>
+        }
 
-  override val prefix: String = "unauthorised"
-
-  behave like pageWithoutBackLink()
-
-  behave like pageWithHeading()
-
-  behave like pageWithContent("p", "You must have an account with an activated EORI number.")
+        @govukSummaryList(
+            SummaryList(
+                rows = section.rows
+            )
+        )
+    }
 }

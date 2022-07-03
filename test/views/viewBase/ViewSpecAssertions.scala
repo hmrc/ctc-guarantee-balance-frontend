@@ -35,6 +35,11 @@ trait ViewSpecAssertions extends ViewSpecGetters {
   def assertRenderedByCssSelector(doc: Document, cssSelector: String): Assertion =
     assert(!doc.select(cssSelector).isEmpty, "Element " + cssSelector + " was not rendered on the page.")
 
+  def assertElementHasLink(element: Element, expectedText: String, expectedHref: String): Assertion = {
+    assertElementContainsText(element, expectedText)
+    assertElementContainsHref(element, expectedHref)
+  }
+
   def assertElementContainsText(element: Element, expectedText: String): Assertion =
     element.text() mustBe expectedText
 

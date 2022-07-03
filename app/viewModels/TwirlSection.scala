@@ -14,22 +14,13 @@
  * limitations under the License.
  */
 
-package views
+package viewModels
 
-import play.twirl.api.HtmlFormat
-import views.behaviours.ViewBehaviours
-import views.html.UnauthorisedView
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 
-class UnauthorisedViewSpec extends ViewBehaviours {
+case class TwirlSection(sectionTitle: Option[String], rows: Seq[SummaryListRow])
 
-  override def view: HtmlFormat.Appendable =
-    app.injector.instanceOf[UnauthorisedView].apply()(fakeRequest, messages)
-
-  override val prefix: String = "unauthorised"
-
-  behave like pageWithoutBackLink()
-
-  behave like pageWithHeading()
-
-  behave like pageWithContent("p", "You must have an account with an activated EORI number.")
+object TwirlSection {
+  def apply(sectionTitle: String, rows: Seq[SummaryListRow]): TwirlSection = new TwirlSection(Some(sectionTitle), rows)
+  def apply(rows: Seq[SummaryListRow]): TwirlSection                       = new TwirlSection(None, rows)
 }
