@@ -16,16 +16,20 @@
 
 package controllers.actions
 
-import models.UserAnswers
-import models.requests.{IdentifierRequest, OptionalDataRequest}
+import models.requests.{DataRequest, OptionalDataRequest}
+import play.api.mvc.{ActionBuilder, AnyContent}
 
-import scala.concurrent.{ExecutionContext, Future}
+import javax.inject.Inject
 
-class FakeDataRetrievalAction(userAnswers: Option[UserAnswers]) extends DataRetrievalAction {
+class Actions @Inject() (
+  identifierAction: IdentifierAction,
+  dataRetrievalAction: DataRetrievalAction,
+  dataRequiredAction: DataRequiredAction
+) {
 
-  override protected def transform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] =
-    Future(OptionalDataRequest(request.request, request.internalId, userAnswers))
+  def getData: ActionBuilder[OptionalDataRequest, AnyContent] =
+    identifierAction andThen dataRetrievalAction
 
-  implicit override protected val executionContext: ExecutionContext =
-    scala.concurrent.ExecutionContext.Implicits.global
+  def requireData: ActionBuilder[DataRequest, AnyContent] =
+    getData andThen dataRequiredAction
 }

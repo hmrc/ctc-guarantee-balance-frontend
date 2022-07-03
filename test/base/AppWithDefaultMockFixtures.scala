@@ -18,6 +18,7 @@ package base
 
 import controllers.actions._
 import models.UserAnswers
+import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import org.mockito.Mockito.when
@@ -28,6 +29,7 @@ import play.api.Application
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.Call
 import play.api.test.Helpers
 import play.twirl.api.Html
 import repositories.{MongoLockRepository, SessionRepository}
@@ -42,7 +44,6 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
   override def beforeEach(): Unit = {
     Mockito.reset(
       mockRenderer,
-      mockDataRetrievalAction,
       mockSessionRepository,
       mockMongoLockRepository,
       mockGuaranteeBalanceService,
@@ -57,11 +58,13 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
   }
 
   val mockRenderer: NunjucksRenderer                       = mock[NunjucksRenderer]
-  val mockDataRetrievalAction: DataRetrievalAction         = mock[DataRetrievalAction]
   val mockSessionRepository: SessionRepository             = mock[SessionRepository]
   val mockMongoLockRepository: MongoLockRepository         = mock[MongoLockRepository]
   val mockGuaranteeBalanceService: GuaranteeBalanceService = mock[GuaranteeBalanceService]
   val mockAuditService: AuditService                       = mock[AuditService]
+
+  protected val onwardRoute: Call        = Call("GET", "/foo")
+  protected val fakeNavigator: Navigator = new FakeNavigator(onwardRoute)
 
   final override def fakeApplication(): Application =
     applicationBuilder()

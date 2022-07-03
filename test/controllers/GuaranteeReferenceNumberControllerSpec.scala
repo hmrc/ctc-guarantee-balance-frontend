@@ -28,14 +28,11 @@ import org.scalatestplus.mockito.MockitoSugar
 import pages.GuaranteeReferenceNumberPage
 import play.api.inject.bind
 import play.api.libs.json.{JsObject, Json}
-import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 
 class GuaranteeReferenceNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksSupport with JsonMatchers with AppWithDefaultMockFixtures {
-
-  def onwardRoute = Call("GET", "/foo")
 
   val formProvider = new GuaranteeReferenceNumberFormProvider()
   val form         = formProvider()

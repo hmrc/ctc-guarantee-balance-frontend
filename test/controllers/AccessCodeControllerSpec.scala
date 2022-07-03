@@ -18,95 +18,70 @@ package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import forms.AccessCodeFormProvider
-import matchers.JsonMatchers
-import models.{NormalMode, UserAnswers}
-import navigation.{FakeNavigator, Navigator}
-import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{times, verify}
-import org.scalatestplus.mockito.MockitoSugar
+import models.NormalMode
+import navigation.Navigator
 import pages.AccessCodePage
+import play.api.data.Form
 import play.api.inject.bind
-import play.api.libs.json.{JsObject, Json}
-import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.viewmodels.NunjucksSupport
+import views.html.AccessCodeView
 
-class AccessCodeControllerSpec extends SpecBase with MockitoSugar with NunjucksSupport with JsonMatchers with AppWithDefaultMockFixtures {
+class AccessCodeControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
-  def onwardRoute = Call("GET", "/foo")
+  private val formProvider                 = new AccessCodeFormProvider()
+  private val form: Form[String]           = formProvider()
+  private val mode                         = NormalMode
+  private lazy val accessCodeRoute: String = routes.AccessCodeController.onPageLoad(mode).url
 
-  val formProvider = new AccessCodeFormProvider()
-  val form         = formProvider()
-
-  lazy val accessCodeRoute = routes.AccessCodeController.onPageLoad(NormalMode).url
+  private val validAnswer: String = "1111"
+  private val invalidAnswer       = ""
 
   "AccessCode Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
-      val application                            = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-      val request                                = FakeRequest(GET, accessCodeRoute)
-      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-      val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
-      val result = route(application, request).value
+      val request = FakeRequest(GET, accessCodeRoute)
+      val view    = injector.instanceOf[AccessCodeView]
+      val result  = route(application, request).value
 
       status(result) mustEqual OK
 
-      verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
-
-      val expectedJson = Json.obj(
-        "form" -> form,
-        "mode" -> NormalMode
-      )
-
-      templateCaptor.getValue mustEqual "accessCode.njk"
-      jsonCaptor.getValue must containJson(expectedJson)
+      contentAsString(result) mustEqual
+        view(form, mode)(request, messages).toString
 
       application.stop()
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers                            = UserAnswers(userAnswersId).set(AccessCodePage, "1111").success.value
-      val application                            = applicationBuilder(userAnswers = Some(userAnswers)).build()
-      val request                                = FakeRequest(GET, accessCodeRoute)
-      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-      val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
+      val userAnswers = emptyUserAnswers.setValue(AccessCodePage, validAnswer)
+      val application = applicationBuilder(userAnswers = Some(userAnswers)).build()
 
-      val result = route(application, request).value
+      val request = FakeRequest(GET, accessCodeRoute)
+      val view    = injector.instanceOf[AccessCodeView]
+      val result  = route(application, request).value
 
       status(result) mustEqual OK
 
-      verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
+      val filledForm = form.bind(Map("value" -> validAnswer))
 
-      val filledForm = form.bind(Map("value" -> "1111"))
-
-      val expectedJson = Json.obj(
-        "form" -> filledForm,
-        "mode" -> NormalMode
-      )
-
-      templateCaptor.getValue mustEqual "accessCode.njk"
-      jsonCaptor.getValue must containJson(expectedJson)
+      contentAsString(result) mustEqual
+        view(filledForm, mode)(request, messages).toString
 
       application.stop()
     }
 
     "must redirect to the next page when valid data is submitted" in {
 
-      val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(
-            bind[Navigator].toInstance(new FakeNavigator(onwardRoute))
-          )
-          .build()
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
+        .overrides(bind[Navigator].toInstance(fakeNavigator))
+        .build()
 
-      val request =
-        FakeRequest(POST, accessCodeRoute)
-          .withFormUrlEncodedBody(("value", "1111"))
+      val request = FakeRequest(POST, accessCodeRoute)
+        .withFormUrlEncodedBody(("value", validAnswer))
 
       val result = route(application, request).value
 
@@ -118,25 +93,18 @@ class AccessCodeControllerSpec extends SpecBase with MockitoSugar with NunjucksS
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application                            = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-      val request                                = FakeRequest(POST, accessCodeRoute).withFormUrlEncodedBody(("value", ""))
-      val boundForm                              = form.bind(Map("value" -> ""))
-      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-      val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
+      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
-      val result = route(application, request).value
+      val request = FakeRequest(POST, accessCodeRoute).withFormUrlEncodedBody(("value", invalidAnswer))
+      val view    = injector.instanceOf[AccessCodeView]
+      val result  = route(application, request).value
 
       status(result) mustEqual BAD_REQUEST
 
-      verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
+      val boundForm = form.bind(Map("value" -> invalidAnswer))
 
-      val expectedJson = Json.obj(
-        "form" -> boundForm,
-        "mode" -> NormalMode
-      )
-
-      templateCaptor.getValue mustEqual "accessCode.njk"
-      jsonCaptor.getValue must containJson(expectedJson)
+      contentAsString(result) mustEqual
+        view(boundForm, mode)(request, messages).toString
 
       application.stop()
     }
@@ -160,9 +128,8 @@ class AccessCodeControllerSpec extends SpecBase with MockitoSugar with NunjucksS
 
       val application = applicationBuilder(userAnswers = None).build()
 
-      val request =
-        FakeRequest(POST, accessCodeRoute)
-          .withFormUrlEncodedBody(("value", "answer"))
+      val request = FakeRequest(POST, accessCodeRoute)
+        .withFormUrlEncodedBody(("value", validAnswer))
 
       val result = route(application, request).value
 

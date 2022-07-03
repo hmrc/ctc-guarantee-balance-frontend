@@ -16,8 +16,6 @@
 
 package services
 
-import java.util.UUID
-
 import akka.actor.ActorSystem
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import config.FrontendAppConfig
@@ -36,6 +34,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
 
+import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
 
@@ -129,12 +128,10 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
           case (eoriNumber, grn, accessCode) => !(eoriNumber.isDefined && grn.isDefined && accessCode.isDefined)
         }) {
           case (eoriNumber, grn, accessCode) =>
-            // format: off
             val userAnswers = emptyUserAnswers
-              .setOption(EoriNumberPage, eoriNumber).success.value
-              .setOption(GuaranteeReferenceNumberPage, grn).success.value
-              .setOption(AccessCodePage, accessCode).success.value
-            // format: on
+              .setValue(EoriNumberPage, eoriNumber)
+              .setValue(GuaranteeReferenceNumberPage, grn)
+              .setValue(AccessCodePage, accessCode)
             val request              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
             implicit val dataRequest = DataRequest(request, "id", userAnswers)
 
