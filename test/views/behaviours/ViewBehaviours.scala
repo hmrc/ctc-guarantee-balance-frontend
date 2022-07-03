@@ -81,7 +81,7 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
       .find(_.text() == "Accessibility statement")
       .get
 
-    getElementHref(link) must include("http://localhost:12346/accessibility-statement/manage-transit-movements?referrerUrl=")
+    getElementHref(link) must include("http://localhost:12346/accessibility-statement/check-transit-guarantee-balance?referrerUrl=")
   }
 
   "must not render language toggle" in {

@@ -38,14 +38,14 @@
 
     @referral match {
         case Some(NCTS.toString) => {
-            <p>@messages("balanceConfirmation.fromNcts.p")</p>
+            <p class="govuk-body">@messages("balanceConfirmation.fromNcts.p")</p>
             <ul class="govuk-list govuk-list--bullet">
                 <li><a class="govuk-link" href=@routes.BalanceConfirmationController.checkAnotherGuaranteeBalance() id="check-another-guarantee-balance">@messages("balanceConfirmation.fromNcts.link1")</a></li>
                 <li><a class="govuk-link" href=@routes.BalanceConfirmationController.manageTransitMovements() id="manage-transit-movements">@messages("balanceConfirmation.fromNcts.link2")</a></li>
             </ul>
         }
         case _ => {
-            <p>@messages("balanceConfirmation.fromGovUk.p")
+            <p class="govuk-body">@messages("balanceConfirmation.fromGovUk.p")
                 <a class="govuk-link" href=@routes.BalanceConfirmationController.checkAnotherGuaranteeBalance() id="check-another-guarantee-balance">@messages("balanceConfirmation.fromGovUk.link")</a>.
             </p>
         }
