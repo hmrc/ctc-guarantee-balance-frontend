@@ -17,24 +17,29 @@
 package viewModels
 
 import models.{CheckMode, UserAnswers}
+import play.api.i18n.Messages
 import utils.CheckYourAnswersHelper
 
-case class CheckYourAnswersViewModel(section: Section)
+case class CheckYourAnswersViewModel(section: TwirlSection)
 
-class CheckYourAnswersViewModelProvider {
+object CheckYourAnswersViewModel {
 
-  def apply(userAnswers: UserAnswers): CheckYourAnswersViewModel = {
-    val helper = new CheckYourAnswersHelper(userAnswers, CheckMode)
+  class CheckYourAnswersViewModelProvider {
 
-    CheckYourAnswersViewModel(
-      Section(
-        Seq(
-          helper.eoriNumber,
-          helper.guaranteeReferenceNumber,
-          helper.accessCode
-        ).flatten
+    def apply(userAnswers: UserAnswers)(implicit messages: Messages): CheckYourAnswersViewModel = {
+      val helper = new CheckYourAnswersHelper(userAnswers, CheckMode)
+
+      CheckYourAnswersViewModel(
+        TwirlSection(
+          Seq(
+            helper.eoriNumber,
+            helper.guaranteeReferenceNumber,
+            helper.accessCode
+          ).flatten
+        )
       )
-    )
+    }
+
   }
 
 }

@@ -18,7 +18,8 @@ package viewModels
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
-import uk.gov.hmrc.viewmodels.Text.Literal
+import uk.gov.hmrc.govukfrontend.views.Aliases.Text
+import viewModels.CheckYourAnswersViewModel.CheckYourAnswersViewModelProvider
 
 class CheckYourAnswersViewModelSpec extends SpecBase with AppWithDefaultMockFixtures {
 
@@ -64,7 +65,7 @@ class CheckYourAnswersViewModelSpec extends SpecBase with AppWithDefaultMockFixt
           val row = result.section.rows(index)
 
           "must correspond to the correct value" in {
-            row.value.content mustEqual Literal(value)
+            row.value.content mustEqual Text(value)
           }
 
           "must have 1 action" in {
@@ -72,7 +73,7 @@ class CheckYourAnswersViewModelSpec extends SpecBase with AppWithDefaultMockFixt
           }
 
           "must be using CheckMode" in {
-            row.actions.head.href must include("change")
+            row.actions.get.items.foreach(_.href must include("change"))
           }
         }
     }

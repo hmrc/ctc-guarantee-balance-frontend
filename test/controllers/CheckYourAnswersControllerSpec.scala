@@ -17,34 +17,30 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import matchers.JsonMatchers.containJson
 import models.UserAnswers
 import models.backend.BalanceRequestSuccess
 import models.values.CurrencyCode
-import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{reset, times, verify, when}
-import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.Mockito.{reset, verify, when}
+import org.scalacheck.Arbitrary.arbitrary
+import org.scalacheck.Gen
 import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import viewModels.{CheckYourAnswersViewModel, CheckYourAnswersViewModelProvider, Section}
+import viewModels.CheckYourAnswersViewModel.CheckYourAnswersViewModelProvider
+import viewModels.{CheckYourAnswersViewModel, TwirlSection}
+import views.html.CheckYourAnswersView
 
 import scala.concurrent.Future
 
-class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with AppWithDefaultMockFixtures {
-
-  private val grn: String    = "grn"
-  private val access: String = "access"
-  private val taxId: String  = "taxId"
+class CheckYourAnswersControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   private val baseAnswers: UserAnswers = emptyUserAnswers
-    .setValue(GuaranteeReferenceNumberPage, grn)
-    .setValue(AccessCodePage, access)
-    .setValue(EoriNumberPage, taxId)
+    .setValue(GuaranteeReferenceNumberPage, Gen.alphaNumStr.sample.value)
+    .setValue(AccessCodePage, Gen.alphaNumStr.sample.value)
+    .setValue(EoriNumberPage, Gen.alphaNumStr.sample.value)
 
   private val mockViewModelProvider: CheckYourAnswersViewModelProvider = mock[CheckYourAnswersViewModelProvider]
 
@@ -53,12 +49,12 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
       .applicationBuilder()
       .overrides(bind[CheckYourAnswersViewModelProvider].toInstance(mockViewModelProvider))
 
-  private val emptySection: Section = Section(Nil)
+  private val section: TwirlSection = arbitrary[TwirlSection].sample.value
 
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockViewModelProvider)
-    when(mockViewModelProvider(any())).thenReturn(CheckYourAnswersViewModel(emptySection))
+    when(mockViewModelProvider.apply(any())(any())).thenReturn(CheckYourAnswersViewModel(section))
   }
 
   "CheckYourAnswers Controller" - {
@@ -66,23 +62,15 @@ class CheckYourAnswersControllerSpec extends SpecBase with MockitoSugar with App
     "return OK and the correct view for a GET" in {
       val userAnswers = baseAnswers
       setExistingUserAnswers(userAnswers)
+
       val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
-
-      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-      val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
-
-      val result = route(app, request).value
+      val view    = injector.instanceOf[CheckYourAnswersView]
+      val result  = route(app, request).value
 
       status(result) mustEqual OK
 
-      verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
-
-      val expectedJson = Json.obj(
-        "section" -> emptySection
-      )
-
-      templateCaptor.getValue mustEqual "checkYourAnswers.njk"
-      jsonCaptor.getValue must containJson(expectedJson)
+      contentAsString(result) mustEqual
+        view(Seq(section))(request, messages).toString
 
       verify(mockViewModelProvider)(userAnswers)
     }
