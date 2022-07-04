@@ -24,10 +24,10 @@ import views.html.TryAgainView
 
 class TryAgainViewSpec extends ViewBehaviours {
 
-  private val balanceId = arbitrary[BalanceId].sample.value
+  private val balanceId = arbitrary[Option[BalanceId]].sample.value.map(_.value)
 
   override def view: HtmlFormat.Appendable =
-    injector.instanceOf[TryAgainView].apply(balanceId.value)(fakeRequest, messages)
+    injector.instanceOf[TryAgainView].apply(balanceId)(fakeRequest, messages)
 
   override val prefix: String = "tryAgain"
 
@@ -36,8 +36,6 @@ class TryAgainViewSpec extends ViewBehaviours {
   behave like pageWithoutBackLink
 
   behave like pageWithHeading()
-
-  behave like pageWithHiddenInput(balanceId.value.toString)
 
   behave like pageWithPartialContent("p", "You can")
   behave like pageWithLink(
@@ -48,4 +46,17 @@ class TryAgainViewSpec extends ViewBehaviours {
   behave like pageWithPartialContent("p", s"or you can try again in ${frontendAppConfig.rateLimitDuration} seconds.")
 
   behave like pageWithSubmitButton("Try again")
+
+  "when balance ID is defined" - {
+    val balanceId = arbitrary[BalanceId].sample.value.value
+    val view      = injector.instanceOf[TryAgainView].apply(Some(balanceId))(fakeRequest, messages)
+    val doc       = parseView(view)
+    behave like pageWithHiddenInput(doc, balanceId.toString)
+  }
+
+  "when balance ID is not defined" - {
+    val view = injector.instanceOf[TryAgainView].apply(None)(fakeRequest, messages)
+    val doc  = parseView(view)
+    behave like pageWithNoInput(doc)
+  }
 }

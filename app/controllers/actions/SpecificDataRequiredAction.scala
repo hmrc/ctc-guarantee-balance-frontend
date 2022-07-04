@@ -18,6 +18,7 @@ package controllers.actions
 
 import models.UserAnswers
 import models.requests._
+import play.api.Logging
 import play.api.libs.json.Reads
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, Result}
@@ -65,7 +66,7 @@ trait SpecificDataRequiredActionProvider {
   ]
 }
 
-trait SpecificDataRequiredAction {
+trait SpecificDataRequiredAction extends Logging {
 
   def getPage[T, R](userAnswers: UserAnswers, page: Gettable[T])(block: T => R)(implicit rds: Reads[T]): Future[Either[Result, R]] =
     Future.successful {
@@ -73,6 +74,7 @@ trait SpecificDataRequiredAction {
         case Some(value) =>
           Right(block(value))
         case None =>
+          logger.error(s"Mandatory answer missing from user answers at ${page.path}. Redirecting to session expired.")
           Left(Redirect(controllers.routes.SessionExpiredController.onPageLoad()))
       }
     }

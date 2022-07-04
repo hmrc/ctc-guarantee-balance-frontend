@@ -89,8 +89,8 @@ class GuaranteeBalanceResponseHandler @Inject() (
           SEE_OTHER,
           ErrorMessage(AUDIT_ERROR_UNSUPPORTED_TYPE, AUDIT_DEST_UNSUPPORTED_TYPE)
         )
-
         Future.successful(Redirect(controllers.routes.UnsupportedGuaranteeTypeController.onPageLoad()))
+
       case fe: BalanceRequestFunctionalError =>
         auditError(
           INTERNAL_SERVER_ERROR,
@@ -100,7 +100,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
     }
 
   private def processHttpResponse(failureResponse: HttpResponse)(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
-    logger.warn(s"[GuaranteeBalanceResponseHandler][processHttpResponse]Failed to process Response: $failureResponse")
+    logger.warn(s"[GuaranteeBalanceResponseHandler][processHttpResponse] Failed to process Response: $failureResponse")
 
     auditError(
       INTERNAL_SERVER_ERROR,
@@ -161,7 +161,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
   }
 
   private def auditRateLimit()(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]): Unit = {
-    logger.info(s"[GuaranteeBalanceResponseHandler][auditRateLimit]Failed to process Response")
+    logger.info(s"[GuaranteeBalanceResponseHandler][auditRateLimit] Request limit exceeded")
     auditService.audit(
       UnsuccessfulBalanceAuditModel.build(
         AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT,
@@ -181,7 +181,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
     ec: ExecutionContext,
     request: DataRequest[_]
   ): Unit = {
-    logger.warn(s"[GuaranteeBalanceResponseHandler][auditError]Failed to process errorMessage: $errorMessage, status Code: $errorCode")
+    logger.warn(s"[GuaranteeBalanceResponseHandler][auditError] Failed to process errorMessage: $errorMessage, status Code: $errorCode")
     auditService.audit(
       UnsuccessfulBalanceAuditModel.build(
         AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION,

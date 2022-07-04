@@ -46,5 +46,5 @@ class AccessCodeViewSpec extends InputTextViewBehaviours[String] {
 
   behave like pageWithInputText(Some(InputSize.Width5), "password")
 
-  behave like pageWithSubmitButton("Continue")
+  behave like pageWithContinueButton("Continue")
 }

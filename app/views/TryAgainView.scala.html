@@ -28,7 +28,7 @@
     button: Button
 )
 
-@(balanceId: UUID)(implicit request: Request[_], messages: Messages)
+@(balanceId: Option[UUID])(implicit request: Request[_], messages: Messages)
 
 @mainTemplate(
     title = messages("tryAgain.title")
@@ -42,7 +42,9 @@
 
     @formHelper(action = routes.TryAgainController.onSubmit(), 'autoComplete -> "off") {
 
-        <input type="hidden" id="balanceId" value="@balanceId"/>
+        @balanceId.map { value =>
+            <input type="hidden" id="balanceId" value="@value"/>
+        }
 
         @button(
             messageKey = "site.tryAgain",

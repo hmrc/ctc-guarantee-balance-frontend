@@ -47,17 +47,32 @@ class TryAgainControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
   "TryAgainController" - {
 
     "onLoad" - {
-      "must return OK and the correct view for a GET" in {
-        setExistingUserAnswers(baseAnswers)
+      "must return OK and the correct view for a GET" - {
+        "when balance ID exists in user answers" in {
+          setExistingUserAnswers(baseAnswers)
 
-        val request = FakeRequest(GET, routes.TryAgainController.onPageLoad().url)
-        val view    = injector.instanceOf[TryAgainView]
-        val result  = route(app, request).value
+          val request = FakeRequest(GET, routes.TryAgainController.onPageLoad().url)
+          val view    = injector.instanceOf[TryAgainView]
+          val result  = route(app, request).value
 
-        status(result) mustEqual OK
+          status(result) mustEqual OK
 
-        contentAsString(result) mustEqual
-          view(balanceId.value)(request, messages).toString
+          contentAsString(result) mustEqual
+            view(Some(balanceId.value))(request, messages).toString
+        }
+
+        "when balance ID doesn't exist in user answers" in {
+          setExistingUserAnswers(emptyUserAnswers)
+
+          val request = FakeRequest(GET, routes.TryAgainController.onPageLoad().url)
+          val view    = injector.instanceOf[TryAgainView]
+          val result  = route(app, request).value
+
+          status(result) mustEqual OK
+
+          contentAsString(result) mustEqual
+            view(None)(request, messages).toString
+        }
       }
     }
 

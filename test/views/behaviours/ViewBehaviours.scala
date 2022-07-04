@@ -133,8 +133,14 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
     }
 
   def pageWithSubmitButton(expectedText: String): Unit =
+    pageWithButton("submit", expectedText)
+
+  def pageWithContinueButton(expectedText: String): Unit =
+    pageWithButton("continue", expectedText)
+
+  private def pageWithButton(id: String, expectedText: String): Unit =
     pageWithButton(expectedText) {
-      button => assertElementContainsId(button, "submit")
+      button => assertElementContainsId(button, id)
     }
 
   private def pageWithButton(expectedText: String)(additionalAssertions: Element => Assertion*): Unit =
@@ -214,10 +220,16 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
       formAction mustBe expectedUrl
     }
 
-  def pageWithHiddenInput(value: String): Unit =
+  def pageWithHiddenInput(doc: Document, value: String): Unit =
     "must render hidden input" in {
       val input = getElementsByTag(doc, "input")
       assert(input.attr("type") == "hidden")
       assert(input.attr("value") == value)
+    }
+
+  def pageWithNoInput(doc: Document): Unit =
+    "must render no input" in {
+      val inputs = getElementsByTag(doc, "input")
+      assert(inputs.isEmpty)
     }
 }

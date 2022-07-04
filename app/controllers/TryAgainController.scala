@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions.{Actions, SpecificDataRequiredActionProvider}
+import controllers.actions.Actions
 import handlers.GuaranteeBalanceResponseHandler
 import pages.BalanceIdPage
 import play.api.i18n.I18nSupport
@@ -33,15 +33,14 @@ class TryAgainController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   responseHandler: GuaranteeBalanceResponseHandler,
   actions: Actions,
-  getMandatoryPage: SpecificDataRequiredActionProvider,
   view: TryAgainView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = actions.requireData.andThen(getMandatoryPage(BalanceIdPage)) {
+  def onPageLoad(): Action[AnyContent] = actions.requireData {
     implicit request =>
-      Ok(view(request.arg.value))
+      Ok(view(request.userAnswers.get(BalanceIdPage).map(_.value)))
   }
 
   def onSubmit(): Action[AnyContent] = actions.requireData.async {
