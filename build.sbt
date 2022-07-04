@@ -47,7 +47,8 @@ lazy val root = (project in file("."))
       ".*testOnly.*",
       "views\\.html\\.components.*",
       "views\\.html\\.resources.*",
-      "views\\.html\\.templates.*"
+      "views\\.html\\.templates.*",
+      "viewModels\\.audit\\.AuditConstants.*"
     ).mkString(";"),
     ScoverageKeys.coverageMinimumStmtTotal := 85,
     ScoverageKeys.coverageFailOnMinimum := true,

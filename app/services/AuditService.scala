@@ -17,36 +17,33 @@
 package services
 
 import config.FrontendAppConfig
-import javax.inject.Inject
 import play.api.libs.json.JsValue
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
-import utils.JsonUtils
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class AuditService @Inject() (appConfig: FrontendAppConfig, auditConnector: AuditConnector) {
 
   def audit(dataSource: JsonAuditModel)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): Unit = {
-    val evt = toExtendedDataEvent(dataSource, request.path)
+    val evt = extendedDataEvent(dataSource, request.path)
     auditConnector.sendExtendedEvent(evt)
   }
 
-  private def toExtendedDataEvent(auditModel: JsonAuditModel, path: String)(implicit hc: HeaderCarrier): ExtendedDataEvent = {
-    val event = ExtendedDataEvent(
+  private def extendedDataEvent(auditModel: JsonAuditModel, path: String)(implicit hc: HeaderCarrier): ExtendedDataEvent =
+    ExtendedDataEvent(
       auditSource = appConfig.appName,
       auditType = auditModel.auditType,
       tags = AuditExtensions.auditHeaderCarrier(hc).toAuditTags(path),
       detail = auditModel.detail
     )
-    event
-  }
 }
 
-trait JsonAuditModel extends JsonUtils {
+trait JsonAuditModel {
   val auditType: String
   val detail: JsValue
 }

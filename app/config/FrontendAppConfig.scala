@@ -18,9 +18,10 @@ package config
 
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
-class FrontendAppConfig @Inject() (configuration: Configuration) {
+class FrontendAppConfig @Inject() (configuration: Configuration, service: ServicesConfig) {
 
   lazy val appName: String = configuration.get[String]("appName")
 
@@ -50,11 +51,11 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   lazy val languageTranslationEnabled: Boolean = configuration.get[Boolean]("microservice.services.features.welsh-translation")
 
-  lazy val authUrl: String          = configuration.get[Service]("auth").baseUrl
+  lazy val authUrl: String          = service.baseUrl("auth")
   lazy val loginUrl: String         = configuration.get[String]("urls.login")
   lazy val loginContinueUrl: String = configuration.get[String]("urls.loginContinue")
 
-  lazy val guaranteeBalanceUrl: String       = configuration.get[Service]("microservice.services.common-transit-convention-guarantee-balance").baseUrl
+  lazy val guaranteeBalanceUrl: String       = service.baseUrl("common-transit-convention-guarantee-balance")
   lazy val nctsUrl: String                   = configuration.get[String]("urls.ncts")
   lazy val nctsEnquiriesUrl: String          = configuration.get[String]("urls.nctsEnquiries")
   lazy val manageTransitMovementsUrl: String = configuration.get[String]("urls.manageTransitMovements")

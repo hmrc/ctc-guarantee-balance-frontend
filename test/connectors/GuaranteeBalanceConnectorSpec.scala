@@ -20,8 +20,8 @@ import base.{AppWithDefaultMockFixtures, SpecBase}
 import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
-import models.backend.errors.FunctionalError
 import models.backend._
+import models.backend.errors.FunctionalError
 import models.requests.BalanceRequest
 import models.values.ErrorType.{InvalidDataErrorType, NotMatchedErrorType}
 import models.values._
@@ -298,7 +298,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
       }
 
       "must return the HttpResponse when there is an unexpected response" in {
-        val errorResponses = Gen.chooseNum(400, 599).suchThat(_ != Status.NOT_FOUND)
+        val errorResponses = Gen.chooseNum(400, 599).suchThat(_ != Status.TOO_MANY_REQUESTS)
 
         forAll(errorResponses) {
           errorResponse =>

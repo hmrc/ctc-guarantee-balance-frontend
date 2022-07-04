@@ -16,14 +16,9 @@
 
 package models.values
 
-import play.api.libs.json.Format
-import play.api.libs.json.Json
+import play.api.libs.json.{Format, Json}
 
-case class AccessCode(value: String) extends AnyVal {
-
-  override def toString: String =
-    s"$productPrefix(***)"
-}
+case class AccessCode(value: String)
 
 object AccessCode {
 
