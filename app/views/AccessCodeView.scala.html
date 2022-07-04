@@ -45,7 +45,8 @@
                 additionalHtml = Html(s"""<p class="govuk-body">${messages("accessCode.paragraph")}</p>""")
             ),
             inputClass = InputSize.Width5,
-            inputType = "password"
+            inputType = "password",
+            autocomplete = Some("off")
         )
 
         @button(attributes = Map("id" -> "continue"))
