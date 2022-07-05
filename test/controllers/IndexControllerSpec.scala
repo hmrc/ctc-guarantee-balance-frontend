@@ -29,9 +29,9 @@ class IndexControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
     forAll(arbitrary[Option[UserAnswers]]) {
       userAnswers =>
-        val application = applicationBuilder(userAnswers = userAnswers).build()
-        val request     = FakeRequest(GET, routes.IndexController.onPageLoad(Some(Referral.GovUK)).url)
-        val result      = route(application, request).value
+        setExistingUserAnswers(userAnswers)
+        val request = FakeRequest(GET, routes.IndexController.onPageLoad(Some(Referral.GovUK)).url)
+        val result  = route(app, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.StartController.start(Some(Referral.GovUK)).url

@@ -16,16 +16,14 @@
 
 package controllers
 
-import config.FrontendAppConfig
-import controllers.actions.{DataRequiredAction, DataRetrievalAction, IdentifierAction}
+import controllers.actions.Actions
 import handlers.GuaranteeBalanceResponseHandler
 import pages.BalanceIdPage
 import play.api.i18n.I18nSupport
-import play.api.libs.json.Json
 import play.api.mvc._
-import renderer.Renderer
 import services.GuaranteeBalanceService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import views.html.TryAgainView
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
@@ -34,27 +32,19 @@ class TryAgainController @Inject() (
   balanceService: GuaranteeBalanceService,
   val controllerComponents: MessagesControllerComponents,
   responseHandler: GuaranteeBalanceResponseHandler,
-  config: FrontendAppConfig,
-  identify: IdentifierAction,
-  renderer: Renderer,
-  getData: DataRetrievalAction,
-  requireData: DataRequiredAction
+  actions: Actions,
+  view: TryAgainView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onPageLoad(): Action[AnyContent] = actions.requireData {
     implicit request =>
-      val json = Json.obj(
-        "waitTimeInSeconds" -> config.rateLimitDuration,
-        "balanceId"         -> request.userAnswers.get(BalanceIdPage)
-      )
-      renderer.render("tryAgain.njk", json).map(Ok(_))
+      Ok(view(request.userAnswers.get(BalanceIdPage).map(_.value)))
   }
 
-  def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(): Action[AnyContent] = actions.requireData.async {
     implicit request =>
-      balanceService.retrieveBalanceResponse
-        .flatMap(responseHandler.processResponse(_))
+      balanceService.retrieveBalanceResponse.flatMap(responseHandler.processResponse(_))
   }
 }

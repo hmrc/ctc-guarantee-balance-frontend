@@ -24,7 +24,10 @@ trait PageGenerators {
   implicit lazy val arbitraryAccessCodePage: Arbitrary[AccessCodePage.type] =
     Arbitrary(AccessCodePage)
 
-  implicit lazy val arbitraryTestPagePage: Arbitrary[TestPagePage.type] =
-    Arbitrary(TestPagePage)
+  implicit lazy val arbitraryEoriNumberPage: Arbitrary[EoriNumberPage.type] =
+    Arbitrary(EoriNumberPage)
+
+  implicit lazy val arbitraryGuaranteeReferenceNumberPage: Arbitrary[GuaranteeReferenceNumberPage.type] =
+    Arbitrary(GuaranteeReferenceNumberPage)
 
 }

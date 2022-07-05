@@ -16,42 +16,44 @@
 
 package views
 
-import org.jsoup.nodes.Element
+import forms.GuaranteeReferenceNumberFormProvider
+import models.NormalMode
+import org.scalacheck.{Arbitrary, Gen}
+import play.api.data.Form
+import play.twirl.api.HtmlFormat
+import viewModels.InputSize
+import views.behaviours.InputTextViewBehaviours
+import views.html.GuaranteeReferenceNumberView
 
-class GuaranteeReferenceNumberViewSpec extends SingleViewSpec("guaranteeReferenceNumber.njk") {
+class GuaranteeReferenceNumberViewSpec extends InputTextViewBehaviours[String] {
 
-  val input: Element = doc.getElementsByClass("govuk-input").first()
+  override def form: Form[String] = new GuaranteeReferenceNumberFormProvider()()
 
-  "must render hint text" in {
-    assertContainsText(doc, messages("guaranteeReferenceNumber.paragraph1"))
-    assertContainsText(doc, messages("guaranteeReferenceNumber.bullet1"))
-    assertContainsText(doc, messages("guaranteeReferenceNumber.bullet2"))
-    assertContainsText(doc, messages("guaranteeReferenceNumber.bullet3"))
-    assertContainsText(doc, messages("guaranteeReferenceNumber.paragraph2"))
-  }
+  override def applyView(form: Form[String]): HtmlFormat.Appendable =
+    injector.instanceOf[GuaranteeReferenceNumberView].apply(form, NormalMode)(fakeRequest, messages)
 
-  "must have correct width class" in {
-    assert(input.hasClass("govuk-input--width-20"))
-  }
+  override val prefix: String = "guaranteeReferenceNumber"
 
-  "must have correct ID" in {
-    input.id() mustEqual "value"
-  }
+  implicit override val arbitraryT: Arbitrary[String] = Arbitrary(Gen.alphaNumStr)
 
-  "must render a continue button" in {
-    assertPageHasButton(doc, "site.continue")
-  }
+  behave like pageWithTitle()
 
-  "must render correct title" in {
-    assertPageHasTitle(doc, "guaranteeReferenceNumber")
-  }
+  behave like pageWithBackLink
 
-  "must render correct heading" in {
-    assertPageTitleEqualsMessage(doc, "guaranteeReferenceNumber.heading")
-  }
+  behave like pageWithHeading()
 
-  "must render correct label" in {
-    assertPageHasLabel(doc, "guaranteeReferenceNumber")
-  }
+  behave like pageWithContent("p", "You can only check the balance for:")
 
+  behave like pageWithList(
+    "govuk-list--bullet",
+    "comprehensive guarantee",
+    "guarantee waiver",
+    "individual guarantee with multiple usage"
+  )
+
+  behave like pageWithContent("p", "You must make sure this reference is up to date.")
+
+  behave like pageWithInputText(Some(InputSize.Width20))
+
+  behave like pageWithContinueButton("Continue")
 }

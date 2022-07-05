@@ -1,0 +1,67 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import viewModels.components.InputTextViewModel._
+@import views.html.components.InputText
+
+@this(
+    inputText: InputText,
+    govukFieldset: GovukFieldset
+)
+
+@(
+    form: Form[_],
+    messageKeyPrefix: String,
+    headingArgs: Any*
+)(implicit messages: Messages)
+
+@html = {
+    @inputText(
+        field = form("buildingAndStreet"),
+        inputTextType = AddressTextInput(
+            label = messages(s"$messageKeyPrefix.buildingAndStreet")
+        ),
+        autocomplete = Some("address-line1"),
+        inputClass = Some("govuk-!-width-two-thirds")
+    )
+
+    @inputText(
+        field = form("city"),
+        inputTextType = AddressTextInput(
+            label = messages(s"$messageKeyPrefix.city")
+        ),
+        autocomplete = Some("address-line2"),
+        inputClass = Some("govuk-!-width-two-thirds")
+    )
+
+    @inputText(
+        field = form("postcode"),
+        inputTextType = AddressTextInput(
+            label = messages(s"$messageKeyPrefix.postcode")
+        ),
+        autocomplete = Some("postal-code"),
+        inputClass = InputSize.Width10
+    )
+}
+
+@govukFieldset(Fieldset(
+    legend = Some(Legend(
+        content = Text(messages(s"$messageKeyPrefix.heading", headingArgs: _*)),
+        classes = LegendSize.XL,
+        isPageHeading = true
+    )),
+    html = html
+))

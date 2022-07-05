@@ -18,23 +18,20 @@ package services
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import config.FrontendAppConfig
-import matchers.JsonMatchers
 import org.joda.time.LocalDateTime
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.FakeRequest
 import play.api.test.Helpers.GET
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
-import uk.gov.hmrc.viewmodels.NunjucksSupport
 import viewModels.audit.SuccessfulBalanceAuditModel
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuditServiceSpec extends SpecBase with MockitoSugar with NunjucksSupport with JsonMatchers with AppWithDefaultMockFixtures {
+class AuditServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   "AuditService" - {
 
@@ -43,7 +40,7 @@ class AuditServiceSpec extends SpecBase with MockitoSugar with NunjucksSupport w
     val auditService                                               = new AuditService(mockFrontendAppConfig, mockAuditConnector)
     implicit val hc: HeaderCarrier                                 = HeaderCarrier()
     implicit val ec: ExecutionContext                              = ExecutionContext.global
-    implicit val request                                           = FakeRequest(GET, "/check-transit-guarantee-balance/balance")
+    implicit val request: FakeRequest[_]                           = FakeRequest(GET, "/check-transit-guarantee-balance/balance")
     val extendedDataEventCaptor: ArgumentCaptor[ExtendedDataEvent] = ArgumentCaptor.forClass(classOf[ExtendedDataEvent])
 
     "audit must call sendExtendedEvent exactly once in audit connector if there's an event" in {

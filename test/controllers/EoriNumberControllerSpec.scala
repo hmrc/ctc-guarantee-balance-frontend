@@ -18,30 +18,21 @@ package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import forms.EoriNumberFormProvider
-import matchers.JsonMatchers
 import models.{Mode, NormalMode, UserAnswers}
-import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{times, verify}
+import org.mockito.Mockito.verify
 import org.scalacheck.Arbitrary.arbitrary
-import org.scalatestplus.mockito.MockitoSugar
 import pages.EoriNumberPage
-import play.api.inject.bind
-import play.api.libs.json.{JsObject, Json}
-import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.viewmodels.NunjucksSupport
+import views.html.EoriNumberView
 
-class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksSupport with JsonMatchers with AppWithDefaultMockFixtures {
+class EoriNumberControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
-  def onwardRoute = Call("GET", "/foo")
+  private val formProvider = new EoriNumberFormProvider()
+  private val form         = formProvider()
 
-  val formProvider = new EoriNumberFormProvider()
-  val form         = formProvider()
-
-  def eoriNumberRoute(mode: Mode = NormalMode): String = routes.EoriNumberController.onPageLoad(mode).url
+  private def eoriNumberRoute(mode: Mode = NormalMode): String = routes.EoriNumberController.onPageLoad(mode).url
 
   "EoriNumber Controller" - {
 
@@ -50,27 +41,16 @@ class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksS
       forAll(arbitrary[Mode]) {
         mode =>
           beforeEach()
+          setExistingUserAnswers(emptyUserAnswers)
 
-          val application                            = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-          val request                                = FakeRequest(GET, eoriNumberRoute(mode))
-          val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-          val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
-
-          val result = route(application, request).value
+          val request = FakeRequest(GET, eoriNumberRoute(mode))
+          val view    = injector.instanceOf[EoriNumberView]
+          val result  = route(app, request).value
 
           status(result) mustEqual OK
 
-          verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
-
-          val expectedJson = Json.obj(
-            "form" -> form,
-            "mode" -> mode
-          )
-
-          templateCaptor.getValue mustEqual "eoriNumber.njk"
-          jsonCaptor.getValue must containJson(expectedJson)
-
-          application.stop()
+          contentAsString(result) mustEqual
+            view(form, mode)(request, messages).toString
       }
     }
 
@@ -79,48 +59,30 @@ class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksS
       forAll(arbitrary[Mode]) {
         mode =>
           beforeEach()
+          val userAnswers = emptyUserAnswers.setValue(EoriNumberPage, validEori)
+          setExistingUserAnswers(userAnswers)
 
-          val userAnswers = UserAnswers(userAnswersId).set(EoriNumberPage, validEori).success.value
-
-          val application                            = applicationBuilder(userAnswers = Some(userAnswers)).build()
-          val request                                = FakeRequest(GET, eoriNumberRoute(mode))
-          val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-          val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
-
-          val result = route(application, request).value
+          val request = FakeRequest(GET, eoriNumberRoute(mode))
+          val view    = injector.instanceOf[EoriNumberView]
+          val result  = route(app, request).value
 
           status(result) mustEqual OK
 
-          verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
-
           val filledForm = form.bind(Map("value" -> validEori))
 
-          val expectedJson = Json.obj(
-            "form" -> filledForm,
-            "mode" -> mode
-          )
-
-          templateCaptor.getValue mustEqual "eoriNumber.njk"
-          jsonCaptor.getValue must containJson(expectedJson)
-
-          application.stop()
+          contentAsString(result) mustEqual
+            view(filledForm, mode)(request, messages).toString
       }
     }
 
     "must redirect to the next page when valid data is submitted" in {
 
-      val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(
-            bind[Navigator].toInstance(new FakeNavigator(onwardRoute))
-          )
-          .build()
+      setExistingUserAnswers(emptyUserAnswers)
 
-      val request =
-        FakeRequest(POST, eoriNumberRoute())
-          .withFormUrlEncodedBody(("value", validEori))
+      val request = FakeRequest(POST, eoriNumberRoute())
+        .withFormUrlEncodedBody(("value", validEori))
 
-      val result = route(application, request).value
+      val result = route(app, request).value
 
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value mustEqual onwardRoute.url
@@ -128,8 +90,6 @@ class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksS
       val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
       verify(mockSessionRepository).set(uaCaptor.capture)
       uaCaptor.getValue.get(EoriNumberPage).get mustBe validEori
-
-      application.stop()
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {
@@ -137,61 +97,47 @@ class EoriNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksS
       forAll(arbitrary[Mode]) {
         mode =>
           beforeEach()
+          setExistingUserAnswers(emptyUserAnswers)
+          val invalidAnswer = ""
 
-          val application                            = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-          val request                                = FakeRequest(POST, eoriNumberRoute(mode)).withFormUrlEncodedBody(("value", ""))
-          val boundForm                              = form.bind(Map("value" -> ""))
-          val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-          val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
-
-          val result = route(application, request).value
+          val request = FakeRequest(POST, eoriNumberRoute(mode)).withFormUrlEncodedBody(("value", invalidAnswer))
+          val view    = injector.instanceOf[EoriNumberView]
+          val result  = route(app, request).value
 
           status(result) mustEqual BAD_REQUEST
 
-          verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
+          val boundForm = form.bind(Map("value" -> invalidAnswer))
 
-          val expectedJson = Json.obj(
-            "form" -> boundForm,
-            "mode" -> mode
-          )
-
-          templateCaptor.getValue mustEqual "eoriNumber.njk"
-          jsonCaptor.getValue must containJson(expectedJson)
-
-          application.stop()
+          contentAsString(result) mustEqual
+            view(boundForm, mode)(request, messages).toString
       }
     }
 
     "must redirect to Session Expired for a GET if no existing data is found" in {
 
-      val application = applicationBuilder(userAnswers = None).build()
+      setNoExistingUserAnswers()
 
       val request = FakeRequest(GET, eoriNumberRoute())
 
-      val result = route(application, request).value
+      val result = route(app, request).value
 
       status(result) mustEqual SEE_OTHER
 
       redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
-
-      application.stop()
     }
 
     "must redirect to Session Expired for a POST if no existing data is found" in {
 
-      val application = applicationBuilder(userAnswers = None).build()
+      setNoExistingUserAnswers()
 
-      val request =
-        FakeRequest(POST, eoriNumberRoute())
-          .withFormUrlEncodedBody(("value", validEori))
+      val request = FakeRequest(POST, eoriNumberRoute())
+        .withFormUrlEncodedBody(("value", validEori))
 
-      val result = route(application, request).value
+      val result = route(app, request).value
 
       status(result) mustEqual SEE_OTHER
 
       redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
-
-      application.stop()
     }
 
   }

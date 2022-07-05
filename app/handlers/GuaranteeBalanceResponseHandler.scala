@@ -16,19 +16,16 @@
 
 package handlers
 
-import config.FrontendAppConfig
 import javax.inject.Inject
 import models.UserAnswers
 import models.backend._
 import models.requests.DataRequest
 import org.joda.time.LocalDateTime
-import pages.{AccessCodePage, BalanceIdPage, BalancePage, EoriNumberPage, GuaranteeReferenceNumberPage}
+import pages._
 import play.api.Logging
 import play.api.http.Status._
-import play.api.libs.json.Json
-import play.api.mvc.Results.{InternalServerError, Redirect}
+import play.api.mvc.Results.Redirect
 import play.api.mvc._
-import renderer.Renderer
 import repositories.SessionRepository
 import services.AuditService
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -39,9 +36,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class GuaranteeBalanceResponseHandler @Inject() (
   sessionRepository: SessionRepository,
-  renderer: Renderer,
-  appConfig: FrontendAppConfig,
-  auditService: AuditService
+  auditService: AuditService,
+  errorHandler: ErrorHandler
 )(implicit ec: ExecutionContext)
     extends Logging {
 
@@ -93,24 +89,24 @@ class GuaranteeBalanceResponseHandler @Inject() (
           SEE_OTHER,
           ErrorMessage(AUDIT_ERROR_UNSUPPORTED_TYPE, AUDIT_DEST_UNSUPPORTED_TYPE)
         )
-
         Future.successful(Redirect(controllers.routes.UnsupportedGuaranteeTypeController.onPageLoad()))
+
       case fe: BalanceRequestFunctionalError =>
         auditError(
           INTERNAL_SERVER_ERROR,
           ErrorMessage(s"Failed to process Response: ${fe.errors}", AUDIT_DEST_TECHNICAL_DIFFICULTIES)
         )
-        technicalDifficulties()
+        errorHandler.onClientError(request, INTERNAL_SERVER_ERROR)
     }
 
   private def processHttpResponse(failureResponse: HttpResponse)(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
-    logger.warn(s"[GuaranteeBalanceResponseHandler][processHttpResponse]Failed to process Response: $failureResponse")
+    logger.warn(s"[GuaranteeBalanceResponseHandler][processHttpResponse] Failed to process Response: $failureResponse")
 
     auditError(
       INTERNAL_SERVER_ERROR,
       ErrorMessage(s"Failed to process Response: $failureResponse", AUDIT_DEST_TECHNICAL_DIFFICULTIES)
     )
-    technicalDifficulties()
+    errorHandler.onClientError(request, INTERNAL_SERVER_ERROR)
   }
 
   private def processPendingResponse(balanceResponse: BalanceRequestPending, userAnswers: UserAnswers): Future[Result] = {
@@ -132,13 +128,6 @@ class GuaranteeBalanceResponseHandler @Inject() (
       updatedAnswers <- Future.fromTry(request.userAnswers.remove(BalanceIdPage))
       _              <- sessionRepository.set(updatedAnswers)
     } yield updatedAnswers
-
-  private def technicalDifficulties()(implicit request: Request[_]): Future[Result] = {
-    val json = Json.obj(
-      "contactUrl" -> appConfig.nctsEnquiriesUrl
-    )
-    renderer.render("technicalDifficulties.njk", json).map(InternalServerError(_))
-  }
 
   private def auditBalanceRequestNotMatched(errorPointer: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]): Unit = {
     val balanceRequestNotMatchedMessage = errorPointer match {
@@ -172,7 +161,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
   }
 
   private def auditRateLimit()(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]): Unit = {
-    logger.info(s"[GuaranteeBalanceResponseHandler][auditRateLimit]Failed to process Response")
+    logger.info(s"[GuaranteeBalanceResponseHandler][auditRateLimit] Request limit exceeded")
     auditService.audit(
       UnsuccessfulBalanceAuditModel.build(
         AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT,
@@ -192,7 +181,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
     ec: ExecutionContext,
     request: DataRequest[_]
   ): Unit = {
-    logger.warn(s"[GuaranteeBalanceResponseHandler][auditError]Failed to process errorMessage: $errorMessage, status Code: $errorCode")
+    logger.warn(s"[GuaranteeBalanceResponseHandler][auditError] Failed to process errorMessage: $errorMessage, status Code: $errorCode")
     auditService.audit(
       UnsuccessfulBalanceAuditModel.build(
         AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION,

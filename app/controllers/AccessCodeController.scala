@@ -22,12 +22,10 @@ import models.Mode
 import navigation.Navigator
 import pages.AccessCodePage
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import renderer.Renderer
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import uk.gov.hmrc.viewmodels.NunjucksSupport
+import views.html.AccessCodeView
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -36,48 +34,32 @@ class AccessCodeController @Inject() (
   override val messagesApi: MessagesApi,
   sessionRepository: SessionRepository,
   navigator: Navigator,
-  identify: IdentifierAction,
-  getData: DataRetrievalAction,
-  requireData: DataRequiredAction,
+  actions: Actions,
   formProvider: AccessCodeFormProvider,
   val controllerComponents: MessagesControllerComponents,
-  renderer: Renderer
+  view: AccessCodeView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
-    with I18nSupport
-    with NunjucksSupport {
+    with I18nSupport {
 
   private val form = formProvider()
 
-  def onPageLoad(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onPageLoad(mode: Mode): Action[AnyContent] = actions.requireData {
     implicit request =>
       val preparedForm = request.userAnswers.get(AccessCodePage) match {
         case None        => form
         case Some(value) => form.fill(value)
       }
 
-      val json = Json.obj(
-        "form" -> preparedForm,
-        "mode" -> mode
-      )
-
-      renderer.render("accessCode.njk", json).map(Ok(_))
+      Ok(view(preparedForm, mode))
   }
 
-  def onSubmit(mode: Mode): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(mode: Mode): Action[AnyContent] = actions.requireData.async {
     implicit request =>
       form
         .bindFromRequest()
         .fold(
-          formWithErrors => {
-
-            val json = Json.obj(
-              "form" -> formWithErrors,
-              "mode" -> mode
-            )
-
-            renderer.render("accessCode.njk", json).map(BadRequest(_))
-          },
+          formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
           value =>
             for {
               updatedAnswers <- Future.fromTry(request.userAnswers.set(AccessCodePage, value))

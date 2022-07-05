@@ -18,161 +18,108 @@ package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import forms.GuaranteeReferenceNumberFormProvider
-import matchers.JsonMatchers
-import models.{NormalMode, UserAnswers}
-import navigation.{FakeNavigator, Navigator}
-import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{times, verify}
-import org.scalatestplus.mockito.MockitoSugar
+import models.NormalMode
 import pages.GuaranteeReferenceNumberPage
-import play.api.inject.bind
-import play.api.libs.json.{JsObject, Json}
-import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.viewmodels.NunjucksSupport
+import views.html.GuaranteeReferenceNumberView
 
-class GuaranteeReferenceNumberControllerSpec extends SpecBase with MockitoSugar with NunjucksSupport with JsonMatchers with AppWithDefaultMockFixtures {
+class GuaranteeReferenceNumberControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
-  def onwardRoute = Call("GET", "/foo")
+  private val formProvider                       = new GuaranteeReferenceNumberFormProvider()
+  private val form                               = formProvider()
+  private val mode                               = NormalMode
+  private lazy val guaranteeReferenceNumberRoute = routes.GuaranteeReferenceNumberController.onPageLoad(mode).url
 
-  val formProvider = new GuaranteeReferenceNumberFormProvider()
-  val form         = formProvider()
-
-  lazy val guaranteeReferenceNumberRoute = routes.GuaranteeReferenceNumberController.onPageLoad(NormalMode).url
-
-  val validAnswer: String = "guaranteeRef12345"
+  private val validAnswer: String = "guaranteeRef12345"
 
   "GuaranteeReferenceNumber Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
-      val application                            = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-      val request                                = FakeRequest(GET, guaranteeReferenceNumberRoute)
-      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-      val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
+      setExistingUserAnswers(emptyUserAnswers)
 
-      val result = route(application, request).value
+      val request = FakeRequest(GET, guaranteeReferenceNumberRoute)
+      val view    = injector.instanceOf[GuaranteeReferenceNumberView]
+      val result  = route(app, request).value
 
       status(result) mustEqual OK
 
-      verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
-
-      val expectedJson = Json.obj(
-        "form" -> form,
-        "mode" -> NormalMode
-      )
-
-      templateCaptor.getValue mustEqual "guaranteeReferenceNumber.njk"
-      jsonCaptor.getValue must containJson(expectedJson)
-
-      application.stop()
+      contentAsString(result) mustEqual
+        view(form, mode)(request, messages).toString
     }
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers                            = UserAnswers(userAnswersId).set(GuaranteeReferenceNumberPage, validAnswer).success.value
-      val application                            = applicationBuilder(userAnswers = Some(userAnswers)).build()
-      val request                                = FakeRequest(GET, guaranteeReferenceNumberRoute)
-      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-      val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
+      val userAnswers = emptyUserAnswers.setValue(GuaranteeReferenceNumberPage, validAnswer)
+      setExistingUserAnswers(userAnswers)
 
-      val result = route(application, request).value
+      val request = FakeRequest(GET, guaranteeReferenceNumberRoute)
+      val view    = injector.instanceOf[GuaranteeReferenceNumberView]
+      val result  = route(app, request).value
 
       status(result) mustEqual OK
 
-      verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
-
       val filledForm = form.bind(Map("value" -> validAnswer))
 
-      val expectedJson = Json.obj(
-        "form" -> filledForm,
-        "mode" -> NormalMode
-      )
-
-      templateCaptor.getValue mustEqual "guaranteeReferenceNumber.njk"
-      jsonCaptor.getValue must containJson(expectedJson)
-
-      application.stop()
+      contentAsString(result) mustEqual
+        view(filledForm, mode)(request, messages).toString
     }
 
     "must redirect to the next page when valid data is submitted" in {
 
-      val application =
-        applicationBuilder(userAnswers = Some(emptyUserAnswers))
-          .overrides(
-            bind[Navigator].toInstance(new FakeNavigator(onwardRoute))
-          )
-          .build()
+      setExistingUserAnswers(emptyUserAnswers)
 
-      val request =
-        FakeRequest(POST, guaranteeReferenceNumberRoute)
-          .withFormUrlEncodedBody(("value", validAnswer))
+      val request = FakeRequest(POST, guaranteeReferenceNumberRoute)
+        .withFormUrlEncodedBody(("value", validAnswer))
 
-      val result = route(application, request).value
+      val result = route(app, request).value
 
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value mustEqual onwardRoute.url
-
-      application.stop()
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
-      val application                            = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-      val request                                = FakeRequest(POST, guaranteeReferenceNumberRoute).withFormUrlEncodedBody(("value", ""))
-      val boundForm                              = form.bind(Map("value" -> ""))
-      val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-      val jsonCaptor: ArgumentCaptor[JsObject]   = ArgumentCaptor.forClass(classOf[JsObject])
+      setExistingUserAnswers(emptyUserAnswers)
 
-      val result = route(application, request).value
+      val request = FakeRequest(POST, guaranteeReferenceNumberRoute).withFormUrlEncodedBody(("value", ""))
+      val view    = injector.instanceOf[GuaranteeReferenceNumberView]
+      val result  = route(app, request).value
 
       status(result) mustEqual BAD_REQUEST
 
-      verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
+      val boundForm = form.bind(Map("value" -> ""))
 
-      val expectedJson = Json.obj(
-        "form" -> boundForm,
-        "mode" -> NormalMode
-      )
-
-      templateCaptor.getValue mustEqual "guaranteeReferenceNumber.njk"
-      jsonCaptor.getValue must containJson(expectedJson)
-
-      application.stop()
+      contentAsString(result) mustEqual
+        view(boundForm, mode)(request, messages).toString
     }
 
     "must redirect to Session Expired for a GET if no existing data is found" in {
 
-      val application = applicationBuilder(userAnswers = None).build()
+      setNoExistingUserAnswers()
 
       val request = FakeRequest(GET, guaranteeReferenceNumberRoute)
 
-      val result = route(application, request).value
+      val result = route(app, request).value
 
       status(result) mustEqual SEE_OTHER
 
       redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
-
-      application.stop()
     }
 
     "must redirect to Session Expired for a POST if no existing data is found" in {
 
-      val application = applicationBuilder(userAnswers = None).build()
+      setNoExistingUserAnswers()
 
-      val request =
-        FakeRequest(POST, guaranteeReferenceNumberRoute)
-          .withFormUrlEncodedBody(("value", validAnswer))
+      val request = FakeRequest(POST, guaranteeReferenceNumberRoute)
+        .withFormUrlEncodedBody(("value", validAnswer))
 
-      val result = route(application, request).value
+      val result = route(app, request).value
 
       status(result) mustEqual SEE_OTHER
 
       redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
-
-      application.stop()
     }
   }
 }

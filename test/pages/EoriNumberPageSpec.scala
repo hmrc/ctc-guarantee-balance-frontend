@@ -16,12 +16,12 @@
 
 package pages
 
-import java.util.UUID
-
 import models.UserAnswers
 import models.values.BalanceId
 import pages.behaviours.PageBehaviours
 import play.api.libs.json.Json
+
+import java.util.UUID
 
 class EoriNumberPageSpec extends PageBehaviours {
 
@@ -29,10 +29,8 @@ class EoriNumberPageSpec extends PageBehaviours {
   private val expectedUuid  = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
   private val balanceId     = BalanceId(expectedUuid)
 
-  // format: off
   val baseUserAnswers: UserAnswers = UserAnswers("id", Json.obj())
-    .set(EoriNumberPage, taxId).success.value
-  // format: on
+    .setValue(EoriNumberPage, taxId)
 
   "EoriNumberPage" - {
 
@@ -45,19 +43,19 @@ class EoriNumberPageSpec extends PageBehaviours {
     "cleanup" - {
 
       "must remove BalanceId when EORI changes" in {
-        val answersWithBalanceId = baseUserAnswers.set(BalanceIdPage, balanceId).success.value
+        val answersWithBalanceId = baseUserAnswers.setValue(BalanceIdPage, balanceId)
         answersWithBalanceId.get(BalanceIdPage).isDefined mustEqual true
 
-        val result = answersWithBalanceId.set(EoriNumberPage, "newValue")
-        result.success.value.get(BalanceIdPage).isDefined mustEqual false
+        val result = answersWithBalanceId.setValue(EoriNumberPage, "newValue")
+        result.get(BalanceIdPage).isDefined mustEqual false
       }
 
       "must NOT remove BalanceId when EORI hasn't changed" in {
-        val answersWithBalanceId = baseUserAnswers.set(BalanceIdPage, balanceId).success.value
+        val answersWithBalanceId = baseUserAnswers.setValue(BalanceIdPage, balanceId)
         answersWithBalanceId.get(BalanceIdPage).isDefined mustEqual true
 
-        val result = answersWithBalanceId.set(EoriNumberPage, taxId)
-        result.success.value.get(BalanceIdPage).isDefined mustEqual true
+        val result = answersWithBalanceId.setValue(EoriNumberPage, taxId)
+        result.get(BalanceIdPage).isDefined mustEqual true
       }
     }
   }

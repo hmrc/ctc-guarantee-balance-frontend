@@ -16,6 +16,7 @@
 
 package base
 
+import config.FrontendAppConfig
 import generators.Generators
 import models.UserAnswers
 import org.scalatest._
@@ -23,22 +24,27 @@ import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import pages.QuestionPage
+import play.api.i18n.{Messages, MessagesApi}
+import play.api.inject.Injector
 import play.api.libs.json.{Json, Reads, Writes}
-import queries.{Gettable, Settable}
-
-import scala.util.{Success, Try}
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.FakeRequest
 
 trait SpecBase
     extends AnyFreeSpec
     with Matchers
     with ScalaCheckPropertyChecks
     with OptionValues
+    with GuiceOneAppPerSuite
     with TryValues
     with ScalaFutures
     with IntegrationPatience
     with MockitoSugar
-    with Generators {
+    with Generators
+    with EitherValues {
 
   val configKey = "config"
 
@@ -48,13 +54,27 @@ trait SpecBase
 
   def emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId, Json.obj())
 
+  def injector: Injector                               = app.injector
+  def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")
+
+  def messagesApi: MessagesApi    = injector.instanceOf[MessagesApi]
+  implicit def messages: Messages = messagesApi.preferred(fakeRequest)
+
+  def frontendAppConfig: FrontendAppConfig = injector.instanceOf[FrontendAppConfig]
+
   implicit class RichUserAnswers(userAnswers: UserAnswers) {
 
-    def setOption[A](page: Settable[A] with Gettable[A], optionalValue: Option[A])(implicit writes: Writes[A], reads: Reads[A]): Try[UserAnswers] =
-      optionalValue match {
-        case Some(value) => userAnswers.set(page, value)
-        case None        => Success(userAnswers)
-      }
+    def getValue[T](page: QuestionPage[T])(implicit rds: Reads[T]): T =
+      userAnswers.get(page).value
+
+    def setValue[T](page: QuestionPage[T], value: T)(implicit rds: Reads[T], wts: Writes[T]): UserAnswers =
+      userAnswers.set(page, value).success.value
+
+    def setValue[T](page: QuestionPage[T], value: Option[T])(implicit rds: Reads[T], wts: Writes[T]): UserAnswers =
+      value.map(setValue(page, _)).getOrElse(userAnswers)
+
+    def removeValue(page: QuestionPage[_]): UserAnswers =
+      userAnswers.remove(page).success.value
   }
 
 }

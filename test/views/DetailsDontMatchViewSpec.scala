@@ -16,32 +16,34 @@
 
 package views
 
-class DetailsDontMatchViewSpec extends SingleViewSpec("detailsDontMatch.njk") {
+import play.twirl.api.HtmlFormat
+import views.behaviours.ViewBehaviours
+import views.html.DetailsDontMatchView
 
-  "must have correct heading" in {
-    assertPageTitleEqualsMessage(doc, "detailsDontMatch.heading")
-  }
+class DetailsDontMatchViewSpec extends ViewBehaviours {
 
-  "must have 'try again' paragraph text and link" in {
-    assertContainsText(doc, "detailsDontMatch.p1")
+  override def view: HtmlFormat.Appendable =
+    injector.instanceOf[DetailsDontMatchView].apply()(fakeRequest, messages)
 
-    assertPageHasLink(
-      doc = doc,
-      id = "try-again",
-      expectedText = "detailsDontMatch.p1.a",
-      expectedHref = controllers.routes.CheckYourAnswersController.onPageLoad().url
-    )
-  }
+  override val prefix: String = "detailsDontMatch"
 
-  "must have 'contact helpdesk' paragraph text and link" in {
-    assertContainsText(doc, "detailsDontMatch.p2")
+  behave like pageWithTitle()
 
-    assertPageHasLink(
-      doc = doc,
-      id = "contact",
-      expectedText = "detailsDontMatch.p2.a",
-      expectedHref = frontendAppConfig.nctsEnquiriesUrl
-    )
-  }
+  behave like pageWithoutBackLink
 
+  behave like pageWithHeading()
+
+  behave like pageWithPartialContent("p", "You must")
+  behave like pageWithLink(
+    "try-again",
+    "check your answers and try again",
+    controllers.routes.CheckYourAnswersController.onPageLoad().url
+  )
+
+  behave like pageWithPartialContent("p", "If your details are correct, you must")
+  behave like pageWithLink(
+    "contact",
+    "contact the NCTS helpdesk (opens in a new tab)",
+    frontendAppConfig.nctsEnquiriesUrl
+  )
 }

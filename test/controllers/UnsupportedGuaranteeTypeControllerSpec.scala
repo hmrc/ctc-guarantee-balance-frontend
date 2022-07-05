@@ -17,41 +17,35 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{times, verify}
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import views.html.UnsupportedGuaranteeTypeView
 
-class UnsupportedGuaranteeTypeControllerSpec extends SpecBase with MockitoSugar with AppWithDefaultMockFixtures {
+class UnsupportedGuaranteeTypeControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   "UnsupportedGuaranteeType Controller" - {
 
     "onPageLoad" - {
       "return OK and the correct view for a GET" in {
+        setExistingUserAnswers(emptyUserAnswers)
 
-        val application                            = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-        val request                                = FakeRequest(GET, routes.UnsupportedGuaranteeTypeController.onPageLoad().url)
-        val templateCaptor: ArgumentCaptor[String] = ArgumentCaptor.forClass(classOf[String])
-
-        val result = route(application, request).value
+        val request = FakeRequest(GET, routes.UnsupportedGuaranteeTypeController.onPageLoad().url)
+        val view    = injector.instanceOf[UnsupportedGuaranteeTypeView]
+        val result  = route(app, request).value
 
         status(result) mustEqual OK
 
-        verify(mockRenderer, times(1)).render(templateCaptor.capture(), any())(any())
-
-        templateCaptor.getValue mustEqual "unsupportedGuaranteeType.njk"
-
-        application.stop()
+        contentAsString(result) mustEqual
+          view()(request, messages).toString
       }
     }
 
     "onSubmit" - {
       "must Redirect to the StartController DataReturned " in {
-        val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
-        val request     = FakeRequest(POST, routes.UnsupportedGuaranteeTypeController.onSubmit().url)
-        val result      = route(application, request).value
+        setExistingUserAnswers(emptyUserAnswers)
+
+        val request = FakeRequest(POST, routes.UnsupportedGuaranteeTypeController.onSubmit().url)
+        val result  = route(app, request).value
 
         status(result) mustEqual SEE_OTHER
         redirectLocation(result).value mustEqual routes.StartController.startAgain().url

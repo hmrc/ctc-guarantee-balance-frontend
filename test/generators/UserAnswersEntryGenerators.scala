@@ -21,21 +21,30 @@ import org.scalacheck.Arbitrary.arbitrary
 import pages._
 import play.api.libs.json.{JsValue, Json}
 
-trait UserAnswersEntryGenerators extends PageGenerators with ModelGenerators {
+trait UserAnswersEntryGenerators {
+  self: Generators =>
 
   implicit lazy val arbitraryAccessCodeUserAnswersEntry: Arbitrary[(AccessCodePage.type, JsValue)] =
     Arbitrary {
       for {
         page  <- arbitrary[AccessCodePage.type]
-        value <- arbitrary[String].suchThat(_.nonEmpty).map(Json.toJson(_))
+        value <- nonEmptyString.map(Json.toJson(_))
       } yield (page, value)
     }
 
-  implicit lazy val arbitraryTestPageUserAnswersEntry: Arbitrary[(TestPagePage.type, JsValue)] =
+  implicit lazy val arbitraryEoriNumberUserAnswersEntry: Arbitrary[(EoriNumberPage.type, JsValue)] =
     Arbitrary {
       for {
-        page  <- arbitrary[TestPagePage.type]
-        value <- arbitrary[String].suchThat(_.nonEmpty).map(Json.toJson(_))
+        page  <- arbitrary[EoriNumberPage.type]
+        value <- nonEmptyString.map(Json.toJson(_))
+      } yield (page, value)
+    }
+
+  implicit lazy val arbitraryGuaranteeReferenceNumberUserAnswersEntry: Arbitrary[(GuaranteeReferenceNumberPage.type, JsValue)] =
+    Arbitrary {
+      for {
+        page  <- arbitrary[GuaranteeReferenceNumberPage.type]
+        value <- nonEmptyString.map(Json.toJson(_))
       } yield (page, value)
     }
 

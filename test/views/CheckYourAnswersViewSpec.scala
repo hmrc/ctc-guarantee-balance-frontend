@@ -16,96 +16,30 @@
 
 package views
 
-import org.jsoup.nodes.{Document, Element}
-import play.api.libs.json.Json
-import uk.gov.hmrc.viewmodels.SummaryList._
-import uk.gov.hmrc.viewmodels.Text._
+import play.twirl.api.HtmlFormat
 import viewModels.Section
+import views.behaviours.CheckYourAnswersViewBehaviours
+import views.html.CheckYourAnswersView
 
-import scala.collection.convert.ImplicitConversions._
+class CheckYourAnswersViewSpec extends CheckYourAnswersViewBehaviours {
 
-class CheckYourAnswersViewSpec extends SingleViewSpec("checkYourAnswers.njk") {
+  override val prefix: String = "checkYourAnswers"
 
-  private val fakeSection = Section(
-    (1 to 3).foldLeft[Seq[Row]](Nil) {
-      (acc, i) =>
-        acc :+ Row(Key(Literal(s"Key $i")), Value(Literal(s"Value $i")), Seq(Action(Literal(s"Action $i"), s"Link $i")))
-    }
-  )
+  override def view: HtmlFormat.Appendable = viewWithSections(sections)
 
-  private val json = Json.obj(
-    "section" -> Json.toJson(fakeSection)
-  )
+  override def viewWithSections(sections: Seq[Section]): HtmlFormat.Appendable =
+    injector.instanceOf[CheckYourAnswersView].apply(sections)(fakeRequest, messages)
 
-  override lazy val doc: Document = renderDocument(json).futureValue
+  behave like pageWithTitle()
 
-  "must render correct heading" in {
-    assertPageTitleEqualsMessage(doc, "checkYourAnswers.heading")
-  }
+  behave like pageWithoutBackLink
 
-  "must render correct caption" in {
-    assertPageHasCaption(doc, "checkYourAnswers.preHeading")
-  }
+  behave like pageWithHeading()
 
-  "must render a continue button" in {
-    assertPageHasButton(doc, "site.continue")
-  }
+  behave like pageWithCheckYourAnswers()
 
-  "must render a summary list" - {
+  behave like pageWithFormAction(controllers.routes.CheckYourAnswersController.onSubmit().url)
 
-    val summaryList: Element = doc.getElementsByClass("govuk-summary-list").first()
-    val rows: List[Element]  = summaryList.getElementsByClass("govuk-summary-list__row").toList
+  behave like pageWithContinueButton("Continue")
 
-    "must generate a row for each answer" in {
-      rows.size() mustEqual fakeSection.rows.size
-    }
-
-    "must render correct data in each row" - {
-      rows.zipWithIndex.foreach {
-        case (row, rowIndex) =>
-          s"when row ${rowIndex + 1}" - {
-
-            "must have correct key" in {
-              val key = row.getElementsByClass("govuk-summary-list__key").first()
-              key.text() mustBe fakeSection.rows.get(rowIndex).key.content.asInstanceOf[Literal].resolve
-            }
-
-            "must have correct value" in {
-              val value = row.getElementsByClass("govuk-summary-list__value").first()
-              value.text() mustBe fakeSection.rows.get(rowIndex).value.content.asInstanceOf[Literal].resolve
-            }
-
-            "must have correct actions" - {
-
-              val actions = row
-                .getElementsByClass("govuk-summary-list__actions")
-                .first()
-                .getElementsByClass("govuk-link")
-                .toList
-
-              "must generate a link for each action" in {
-                actions.size mustEqual fakeSection.rows.get(rowIndex).actions.size
-              }
-
-              "must render correct data for each action" - {
-                actions.zipWithIndex.foreach {
-                  case (action, actionIndex) =>
-                    s"when action ${actionIndex + 1}" - {
-
-                      "must render correct text" in {
-                        action.text() mustBe fakeSection.rows.get(rowIndex).actions.get(actionIndex).content.asInstanceOf[Literal].resolve
-                      }
-
-                      "must render correct href" in {
-                        action.attr("href") mustBe fakeSection.rows.get(rowIndex).actions.get(actionIndex).href
-                      }
-                    }
-                }
-              }
-            }
-          }
-      }
-
-    }
-  }
 }

@@ -22,7 +22,6 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import uk.gov.hmrc.viewmodels.NunjucksSupport
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
@@ -31,23 +30,20 @@ class StartController @Inject() (
   override val messagesApi: MessagesApi,
   sessionRepository: SessionRepository,
   updateSession: ReferralActionProvider,
-  identify: IdentifierAction,
-  getData: DataRetrievalAction,
-  requireData: DataRequiredAction,
+  actions: Actions,
   val controllerComponents: MessagesControllerComponents
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
-    with I18nSupport
-    with NunjucksSupport {
+    with I18nSupport {
 
-  def start(referral: Option[Referral]): Action[AnyContent] = (updateSession(referral) andThen identify andThen getData).async {
+  def start(referral: Option[Referral]): Action[AnyContent] = (updateSession(referral) andThen actions.getData).async {
     implicit request =>
       sessionRepository.set(UserAnswers(id = request.internalId)) map {
         _ => Redirect(routes.EoriNumberController.onPageLoad(NormalMode))
       }
   }
 
-  def startAgain(): Action[AnyContent] = (identify andThen getData andThen requireData) {
+  def startAgain(): Action[AnyContent] = actions.requireData {
     _ => Redirect(routes.EoriNumberController.onPageLoad(NormalMode))
   }
 }

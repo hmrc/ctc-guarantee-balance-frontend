@@ -1,0 +1,75 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.FrontendAppConfig
+@import uk.gov.hmrc.hmrcfrontend.views.config.StandardBetaBanner
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcLayout
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.timeoutdialog.TimeoutDialog
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.footer.{Footer, FooterItem, Meta}
+@import resources._
+@import views.utils.ViewUtils._
+
+@this(
+    appConfig: FrontendAppConfig,
+    hmrcLayout: HmrcLayout,
+    hmrcHead: HmrcHead,
+    hmrcTimeoutDialog: HmrcTimeoutDialog,
+    standardBetaBanner: StandardBetaBanner,
+    stylesheets: Stylesheets,
+    javascripts: Javascripts,
+    govukBackLink: GovukBackLink,
+    hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper
+)
+
+@(
+    title: String,
+    timeoutEnabled: Boolean = true,
+    canSignOut: Boolean = true,
+    showBackLink: Boolean = false
+)(mainContent: Html)(implicit request: Request[_], messages: Messages)
+
+@headScripts = {
+    @if(canSignOut) {
+        @hmrcTimeoutDialog(TimeoutDialog(
+            timeout = Some(appConfig.timeoutSeconds),
+            countdown = Some(appConfig.countdownSeconds),
+            keepAliveUrl = Some(routes.KeepAliveController.keepAlive().url),
+            signOutUrl = Some(appConfig.signOutUrl)
+        ))
+    }
+
+    @stylesheets()
+}
+
+@mainContentWithGetHelp = {
+    @mainContent
+    @hmrcReportTechnicalIssueHelper()
+}
+
+@hmrcLayout(
+    pageTitle = Some(breadCrumbTitle(title, mainContent)),
+    additionalHeadBlock = Some(hmrcHead(
+        headBlock = Some(headScripts)
+    )),
+    userResearchBannerUrl = if (appConfig.showUserResearchBanner) Some(appConfig.userResearchUrl) else None,
+    serviceName = Some(messages("site.service_name")),
+    serviceUrl = Some(routes.StartController.startAgain().url),
+    signOutUrl = if (canSignOut) Some(appConfig.signOutUrl) else None,
+    phaseBanner = Some(standardBetaBanner(url = appConfig.betaFeedbackUnauthenticatedUrl)),
+    backLinkUrl = if (showBackLink) Some("#") else None, // This is overridden in ctc.js
+    nonce = CSPNonce.get,
+    additionalScriptsBlock = Some(javascripts())
+)(mainContentWithGetHelp)

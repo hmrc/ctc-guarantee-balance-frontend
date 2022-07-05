@@ -22,8 +22,9 @@ import forms.Constants.accessCodeLength
 import models.{CheckMode, Mode, UserAnswers}
 import org.scalacheck.Arbitrary.arbitrary
 import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
-import uk.gov.hmrc.viewmodels.MessageInterpolators
-import uk.gov.hmrc.viewmodels.SummaryList.{Action, Key, Row, Value}
+import uk.gov.hmrc.govukfrontend.views.Aliases._
+import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+import uk.gov.hmrc.govukfrontend.views.html.components.{ActionItem, Actions}
 
 class CheckYourAnswersHelperSpec extends SpecBase {
 
@@ -46,23 +47,25 @@ class CheckYourAnswersHelperSpec extends SpecBase {
 
         forAll(arbitrary[Mode], arbitrary[String]) {
           (mode, answer) =>
-            val answers: UserAnswers = emptyUserAnswers.set(EoriNumberPage, answer).success.value
+            val answers: UserAnswers = emptyUserAnswers.setValue(EoriNumberPage, answer)
 
             val helper = new CheckYourAnswersHelper(answers, mode)
             val result = helper.eoriNumber
 
-            val label = msg"eoriNumber.checkYourAnswersLabel"
-
             result mustBe Some(
-              Row(
-                key = Key(label),
-                value = Value(lit"$answer"),
-                actions = List(
-                  Action(
-                    content = msg"site.edit",
-                    href = routes.EoriNumberController.onPageLoad(mode).url,
-                    visuallyHiddenText = Some(label),
-                    attributes = Map("id" -> "change-eori-number")
+              SummaryListRow(
+                key = Key("EORI number".toText),
+                value = Value(answer.toText),
+                actions = Some(
+                  Actions(
+                    items = List(
+                      ActionItem(
+                        content = "Change".toText,
+                        href = routes.EoriNumberController.onPageLoad(mode).url,
+                        visuallyHiddenText = Some("EORI number"),
+                        attributes = Map("id" -> "change-eori-number")
+                      )
+                    )
                   )
                 )
               )
@@ -91,23 +94,25 @@ class CheckYourAnswersHelperSpec extends SpecBase {
 
         forAll(arbitrary[Mode], arbitrary[String]) {
           (mode, answer) =>
-            val answers: UserAnswers = emptyUserAnswers.set(GuaranteeReferenceNumberPage, answer).success.value
+            val answers: UserAnswers = emptyUserAnswers.setValue(GuaranteeReferenceNumberPage, answer)
 
             val helper = new CheckYourAnswersHelper(answers, mode)
             val result = helper.guaranteeReferenceNumber
 
-            val label = msg"guaranteeReferenceNumber.checkYourAnswersLabel"
-
             result mustBe Some(
-              Row(
-                key = Key(label),
-                value = Value(lit"$answer"),
-                actions = List(
-                  Action(
-                    content = msg"site.edit",
-                    href = routes.GuaranteeReferenceNumberController.onPageLoad(mode).url,
-                    visuallyHiddenText = Some(label),
-                    attributes = Map("id" -> "change-guarantee-reference-number")
+              SummaryListRow(
+                key = Key("Guarantee reference number".toText),
+                value = Value(answer.toText),
+                actions = Some(
+                  Actions(
+                    items = List(
+                      ActionItem(
+                        content = "Change".toText,
+                        href = routes.GuaranteeReferenceNumberController.onPageLoad(mode).url,
+                        visuallyHiddenText = Some("guarantee reference number"),
+                        attributes = Map("id" -> "change-guarantee-reference-number")
+                      )
+                    )
                   )
                 )
               )
@@ -136,23 +141,25 @@ class CheckYourAnswersHelperSpec extends SpecBase {
 
         forAll(arbitrary[Mode], stringsOfLength(accessCodeLength)) {
           (mode, answer) =>
-            val answers: UserAnswers = emptyUserAnswers.set(AccessCodePage, answer).success.value
+            val answers: UserAnswers = emptyUserAnswers.setValue(AccessCodePage, answer)
 
             val helper = new CheckYourAnswersHelper(answers, mode)
             val result = helper.accessCode
 
-            val label = msg"accessCode.checkYourAnswersLabel"
-
             result mustBe Some(
-              Row(
-                key = Key(label),
-                value = Value(lit"••••"),
-                actions = List(
-                  Action(
-                    content = msg"site.edit",
-                    href = routes.AccessCodeController.onPageLoad(mode).url,
-                    visuallyHiddenText = Some(label),
-                    attributes = Map("id" -> "change-access-code")
+              SummaryListRow(
+                key = Key("Access code".toText),
+                value = Value("••••".toText),
+                actions = Some(
+                  Actions(
+                    items = List(
+                      ActionItem(
+                        content = "Change".toText,
+                        href = routes.AccessCodeController.onPageLoad(mode).url,
+                        visuallyHiddenText = Some("access code"),
+                        attributes = Map("id" -> "change-access-code")
+                      )
+                    )
                   )
                 )
               )

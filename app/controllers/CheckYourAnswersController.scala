@@ -18,49 +18,38 @@ package controllers
 
 import controllers.actions._
 import handlers.GuaranteeBalanceResponseHandler
-import javax.inject.Inject
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import renderer.Renderer
 import services.GuaranteeBalanceService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import uk.gov.hmrc.viewmodels.NunjucksSupport
-import viewModels.CheckYourAnswersViewModelProvider
+import viewModels.CheckYourAnswersViewModel.CheckYourAnswersViewModelProvider
+import views.html.CheckYourAnswersView
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class CheckYourAnswersController @Inject() (
   override val messagesApi: MessagesApi,
-  identify: IdentifierAction,
-  getData: DataRetrievalAction,
-  requireData: DataRequiredAction,
+  actions: Actions,
   val controllerComponents: MessagesControllerComponents,
-  renderer: Renderer,
   guaranteeBalanceService: GuaranteeBalanceService,
   viewModelProvider: CheckYourAnswersViewModelProvider,
-  responseHandler: GuaranteeBalanceResponseHandler
+  responseHandler: GuaranteeBalanceResponseHandler,
+  view: CheckYourAnswersView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
-    with NunjucksSupport
     with Logging {
 
-  def onPageLoad(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onPageLoad(): Action[AnyContent] = actions.requireData {
     implicit request =>
       val viewModel = viewModelProvider(request.userAnswers)
-
-      val json = Json.obj(
-        "section" -> Json.toJson(viewModel.section)
-      )
-
-      renderer.render("checkYourAnswers.njk", json).map(Ok(_))
+      Ok(view(Seq(viewModel.section)))
   }
 
-  def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onSubmit(): Action[AnyContent] = actions.requireData.async {
     implicit request =>
-      guaranteeBalanceService.retrieveBalanceResponse
-        .flatMap(responseHandler.processResponse(_))
+      guaranteeBalanceService.retrieveBalanceResponse.flatMap(responseHandler.processResponse(_))
   }
 }

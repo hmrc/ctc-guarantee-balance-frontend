@@ -17,32 +17,27 @@
 package controllers
 
 import controllers.actions._
-import javax.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import renderer.Renderer
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import views.html.UnsupportedGuaranteeTypeView
 
-import scala.concurrent.{ExecutionContext, Future}
+import javax.inject.Inject
 
 class UnsupportedGuaranteeTypeController @Inject() (
   override val messagesApi: MessagesApi,
-  identify: IdentifierAction,
-  getData: DataRetrievalAction,
-  requireData: DataRequiredAction,
+  actions: Actions,
   val controllerComponents: MessagesControllerComponents,
-  renderer: Renderer
-)(implicit ec: ExecutionContext)
-    extends FrontendBaseController
+  view: UnsupportedGuaranteeTypeView
+) extends FrontendBaseController
     with I18nSupport {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onPageLoad: Action[AnyContent] = actions.requireData {
     implicit request =>
-      renderer.render("unsupportedGuaranteeType.njk").map(Ok(_))
+      Ok(view())
   }
 
-  def onSubmit(): Action[AnyContent] = (identify andThen getData andThen requireData).async {
-    Future.successful(Redirect(routes.StartController.startAgain()))
+  def onSubmit(): Action[AnyContent] = actions.requireData {
+    Redirect(routes.StartController.startAgain())
   }
-
 }

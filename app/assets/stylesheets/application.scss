@@ -4,20 +4,4 @@ $hmrc-assets-path: "/check-transit-guarantee-balance/assets/lib/hmrc-frontend/hm
 @import "lib/govuk-frontend/govuk/all";
 @import "lib/hmrc-frontend/hmrc/all";
 
-@import "partials/page-heading";
-@import "partials/header";
-@import "partials/shame";
-@import "partials/timeout-dialog";
-
-.govuk-summary-list__actions-list-item {
-  display: inline-block;
-}
-
-p {
-  @extend .govuk-body;
-}
-
-.break-all {
-  display: inline-block;
-  word-break: break-all;
-}
+@import "components/shame";

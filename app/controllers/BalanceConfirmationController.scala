@@ -21,45 +21,32 @@ import controllers.actions._
 import pages.BalancePage
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import renderer.Renderer
 import repositories.SessionRepository
 import services.ReferralService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import views.html.BalanceConfirmationView
 
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class BalanceConfirmationController @Inject() (
   override val messagesApi: MessagesApi,
   sessionRepository: SessionRepository,
-  identify: IdentifierAction,
-  getData: DataRetrievalAction,
-  requireData: DataRequiredAction,
+  actions: Actions,
+  getMandatoryPage: SpecificDataRequiredActionProvider,
   val controllerComponents: MessagesControllerComponents,
-  renderer: Renderer,
   appConfig: FrontendAppConfig,
-  referralService: ReferralService
+  referralService: ReferralService,
+  view: BalanceConfirmationView
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
     with Logging {
 
-  def onPageLoad: Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  def onPageLoad: Action[AnyContent] = actions.requireData.andThen(getMandatoryPage(BalancePage)) {
     implicit request =>
-      request.userAnswers.get(BalancePage) match {
-        case Some(balance) =>
-          val json = Json.obj(
-            "balance"                         -> balance,
-            "referral"                        -> referralService.getReferralFromSession(request),
-            "checkAnotherGuaranteeBalanceUrl" -> routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
-          )
-          renderer.render("balanceConfirmation.njk", json).map(Ok(_))
-        case _ =>
-          logger.warn("[BalanceConfirmationController][onPageLoad] Insufficient data in user answers. Redirecting to start of guarantee balance journey.")
-          Future.successful(Redirect(routes.StartController.startAgain()))
-      }
+      Ok(view(balance = request.arg, referral = referralService.getReferralFromSession))
   }
 
   def checkAnotherGuaranteeBalance: Action[AnyContent] =
@@ -68,7 +55,7 @@ class BalanceConfirmationController @Inject() (
   def manageTransitMovements: Action[AnyContent] =
     clearUserAnswersAndRedirect(appConfig.manageTransitMovementsUrl)
 
-  private def clearUserAnswersAndRedirect(url: String): Action[AnyContent] = (identify andThen getData andThen requireData).async {
+  private def clearUserAnswersAndRedirect(url: String): Action[AnyContent] = actions.requireData.async {
     implicit request =>
       sessionRepository.set(request.userAnswers.clear) map {
         _ =>

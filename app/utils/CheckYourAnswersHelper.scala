@@ -19,57 +19,36 @@ package utils
 import controllers.routes
 import models.{Mode, UserAnswers}
 import pages._
-import uk.gov.hmrc.viewmodels.SummaryList._
-import uk.gov.hmrc.viewmodels._
+import play.api.i18n.Messages
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 
-class CheckYourAnswersHelper(userAnswers: UserAnswers, mode: Mode) {
+class CheckYourAnswersHelper(userAnswers: UserAnswers, mode: Mode)(implicit messages: Messages) extends AnswersHelper(userAnswers) {
 
-  def eoriNumber: Option[Row] = userAnswers.get(EoriNumberPage) map {
-    answer =>
-      Row(
-        key = Key(msg"eoriNumber.checkYourAnswersLabel"),
-        value = Value(lit"$answer"),
-        actions = List(
-          Action(
-            content = msg"site.edit",
-            href = routes.EoriNumberController.onPageLoad(mode).url,
-            visuallyHiddenText = Some(msg"eoriNumber.checkYourAnswersLabel"),
-            attributes = Map("id" -> "change-eori-number")
-          )
-        )
-      )
-  }
+  def eoriNumber: Option[SummaryListRow] =
+    getAnswerAndBuildRow[String](
+      page = EoriNumberPage,
+      formatAnswer = formatAsText,
+      prefix = "eoriNumber",
+      id = Some("change-eori-number"),
+      call = routes.EoriNumberController.onPageLoad(mode)
+    )
 
-  def guaranteeReferenceNumber: Option[Row] = userAnswers.get(GuaranteeReferenceNumberPage) map {
-    answer =>
-      Row(
-        key = Key(msg"guaranteeReferenceNumber.checkYourAnswersLabel"),
-        value = Value(lit"$answer"),
-        actions = List(
-          Action(
-            content = msg"site.edit",
-            href = routes.GuaranteeReferenceNumberController.onPageLoad(mode).url,
-            visuallyHiddenText = Some(msg"guaranteeReferenceNumber.checkYourAnswersLabel"),
-            attributes = Map("id" -> "change-guarantee-reference-number")
-          )
-        )
-      )
-  }
+  def guaranteeReferenceNumber: Option[SummaryListRow] =
+    getAnswerAndBuildRow[String](
+      page = GuaranteeReferenceNumberPage,
+      formatAnswer = formatAsText,
+      prefix = "guaranteeReferenceNumber",
+      id = Some("change-guarantee-reference-number"),
+      call = routes.GuaranteeReferenceNumberController.onPageLoad(mode)
+    )
 
-  def accessCode: Option[Row] = userAnswers.get(AccessCodePage) map {
-    answer =>
-      Row(
-        key = Key(msg"accessCode.checkYourAnswersLabel"),
-        value = Value(lit"${"•" * answer.length}"),
-        actions = List(
-          Action(
-            content = msg"site.edit",
-            href = routes.AccessCodeController.onPageLoad(mode).url,
-            visuallyHiddenText = Some(msg"accessCode.checkYourAnswersLabel"),
-            attributes = Map("id" -> "change-access-code")
-          )
-        )
-      )
-  }
+  def accessCode: Option[SummaryListRow] =
+    getAnswerAndBuildRow[String](
+      page = AccessCodePage,
+      formatAnswer = formatAsPassword,
+      prefix = "accessCode",
+      id = Some("change-access-code"),
+      call = routes.AccessCodeController.onPageLoad(mode)
+    )
 
 }

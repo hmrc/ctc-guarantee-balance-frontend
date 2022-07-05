@@ -18,9 +18,10 @@ package config
 
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
-class FrontendAppConfig @Inject() (configuration: Configuration) {
+class FrontendAppConfig @Inject() (configuration: Configuration, service: ServicesConfig) {
 
   lazy val appName: String = configuration.get[String]("appName")
 
@@ -39,9 +40,9 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
   val userResearchUrl: String         = configuration.get[String]("urls.userResearch")
   val showUserResearchBanner: Boolean = configuration.get[Boolean]("banners.showUserResearch")
 
-  lazy val timeoutSeconds: String   = configuration.get[String]("session.timeoutSeconds")
-  lazy val countdownSeconds: String = configuration.get[String]("session.countdownSeconds")
-  lazy val mongoDbTtl: Int          = configuration.get[Int]("mongodb.timeToLiveInSeconds")
+  lazy val timeoutSeconds: Int   = configuration.get[Int]("session.timeoutSeconds")
+  lazy val countdownSeconds: Int = configuration.get[Int]("session.countdownSeconds")
+  lazy val mongoDbTtl: Int       = configuration.get[Int]("mongodb.timeToLiveInSeconds")
 
   lazy val rateLimitDuration: Int               = configuration.get[Int]("rateLimit.duration")
   lazy val guaranteeBalanceDelayInSecond: Int   = configuration.get[Int]("guaranteeBalanceLookup.waitTimeInSeconds")
@@ -50,11 +51,11 @@ class FrontendAppConfig @Inject() (configuration: Configuration) {
 
   lazy val languageTranslationEnabled: Boolean = configuration.get[Boolean]("microservice.services.features.welsh-translation")
 
-  lazy val authUrl: String          = configuration.get[Service]("auth").baseUrl
+  lazy val authUrl: String          = service.baseUrl("auth")
   lazy val loginUrl: String         = configuration.get[String]("urls.login")
   lazy val loginContinueUrl: String = configuration.get[String]("urls.loginContinue")
 
-  lazy val guaranteeBalanceUrl: String       = configuration.get[Service]("microservice.services.common-transit-convention-guarantee-balance").baseUrl
+  lazy val guaranteeBalanceUrl: String       = service.baseUrl("common-transit-convention-guarantee-balance")
   lazy val nctsUrl: String                   = configuration.get[String]("urls.ncts")
   lazy val nctsEnquiriesUrl: String          = configuration.get[String]("urls.nctsEnquiries")
   lazy val manageTransitMovementsUrl: String = configuration.get[String]("urls.manageTransitMovements")

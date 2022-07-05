@@ -2,7 +2,6 @@ site.day.capitalized = Day
 site.month.capitalized = Month
 site.year.capitalized = Year
 
-site.back = Back
 site.delete = Remove
 site.edit = Change
 site.delete.hidden = Change {0}
@@ -14,10 +13,10 @@ site.continueWaiting = Continue waiting
 site.tryAgain = Try again
 site.startAgain = Start again
 site.confirmAndSend = Confirm and send
-site.service_name = Check your transit guarantee balance
 site.textarea.char_limit = (Limit is {0} characters)
 site.title.suffix = - Check your transit guarantee balance - GOV.UK
 site.youMust = You must
+site.service_name = Check your transit guarantee balance
 
 error.title.prefix = Error:
 error.summary.title = There is a problem
@@ -75,6 +74,7 @@ eoriNumber.error.minLength = Your EORI number must be 14 characters or more
 eoriNumber.error.invalidCharacters = Your EORI number must only include letters a to z without accents and numbers 0 to 9
 eoriNumber.error.invalidFormat = Your EORI number must start GB or XI followed by 12 or 15 numbers, for example GB123456789000
 eoriNumber.error.prefix = Your EORI number must start with GB or XI, like GB123456789000
+eoriNumber.change.hidden = EORI number
 
 tryAgain.title = We have not been able to get your guarantee balance
 tryAgain.heading = We have not been able to get your guarantee balance
@@ -94,6 +94,7 @@ guaranteeReferenceNumber.paragraph2 = You must make sure this reference is up to
 guaranteeReferenceNumber.error.required = Enter the guarantee reference number
 guaranteeReferenceNumber.error.length = The guarantee reference number must be 17 characters or less
 guaranteeReferenceNumber.error.invalid = The guarantee reference number must only include letters a to z without accents and numbers 0 to 9
+guaranteeReferenceNumber.change.hidden = guarantee reference number
 
 unsupportedGuaranteeType.title = We cannot get the balance for this type of guarantee
 unsupportedGuaranteeType.heading = We cannot get the balance for this type of guarantee
@@ -114,6 +115,7 @@ accessCode.error.length = The access code must be 4 characters long, like 0000 o
 accessCode.error.invalidCharacters = The access code must only include letters a to z and numbers 0 to 9
 accessCode.hint = The access code must be 4 characters long, like 0000 or X9X9.
 accessCode.paragraph = The person responsible for your transit movements will have received an email about access codes.
+accessCode.change.hidden = access code
 
 checkYourAnswers.title = Check your answers
 checkYourAnswers.heading = Check your answers

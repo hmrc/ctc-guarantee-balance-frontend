@@ -24,10 +24,10 @@ trait ClearValueOnChangePage[A] extends QuestionPage[A] {
 
   val pageToClear: Settable[_]
 
-  override def cleanup(value: Option[A], userAnswers: UserAnswers, hasChanged: Boolean): Try[UserAnswers] =
-    if (hasChanged) {
+  override def cleanup(value: Option[A], userAnswers: UserAnswers, hasValueChanged: Boolean): Try[UserAnswers] =
+    if (hasValueChanged) {
       userAnswers.remove(pageToClear)
     } else {
-      super.cleanup(value, userAnswers, hasChanged)
+      super.cleanup(value, userAnswers, hasValueChanged)
     }
 }

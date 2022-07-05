@@ -16,13 +16,20 @@
 
 package views
 
-class UnauthorisedViewSpec extends SingleViewSpec("unauthorised.njk") {
+import play.twirl.api.HtmlFormat
+import views.behaviours.ViewBehaviours
+import views.html.UnauthorisedView
 
-  "must render correct heading" in {
-    assertPageTitleEqualsMessage(doc, "unauthorised.heading")
-  }
+class UnauthorisedViewSpec extends ViewBehaviours {
 
-  "must render paragraph" in {
-    assertContainsText(doc, "unauthorised.paragraph1")
-  }
+  override def view: HtmlFormat.Appendable =
+    app.injector.instanceOf[UnauthorisedView].apply()(fakeRequest, messages)
+
+  override val prefix: String = "unauthorised"
+
+  behave like pageWithoutBackLink()
+
+  behave like pageWithHeading()
+
+  behave like pageWithContent("p", "You must have an account with an activated EORI number.")
 }
