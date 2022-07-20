@@ -71,7 +71,7 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
 
   "must append service to feedback link" in {
     val link = getElementBySelector(doc, ".govuk-phase-banner__text > .govuk-link")
-    getElementHref(link) must endWith("?service=CTCTraders")
+    getElementHref(link) must fullyMatch regex "http:\\/\\/localhost:9250\\/contact\\/beta-feedback\\?service=CTCTraders&backUrl=.*"
   }
 
   "must render accessibility statement link" in {
