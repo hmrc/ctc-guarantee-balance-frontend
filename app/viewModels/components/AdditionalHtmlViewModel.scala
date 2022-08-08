@@ -18,29 +18,7 @@ package viewModels.components
 
 import play.twirl.api.Html
 
-sealed trait InputTextViewModel
-
-object InputTextViewModel {
-
-  case class OrdinaryTextInput(
-    heading: String
-  ) extends InputTextViewModel
-
-  case class TextInputWithHiddenLabel(
-    heading: String,
-    label: String,
-    additionalHtml: Html
-  ) extends InputTextViewModel
-      with AdditionalHtmlViewModel
-
-  case class TextInputWithStatementHeading(
-    heading: String,
-    label: String,
-    additionalHtml: Html
-  ) extends InputTextViewModel
-      with AdditionalHtmlViewModel
-
-  case class AddressTextInput(
-    label: String
-  ) extends InputTextViewModel
+trait AdditionalHtmlViewModel {
+  val additionalHtml: Html
+  val headingClasses = "govuk-!-margin-top-0 govuk-!-margin-bottom-2"
 }

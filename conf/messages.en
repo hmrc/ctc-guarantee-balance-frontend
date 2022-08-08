@@ -1,7 +1,3 @@
-site.day.capitalized = Day
-site.month.capitalized = Month
-site.year.capitalized = Year
-
 site.delete = Remove
 site.edit = Change
 site.delete.hidden = Change {0}
@@ -17,26 +13,10 @@ site.textarea.char_limit = (Limit is {0} characters)
 site.title.suffix = - Check your transit guarantee balance - GOV.UK
 site.youMust = You must
 site.service_name = Check your transit guarantee balance
+site.section = This section is
 
 error.title.prefix = Error:
 error.summary.title = There is a problem
-
-phaseBanner.1 = This is a new service – your
-phaseBanner.2 = feedback
-phaseBanner.3 = will help us to improve it.
-
-footer.links.support_links = Support links
-footer.links.help = Help using GOV.UK
-footer.links.cookies = Cookies
-footer.links.accessibility = Accessibility statement
-footer.links.privacy = Privacy policy
-footer.links.terms = Terms and conditions
-
-language.cymraeg = Cymraeg
-language.change.cymraeg = Newid yr iaith i'r Gymraeg
-language.english = English
-language.change.english = Change the language to English
-language.switcher = Language switcher
 
 session_expired.title = For your security, we signed you out
 session_expired.heading = For your security, we signed you out
@@ -135,5 +115,3 @@ detailsDontMatch.p1 = You must
 detailsDontMatch.p1.a = check your answers and try again
 detailsDontMatch.p2 = If your details are correct, you must
 detailsDontMatch.p2.a = contact the NCTS helpdesk (opens in a new tab)
-
-
