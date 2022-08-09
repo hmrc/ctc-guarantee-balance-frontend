@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,25 +12,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import views.html.components.Heading
+package templates
 
-@this(
-    main_template: MainTemplate,
-    heading: Heading
-)
+import a11ySpecBase.A11ySpecBase
+import views.html.templates.ErrorTemplate
 
-@(title: String, header: String, message: String)(implicit request: Request[_], messages: Messages)
+class ErrorTemplateSpec extends A11ySpecBase {
 
-@main_template(
-    title = messages(title),
-    showBackLink = true
-) {
+  "the 'error' template" must {
+    val template = app.injector.instanceOf[ErrorTemplate]
 
-    @heading(messages(header))
+    val title   = nonEmptyString.sample.value
+    val header  = nonEmptyString.sample.value
+    val message = nonEmptyString.sample.value
 
-    <p class="govuk-body">
-        @messages(message)
-    </p>
+    val content = template.apply(title, header, message)
+
+    "pass accessibility checks" in {
+      content.toString() must passAccessibilityChecks
+    }
+  }
 }

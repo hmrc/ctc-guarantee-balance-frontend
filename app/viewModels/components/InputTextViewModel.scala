@@ -31,12 +31,14 @@ object InputTextViewModel {
     label: String,
     additionalHtml: Html
   ) extends InputTextViewModel
+      with AdditionalHtmlViewModel
 
   case class TextInputWithStatementHeading(
     heading: String,
     label: String,
     additionalHtml: Html
   ) extends InputTextViewModel
+      with AdditionalHtmlViewModel
 
   case class AddressTextInput(
     label: String

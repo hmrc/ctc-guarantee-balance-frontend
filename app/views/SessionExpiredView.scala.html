@@ -32,7 +32,7 @@
 ) {
 
     @formHelper(action = routes.SessionExpiredController.onSubmit(), 'autoComplete -> "off") {
-        @heading("session_expired.heading")
+        @heading(messages("session_expired.heading"))
 
         <p class="govuk-body">@messages("session_expired.guidance")</p>
 

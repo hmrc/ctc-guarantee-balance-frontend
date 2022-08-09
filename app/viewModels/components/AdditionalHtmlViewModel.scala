@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,25 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import views.html.components.Heading
+package viewModels.components
 
-@this(
-    main_template: MainTemplate,
-    heading: Heading
-)
+import play.twirl.api.Html
 
-@(title: String, header: String, message: String)(implicit request: Request[_], messages: Messages)
-
-@main_template(
-    title = messages(title),
-    showBackLink = true
-) {
-
-    @heading(messages(header))
-
-    <p class="govuk-body">
-        @messages(message)
-    </p>
+trait AdditionalHtmlViewModel {
+  val additionalHtml: Html
+  val headingClasses = "govuk-!-margin-top-0 govuk-!-margin-bottom-2"
 }
