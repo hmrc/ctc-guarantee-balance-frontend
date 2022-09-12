@@ -25,7 +25,7 @@
 @this(
     appConfig: FrontendAppConfig,
     hmrcLayout: HmrcLayout,
-    hmrcHead: HmrcHead,
+    hmrcInternalHead: HmrcInternalHead,
     hmrcTimeoutDialog: HmrcTimeoutDialog,
     standardBetaBanner: StandardBetaBanner,
     stylesheets: Stylesheets,
@@ -61,8 +61,9 @@
 
 @hmrcLayout(
     pageTitle = Some(breadCrumbTitle(title, mainContent)),
-    additionalHeadBlock = Some(hmrcHead(
-        headBlock = Some(headScripts)
+    additionalHeadBlock = Some(hmrcInternalHead(
+        headBlock = Some(headScripts),
+        nonce = CSPNonce.get
     )),
     userResearchBannerUrl = if (appConfig.showUserResearchBanner) Some(appConfig.userResearchUrl) else None,
     serviceName = Some(messages("site.service_name")),
