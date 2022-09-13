@@ -8,7 +8,7 @@ lazy val appName: String = "ctc-guarantee-balance-frontend"
 
 resolvers += "hmrc-releases" at "https://artefacts.tax.service.gov.uk/artifactory/hmrc-releases/"
 
-val silencerVersion = "1.7.8"
+val silencerVersion = "1.7.9"
 
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin)
