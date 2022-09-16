@@ -52,10 +52,7 @@ class SessionRepositorySpec extends AnyFreeSpec with Matchers with DefaultPlayMo
 
         result.value.id mustBe userAnswers1.id
         result.value.data mustBe userAnswers1.data
-
-        result.value.lastUpdated isEqual userAnswers1.lastUpdated.truncatedTo(
-          java.time.temporal.ChronoUnit.MILLIS
-        ) mustBe true
+        result.value.lastUpdated isEqual userAnswers1.lastUpdated mustBe true
       }
 
       "must return None when no match found for internal ID" in {
