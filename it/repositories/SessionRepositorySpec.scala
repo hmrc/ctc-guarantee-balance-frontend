@@ -52,7 +52,10 @@ class SessionRepositorySpec extends AnyFreeSpec with Matchers with DefaultPlayMo
 
         result.value.id mustBe userAnswers1.id
         result.value.data mustBe userAnswers1.data
-        result.value.lastUpdated isEqual userAnswers1.lastUpdated mustBe true
+
+        result.value.lastUpdated isEqual userAnswers1.lastUpdated.truncatedTo(
+          java.time.temporal.ChronoUnit.MILLIS
+        ) mustBe true
       }
 
       "must return None when no match found for internal ID" in {
@@ -74,7 +77,10 @@ class SessionRepositorySpec extends AnyFreeSpec with Matchers with DefaultPlayMo
         setResult mustBe true
         getResult.id mustBe userAnswers1.id
         getResult.data mustBe userAnswers1.data
-        getResult.lastUpdated isAfter userAnswers1.lastUpdated mustBe true
+
+        getResult.lastUpdated isAfter userAnswers1.lastUpdated.truncatedTo(
+          java.time.temporal.ChronoUnit.MILLIS
+        ) mustBe true
       }
 
       "must create new document when it doesn't already exist" in {
@@ -86,7 +92,10 @@ class SessionRepositorySpec extends AnyFreeSpec with Matchers with DefaultPlayMo
         setResult mustBe true
         getResult.id mustBe userAnswers2.id
         getResult.data mustBe userAnswers2.data
-        getResult.lastUpdated isAfter userAnswers2.lastUpdated mustBe true
+
+        getResult.lastUpdated isAfter userAnswers2.lastUpdated.truncatedTo(
+          java.time.temporal.ChronoUnit.MILLIS
+        ) mustBe true
       }
     }
 
