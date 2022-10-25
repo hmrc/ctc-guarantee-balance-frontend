@@ -44,7 +44,7 @@
         <a class="govuk-link" id="checkDetails-link" href="@routes.CheckYourAnswersController.onPageLoad()">@messages("unsupportedGuaranteeType.checkDetails.link")</a> @messages("unsupportedGuaranteeType.checkDetails.postLink")
     </p>
 
-    @formHelper(action = routes.UnsupportedGuaranteeTypeController.onSubmit(), 'autoComplete -> "off") {
+    @formHelper(action = routes.UnsupportedGuaranteeTypeController.onSubmit(), Symbol("autoComplete") -> "off") {
 
         @button(
             messageKey = "site.startAgain",

@@ -18,6 +18,8 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import play.api.libs.json._
 import uk.gov.hmrc.http.HttpResponse
 
+import scala.annotation.nowarn
+
 package object models {
 
   implicit class RichJsObject(jsObject: JsObject) {
@@ -115,6 +117,9 @@ package object models {
       }
     }
 
+    @nowarn("msg=Exhaustivity analysis reached max recursion depth, not all missing cases are reported.")
+    @nowarn("msg=match may not be exhaustive")
+    // scalastyle:off cyclomatic.complexity
     def remove(path: JsPath): JsResult[JsValue] =
       (path.path, jsValue) match {
         case (Nil, _)                                                                  => JsError("path cannot be empty")
@@ -148,6 +153,7 @@ package object models {
                   }
             }
       }
+    // scalastyle:on cyclomatic.complexity
   }
 
   implicit class RichString(string: String) {

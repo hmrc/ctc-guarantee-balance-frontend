@@ -16,10 +16,9 @@
 
 package views.behaviours
 
+import play.twirl.api.TwirlHelperImports._
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
-
-import scala.collection.JavaConverters._
 
 trait SummaryListViewBehaviours extends ViewBehaviours {
 
@@ -29,7 +28,7 @@ trait SummaryListViewBehaviours extends ViewBehaviours {
   def pageWithSummaryLists(): Unit =
     "page with summary lists" - {
 
-      val renderedLists = doc.getElementsByClass("govuk-summary-list").asScala
+      val renderedLists = doc.getElementsByClass("govuk-summary-list").toList
 
       summaryLists.zipWithIndex.foreach {
         case (summaryList, listIndex) =>
@@ -37,7 +36,7 @@ trait SummaryListViewBehaviours extends ViewBehaviours {
 
           s"list ${listIndex + 1}" - {
 
-            val renderedRows = renderedList.getElementsByClass("govuk-summary-list__row").asScala
+            val renderedRows = renderedList.getElementsByClass("govuk-summary-list__row").toList
 
             summaryList.rows.zipWithIndex.foreach {
               case (row, rowIndex) =>

@@ -35,7 +35,7 @@ class BalanceIdSpec extends SpecBase {
   "must fail to bind a non-UUID" in {
     forAll(arbitrary[String]) {
       notAUuid =>
-        BalanceId.pathBinder.bind(balanceIdKey, notAUuid) mustBe 'left
+        BalanceId.pathBinder.bind(balanceIdKey, notAUuid).isLeft mustBe true
     }
   }
 

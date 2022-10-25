@@ -18,9 +18,8 @@ package views.behaviours
 
 import org.jsoup.nodes.Document
 import play.twirl.api.HtmlFormat
+import play.twirl.api.TwirlHelperImports._
 import uk.gov.hmrc.hmrcfrontend.views.viewmodels.addtoalist.ListItem
-
-import scala.collection.JavaConverters._
 
 trait ListWithActionsViewBehaviours extends YesNoViewBehaviours {
 
@@ -73,7 +72,7 @@ trait ListWithActionsViewBehaviours extends YesNoViewBehaviours {
         descriptionLists.size mustBe 1
       }
 
-      val renderedItems = doc.getElementsByClass("govuk-summary-list__row").asScala
+      val renderedItems = doc.getElementsByClass("govuk-summary-list__row").toList
 
       listItems.zipWithIndex.foreach {
         case (listItem, index) =>
@@ -94,7 +93,7 @@ trait ListWithActionsViewBehaviours extends YesNoViewBehaviours {
               s"must contain a $linkType link" in {
                 val link = renderedItem
                   .getElementsByClass("govuk-summary-list__actions-list-item")
-                  .asScala(index)
+                  .toList(index)
                   .getElementsByClass("govuk-link")
                   .first()
 

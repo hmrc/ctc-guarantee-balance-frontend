@@ -84,7 +84,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
           .thenReturn(Future.successful(Right(balance)))
 
         val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
-        val result  = service.retrieveBalanceResponse.futureValue
+        val result  = service.retrieveBalanceResponse().futureValue
         result.value mustEqual balance
 
         verify(mockMongoLockRepository).takeLock(any(), any(), any())
@@ -112,7 +112,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
 
         when(mockMongoLockRepository.takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())).thenReturn(Future.successful(false))
         val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
-        val result  = service.retrieveBalanceResponse.futureValue
+        val result  = service.retrieveBalanceResponse().futureValue
         result.value mustEqual BalanceRequestRateLimit
 
         verify(mockMongoLockRepository).takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())
@@ -137,7 +137,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
               .thenReturn(Future.successful(Right(balance)))
 
             val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
-            val result  = service.retrieveBalanceResponse.futureValue
+            val result  = service.retrieveBalanceResponse().futureValue
             result.value mustEqual BalanceRequestSessionExpired
         }
       }
@@ -154,7 +154,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
 
         val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
 
-        val result = service.retrieveBalanceResponse
+        val result = service.retrieveBalanceResponse()
         whenReady(result) {
           _ mustEqual successResponse
         }
@@ -168,7 +168,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
 
         val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
 
-        val result = service.retrieveBalanceResponse
+        val result = service.retrieveBalanceResponse()
         whenReady(result) {
           _ mustEqual successResponse
         }
@@ -182,7 +182,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
 
         val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
 
-        val result = service.retrieveBalanceResponse
+        val result = service.retrieveBalanceResponse()
         whenReady(result) {
           _ mustEqual tryAgainResponse
         }
@@ -198,7 +198,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
 
         val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
 
-        val result = service.retrieveBalanceResponse
+        val result = service.retrieveBalanceResponse()
         whenReady(result) {
           _ mustEqual successResponse
         }
@@ -215,7 +215,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
 
         val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
 
-        val result = service.retrieveBalanceResponse
+        val result = service.retrieveBalanceResponse()
 
         whenReady(result) {
           _ mustEqual tryAgainResponse
@@ -230,7 +230,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
 
         val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
 
-        val result = service.retrieveBalanceResponse
+        val result = service.retrieveBalanceResponse()
         whenReady(result) {
           _ mustEqual pendingResponse
         }

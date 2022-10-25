@@ -32,7 +32,7 @@ class CheckYourAnswersViewSpec extends CheckYourAnswersViewBehaviours {
 
   behave like pageWithTitle()
 
-  behave like pageWithoutBackLink
+  behave like pageWithoutBackLink()
 
   behave like pageWithHeading()
 

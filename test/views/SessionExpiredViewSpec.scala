@@ -31,7 +31,7 @@ class SessionExpiredViewSpec extends ViewBehaviours {
 
   behave like pageWithTitle()
 
-  behave like pageWithoutBackLink
+  behave like pageWithoutBackLink()
 
   behave like pageWithHeading()
 

@@ -31,7 +31,7 @@
     canSignOut = false
 ) {
 
-    @formHelper(action = routes.SessionExpiredController.onSubmit(), 'autoComplete -> "off") {
+    @formHelper(action = routes.SessionExpiredController.onSubmit(), Symbol("autoComplete") -> "off") {
         @heading(messages("session_expired.heading"))
 
         <p class="govuk-body">@messages("session_expired.guidance")</p>

@@ -43,7 +43,7 @@
     showBackLink = true
 ) {
 
-    @formHelper(action = routes.GuaranteeReferenceNumberController.onSubmit(mode), 'autoComplete -> "off") {
+    @formHelper(action = routes.GuaranteeReferenceNumberController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
         @errorSummary(form.errors)
 

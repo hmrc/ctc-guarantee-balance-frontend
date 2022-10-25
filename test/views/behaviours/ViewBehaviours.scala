@@ -21,9 +21,8 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import org.scalatest.Assertion
 import play.twirl.api.HtmlFormat
+import play.twirl.api.TwirlHelperImports._
 import views.viewBase.ViewSpecAssertions
-
-import scala.collection.convert.ImplicitConversions._
 
 trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
 
@@ -212,7 +211,7 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
       val listItems = list.getElementsByTag("li")
       listItems.toList.zipWithIndex.foreach {
         case (listItem, index) =>
-          val expectedListItem = expectedListItems.get(index)
+          val expectedListItem = expectedListItems.toList(index)
           val link             = listItem.getElementById(expectedListItem._1)
           assertElementHasLink(link, expectedListItem._2, expectedListItem._3)
       }

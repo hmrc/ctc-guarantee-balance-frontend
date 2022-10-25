@@ -56,7 +56,7 @@ trait Generators extends UserAnswersGenerator with PageGenerators with ModelGene
     )
 
   def nonNumerics: Gen[String] =
-    alphaStr suchThat (_.nonEmpty)
+    Gen.nonEmptyListOf[Char](Gen.numChar).map(_.mkString)
 
   def decimals: Gen[String] =
     arbitrary[BigDecimal]
@@ -76,13 +76,12 @@ trait Generators extends UserAnswersGenerator with PageGenerators with ModelGene
     )
 
   def nonBooleans: Gen[String] =
-    arbitrary[String]
-      .suchThat(_.nonEmpty)
+    nonEmptyString
       .suchThat(_ != "true")
       .suchThat(_ != "false")
 
   def nonEmptyString: Gen[String] =
-    Gen.alphaNumStr suchThat (_.nonEmpty)
+    Gen.nonEmptyListOf[Char](Gen.alphaNumChar).map(_.mkString)
 
   def stringsWithLengthInRange(minLength: Int, maxLength: Int, charGen: Gen[Char] = arbitrary[Char]): Gen[String] =
     for {
