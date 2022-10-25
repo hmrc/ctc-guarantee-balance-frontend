@@ -248,7 +248,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
         )
 
         val result   = connector.submitBalanceRequest(request).futureValue
-        val response = result.left.get
+        val response = result.left.value
         response.status mustBe Status.BAD_REQUEST
       }
 
@@ -291,7 +291,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
 
             val result = connector.submitBalanceRequest(request).futureValue
 
-            val response = result.left.get
+            val response = result.left.value
 
             response.status mustBe Status.BAD_REQUEST
         }
@@ -314,7 +314,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
 
             val result = connector.submitBalanceRequest(request).futureValue
 
-            val response = result.left.get
+            val response = result.left.value
 
             response.status mustBe errorResponse
         }
@@ -424,7 +424,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
 
             val result = connector.queryPendingBalance(BalanceId(testUuid)).futureValue
 
-            val response = result.left.get
+            val response = result.left.value
 
             response.status mustBe errorResponse
         }

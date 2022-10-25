@@ -45,6 +45,6 @@ class TryAgainController @Inject() (
 
   def onSubmit(): Action[AnyContent] = actions.requireData.async {
     implicit request =>
-      balanceService.retrieveBalanceResponse.flatMap(responseHandler.processResponse(_))
+      balanceService.retrieveBalanceResponse().flatMap(responseHandler.processResponse(_))
   }
 }

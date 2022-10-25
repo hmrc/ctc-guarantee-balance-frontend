@@ -46,7 +46,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
     request: DataRequest[_]
   ): Future[Result] =
     for {
-      updateAnswers <- removeBalanceIdFromUserAnswers
+      updateAnswers <- removeBalanceIdFromUserAnswers()
       handlerResponse <- response match {
         case Right(balanceRequestResponse) => processBalanceRequestResponse(balanceRequestResponse, updateAnswers)
         case Left(failureResponse)         => processHttpResponse(failureResponse)
@@ -74,7 +74,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
         Future.successful(Redirect(controllers.routes.DetailsDontMatchController.onPageLoad()))
 
       case BalanceRequestRateLimit =>
-        auditRateLimit
+        auditRateLimit()
         Future.successful(Redirect(controllers.routes.TryAgainController.onPageLoad()))
 
       case BalanceRequestPendingExpired(_) =>

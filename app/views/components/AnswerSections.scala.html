@@ -21,7 +21,7 @@
 
 @(
     sections: Seq[Section]
-)(implicit messages: Messages)
+)
 
 @for(section <- sections) {
     @if(section.rows.nonEmpty) {

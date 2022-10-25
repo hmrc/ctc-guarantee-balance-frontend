@@ -32,7 +32,7 @@ object BalanceId {
 
     override def bind(key: String, value: String): Either[String, BalanceId] =
       for {
-        uuid <- uuidBinder.bind(key, value).right
+        uuid <- uuidBinder.bind(key, value)
       } yield BalanceId(uuid)
 
     override def unbind(key: String, value: BalanceId): String =

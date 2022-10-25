@@ -33,7 +33,7 @@ class TryAgainViewSpec extends ViewBehaviours {
 
   behave like pageWithTitle()
 
-  behave like pageWithoutBackLink
+  behave like pageWithoutBackLink()
 
   behave like pageWithHeading()
 

@@ -71,7 +71,7 @@ class SpecificDataRequiredActionSpec extends SpecBase with ScalaCheckPropertyChe
 
           whenReady(futureResult) {
             r =>
-              val result = Future.successful(r.left.get)
+              val result = Future.successful(r.left.value)
               status(result) mustEqual SEE_OTHER
               redirectLocation(result).value mustEqual controllers.routes.SessionExpiredController.onPageLoad().url
           }
@@ -90,7 +90,7 @@ class SpecificDataRequiredActionSpec extends SpecBase with ScalaCheckPropertyChe
               val futureResult = action.callRefine(request(userAnswers))
 
               whenReady(futureResult) {
-                _.right.get.arg mustBe str
+                _.value.arg mustBe str
               }
           }
         }
@@ -113,7 +113,7 @@ class SpecificDataRequiredActionSpec extends SpecBase with ScalaCheckPropertyChe
 
               whenReady(futureResult) {
                 r =>
-                  val result = Future.successful(r.left.get)
+                  val result = Future.successful(r.left.value)
                   status(result) mustEqual SEE_OTHER
                   redirectLocation(result).value mustEqual controllers.routes.SessionExpiredController.onPageLoad().url
               }
@@ -134,8 +134,8 @@ class SpecificDataRequiredActionSpec extends SpecBase with ScalaCheckPropertyChe
 
               whenReady(futureResult) {
                 r =>
-                  r.right.get.arg._1 mustBe str1
-                  r.right.get.arg._2 mustBe str2
+                  r.value.arg._1 mustBe str1
+                  r.value.arg._2 mustBe str2
               }
           }
         }

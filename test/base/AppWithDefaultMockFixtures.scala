@@ -20,8 +20,7 @@ import controllers.actions._
 import models.UserAnswers
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{reset, when}
 import org.scalatest.{BeforeAndAfterEach, TestSuite}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.{GuiceFakeApplicationFactory, GuiceOneAppPerSuite}
@@ -40,12 +39,10 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
   self: TestSuite =>
 
   override def beforeEach(): Unit = {
-    Mockito.reset(
-      mockSessionRepository,
-      mockMongoLockRepository,
-      mockGuaranteeBalanceService,
-      mockAuditService
-    )
+    reset(mockSessionRepository)
+    reset(mockMongoLockRepository)
+    reset(mockGuaranteeBalanceService)
+    reset(mockAuditService)
 
     when(mockSessionRepository.set(any()))
       .thenReturn(Future.successful(true))

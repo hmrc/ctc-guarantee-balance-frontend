@@ -50,6 +50,6 @@ class CheckYourAnswersController @Inject() (
 
   def onSubmit(): Action[AnyContent] = actions.requireData.async {
     implicit request =>
-      guaranteeBalanceService.retrieveBalanceResponse.flatMap(responseHandler.processResponse(_))
+      guaranteeBalanceService.retrieveBalanceResponse().flatMap(responseHandler.processResponse(_))
   }
 }

@@ -20,8 +20,7 @@ import base.SpecBase
 import org.jsoup.nodes.{Document, Element}
 import org.jsoup.select.Elements
 import org.scalatest.Assertion
-
-import scala.collection.JavaConverters._
+import play.twirl.api.TwirlHelperImports._
 
 trait ViewSpecAssertions extends ViewSpecGetters {
   this: SpecBase =>
@@ -53,10 +52,10 @@ trait ViewSpecAssertions extends ViewSpecGetters {
     element.id() mustBe expectedId
 
   def assertElementExists(elements: Elements, condition: Element => Boolean): Assertion =
-    assert(elements.asScala.exists(condition))
+    assert(elements.toList.exists(condition))
 
   def assertElementDoesNotExist(elements: Elements, condition: Element => Boolean): Assertion =
-    assert(!elements.asScala.exists(condition))
+    assert(!elements.toList.exists(condition))
 
   def assertElementDoesNotExist(doc: Document, className: String): Assertion =
     assert(doc.getElementsByClass(className).isEmpty)

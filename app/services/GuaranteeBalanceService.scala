@@ -43,7 +43,7 @@ class GuaranteeBalanceService @Inject() (
   def retrieveBalanceResponse()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] =
     request.userAnswers.get(BalanceIdPage) match {
       case Some(balanceId: BalanceId) => pollForGuaranteeBalance(balanceId)
-      case None                       => submitBalanceRequest
+      case None                       => submitBalanceRequest()
     }
 
   private def submitBalanceRequest()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] = {

@@ -38,7 +38,7 @@ class AccessCodeViewSpec extends InputTextViewBehaviours[String] {
 
   behave like pageWithTitle()
 
-  behave like pageWithBackLink
+  behave like pageWithBackLink()
 
   behave like pageWithHeading()
 
