@@ -56,7 +56,7 @@ trait Generators extends UserAnswersGenerator with PageGenerators with ModelGene
     )
 
   def nonNumerics: Gen[String] =
-    Gen.nonEmptyListOf[Char](Gen.numChar).map(_.mkString)
+    Gen.nonEmptyListOf[Char](Gen.alphaChar).map(_.mkString)
 
   def decimals: Gen[String] =
     arbitrary[BigDecimal]
