@@ -21,7 +21,7 @@ import config.FrontendAppConfig
 import models.RichHttpResponse
 import models.backend._
 import models.backend.errors.FunctionalError
-import models.requests.BalanceRequest
+import models.requests.{BalanceRequest, BalanceRequestV2}
 import models.values.BalanceId
 import models.values.ErrorType.{InvalidDataErrorType, NotMatchedErrorType}
 import play.api.Logging
@@ -65,6 +65,34 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
       }
 
     http.POST[BalanceRequest, Either[HttpResponse, BalanceRequestResponse]](
+      url,
+      request,
+      headers
+    )
+  }
+
+  def submitBalanceRequestV2(request: BalanceRequestV2, grn: String)(implicit
+    hc: HeaderCarrier
+  ): Future[Either[HttpResponse, BalanceRequestResponse]] = {
+    val url = s"${appConfig.guaranteeBalanceUrl}/$grn/balance"
+
+    implicit val eitherBalanceIdOrResponseReads: HttpReads[Either[HttpResponse, BalanceRequestResponse]] =
+      HttpReads[HttpResponse].map {
+        response =>
+          response.status match {
+            case Status.OK =>
+              Right(response.json.as[PostBalanceRequestSuccessResponse].response)
+            case Status.TOO_MANY_REQUESTS =>
+              logger.warn("[GuaranteeBalanceConnector][submitBalanceRequest] TOO_MANY_REQUESTS response from back end call")
+              Right(BalanceRequestRateLimit)
+            case Status.BAD_REQUEST =>
+              processSubmitErrorResponse(response)
+            case _ =>
+              Left(response)
+          }
+      }
+
+    http.POST[BalanceRequestV2, Either[HttpResponse, BalanceRequestResponse]](
       url,
       request,
       headers

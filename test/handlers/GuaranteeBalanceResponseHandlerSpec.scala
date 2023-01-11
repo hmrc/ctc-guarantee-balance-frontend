@@ -42,7 +42,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with AppWithDefaultMo
 
   private val expectedUuid    = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
   private val balanceId       = BalanceId(expectedUuid)
-  private val balanceResponse = BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP"))
+  private val balanceResponse = BalanceRequestSuccess(BigDecimal(99.9), Some(CurrencyCode("GBP")))
   private val grn: String     = "grn"
   private val access: String  = "access"
   private val taxId: String   = "taxId"

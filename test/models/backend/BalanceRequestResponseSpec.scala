@@ -33,7 +33,7 @@ class BalanceRequestResponseSpec extends SpecBase {
 
         "when pounds sterling" - {
 
-          val currency = CurrencyCode("GBP")
+          val currency: Option[CurrencyCode] = Some(CurrencyCode("GBP"))
 
           "when balance of 10" in {
             val balance = BalanceRequestSuccess(10, currency)
@@ -63,7 +63,7 @@ class BalanceRequestResponseSpec extends SpecBase {
 
         "when euros" - {
 
-          val currency = CurrencyCode("EUR")
+          val currency = Some(CurrencyCode("EUR"))
 
           "when balance of 10" in {
             val balance = BalanceRequestSuccess(10, currency)
@@ -100,7 +100,7 @@ class BalanceRequestResponseSpec extends SpecBase {
                arbitrary[BigDecimal]
         ) {
           (invalidCurrencyCode, amount) =>
-            val balance = BalanceRequestSuccess(amount, CurrencyCode(invalidCurrencyCode))
+            val balance = BalanceRequestSuccess(amount, Some(CurrencyCode(invalidCurrencyCode)))
             balance.formatForDisplay mustEqual s"$invalidCurrencyCode$amount"
         }
       }

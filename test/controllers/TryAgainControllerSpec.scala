@@ -39,7 +39,7 @@ class TryAgainControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   private val baseAnswers: UserAnswers = emptyUserAnswers.setValue(BalanceIdPage, balanceId)
 
-  private val successResponse = Right(BalanceRequestSuccess(BigDecimal(99.9), CurrencyCode("GBP")))
+  private val successResponse = Right(BalanceRequestSuccess(BigDecimal(99.9), Some(CurrencyCode("GBP"))))
   private val errorResponse   = Left(HttpResponse(404: Int, ""))
 
   implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
