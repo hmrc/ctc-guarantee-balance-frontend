@@ -43,6 +43,10 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
     HeaderNames.ACCEPT -> "application/vnd.hmrc.1.0+json"
   )
 
+  private val headersV2 = Seq(
+    HeaderNames.ACCEPT -> "application/vnd.hmrc.2.0+json"
+  )
+
   def submitBalanceRequest(request: BalanceRequest)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] = {
     val url = s"${appConfig.guaranteeBalanceUrl}/balances"
 
@@ -95,7 +99,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
     http.POST[BalanceRequestV2, Either[HttpResponse, BalanceRequestResponse]](
       url,
       request,
-      headers
+      headersV2
     )
   }
 

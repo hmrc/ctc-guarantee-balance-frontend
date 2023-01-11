@@ -553,7 +553,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
 
         server.stubFor(
           post(urlEqualTo(submitBalanceRequestV2Url(grn.value)))
-            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
             .withRequestBody(equalToJson(requestV2AsJsonString))
             .willReturn(okJson(balanceRequestSuccessResponseJson))
         )
@@ -583,7 +583,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
 
         server.stubFor(
           post(urlEqualTo(submitBalanceRequestV2Url(grn.value)))
-            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
             .withRequestBody(equalToJson(requestV2AsJsonString))
             .willReturn(
               aResponse()
@@ -617,7 +617,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
 
         server.stubFor(
           post(urlEqualTo(submitBalanceRequestV2Url(grn.value)))
-            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
             .withRequestBody(equalToJson(requestV2AsJsonString))
             .willReturn(
               aResponse()
@@ -651,7 +651,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
 
         server.stubFor(
           post(urlEqualTo(submitBalanceRequestV2Url(grn.value)))
-            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
             .withRequestBody(equalToJson(requestV2AsJsonString))
             .willReturn(
               aResponse()
@@ -684,7 +684,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
 
         server.stubFor(
           post(urlEqualTo(submitBalanceRequestV2Url(grn.value)))
-            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
             .withRequestBody(equalToJson(requestV2AsJsonString))
             .willReturn(
               aResponse()
@@ -726,7 +726,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
 
             server.stubFor(
               post(urlEqualTo(submitBalanceRequestV2Url(grn.value)))
-                .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+                .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
                 .withRequestBody(equalToJson(requestV2AsJsonString))
                 .willReturn(
                   aResponse()
@@ -751,7 +751,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
           errorResponse =>
             server.stubFor(
               post(urlEqualTo(submitBalanceRequestV2Url(grn.value)))
-                .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.1.0+json"))
+                .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
                 .withRequestBody(equalToJson(requestV2AsJsonString))
                 .willReturn(
                   aResponse()
