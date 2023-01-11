@@ -40,9 +40,7 @@ class GuaranteeBalanceService @Inject() (
 )(implicit ec: ExecutionContext)
     extends Logging {
 
-  // For V2 where the operation is synchronous no balance id should exist therefore pollForGuaranteeBalance should never get called after V2 goes live
-  // No change required to this function for V2
-  // TODO - remove polling functionality post P5 deploy
+  // TODO - remove polling functionality and call to submitBalanceRequest (v1) post P5 deploy
   def retrieveBalanceResponse()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] =
     (config.guaranteeBalanceApiV2, request.userAnswers.get(BalanceIdPage)) match {
       case (false, Some(balanceId: BalanceId)) => pollForGuaranteeBalance(balanceId)
