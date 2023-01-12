@@ -28,7 +28,7 @@
 
 @govukButton(Button(
     isStartButton = isStartButton,
-    preventDoubleClick = preventDoubleClick,
+    preventDoubleClick = Some(preventDoubleClick),
     content = Text(messages(messageKey)),
     attributes = attributes,
     href = href
