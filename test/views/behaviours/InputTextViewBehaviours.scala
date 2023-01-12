@@ -49,9 +49,7 @@ trait InputTextViewBehaviours[T] extends QuestionViewBehaviours[T] with Generato
           assert(getElementById(doc, "value").attr("type") == inputType)
         }
 
-        "must not render an error summary" in {
-          assertNotRenderedById(doc, "error-summary_header")
-        }
+        behave like pageWithoutErrorSummary()
       }
 
       "when rendered with a valid value" - {
@@ -66,16 +64,7 @@ trait InputTextViewBehaviours[T] extends QuestionViewBehaviours[T] with Generato
         }
       }
 
-      "when rendered with an error" - {
-        "must show an error summary" in {
-          assertRenderedById(docWithError(), "error-summary-title")
-        }
-
-        "must show an error in the value field's label" in {
-          val errorSpan = docWithError().getElementsByClass("govuk-error-message").first
-          assertElementContainsText(errorSpan, s"${messages("error.title.prefix")} ${messages(errorMessage)}")
-        }
-      }
+      behave like pageWithErrorSummary()
     }
 
 }

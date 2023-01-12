@@ -20,7 +20,7 @@ import org.jsoup.nodes.Document
 import play.api.data.{Form, FormError}
 import play.twirl.api.HtmlFormat
 
-trait QuestionViewBehaviours[T] extends ViewBehaviours {
+trait QuestionViewBehaviours[T] extends ViewBehaviours with ErrorSummaryViewBehaviours[T] {
 
   def form: Form[T]
 
