@@ -67,7 +67,6 @@ class FrontendAppConfig @Inject() (configuration: Configuration, service: Servic
       "guaranteeBalanceApi.version"
     )
     .getOrElse("1.0")
-    .toUpperCase
-    .eq("2.0")
+    .equals("2.0")
 
 }

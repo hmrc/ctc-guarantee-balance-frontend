@@ -70,8 +70,11 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
 
   override def beforeEach(): Unit = {
     reset(mockGuaranteeBalanceConnector)
+    reset(mockFrontendAppConfig)
     super.beforeEach()
   }
+
+  private val mockFrontendAppConfig = mock[FrontendAppConfig]
 
   "retrieveBalanceResponse" - {
     "submitBalanceRequest" - {
@@ -83,8 +86,11 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
         when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
         when(mockGuaranteeBalanceConnector.submitBalanceRequest(any())(any()))
           .thenReturn(Future.successful(Right(balance)))
+        when(mockFrontendAppConfig.guaranteeBalanceApiV2).thenReturn(false)
+        when(mockFrontendAppConfig.rateLimitDuration).thenReturn(frontendAppConfig.rateLimitDuration)
+        when(mockFrontendAppConfig.guaranteeBalanceUrl).thenReturn(frontendAppConfig.guaranteeBalanceUrl)
 
-        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
+        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, mockFrontendAppConfig)
         val result  = service.retrieveBalanceResponse().futureValue
         result.value mustEqual balance
 
@@ -98,8 +104,11 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
         val userAnswers                          = emptyUserAnswers
         val request                              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
         implicit val dataRequest: DataRequest[_] = DataRequest(request, userAnswers.id, userAnswers)
+        when(mockFrontendAppConfig.guaranteeBalanceApiV2).thenReturn(false)
+        when(mockFrontendAppConfig.rateLimitDuration).thenReturn(frontendAppConfig.rateLimitDuration)
+        when(mockFrontendAppConfig.guaranteeBalanceUrl).thenReturn(frontendAppConfig.guaranteeBalanceUrl)
 
-        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
+        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, mockFrontendAppConfig)
         val result  = service.retrieveBalanceResponse().futureValue
         result.value mustEqual BalanceRequestSessionExpired
       }
@@ -112,7 +121,11 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
         val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
 
         when(mockMongoLockRepository.takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())).thenReturn(Future.successful(false))
-        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
+        when(mockFrontendAppConfig.guaranteeBalanceApiV2).thenReturn(false)
+        when(mockFrontendAppConfig.rateLimitDuration).thenReturn(frontendAppConfig.rateLimitDuration)
+        when(mockFrontendAppConfig.guaranteeBalanceUrl).thenReturn(frontendAppConfig.guaranteeBalanceUrl)
+
+        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, mockFrontendAppConfig)
         val result  = service.retrieveBalanceResponse().futureValue
         result.value mustEqual BalanceRequestRateLimit
 
@@ -136,8 +149,11 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
 
             when(mockGuaranteeBalanceConnector.submitBalanceRequest(any())(any()))
               .thenReturn(Future.successful(Right(balance)))
+            when(mockFrontendAppConfig.guaranteeBalanceApiV2).thenReturn(false)
+            when(mockFrontendAppConfig.rateLimitDuration).thenReturn(frontendAppConfig.rateLimitDuration)
+            when(mockFrontendAppConfig.guaranteeBalanceUrl).thenReturn(frontendAppConfig.guaranteeBalanceUrl)
 
-            val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
+            val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, mockFrontendAppConfig)
             val result  = service.retrieveBalanceResponse().futureValue
             result.value mustEqual BalanceRequestSessionExpired
         }
@@ -146,8 +162,6 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
     }
 
     "submitBalanceRequestV2" - {
-      val mockFrontendAppConfig = mock[FrontendAppConfig]
-
       "must submit the return the balance response for a successful call v2" in {
         val userAnswers                          = baseAnswers
         val request                              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
@@ -238,8 +252,11 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
       "return successResponse first time with a single call when we have a balanceId in the UserAnswers" in {
         val mockGuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
         when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any())).thenReturn(Future.successful(successResponse))
+        when(mockFrontendAppConfig.guaranteeBalanceApiV2).thenReturn(false)
+        when(mockFrontendAppConfig.rateLimitDuration).thenReturn(frontendAppConfig.rateLimitDuration)
+        when(mockFrontendAppConfig.guaranteeBalanceUrl).thenReturn(frontendAppConfig.guaranteeBalanceUrl)
 
-        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
+        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, mockFrontendAppConfig)
 
         val result = service.retrieveBalanceResponse()
         whenReady(result) {
@@ -252,8 +269,11 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
       "return successResponse first time with a single call when we Dont have a balanceId in the UserAnswers" in {
         val mockGuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
         when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any())).thenReturn(Future.successful(successResponse))
+        when(mockFrontendAppConfig.guaranteeBalanceApiV2).thenReturn(false)
+        when(mockFrontendAppConfig.rateLimitDuration).thenReturn(frontendAppConfig.rateLimitDuration)
+        when(mockFrontendAppConfig.guaranteeBalanceUrl).thenReturn(frontendAppConfig.guaranteeBalanceUrl)
 
-        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
+        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, mockFrontendAppConfig)
 
         val result = service.retrieveBalanceResponse()
         whenReady(result) {
@@ -266,8 +286,11 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
       "return tryAgainResponse first time with a single call" in {
         val mockGuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
         when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any())).thenReturn(Future.successful(tryAgainResponse))
+        when(mockFrontendAppConfig.guaranteeBalanceApiV2).thenReturn(false)
+        when(mockFrontendAppConfig.rateLimitDuration).thenReturn(frontendAppConfig.rateLimitDuration)
+        when(mockFrontendAppConfig.guaranteeBalanceUrl).thenReturn(frontendAppConfig.guaranteeBalanceUrl)
 
-        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
+        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, mockFrontendAppConfig)
 
         val result = service.retrieveBalanceResponse()
         whenReady(result) {
@@ -282,8 +305,13 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
         when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any()))
           .thenReturn(Future.successful(pendingResponse))
           .thenReturn(Future.successful(successResponse))
+        when(mockFrontendAppConfig.guaranteeBalanceApiV2).thenReturn(false)
+        when(mockFrontendAppConfig.rateLimitDuration).thenReturn(frontendAppConfig.rateLimitDuration)
+        when(mockFrontendAppConfig.guaranteeBalanceUrl).thenReturn(frontendAppConfig.guaranteeBalanceUrl)
+        when(mockFrontendAppConfig.guaranteeBalanceDelayInSecond).thenReturn(frontendAppConfig.guaranteeBalanceDelayInSecond)
+        when(mockFrontendAppConfig.guaranteeBalanceMaxTimeInSecond).thenReturn(frontendAppConfig.guaranteeBalanceMaxTimeInSecond)
 
-        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
+        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, mockFrontendAppConfig)
 
         val result = service.retrieveBalanceResponse()
         whenReady(result) {
@@ -299,8 +327,13 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
           .thenReturn(Future.successful(pendingResponse))
           .thenReturn(Future.successful(pendingResponse))
           .thenReturn(Future.successful(tryAgainResponse))
+        when(mockFrontendAppConfig.guaranteeBalanceApiV2).thenReturn(false)
+        when(mockFrontendAppConfig.rateLimitDuration).thenReturn(frontendAppConfig.rateLimitDuration)
+        when(mockFrontendAppConfig.guaranteeBalanceUrl).thenReturn(frontendAppConfig.guaranteeBalanceUrl)
+        when(mockFrontendAppConfig.guaranteeBalanceDelayInSecond).thenReturn(frontendAppConfig.guaranteeBalanceDelayInSecond)
+        when(mockFrontendAppConfig.guaranteeBalanceMaxTimeInSecond).thenReturn(frontendAppConfig.guaranteeBalanceMaxTimeInSecond)
 
-        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
+        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, mockFrontendAppConfig)
 
         val result = service.retrieveBalanceResponse()
 
@@ -314,8 +347,13 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
       "keep returning pending until we time out, then return that status" in {
         when(mockGuaranteeBalanceConnector.queryPendingBalance(any())(any()))
           .thenReturn(Future.successful(pendingResponse))
+        when(mockFrontendAppConfig.guaranteeBalanceApiV2).thenReturn(false)
+        when(mockFrontendAppConfig.rateLimitDuration).thenReturn(frontendAppConfig.rateLimitDuration)
+        when(mockFrontendAppConfig.guaranteeBalanceUrl).thenReturn(frontendAppConfig.guaranteeBalanceUrl)
+        when(mockFrontendAppConfig.guaranteeBalanceDelayInSecond).thenReturn(frontendAppConfig.guaranteeBalanceDelayInSecond)
+        when(mockFrontendAppConfig.guaranteeBalanceMaxTimeInSecond).thenReturn(frontendAppConfig.guaranteeBalanceMaxTimeInSecond)
 
-        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
+        val service = new GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, mockFrontendAppConfig)
 
         val result = service.retrieveBalanceResponse()
         whenReady(result) {
