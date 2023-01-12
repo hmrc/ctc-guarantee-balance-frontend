@@ -64,9 +64,7 @@ trait RadioViewBehaviours[T] extends QuestionViewBehaviours[T] {
             }
         }
 
-        "must not render an error summary" in {
-          assertNotRenderedById(doc, "error-summary_header")
-        }
+        behave like pageWithoutErrorSummary()
       }
 
       values foreach {
