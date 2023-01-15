@@ -26,7 +26,7 @@ import models.values.BalanceId
 import models.values.ErrorType.{InvalidDataErrorType, NotMatchedErrorType}
 import play.api.Logging
 import play.api.http.{HeaderNames, Status}
-import play.api.libs.json.JsResult
+import play.api.libs.json.{JsResult, Json}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions, HttpReads, HttpResponse}
 
@@ -90,11 +90,14 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
               logger.warn("[GuaranteeBalanceConnector][submitBalanceRequest] TOO_MANY_REQUESTS response from back end call")
               Right(BalanceRequestRateLimit)
             case Status.BAD_REQUEST =>
-              processSubmitErrorResponse(response)
+              logger.warn(s"[GuaranteeBalanceConnector][submitBalanceRequest] BAD_REQUEST response: ${response.body}")
+              Left(response)
             case _ =>
               Left(response)
           }
       }
+
+    println(s"ACHI - request: ${Json.toJson(request)}")
 
     http.POST[BalanceRequestV2, Either[HttpResponse, BalanceRequestResponse]](
       url,
