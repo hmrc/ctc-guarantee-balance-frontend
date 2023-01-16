@@ -85,13 +85,15 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
         response =>
           response.status match {
             case Status.OK =>
-              Right(response.json.as[PostBalanceRequestSuccessResponse].response)
+              Right(response.json.as[BalanceRequestResponse])
             case Status.TOO_MANY_REQUESTS =>
-              logger.warn("[GuaranteeBalanceConnector][submitBalanceRequest] TOO_MANY_REQUESTS response from back end call")
+              logger.warn("[GuaranteeBalanceConnector][submitBalanceRequestV2] TOO_MANY_REQUESTS response from back end call")
               Right(BalanceRequestRateLimit)
             case Status.BAD_REQUEST =>
-              processSubmitErrorResponse(response)
+              logger.warn(s"[GuaranteeBalanceConnector][submitBalanceRequestV2] BAD_REQUEST response: ${response.body}")
+              Left(response)
             case _ =>
+              logger.warn(s"[GuaranteeBalanceConnector][submitBalanceRequestV2] INTERNAL_SERVER_ERROR response: ${response.body}")
               Left(response)
           }
       }
