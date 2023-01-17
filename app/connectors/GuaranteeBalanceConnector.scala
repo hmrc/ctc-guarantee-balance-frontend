@@ -98,8 +98,6 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
           }
       }
 
-    println(s"ACHI - request: ${Json.toJson(request)}")
-
     http.POST[BalanceRequestV2, Either[HttpResponse, BalanceRequestResponse]](
       url,
       request,
