@@ -563,6 +563,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
       }
 
       // TODO - How do we model this for V2? Waiting for EIS GBQ spec
+      //
       //      "must return balance request not matched for a functional error with error type 12" in {
       //        val balanceRequestNotMatchedJson: String =
       //          """
@@ -597,6 +598,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
       //      }
 
       // TODO - How do we model this for V2? Waiting for EIS GBQ spec
+      //
       //      "must return unsupported guarantee balance type for a functional error with error type 14 and Pointer GRR(1).GQY(1).Query identifier" in {
       //        val balanceRequestNotMatchedJson: String =
       //          """
@@ -632,6 +634,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
       //      }
 
       // TODO - How do we model this for V2? Waiting for EIS GBQ spec
+      //
       //      "must return an Http error when we get a response with error type 14 and other Pointer" in {
       //        val functionErrorJson: String =
       //          """
@@ -667,6 +670,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
       //      }
 
       // TODO - How do we model this for V2? Waiting for EIS GBQ spec
+      //
       //      "must return the HttpResponse for a functional error with inconsequential error type" in {
       //        val knownErrorTypes = Seq(NotMatchedErrorType)
       //
