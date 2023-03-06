@@ -16,28 +16,19 @@
 
 package repositories
 
-import config.FrontendAppConfig
-import org.mongodb.scala.model.{IndexModel, IndexOptions, Indexes}
-import uk.gov.hmrc.mongo.lock
-import uk.gov.hmrc.mongo.{MongoComponent, MongoUtils, TimestampSupport}
+import uk.gov.hmrc.mongo.{lock, MongoComponent, MongoUtils, TimestampSupport}
 
-import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+// TODO - this class can be deleted once the indexes have been replaced
 @Singleton
 class MongoLockRepository @Inject() (
   mongoComponent: MongoComponent,
-  timestampSupport: TimestampSupport,
-  config: FrontendAppConfig
+  timestampSupport: TimestampSupport
 )(implicit ec: ExecutionContext)
     extends lock.MongoLockRepository(mongoComponent, timestampSupport) {
 
-  lazy val expiryTimeIndex: IndexModel = IndexModel(
-    Indexes.ascending("expiryTime"),
-    IndexOptions().name("locks-expiry-time-index").expireAfter(config.rateLimitDuration, TimeUnit.SECONDS)
-  )
-
-  override def ensureIndexes: Future[Seq[String]] =
-    MongoUtils.ensureIndexes(collection, indexes :+ expiryTimeIndex, replaceIndexes = false)
+  override def ensureIndexes(): Future[Seq[String]] =
+    MongoUtils.ensureIndexes(collection, indexes, replaceIndexes = true)
 }
