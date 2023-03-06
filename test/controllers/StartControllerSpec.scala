@@ -24,7 +24,7 @@ import org.scalacheck.Arbitrary.arbitrary
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
-import java.time.LocalDateTime
+import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class StartControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
@@ -42,7 +42,7 @@ class StartControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
             (userAnswers, referral) =>
               beforeEach()
 
-              val time = LocalDateTime.now()
+              val time = Instant.now()
               setExistingUserAnswers(userAnswers.map(_.copy(lastUpdated = time)))
               val request = FakeRequest(GET, startRoute(Some(referral)))
               val result  = route(app, request).value
@@ -64,7 +64,7 @@ class StartControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
             userAnswers =>
               beforeEach()
 
-              val time = LocalDateTime.now()
+              val time = Instant.now()
               setExistingUserAnswers(userAnswers.map(_.copy(lastUpdated = time)))
               val request = FakeRequest(GET, startRoute(None))
               val result  = route(app, request).value

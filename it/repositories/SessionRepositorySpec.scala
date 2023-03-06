@@ -24,21 +24,23 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.Json
+import services.DateTimeService
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class SessionRepositorySpec extends AnyFreeSpec with Matchers with DefaultPlayMongoRepositorySupport[UserAnswers] with GuiceOneAppPerSuite with OptionValues {
 
-  private val config: FrontendAppConfig = app.injector.instanceOf[FrontendAppConfig]
+  private val config: FrontendAppConfig        = app.injector.instanceOf[FrontendAppConfig]
+  private val dateTimeService: DateTimeService = app.injector.instanceOf[DateTimeService]
 
-  override protected def repository = new SessionRepository(mongoComponent, config)
+  override protected val repository = new SessionRepository(mongoComponent, config, dateTimeService)
 
   private val internalId1 = "internalId1"
   private val internalId2 = "internalId2"
 
-  private val userAnswers1 = UserAnswers(internalId1, Json.obj("foo" -> "bar"))
-  private val userAnswers2 = UserAnswers(internalId2, Json.obj("bar" -> "foo"))
+  private val userAnswers1 = UserAnswers(internalId1, Json.obj("foo" -> "bar"), dateTimeService.now)
+  private val userAnswers2 = UserAnswers(internalId2, Json.obj("bar" -> "foo"), dateTimeService.now)
 
   "SessionRepository" - {
 
@@ -53,7 +55,7 @@ class SessionRepositorySpec extends AnyFreeSpec with Matchers with DefaultPlayMo
         result.value.id mustBe userAnswers1.id
         result.value.data mustBe userAnswers1.data
 
-        result.value.lastUpdated isEqual userAnswers1.lastUpdated.truncatedTo(
+        result.value.lastUpdated equals userAnswers1.lastUpdated.truncatedTo(
           java.time.temporal.ChronoUnit.MILLIS
         ) mustBe true
       }
