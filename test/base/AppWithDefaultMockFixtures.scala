@@ -30,8 +30,9 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.Call
 import play.api.test.Helpers
-import repositories.{MongoLockRepository, SessionRepository}
+import repositories.SessionRepository
 import services.{AuditService, GuaranteeBalanceService}
+import uk.gov.hmrc.mongo.lock.MongoLockRepository
 
 import scala.concurrent.Future
 
