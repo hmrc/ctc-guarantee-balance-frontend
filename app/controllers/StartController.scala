@@ -16,11 +16,12 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions._
 import models.{NormalMode, Referral, UserAnswers}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import repositories.SessionRepository
 import services.DateTimeService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -34,7 +35,8 @@ class StartController @Inject() (
   updateSession: ReferralActionProvider,
   actions: Actions,
   val controllerComponents: MessagesControllerComponents,
-  dateTimeService: DateTimeService
+  dateTimeService: DateTimeService,
+  config: FrontendAppConfig
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
@@ -42,11 +44,18 @@ class StartController @Inject() (
   def start(referral: Option[Referral]): Action[AnyContent] = (updateSession(referral) andThen actions.getData).async {
     implicit request =>
       sessionRepository.set(UserAnswers(request.internalId, Json.obj(), dateTimeService.now)) map {
-        _ => Redirect(routes.EoriNumberController.onPageLoad(NormalMode))
+        _ => route
       }
   }
 
   def startAgain(): Action[AnyContent] = actions.requireData {
-    _ => Redirect(routes.EoriNumberController.onPageLoad(NormalMode))
+    _ => route
   }
+
+  def route: Result =
+    if (config.guaranteeBalanceApiV2) {
+      Redirect(routes.GuaranteeReferenceNumberController.onPageLoad(NormalMode))
+    } else {
+      Redirect(routes.EoriNumberController.onPageLoad(NormalMode))
+    }
 }

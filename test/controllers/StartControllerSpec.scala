@@ -17,96 +17,220 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import config.FrontendAppConfig
+import controllers.actions.{DataRequiredAction, DataRequiredActionImpl, FakeIdentifierAction, IdentifierAction}
 import models.{NormalMode, Referral, UserAnswers}
+import navigation.Navigator
 import org.mockito.ArgumentCaptor
-import org.mockito.Mockito.verify
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{reset, verify, when}
 import org.scalacheck.Arbitrary.arbitrary
-import play.api.test.FakeRequest
+import play.api.i18n.MessagesApi
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers._
+import repositories.SessionRepository
+import services.{AuditService, GuaranteeBalanceService}
+import uk.gov.hmrc.mongo.lock.MongoLockRepository
 
 import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class StartControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
+
+  override protected def applicationBuilder(): GuiceApplicationBuilder =
+    new GuiceApplicationBuilder()
+      .overrides(
+        bind[DataRequiredAction].to[DataRequiredActionImpl],
+        bind[IdentifierAction].to[FakeIdentifierAction],
+        bind[MessagesApi].toInstance(Helpers.stubMessagesApi()),
+        bind[SessionRepository].toInstance(mockSessionRepository),
+        bind[MongoLockRepository].toInstance(mockMongoLockRepository),
+        bind[GuaranteeBalanceService].toInstance(mockGuaranteeBalanceService),
+        bind[AuditService].toInstance(mockAuditService),
+        bind[Navigator].toInstance(fakeNavigator),
+        bind[FrontendAppConfig].toInstance(mockAppConfig)
+      )
 
   "Start Controller" - {
 
     ".start" - {
 
-      def startRoute(referral: Option[Referral]): String = routes.StartController.start(referral).url
+      ".v1" - {
 
-      "must create new user answers and redirect to the next page" - {
-        "when referral defined" in {
+        def startRoute(referral: Option[Referral]): String = routes.StartController.start(referral).url
 
-          forAll(arbitrary[Option[UserAnswers]], arbitrary[Referral]) {
-            (userAnswers, referral) =>
-              beforeEach()
+        "must create new user answers and redirect to the next page" - {
+          "when referral defined" in {
 
-              val time = Instant.now()
-              setExistingUserAnswers(userAnswers.map(_.copy(lastUpdated = time)))
-              val request = FakeRequest(GET, startRoute(Some(referral)))
+            forAll(arbitrary[Option[UserAnswers]], arbitrary[Referral]) {
+              (userAnswers, referral) =>
+                beforeEach()
+
+                when(mockAppConfig.guaranteeBalanceApiV2).thenReturn(false)
+
+                val time = Instant.now()
+                setExistingUserAnswers(userAnswers.map(_.copy(lastUpdated = time)))
+                val request = FakeRequest(GET, startRoute(Some(referral)))
+                val result  = route(app, request).value
+
+                status(result) mustEqual SEE_OTHER
+                redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
+                result.map(_.session(request).get(Referral.key).get mustEqual referral.toString)
+
+                val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+                verify(mockSessionRepository).set(uaCaptor.capture)
+
+                uaCaptor.getValue.lastUpdated.isAfter(time) mustBe true // check that new user answers have been created
+            }
+          }
+
+          "when referral not defined" in {
+
+            forAll(arbitrary[Option[UserAnswers]]) {
+              userAnswers =>
+                beforeEach()
+
+                when(mockAppConfig.guaranteeBalanceApiV2).thenReturn(false)
+
+                val time = Instant.now()
+                setExistingUserAnswers(userAnswers.map(_.copy(lastUpdated = time)))
+                val request = FakeRequest(GET, startRoute(None))
+                val result  = route(app, request).value
+
+                status(result) mustEqual SEE_OTHER
+                redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
+                result.map(_.session(request).get(Referral.key) mustNot be(defined))
+
+                val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+                verify(mockSessionRepository).set(uaCaptor.capture)
+
+                uaCaptor.getValue.lastUpdated.isAfter(time) mustBe true // check that new user answers have been created
+            }
+          }
+        }
+
+        ".startAgain" - {
+
+          lazy val startAgainRoute: String = routes.StartController.startAgain().url
+
+          "when session exists" - {
+            "must redirect to EORI page" in {
+
+              when(mockAppConfig.guaranteeBalanceApiV2).thenReturn(false)
+
+              setExistingUserAnswers(emptyUserAnswers)
+              val request = FakeRequest(GET, startAgainRoute)
               val result  = route(app, request).value
 
               status(result) mustEqual SEE_OTHER
               redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
-              result.map(_.session(request).get(Referral.key).get mustEqual referral.toString)
-
-              val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
-              verify(mockSessionRepository).set(uaCaptor.capture)
-
-              uaCaptor.getValue.lastUpdated.isAfter(time) mustBe true // check that new user answers have been created
+            }
           }
-        }
 
-        "when referral not defined" in {
+          "when no session exists" - {
+            "must redirect to session expired" in {
 
-          forAll(arbitrary[Option[UserAnswers]]) {
-            userAnswers =>
-              beforeEach()
+              when(mockAppConfig.guaranteeBalanceApiV2).thenReturn(false)
 
-              val time = Instant.now()
-              setExistingUserAnswers(userAnswers.map(_.copy(lastUpdated = time)))
-              val request = FakeRequest(GET, startRoute(None))
+              setNoExistingUserAnswers()
+              val request = FakeRequest(GET, startAgainRoute)
               val result  = route(app, request).value
 
               status(result) mustEqual SEE_OTHER
-              redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
-              result.map(_.session(request).get(Referral.key) mustNot be(defined))
-
-              val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
-              verify(mockSessionRepository).set(uaCaptor.capture)
-
-              uaCaptor.getValue.lastUpdated.isAfter(time) mustBe true // check that new user answers have been created
+              redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
+            }
           }
         }
       }
-    }
 
-    ".startAgain" - {
+      ".v2" - {
 
-      lazy val startAgainRoute: String = routes.StartController.startAgain().url
+        def startRoute(referral: Option[Referral]): String = routes.StartController.start(referral).url
 
-      "when session exists" - {
-        "must redirect to EORI page" in {
+        "must create new user answers and redirect to the next page" - {
+          "when referral defined" in {
 
-          setExistingUserAnswers(emptyUserAnswers)
-          val request = FakeRequest(GET, startAgainRoute)
-          val result  = route(app, request).value
+            forAll(arbitrary[Option[UserAnswers]], arbitrary[Referral]) {
+              (userAnswers, referral) =>
+                beforeEach()
 
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
+                when(mockAppConfig.guaranteeBalanceApiV2).thenReturn(true)
+
+                val time = Instant.now()
+                setExistingUserAnswers(userAnswers.map(_.copy(lastUpdated = time)))
+                val request = FakeRequest(GET, startRoute(Some(referral)))
+                val result  = route(app, request).value
+
+                status(result) mustEqual SEE_OTHER
+                redirectLocation(result).value mustEqual routes.GuaranteeReferenceNumberController.onPageLoad(NormalMode).url
+                result.map(_.session(request).get(Referral.key).get mustEqual referral.toString)
+
+                val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+                verify(mockSessionRepository).set(uaCaptor.capture)
+
+                uaCaptor.getValue.lastUpdated.isAfter(time) mustBe true // check that new user answers have been created
+            }
+          }
+
+          "when referral not defined" in {
+
+            forAll(arbitrary[Option[UserAnswers]]) {
+              userAnswers =>
+                beforeEach()
+
+                when(mockAppConfig.guaranteeBalanceApiV2).thenReturn(true)
+
+                val time = Instant.now()
+                setExistingUserAnswers(userAnswers.map(_.copy(lastUpdated = time)))
+                val request = FakeRequest(GET, startRoute(None))
+                val result  = route(app, request).value
+
+                status(result) mustEqual SEE_OTHER
+                redirectLocation(result).value mustEqual routes.GuaranteeReferenceNumberController.onPageLoad(NormalMode).url
+                result.map(_.session(request).get(Referral.key) mustNot be(defined))
+
+                val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+                verify(mockSessionRepository).set(uaCaptor.capture)
+
+                uaCaptor.getValue.lastUpdated.isAfter(time) mustBe true // check that new user answers have been created
+            }
+          }
         }
-      }
 
-      "when no session exists" - {
-        "must redirect to session expired" in {
+        ".startAgain" - {
 
-          setNoExistingUserAnswers()
-          val request = FakeRequest(GET, startAgainRoute)
-          val result  = route(app, request).value
+          lazy val startAgainRoute: String = routes.StartController.startAgain().url
 
-          status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
+          "when session exists" - {
+            "must redirect to EORI page" in {
+
+              when(mockAppConfig.guaranteeBalanceApiV2).thenReturn(true)
+
+              setExistingUserAnswers(emptyUserAnswers)
+              val request = FakeRequest(GET, startAgainRoute)
+              val result  = route(app, request).value
+
+              status(result) mustEqual SEE_OTHER
+              redirectLocation(result).value mustEqual routes.GuaranteeReferenceNumberController.onPageLoad(NormalMode).url
+            }
+          }
+
+          "when no session exists" - {
+            "must redirect to session expired" in {
+
+              when(mockAppConfig.guaranteeBalanceApiV2).thenReturn(true)
+
+              setNoExistingUserAnswers()
+              val request = FakeRequest(GET, startAgainRoute)
+              val result  = route(app, request).value
+
+              status(result) mustEqual SEE_OTHER
+              redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
+            }
+          }
         }
       }
     }

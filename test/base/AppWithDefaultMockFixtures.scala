@@ -16,6 +16,7 @@
 
 package base
 
+import config.FrontendAppConfig
 import controllers.actions._
 import models.UserAnswers
 import navigation.{FakeNavigator, Navigator}
@@ -53,6 +54,7 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
   val mockMongoLockRepository: MongoLockRepository         = mock[MongoLockRepository]
   val mockGuaranteeBalanceService: GuaranteeBalanceService = mock[GuaranteeBalanceService]
   val mockAuditService: AuditService                       = mock[AuditService]
+  val mockAppConfig: FrontendAppConfig                     = mock[FrontendAppConfig]
 
   protected val onwardRoute: Call        = Call("GET", "/foo")
   protected val fakeNavigator: Navigator = new FakeNavigator(onwardRoute)
