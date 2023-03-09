@@ -33,6 +33,8 @@ import play.api.libs.json.{Json, Reads, Writes}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 
+import java.time.Instant
+
 trait SpecBase
     extends AnyFreeSpec
     with Matchers
@@ -52,7 +54,7 @@ trait SpecBase
 
   lazy val validEori: String = "GB1234567891234"
 
-  def emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId, Json.obj())
+  def emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId, Json.obj(), Instant.now())
 
   def injector: Injector                               = app.injector
   def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")

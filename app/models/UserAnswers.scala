@@ -20,13 +20,13 @@ import play.api.libs.json._
 import queries._
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-import java.time.LocalDateTime
+import java.time.Instant
 import scala.util.{Failure, Success, Try}
 
 final case class UserAnswers(
   id: String,
-  data: JsObject = Json.obj(),
-  lastUpdated: LocalDateTime = LocalDateTime.now
+  data: JsObject,
+  lastUpdated: Instant
 ) {
 
   def get[A](page: Gettable[A])(implicit rds: Reads[A]): Option[A] =
@@ -78,14 +78,14 @@ object UserAnswers {
     (
       (__ \ "_id").read[String] and
         (__ \ "data").read[JsObject] and
-        (__ \ "lastUpdated").read(MongoJavatimeFormats.localDateTimeReads)
+        (__ \ "lastUpdated").read(MongoJavatimeFormats.instantReads)
     )(UserAnswers.apply _)
 
   implicit lazy val writes: OWrites[UserAnswers] =
     (
       (__ \ "_id").write[String] and
         (__ \ "data").write[JsObject] and
-        (__ \ "lastUpdated").write(MongoJavatimeFormats.localDateTimeWrites)
+        (__ \ "lastUpdated").write(MongoJavatimeFormats.instantWrites)
     )(unlift(UserAnswers.unapply))
 
   implicit lazy val format: Format[UserAnswers] = Format(reads, writes)
