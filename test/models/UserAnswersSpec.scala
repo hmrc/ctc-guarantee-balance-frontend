@@ -21,6 +21,8 @@ import org.scalacheck.Arbitrary.arbitrary
 import pages.QuestionPage
 import play.api.libs.json.{JsObject, JsPath, JsString, Json}
 
+import java.time.Instant
+
 class UserAnswersSpec extends SpecBase {
 
   "UserAnswers" - {
@@ -33,14 +35,14 @@ class UserAnswersSpec extends SpecBase {
 
       "must return data when defined" in {
 
-        val userAnswers = UserAnswers("eoriNumber", JsObject(Map("foo" -> JsString("bar"))))
+        val userAnswers = UserAnswers("eoriNumber", JsObject(Map("foo" -> JsString("bar"))), Instant.now())
 
         userAnswers.get(TestPage) mustBe Some("bar")
       }
 
       "must return None when not defined" in {
 
-        val userAnswers = UserAnswers("eoriNumber")
+        val userAnswers = UserAnswers("eoriNumber", Json.obj(), Instant.now())
 
         userAnswers.get(TestPage) mustBe None
       }
@@ -50,9 +52,9 @@ class UserAnswersSpec extends SpecBase {
 
       "must set data" in {
 
-        val userAnswers = UserAnswers("eoriNumber")
+        val userAnswers = UserAnswers("eoriNumber", Json.obj(), Instant.now())
 
-        val expectedUserAnswers = UserAnswers("eoriNumber", JsObject(Map("foo" -> JsString("bar"))))
+        val expectedUserAnswers = userAnswers.copy(data = JsObject(Map("foo" -> JsString("bar"))))
 
         val result = userAnswers.set(TestPage, "bar").toOption.value.data
 
@@ -64,9 +66,9 @@ class UserAnswersSpec extends SpecBase {
 
       "must remove data" in {
 
-        val userAnswers = UserAnswers("eoriNumber", JsObject(Map("foo" -> JsString("bar"))))
+        val userAnswers = UserAnswers("eoriNumber", JsObject(Map("foo" -> JsString("bar"))), Instant.now())
 
-        val expectedUserAnswers = UserAnswers("eoriNumber")
+        val expectedUserAnswers = userAnswers.copy(data = Json.obj())
 
         val result = userAnswers.remove(TestPage).toOption.value.data
 

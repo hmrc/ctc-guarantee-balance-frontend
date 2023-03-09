@@ -19,7 +19,6 @@ package pages
 import models.UserAnswers
 import models.values.BalanceId
 import pages.behaviours.PageBehaviours
-import play.api.libs.json.Json
 
 import java.util.UUID
 
@@ -29,7 +28,7 @@ class GuaranteeReferenceNumberPageSpec extends PageBehaviours {
   private val expectedUuid = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
   private val balanceId    = BalanceId(expectedUuid)
 
-  val baseUserAnswers: UserAnswers = UserAnswers("id", Json.obj())
+  val baseUserAnswers: UserAnswers = emptyUserAnswers
     .setValue(GuaranteeReferenceNumberPage, grn)
 
   "GuaranteeReferenceNumberPage" - {

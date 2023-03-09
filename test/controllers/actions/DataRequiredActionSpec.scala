@@ -21,10 +21,11 @@ import controllers.routes
 import models.UserAnswers
 import models.requests.{DataRequest, OptionalDataRequest}
 import org.scalatest.EitherValues
+import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.test.Helpers._
 
-import java.time.LocalDateTime
+import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -53,13 +54,15 @@ class DataRequiredActionSpec extends SpecBase with EitherValues with AppWithDefa
 
       "must return Right with DataRequest" in {
 
-        val dateTime = LocalDateTime.now()
+        val dateTime = Instant.now()
 
-        val result = Harness.callRefine(OptionalDataRequest(fakeRequest, "id", Some(UserAnswers("eoriNumber", lastUpdated = dateTime))))
+        val userAnswers = UserAnswers("eoriNumber", Json.obj(), dateTime)
+
+        val result = Harness.callRefine(OptionalDataRequest(fakeRequest, "id", Some(userAnswers)))
 
         whenReady(result) {
           result =>
-            result.value.userAnswers mustBe UserAnswers("eoriNumber", lastUpdated = dateTime)
+            result.value.userAnswers mustBe userAnswers
             result.value.internalId mustBe "id"
         }
       }

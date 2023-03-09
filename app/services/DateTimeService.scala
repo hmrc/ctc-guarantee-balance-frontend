@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,24 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import uk.gov.hmrc.govukfrontend.views.html.components._
+package services
 
-@this(govukButton: GovukButton)
+import java.time.{Clock, Instant}
+import javax.inject.Inject
 
-@(
-    messageKey: String = "site.continue",
-    isStartButton: Boolean = false,
-    preventDoubleClick: Boolean = false,
-    attributes: Map[String, String] = Map.empty,
-    href: Option[String] = None
-)(implicit messages: Messages)
+class DateTimeService @Inject() (clock: Clock) {
 
-@govukButton(Button(
-    isStartButton = isStartButton,
-    preventDoubleClick = Some(preventDoubleClick),
-    content = Text(messages(messageKey)),
-    attributes = attributes,
-    href = href
-))
+  def now: Instant = Instant.now(clock)
+}

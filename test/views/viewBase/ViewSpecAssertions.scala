@@ -59,4 +59,10 @@ trait ViewSpecAssertions extends ViewSpecGetters {
 
   def assertElementDoesNotExist(doc: Document, className: String): Assertion =
     assert(doc.getElementsByClass(className).isEmpty)
+
+  def assertRenderedByClass(doc: Document, className: String): Assertion =
+    assert(!doc.getElementsByClass(className).isEmpty, "\n\nElement with class " + className + " was not rendered on the page.\n")
+
+  def assertNotRenderedByClass(doc: Document, className: String): Assertion =
+    assert(doc.getElementsByClass(className).isEmpty, "\n\nElement with class " + className + " was rendered on the page.\n")
 }

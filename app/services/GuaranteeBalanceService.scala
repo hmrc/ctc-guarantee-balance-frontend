@@ -25,8 +25,8 @@ import models.requests.{BalanceRequest, BalanceRequestV2, DataRequest}
 import models.values._
 import pages.{AccessCodePage, BalanceIdPage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.Logging
-import repositories.MongoLockRepository
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.mongo.lock.MongoLockRepository
 
 import javax.inject.Inject
 import scala.concurrent.duration._
