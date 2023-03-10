@@ -16,22 +16,35 @@
 
 package forms
 
+import config.FrontendAppConfig
 import forms.Constants._
 import forms.mappings.Mappings
 import play.api.data.Form
 
 import javax.inject.Inject
 
-class GuaranteeReferenceNumberFormProvider @Inject() extends Mappings {
+class GuaranteeReferenceNumberFormProvider @Inject() (config: FrontendAppConfig) extends Mappings {
 
   def apply(): Form[String] =
     Form(
       "value" -> textWithSpacesRemoved("guaranteeReferenceNumber.error.required")
         .verifying(
           forms.StopOnFirstFail[String](
-            maxLength(maxGuaranteeReferenceNumberLength, "guaranteeReferenceNumber.error.length"),
+            maxLength(fieldLengthKey, fieldLengthErrorText),
             regexp(alphaNumericRegex, "guaranteeReferenceNumber.error.invalid")
           )
         )
     )
+
+  def fieldLengthKey: Int = if (config.guaranteeBalanceApiV2) {
+    maxGuaranteeReferenceNumberLengthV2
+  } else {
+    maxGuaranteeReferenceNumberLength
+  }
+
+  def fieldLengthErrorText: String = if (config.guaranteeBalanceApiV2) {
+    "guaranteeReferenceNumber.v2.error.length"
+  } else {
+    "guaranteeReferenceNumber.error.length"
+  }
 }

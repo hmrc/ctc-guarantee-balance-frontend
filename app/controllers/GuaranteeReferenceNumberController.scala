@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions._
 import forms.GuaranteeReferenceNumberFormProvider
 import models.Mode
@@ -26,6 +27,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.GuaranteeReferenceNumberView
+import views.html.GuaranteeReferenceNumberViewV2
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,7 +39,9 @@ class GuaranteeReferenceNumberController @Inject() (
   actions: Actions,
   formProvider: GuaranteeReferenceNumberFormProvider,
   val controllerComponents: MessagesControllerComponents,
-  view: GuaranteeReferenceNumberView
+  view: GuaranteeReferenceNumberView,
+  viewV2: GuaranteeReferenceNumberViewV2,
+  config: FrontendAppConfig
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
@@ -51,7 +55,11 @@ class GuaranteeReferenceNumberController @Inject() (
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, mode))
+      if (config.guaranteeBalanceApiV2) {
+        Ok(viewV2(preparedForm, mode))
+      } else {
+        Ok(view(preparedForm, mode))
+      }
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = actions.requireData.async {
@@ -59,7 +67,12 @@ class GuaranteeReferenceNumberController @Inject() (
       form
         .bindFromRequest()
         .fold(
-          formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
+          formWithErrors =>
+            if (config.guaranteeBalanceApiV2) {
+              Future.successful(BadRequest(viewV2(formWithErrors, mode)))
+            } else {
+              Future.successful(BadRequest(view(formWithErrors, mode)))
+            },
           value =>
             for {
               updatedAnswers <- Future.fromTry(request.userAnswers.set(GuaranteeReferenceNumberPage, value))

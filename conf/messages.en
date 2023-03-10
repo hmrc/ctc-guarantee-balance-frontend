@@ -76,6 +76,13 @@ guaranteeReferenceNumber.error.length = The guarantee reference number must be 1
 guaranteeReferenceNumber.error.invalid = The guarantee reference number must only include letters a to z without accents and numbers 0 to 9
 guaranteeReferenceNumber.change.hidden = guarantee reference number
 
+guaranteeReferenceNumber.v2.caption = Guarantee balance
+guaranteeReferenceNumber.v2.heading = What is the Guarantee Reference Number (GRN)?
+guaranteeReferenceNumber.v2.title = What is the Guarantee Reference Number (GRN)?
+guaranteeReferenceNumber.v2.paragraph1 = You can only check the balance of a comprehensive guarantee, guarantee waiver or individual guarantee with multiple usage.
+guaranteeReferenceNumber.v2.hint = The Guarantee Reference Number (GRN) can be up to 24 characters long and include both letters and numbers. For example, 01GB1234567890120A123456.
+guaranteeReferenceNumber.v2.error.length = The guarantee reference number must be 24 characters or less
+
 unsupportedGuaranteeType.title = We cannot get the balance for this type of guarantee
 unsupportedGuaranteeType.heading = We cannot get the balance for this type of guarantee
 unsupportedGuaranteeType.paragraph = We can only get the balance for:
@@ -96,6 +103,12 @@ accessCode.error.invalidCharacters = The access code must only include letters a
 accessCode.hint = The access code must be 4 characters long, like 0000 or X9X9.
 accessCode.paragraph = The person responsible for your transit movements will have received an email about access codes.
 accessCode.change.hidden = access code
+
+accessCode.v2.caption = Guarantee balance
+accessCode.v2.heading = What is the access code?
+accessCode.v2.title = What is the access code?
+accessCode.v2.paragraph = This is set up by the Principal and works just like a bank PIN code.
+accessCode.v2.hint = The code will be 4 characters long, like 0000 or X9X9.
 
 checkYourAnswers.title = Check your answers
 checkYourAnswers.heading = Check your answers

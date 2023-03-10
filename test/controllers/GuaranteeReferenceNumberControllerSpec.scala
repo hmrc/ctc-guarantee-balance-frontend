@@ -17,8 +17,10 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import config.FrontendAppConfig
 import forms.GuaranteeReferenceNumberFormProvider
 import models.NormalMode
+import org.scalatestplus.mockito.MockitoSugar.mock
 import pages.GuaranteeReferenceNumberPage
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -26,7 +28,8 @@ import views.html.GuaranteeReferenceNumberView
 
 class GuaranteeReferenceNumberControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
-  private val formProvider                       = new GuaranteeReferenceNumberFormProvider()
+  val mockConfig                                 = mock[FrontendAppConfig]
+  private val formProvider                       = new GuaranteeReferenceNumberFormProvider(mockConfig)
   private val form                               = formProvider()
   private val mode                               = NormalMode
   private lazy val guaranteeReferenceNumberRoute = routes.GuaranteeReferenceNumberController.onPageLoad(mode).url

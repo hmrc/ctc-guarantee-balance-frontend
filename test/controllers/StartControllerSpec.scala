@@ -22,21 +22,19 @@ import controllers.actions.{DataRequiredAction, DataRequiredActionImpl, FakeIden
 import models.{NormalMode, Referral, UserAnswers}
 import navigation.Navigator
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{reset, verify, when}
+import org.mockito.Mockito.{verify, when}
 import org.scalacheck.Arbitrary.arbitrary
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers._
+import play.api.test.{FakeRequest, Helpers}
 import repositories.SessionRepository
 import services.{AuditService, GuaranteeBalanceService}
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
 
 import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class StartControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 

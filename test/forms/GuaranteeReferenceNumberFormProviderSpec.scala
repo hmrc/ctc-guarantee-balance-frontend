@@ -16,8 +16,10 @@
 
 package forms
 
+import config.FrontendAppConfig
 import forms.Constants._
 import forms.behaviours.StringFieldBehaviours
+import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.data.FormError
 
 class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
@@ -26,7 +28,9 @@ class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
   val maxLengthKey = "guaranteeReferenceNumber.error.length"
   val invalidKey   = "guaranteeReferenceNumber.error.invalid"
 
-  val form = new GuaranteeReferenceNumberFormProvider()()
+  val mockConfig = mock[FrontendAppConfig]
+
+  val form = new GuaranteeReferenceNumberFormProvider(mockConfig)()
 
   ".value" - {
 

@@ -43,4 +43,11 @@ object InputTextViewModel {
   case class AddressTextInput(
     label: String
   ) extends InputTextViewModel
+
+  case class TextInputWithHiddenLabelV2(
+    heading: String,
+    caption: Option[String] = None,
+    additionalHtml: Html
+  ) extends InputTextViewModel
+      with AdditionalHtmlViewModel
 }

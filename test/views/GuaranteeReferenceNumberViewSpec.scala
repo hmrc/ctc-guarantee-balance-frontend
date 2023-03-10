@@ -16,9 +16,11 @@
 
 package views
 
+import config.FrontendAppConfig
 import forms.GuaranteeReferenceNumberFormProvider
 import models.NormalMode
 import org.scalacheck.{Arbitrary, Gen}
+import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.data.Form
 import play.twirl.api.HtmlFormat
 import viewModels.InputSize
@@ -27,7 +29,9 @@ import views.html.GuaranteeReferenceNumberView
 
 class GuaranteeReferenceNumberViewSpec extends InputTextViewBehaviours[String] {
 
-  override def form: Form[String] = new GuaranteeReferenceNumberFormProvider()()
+  val mockConfig = mock[FrontendAppConfig]
+
+  override def form: Form[String] = new GuaranteeReferenceNumberFormProvider(mockConfig)()
 
   override def applyView(form: Form[String]): HtmlFormat.Appendable =
     injector.instanceOf[GuaranteeReferenceNumberView].apply(form, NormalMode)(fakeRequest, messages)
