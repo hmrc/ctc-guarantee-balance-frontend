@@ -17,19 +17,36 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import config.FrontendAppConfig
+import controllers.actions.{DataRequiredAction, DataRequiredActionImpl, FakeIdentifierAction, IdentifierAction}
 import forms.GuaranteeReferenceNumberFormProvider
 import models.NormalMode
-import org.scalatestplus.mockito.MockitoSugar.mock
+import navigation.Navigator
 import pages.GuaranteeReferenceNumberPage
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import repositories.SessionRepository
+import services.{AuditService, GuaranteeBalanceService}
+import uk.gov.hmrc.mongo.lock.MongoLockRepository
 import views.html.GuaranteeReferenceNumberView
 
 class GuaranteeReferenceNumberControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
-  val mockConfig                                 = mock[FrontendAppConfig]
-  private val formProvider                       = new GuaranteeReferenceNumberFormProvider(mockConfig)
+  override protected def applicationBuilder(): GuiceApplicationBuilder =
+    new GuiceApplicationBuilder()
+      .overrides(
+        bind[DataRequiredAction].to[DataRequiredActionImpl],
+        bind[IdentifierAction].to[FakeIdentifierAction],
+        bind[SessionRepository].toInstance(mockSessionRepository),
+        bind[MongoLockRepository].toInstance(mockMongoLockRepository),
+        bind[GuaranteeBalanceService].toInstance(mockGuaranteeBalanceService),
+        bind[AuditService].toInstance(mockAuditService),
+        bind[Navigator].toInstance(fakeNavigator)
+      )
+      .configure("guaranteeBalanceApi.version" -> "1.0")
+
+  private val formProvider                       = new GuaranteeReferenceNumberFormProvider(mockAppConfig)
   private val form                               = formProvider()
   private val mode                               = NormalMode
   private lazy val guaranteeReferenceNumberRoute = routes.GuaranteeReferenceNumberController.onPageLoad(mode).url
@@ -44,7 +61,8 @@ class GuaranteeReferenceNumberControllerSpec extends SpecBase with AppWithDefaul
 
       val request = FakeRequest(GET, guaranteeReferenceNumberRoute)
       val view    = injector.instanceOf[GuaranteeReferenceNumberView]
-      val result  = route(app, request).value
+
+      val result = route(app, request).value
 
       status(result) mustEqual OK
 

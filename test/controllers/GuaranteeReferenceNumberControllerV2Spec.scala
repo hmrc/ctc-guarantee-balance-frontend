@@ -18,11 +18,11 @@ package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import controllers.actions.{DataRequiredAction, DataRequiredActionImpl, FakeIdentifierAction, IdentifierAction}
-import forms.AccessCodeFormProvider
+import forms.GuaranteeReferenceNumberFormProvider
 import models.NormalMode
 import navigation.Navigator
-import pages.AccessCodePage
-import play.api.data.Form
+import org.mockito.Mockito.when
+import pages.GuaranteeReferenceNumberPage
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
@@ -30,9 +30,9 @@ import play.api.test.Helpers._
 import repositories.SessionRepository
 import services.{AuditService, GuaranteeBalanceService}
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
-import views.html.AccessCodeView
+import views.html.{GuaranteeReferenceNumberView, GuaranteeReferenceNumberViewV2}
 
-class AccessCodeControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
+class GuaranteeReferenceNumberControllerV2Spec extends SpecBase with AppWithDefaultMockFixtures {
 
   override protected def applicationBuilder(): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
@@ -45,23 +45,25 @@ class AccessCodeControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         bind[AuditService].toInstance(mockAuditService),
         bind[Navigator].toInstance(fakeNavigator)
       )
-      .configure("guaranteeBalanceApi.version" -> "1.0")
+      .configure("guaranteeBalanceApi.version" -> "2.0")
 
-  private val formProvider                 = new AccessCodeFormProvider()
-  private val form: Form[String]           = formProvider()
-  private val mode                         = NormalMode
-  private lazy val accessCodeRoute: String = routes.AccessCodeController.onPageLoad(mode).url
+  private val formProvider                       = new GuaranteeReferenceNumberFormProvider(mockAppConfig)
+  private val form                               = formProvider()
+  private val mode                               = NormalMode
+  private lazy val guaranteeReferenceNumberRoute = routes.GuaranteeReferenceNumberController.onPageLoad(mode).url
 
-  private val validAnswer: String = "1111"
+  private val validAnswer: String = "guaranteeRef12345"
 
-  "AccessCode Controller" - {
+  "GuaranteeReferenceNumber Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
       setExistingUserAnswers(emptyUserAnswers)
 
-      val request = FakeRequest(GET, accessCodeRoute)
-      val view    = injector.instanceOf[AccessCodeView]
+      when(mockAppConfig.guaranteeBalanceApiV2).thenReturn(true)
+
+      val request = FakeRequest(GET, guaranteeReferenceNumberRoute)
+      val view    = injector.instanceOf[GuaranteeReferenceNumberViewV2]
       val result  = route(app, request).value
 
       status(result) mustEqual OK
@@ -72,11 +74,11 @@ class AccessCodeControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
-      val userAnswers = emptyUserAnswers.setValue(AccessCodePage, validAnswer)
+      val userAnswers = emptyUserAnswers.setValue(GuaranteeReferenceNumberPage, validAnswer)
       setExistingUserAnswers(userAnswers)
 
-      val request = FakeRequest(GET, accessCodeRoute)
-      val view    = injector.instanceOf[AccessCodeView]
+      val request = FakeRequest(GET, guaranteeReferenceNumberRoute)
+      val view    = injector.instanceOf[GuaranteeReferenceNumberViewV2]
       val result  = route(app, request).value
 
       status(result) mustEqual OK
@@ -91,7 +93,7 @@ class AccessCodeControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
       setExistingUserAnswers(emptyUserAnswers)
 
-      val request = FakeRequest(POST, accessCodeRoute)
+      val request = FakeRequest(POST, guaranteeReferenceNumberRoute)
         .withFormUrlEncodedBody(("value", validAnswer))
 
       val result = route(app, request).value
@@ -103,15 +105,14 @@ class AccessCodeControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
       setExistingUserAnswers(emptyUserAnswers)
-      val invalidAnswer = ""
 
-      val request = FakeRequest(POST, accessCodeRoute).withFormUrlEncodedBody(("value", invalidAnswer))
-      val view    = injector.instanceOf[AccessCodeView]
+      val request = FakeRequest(POST, guaranteeReferenceNumberRoute).withFormUrlEncodedBody(("value", ""))
+      val view    = injector.instanceOf[GuaranteeReferenceNumberViewV2]
       val result  = route(app, request).value
 
       status(result) mustEqual BAD_REQUEST
 
-      val boundForm = form.bind(Map("value" -> invalidAnswer))
+      val boundForm = form.bind(Map("value" -> ""))
 
       contentAsString(result) mustEqual
         view(boundForm, mode)(request, messages).toString
@@ -121,7 +122,7 @@ class AccessCodeControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
       setNoExistingUserAnswers()
 
-      val request = FakeRequest(GET, accessCodeRoute)
+      val request = FakeRequest(GET, guaranteeReferenceNumberRoute)
 
       val result = route(app, request).value
 
@@ -134,7 +135,7 @@ class AccessCodeControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
       setNoExistingUserAnswers()
 
-      val request = FakeRequest(POST, accessCodeRoute)
+      val request = FakeRequest(POST, guaranteeReferenceNumberRoute)
         .withFormUrlEncodedBody(("value", validAnswer))
 
       val result = route(app, request).value

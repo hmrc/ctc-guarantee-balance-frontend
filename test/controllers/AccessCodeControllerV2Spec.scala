@@ -30,9 +30,9 @@ import play.api.test.Helpers._
 import repositories.SessionRepository
 import services.{AuditService, GuaranteeBalanceService}
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
-import views.html.AccessCodeView
+import views.html.{AccessCodeView, AccessCodeViewV2}
 
-class AccessCodeControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
+class AccessCodeControllerV2Spec extends SpecBase with AppWithDefaultMockFixtures {
 
   override protected def applicationBuilder(): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
@@ -45,7 +45,7 @@ class AccessCodeControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         bind[AuditService].toInstance(mockAuditService),
         bind[Navigator].toInstance(fakeNavigator)
       )
-      .configure("guaranteeBalanceApi.version" -> "1.0")
+      .configure("guaranteeBalanceApi.version" -> "2.0")
 
   private val formProvider                 = new AccessCodeFormProvider()
   private val form: Form[String]           = formProvider()
@@ -61,7 +61,7 @@ class AccessCodeControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
       setExistingUserAnswers(emptyUserAnswers)
 
       val request = FakeRequest(GET, accessCodeRoute)
-      val view    = injector.instanceOf[AccessCodeView]
+      val view    = injector.instanceOf[AccessCodeViewV2]
       val result  = route(app, request).value
 
       status(result) mustEqual OK
@@ -76,7 +76,7 @@ class AccessCodeControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
       setExistingUserAnswers(userAnswers)
 
       val request = FakeRequest(GET, accessCodeRoute)
-      val view    = injector.instanceOf[AccessCodeView]
+      val view    = injector.instanceOf[AccessCodeViewV2]
       val result  = route(app, request).value
 
       status(result) mustEqual OK
@@ -106,7 +106,7 @@ class AccessCodeControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
       val invalidAnswer = ""
 
       val request = FakeRequest(POST, accessCodeRoute).withFormUrlEncodedBody(("value", invalidAnswer))
-      val view    = injector.instanceOf[AccessCodeView]
+      val view    = injector.instanceOf[AccessCodeViewV2]
       val result  = route(app, request).value
 
       status(result) mustEqual BAD_REQUEST
