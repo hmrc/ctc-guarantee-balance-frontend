@@ -613,7 +613,10 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
       }
 
       "must return the HttpResponse when there is a BAD_REQUEST" in {
-        val errorResponses = Gen.chooseNum(400, 499).suchThat(_ != Status.TOO_MANY_REQUESTS)
+        val errorResponses = Gen
+          .chooseNum(400, 499)
+          .suchThat(_ != Status.TOO_MANY_REQUESTS)
+          .suchThat(_ != Status.NOT_FOUND)
 
         forAll(errorResponses) {
           errorResponse =>
