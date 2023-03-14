@@ -20,7 +20,6 @@ import config.FrontendAppConfig
 import forms.GuaranteeReferenceNumberFormProvider
 import models.NormalMode
 import org.scalacheck.{Arbitrary, Gen}
-import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.data.Form
 import play.twirl.api.HtmlFormat
 import viewModels.InputSize

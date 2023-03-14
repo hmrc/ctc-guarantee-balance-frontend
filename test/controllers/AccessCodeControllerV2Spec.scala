@@ -30,7 +30,7 @@ import play.api.test.Helpers._
 import repositories.SessionRepository
 import services.{AuditService, GuaranteeBalanceService}
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
-import views.html.{AccessCodeView, AccessCodeViewV2}
+import views.html.AccessCodeViewV2
 
 class AccessCodeControllerV2Spec extends SpecBase with AppWithDefaultMockFixtures {
 

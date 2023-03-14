@@ -23,7 +23,7 @@ import play.api.data.Form
 import play.twirl.api.HtmlFormat
 import viewModels.InputSize
 import views.behaviours.InputTextViewBehaviours
-import views.html.{AccessCodeView, AccessCodeViewV2}
+import views.html.AccessCodeViewV2
 
 class AccessCodeViewV2Spec extends InputTextViewBehaviours[String] {
 
