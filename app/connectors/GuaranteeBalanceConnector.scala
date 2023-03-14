@@ -92,6 +92,9 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
             case Status.BAD_REQUEST =>
               logger.warn(s"[GuaranteeBalanceConnector][submitBalanceRequestV2] BAD_REQUEST response: ${response.body}")
               Left(response)
+            case Status.NOT_FOUND =>
+              logger.info(s"[GuaranteeBalanceConnector][submitBalanceRequestV2] NOT_FOUND response: ${response.body}")
+              Right(BalanceRequestNotMatched(response.body))
             case _ =>
               logger.warn(s"[GuaranteeBalanceConnector][submitBalanceRequestV2] INTERNAL_SERVER_ERROR response: ${response.body}")
               Left(response)

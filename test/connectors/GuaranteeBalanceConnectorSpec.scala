@@ -587,6 +587,31 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
         result mustBe Right(BalanceRequestRateLimit)
       }
 
+      "must return non matched when we have an http response NOT_FOUND" in {
+        val notFoundJson: String =
+          """
+            | {
+            |   "code": "NOT_FOUND",
+            |   "message": "Not found"
+            | }
+            |""".stripMargin
+
+        server.stubFor(
+          post(urlEqualTo(submitBalanceRequestV2Url(grn.value)))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
+            .withRequestBody(equalToJson(requestV2AsJsonString))
+            .willReturn(
+              aResponse()
+                .withStatus(Status.NOT_FOUND)
+                .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
+                .withBody(notFoundJson)
+            )
+        )
+
+        val result = connector.submitBalanceRequestV2(requestV2, grn.value).futureValue
+        result mustBe Right(BalanceRequestNotMatched(notFoundJson))
+      }
+
       "must return the HttpResponse when there is a BAD_REQUEST" in {
         val errorResponses = Gen.chooseNum(400, 499).suchThat(_ != Status.TOO_MANY_REQUESTS)
 
