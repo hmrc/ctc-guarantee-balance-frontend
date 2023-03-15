@@ -16,12 +16,12 @@
 
 package controllers
 
-import config.FrontendAppConfig
 import controllers.actions._
-import models.{NormalMode, Referral, UserAnswers}
+import models.{Referral, UserAnswers}
+import navigation.FirstPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc._
 import repositories.SessionRepository
 import services.DateTimeService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -36,7 +36,7 @@ class StartController @Inject() (
   actions: Actions,
   val controllerComponents: MessagesControllerComponents,
   dateTimeService: DateTimeService,
-  config: FrontendAppConfig
+  firstPage: FirstPage
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
@@ -44,18 +44,14 @@ class StartController @Inject() (
   def start(referral: Option[Referral]): Action[AnyContent] = (updateSession(referral) andThen actions.getData).async {
     implicit request =>
       sessionRepository.set(UserAnswers(request.internalId, Json.obj(), dateTimeService.now)) map {
-        _ => route
+        _ => redirect
       }
   }
 
   def startAgain(): Action[AnyContent] = actions.requireData {
-    _ => route
+    _ => redirect
   }
 
-  def route: Result =
-    if (config.guaranteeBalanceApiV2) {
-      Redirect(routes.GuaranteeReferenceNumberController.onPageLoad(NormalMode))
-    } else {
-      Redirect(routes.EoriNumberController.onPageLoad(NormalMode))
-    }
+  private def redirect: Result =
+    Redirect(firstPage.call)
 }

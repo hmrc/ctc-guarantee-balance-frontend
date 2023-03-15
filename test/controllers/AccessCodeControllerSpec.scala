@@ -17,35 +17,19 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import controllers.actions.{DataRequiredAction, DataRequiredActionImpl, FakeIdentifierAction, IdentifierAction}
 import forms.AccessCodeFormProvider
 import models.NormalMode
-import navigation.Navigator
 import pages.AccessCodePage
 import play.api.data.Form
-import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repositories.SessionRepository
-import services.{AuditService, GuaranteeBalanceService}
-import uk.gov.hmrc.mongo.lock.MongoLockRepository
 import views.html.AccessCodeView
 
 class AccessCodeControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   override protected def applicationBuilder(): GuiceApplicationBuilder =
-    new GuiceApplicationBuilder()
-      .overrides(
-        bind[DataRequiredAction].to[DataRequiredActionImpl],
-        bind[IdentifierAction].to[FakeIdentifierAction],
-        bind[SessionRepository].toInstance(mockSessionRepository),
-        bind[MongoLockRepository].toInstance(mockMongoLockRepository),
-        bind[GuaranteeBalanceService].toInstance(mockGuaranteeBalanceService),
-        bind[AuditService].toInstance(mockAuditService),
-        bind[Navigator].toInstance(fakeNavigator)
-      )
-      .configure("guaranteeBalanceApi.version" -> "1.0")
+    super.v1ApplicationBuilder()
 
   private val formProvider                 = new AccessCodeFormProvider()
   private val form: Form[String]           = formProvider()

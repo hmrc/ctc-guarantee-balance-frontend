@@ -32,23 +32,35 @@ import javax.inject.Inject
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
-class GuaranteeBalanceService @Inject() (
+sealed trait GuaranteeBalanceService extends Logging {
+
+  val mongoLockRepository: MongoLockRepository
+
+  val config: FrontendAppConfig
+
+  def retrieveBalanceResponse()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]]
+
+  def checkRateLimit(internalId: String, guaranteeReferenceNumber: String): Future[Boolean] = {
+    val lockId   = LockId(internalId, guaranteeReferenceNumber).toString
+    val duration = config.rateLimitDuration.seconds
+    mongoLockRepository.takeLock(lockId, internalId, duration)
+  }
+}
+
+class V1GuaranteeBalanceService @Inject() (
   actorSystem: ActorSystem,
   connector: GuaranteeBalanceConnector,
-  mongoLockRepository: MongoLockRepository,
-  config: FrontendAppConfig
+  override val mongoLockRepository: MongoLockRepository,
+  override val config: FrontendAppConfig
 )(implicit ec: ExecutionContext)
-    extends Logging {
+    extends GuaranteeBalanceService {
 
-  // TODO - remove polling functionality and call to submitBalanceRequest (v1) post P5 deploy
-  def retrieveBalanceResponse()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] =
-    (config.guaranteeBalanceApiV2, request.userAnswers.get(BalanceIdPage)) match {
-      case (false, Some(balanceId: BalanceId)) => pollForGuaranteeBalance(balanceId)
-      case (false, None)                       => submitBalanceRequest()
-      case _                                   => submitBalanceRequestV2()
+  override def retrieveBalanceResponse()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] =
+    request.userAnswers.get(BalanceIdPage) match {
+      case Some(balanceId: BalanceId) => pollForGuaranteeBalance(balanceId)
+      case None                       => submitBalanceRequest()
     }
 
-  // TODO - remove post P5 deploy
   private def submitBalanceRequest()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] = {
     logger.info("[GuaranteeBalanceService][submitBalanceRequest] submit balance request")
     (for {
@@ -76,38 +88,6 @@ class GuaranteeBalanceService @Inject() (
     }
   }
 
-  private def submitBalanceRequestV2()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] = {
-    logger.info("[GuaranteeBalanceService][submitBalanceRequestV2] submit balance request")
-    (for {
-      guaranteeReferenceNumber <- request.userAnswers.get(GuaranteeReferenceNumberPage)
-      accessCode               <- request.userAnswers.get(AccessCodePage)
-    } yield checkRateLimit(request.internalId, guaranteeReferenceNumber).flatMap {
-      lockFree =>
-        if (lockFree) {
-          connector
-            .submitBalanceRequestV2(
-              BalanceRequestV2(
-                AccessCode(accessCode)
-              ),
-              guaranteeReferenceNumber
-            )
-        } else {
-          logger.warn("[GuaranteeBalanceService][submit][V2] Rate Limit hit")
-          Future.successful(Right(BalanceRequestRateLimit))
-        }
-    }).getOrElse {
-      logger.warn("[GuaranteeBalanceService][submit][V2] Insufficient data in user answers.")
-      Future.successful(Right(BalanceRequestSessionExpired))
-    }
-  }
-
-  private def checkRateLimit(internalId: String, guaranteeReferenceNumber: String): Future[Boolean] = {
-    val lockId   = LockId(internalId, guaranteeReferenceNumber).toString
-    val duration = config.rateLimitDuration.seconds
-    mongoLockRepository.takeLock(lockId, internalId, duration)
-  }
-
-  // TODO  - remove post P5 deploy
   private def pollForGuaranteeBalance(balanceId: BalanceId)(implicit
     hc: HeaderCarrier
   ): Future[Either[HttpResponse, BalanceRequestResponse]] = {
@@ -115,7 +95,6 @@ class GuaranteeBalanceService @Inject() (
     retryGuaranteeBalance(balanceId, System.nanoTime())
   }
 
-  // TODO  - remove post P5 deploy
   private def retryGuaranteeBalance(balanceId: BalanceId, startTimeMillis: Long)(implicit
     hc: HeaderCarrier
   ): Future[Either[HttpResponse, BalanceRequestResponse]] = {
@@ -128,10 +107,43 @@ class GuaranteeBalanceService @Inject() (
     }
   }
 
-  // TODO  - remove post P5 deploy
   private def remainingProcessingTime(startTimeMillis: Long, maxTime: FiniteDuration): Boolean = {
     val currentTimeMillis: Long = System.nanoTime()
     val durationInSeconds       = (currentTimeMillis - startTimeMillis) / 1e9d
     durationInSeconds < maxTime.toSeconds
+  }
+}
+
+class V2GuaranteeBalanceService @Inject() (
+  connector: GuaranteeBalanceConnector,
+  override val mongoLockRepository: MongoLockRepository,
+  override val config: FrontendAppConfig
+)(implicit ec: ExecutionContext)
+    extends GuaranteeBalanceService {
+
+  override def retrieveBalanceResponse()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] =
+    submitBalanceRequest()
+
+  private def submitBalanceRequest()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] = {
+    logger.info("[GuaranteeBalanceService][submitBalanceRequestV2] submit balance request")
+    (for {
+      guaranteeReferenceNumber <- request.userAnswers.get(GuaranteeReferenceNumberPage)
+      accessCode               <- request.userAnswers.get(AccessCodePage)
+    } yield checkRateLimit(request.internalId, guaranteeReferenceNumber).flatMap {
+      lockFree =>
+        if (lockFree) {
+          connector
+            .submitBalanceRequestV2(
+              BalanceRequestV2(AccessCode(accessCode)),
+              guaranteeReferenceNumber
+            )
+        } else {
+          logger.warn("[GuaranteeBalanceService][submit][V2] Rate Limit hit")
+          Future.successful(Right(BalanceRequestRateLimit))
+        }
+    }).getOrElse {
+      logger.warn("[GuaranteeBalanceService][submit][V2] Insufficient data in user answers.")
+      Future.successful(Right(BalanceRequestSessionExpired))
+    }
   }
 }

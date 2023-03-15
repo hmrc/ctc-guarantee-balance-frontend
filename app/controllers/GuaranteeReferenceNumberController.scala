@@ -16,7 +16,6 @@
 
 package controllers
 
-import config.FrontendAppConfig
 import controllers.actions._
 import forms.GuaranteeReferenceNumberFormProvider
 import models.Mode
@@ -26,8 +25,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.GuaranteeReferenceNumberView
-import views.html.GuaranteeReferenceNumberViewV2
+import views.ViewProvider
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -39,9 +37,7 @@ class GuaranteeReferenceNumberController @Inject() (
   actions: Actions,
   formProvider: GuaranteeReferenceNumberFormProvider,
   val controllerComponents: MessagesControllerComponents,
-  view: GuaranteeReferenceNumberView,
-  viewV2: GuaranteeReferenceNumberViewV2,
-  config: FrontendAppConfig
+  viewProvider: ViewProvider
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
@@ -55,11 +51,7 @@ class GuaranteeReferenceNumberController @Inject() (
         case Some(value) => form.fill(value)
       }
 
-      if (config.guaranteeBalanceApiV2) {
-        Ok(viewV2(preparedForm, mode))
-      } else {
-        Ok(view(preparedForm, mode))
-      }
+      Ok(viewProvider.guaranteeReferenceNumberView(preparedForm, mode))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = actions.requireData.async {
@@ -67,12 +59,7 @@ class GuaranteeReferenceNumberController @Inject() (
       form
         .bindFromRequest()
         .fold(
-          formWithErrors =>
-            if (config.guaranteeBalanceApiV2) {
-              Future.successful(BadRequest(viewV2(formWithErrors, mode)))
-            } else {
-              Future.successful(BadRequest(view(formWithErrors, mode)))
-            },
+          formWithErrors => Future.successful(BadRequest(viewProvider.guaranteeReferenceNumberView(formWithErrors, mode))),
           value =>
             for {
               updatedAnswers <- Future.fromTry(request.userAnswers.set(GuaranteeReferenceNumberPage, value))

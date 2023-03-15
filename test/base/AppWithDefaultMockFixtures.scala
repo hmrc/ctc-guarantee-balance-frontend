@@ -16,7 +16,7 @@
 
 package base
 
-import config.FrontendAppConfig
+import config.{FrontendAppConfig, V1Module, V2Module}
 import controllers.actions._
 import models.UserAnswers
 import navigation.{FakeNavigator, Navigator}
@@ -71,7 +71,7 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
   private def setUserAnswers(userAnswers: Option[UserAnswers]): Unit =
     when(mockSessionRepository.get(any())).thenReturn(Future.successful(userAnswers))
 
-  protected def applicationBuilder(): GuiceApplicationBuilder =
+  private def defaultApplicationBuilder(): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],
@@ -83,4 +83,17 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
         bind[AuditService].toInstance(mockAuditService),
         bind[Navigator].toInstance(fakeNavigator)
       )
+
+  protected def applicationBuilder(): GuiceApplicationBuilder =
+    defaultApplicationBuilder()
+
+  protected def v1ApplicationBuilder(): GuiceApplicationBuilder =
+    defaultApplicationBuilder()
+      .disable[V2Module]
+      .bindings(new V1Module)
+
+  protected def v2ApplicationBuilder(): GuiceApplicationBuilder =
+    defaultApplicationBuilder()
+      .disable[V1Module]
+      .bindings(new V2Module)
 }

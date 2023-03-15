@@ -16,8 +16,7 @@
 
 package views
 
-import config.FrontendAppConfig
-import forms.GuaranteeReferenceNumberFormProvider
+import forms.V1GuaranteeReferenceNumberFormProvider
 import models.NormalMode
 import org.scalacheck.{Arbitrary, Gen}
 import play.api.data.Form
@@ -28,9 +27,7 @@ import views.html.GuaranteeReferenceNumberView
 
 class GuaranteeReferenceNumberViewSpec extends InputTextViewBehaviours[String] {
 
-  val mockConfig = mock[FrontendAppConfig]
-
-  override def form: Form[String] = new GuaranteeReferenceNumberFormProvider(mockConfig)()
+  override def form: Form[String] = new V1GuaranteeReferenceNumberFormProvider()()
 
   override def applyView(form: Form[String]): HtmlFormat.Appendable =
     injector.instanceOf[GuaranteeReferenceNumberView].apply(form, NormalMode)(fakeRequest, messages)
