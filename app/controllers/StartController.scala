@@ -52,7 +52,7 @@ class StartController @Inject() (
     _ => route
   }
 
-  def route: Result =
+  private def route: Result =
     if (config.guaranteeBalanceApiV2) {
       Redirect(routes.GuaranteeReferenceNumberController.onPageLoad(NormalMode))
     } else {
