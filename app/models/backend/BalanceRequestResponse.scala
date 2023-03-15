@@ -33,10 +33,7 @@ case class BalanceRequestSuccess(
 ) extends BalanceRequestResponse {
 
   def formatForDisplay: String = {
-    val currencyCode: String = currency match {
-      case Some(x) => x.value
-      case _       => ""
-    }
+    val currencyCode: String = currency.map(_.value).getOrElse("")
 
     try {
       val formatter = NumberFormat.getCurrencyInstance(Locale.UK)

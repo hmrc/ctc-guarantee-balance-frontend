@@ -24,7 +24,7 @@ import play.api.data.Form
 import play.twirl.api.HtmlFormat
 import viewModels.InputSize
 import views.behaviours.InputTextViewBehaviours
-import views.html.{GuaranteeReferenceNumberView, GuaranteeReferenceNumberViewV2}
+import views.html.GuaranteeReferenceNumberViewV2
 
 class GuaranteeReferenceNumberV2ViewSpec extends InputTextViewBehaviours[String] {
 

@@ -30,7 +30,7 @@ import play.api.test.Helpers._
 import repositories.SessionRepository
 import services.{AuditService, GuaranteeBalanceService}
 import uk.gov.hmrc.mongo.lock.MongoLockRepository
-import views.html.{GuaranteeReferenceNumberView, GuaranteeReferenceNumberViewV2}
+import views.html.GuaranteeReferenceNumberViewV2
 
 class GuaranteeReferenceNumberControllerV2Spec extends SpecBase with AppWithDefaultMockFixtures {
 
