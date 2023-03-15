@@ -62,11 +62,4 @@ class FrontendAppConfig @Inject() (configuration: Configuration, service: Servic
   lazy val nctsEnquiriesUrl: String          = configuration.get[String]("urls.nctsEnquiries")
   lazy val manageTransitMovementsUrl: String = configuration.get[String]("urls.manageTransitMovements")
 
-  lazy val guaranteeBalanceApiV2: Boolean = configuration
-    .getOptional[String](
-      "guaranteeBalanceApi.version"
-    )
-    .getOrElse("1.0")
-    .equals("2.0")
-
 }

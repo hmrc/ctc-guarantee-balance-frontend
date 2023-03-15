@@ -17,6 +17,7 @@
 package config
 
 import forms.{GuaranteeReferenceNumberFormProvider, V1GuaranteeReferenceNumberFormProvider}
+import navigation.{FirstPage, V1FirstPage}
 import services.{GuaranteeBalanceService, V1GuaranteeBalanceService}
 import views.{V1ViewProvider, ViewProvider}
 
@@ -26,10 +27,9 @@ class V1Module extends Module {
     super.configure()
 
     bind(classOf[ViewProvider]).to(classOf[V1ViewProvider])
-
     bind(classOf[GuaranteeBalanceService]).to(classOf[V1GuaranteeBalanceService])
-
     bind(classOf[GuaranteeReferenceNumberFormProvider]).to(classOf[V1GuaranteeReferenceNumberFormProvider])
+    bind(classOf[FirstPage]).to(classOf[V1FirstPage])
   }
 
 }

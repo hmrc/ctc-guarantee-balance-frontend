@@ -20,7 +20,7 @@ import forms.Constants._
 import forms.mappings.Mappings
 import play.api.data.Form
 
-trait GuaranteeReferenceNumberFormProvider extends Mappings {
+sealed trait GuaranteeReferenceNumberFormProvider extends Mappings {
 
   val prefix: String
 
