@@ -17,36 +17,20 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import controllers.actions.{DataRequiredAction, DataRequiredActionImpl, FakeIdentifierAction, IdentifierAction}
-import forms.GuaranteeReferenceNumberFormProvider
+import forms.V1GuaranteeReferenceNumberFormProvider
 import models.NormalMode
-import navigation.Navigator
 import pages.GuaranteeReferenceNumberPage
-import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repositories.SessionRepository
-import services.{AuditService, GuaranteeBalanceService}
-import uk.gov.hmrc.mongo.lock.MongoLockRepository
 import views.html.GuaranteeReferenceNumberView
 
 class GuaranteeReferenceNumberControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   override protected def applicationBuilder(): GuiceApplicationBuilder =
-    new GuiceApplicationBuilder()
-      .overrides(
-        bind[DataRequiredAction].to[DataRequiredActionImpl],
-        bind[IdentifierAction].to[FakeIdentifierAction],
-        bind[SessionRepository].toInstance(mockSessionRepository),
-        bind[MongoLockRepository].toInstance(mockMongoLockRepository),
-        bind[GuaranteeBalanceService].toInstance(mockGuaranteeBalanceService),
-        bind[AuditService].toInstance(mockAuditService),
-        bind[Navigator].toInstance(fakeNavigator)
-      )
-      .configure("guaranteeBalanceApi.version" -> "1.0")
+    super.v1ApplicationBuilder()
 
-  private val formProvider                       = new GuaranteeReferenceNumberFormProvider(mockAppConfig)
+  private val formProvider                       = new V1GuaranteeReferenceNumberFormProvider()
   private val form                               = formProvider()
   private val mode                               = NormalMode
   private lazy val guaranteeReferenceNumberRoute = routes.GuaranteeReferenceNumberController.onPageLoad(mode).url

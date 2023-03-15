@@ -134,9 +134,7 @@ class V2GuaranteeBalanceService @Inject() (
         if (lockFree) {
           connector
             .submitBalanceRequestV2(
-              BalanceRequestV2(
-                AccessCode(accessCode)
-              ),
+              BalanceRequestV2(AccessCode(accessCode)),
               guaranteeReferenceNumber
             )
         } else {

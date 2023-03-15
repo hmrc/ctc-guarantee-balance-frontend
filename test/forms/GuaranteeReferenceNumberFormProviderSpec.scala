@@ -16,58 +16,109 @@
 
 package forms
 
-import config.FrontendAppConfig
 import forms.Constants._
 import forms.behaviours.StringFieldBehaviours
-import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.data.FormError
 
 class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
 
-  val requiredKey  = "guaranteeReferenceNumber.error.required"
-  val maxLengthKey = "guaranteeReferenceNumber.error.length"
-  val invalidKey   = "guaranteeReferenceNumber.error.invalid"
+  "v1" - {
 
-  val mockConfig = mock[FrontendAppConfig]
+    val maxLength = maxGuaranteeReferenceNumberLength
 
-  val form = new GuaranteeReferenceNumberFormProvider(mockConfig)()
+    val requiredKey  = "guaranteeReferenceNumber.error.required"
+    val maxLengthKey = "guaranteeReferenceNumber.error.length"
+    val invalidKey   = "guaranteeReferenceNumber.error.invalid"
 
-  ".value" - {
+    val form = new V1GuaranteeReferenceNumberFormProvider()()
 
-    val fieldName = "value"
+    ".value" - {
 
-    behave like fieldThatBindsValidData(
-      form = form,
-      fieldName = fieldName,
-      validDataGenerator = stringsWithMaxLength(maxGuaranteeReferenceNumberLength)
-    )
+      val fieldName = "value"
 
-    behave like fieldWithMaxLength(
-      form = form,
-      fieldName = fieldName,
-      maxLength = maxGuaranteeReferenceNumberLength,
-      lengthError = FormError(fieldName, maxLengthKey, Seq(maxGuaranteeReferenceNumberLength))
-    )
+      behave like fieldThatBindsValidData(
+        form = form,
+        fieldName = fieldName,
+        validDataGenerator = stringsWithMaxLength(maxLength)
+      )
 
-    behave like mandatoryField(
-      form = form,
-      fieldName = fieldName,
-      requiredError = FormError(fieldName, requiredKey)
-    )
+      behave like fieldWithMaxLength(
+        form = form,
+        fieldName = fieldName,
+        maxLength = maxLength,
+        lengthError = FormError(fieldName, maxLengthKey, Seq(maxLength))
+      )
 
-    behave like fieldThatDoesNotBindInvalidData(
-      form = form,
-      fieldName = fieldName,
-      regex = alphaNumericRegex,
-      gen = stringsOfLength(maxGuaranteeReferenceNumberLength),
-      invalidKey = invalidKey
-    )
+      behave like mandatoryField(
+        form = form,
+        fieldName = fieldName,
+        requiredError = FormError(fieldName, requiredKey)
+      )
 
-    "must remove spaces on bound strings" in {
-      val result = form.bind(Map(fieldName -> " 123 456 "))
-      result.errors mustEqual Nil
-      result.get mustEqual "123456"
+      behave like fieldThatDoesNotBindInvalidData(
+        form = form,
+        fieldName = fieldName,
+        regex = alphaNumericRegex,
+        gen = stringsOfLength(maxLength),
+        invalidKey = invalidKey
+      )
+
+      "must remove spaces on bound strings" in {
+        val result = form.bind(Map(fieldName -> " 123 456 "))
+        result.errors mustEqual Nil
+        result.get mustEqual "123456"
+      }
+
     }
+  }
 
+  "v2" - {
+
+    val maxLength = maxGuaranteeReferenceNumberLengthV2
+
+    val requiredKey  = "guaranteeReferenceNumber.v2.error.required"
+    val maxLengthKey = "guaranteeReferenceNumber.v2.error.length"
+    val invalidKey   = "guaranteeReferenceNumber.v2.error.invalid"
+
+    val form = new V2GuaranteeReferenceNumberFormProvider()()
+
+    ".value" - {
+
+      val fieldName = "value"
+
+      behave like fieldThatBindsValidData(
+        form = form,
+        fieldName = fieldName,
+        validDataGenerator = stringsWithMaxLength(maxLength)
+      )
+
+      behave like fieldWithMaxLength(
+        form = form,
+        fieldName = fieldName,
+        maxLength = maxLength,
+        lengthError = FormError(fieldName, maxLengthKey, Seq(maxLength))
+      )
+
+      behave like mandatoryField(
+        form = form,
+        fieldName = fieldName,
+        requiredError = FormError(fieldName, requiredKey)
+      )
+
+      behave like fieldThatDoesNotBindInvalidData(
+        form = form,
+        fieldName = fieldName,
+        regex = alphaNumericRegex,
+        gen = stringsOfLength(maxLength),
+        invalidKey = invalidKey
+      )
+
+      "must remove spaces on bound strings" in {
+        val result = form.bind(Map(fieldName -> " 123 456 "))
+        result.errors mustEqual Nil
+        result.get mustEqual "123456"
+      }
+
+    }
   }
 }

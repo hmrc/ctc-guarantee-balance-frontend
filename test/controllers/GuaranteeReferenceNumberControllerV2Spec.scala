@@ -17,37 +17,20 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import controllers.actions.{DataRequiredAction, DataRequiredActionImpl, FakeIdentifierAction, IdentifierAction}
-import forms.GuaranteeReferenceNumberFormProvider
+import forms.V2GuaranteeReferenceNumberFormProvider
 import models.NormalMode
-import navigation.Navigator
-import org.mockito.Mockito.when
 import pages.GuaranteeReferenceNumberPage
-import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repositories.SessionRepository
-import services.{AuditService, GuaranteeBalanceService}
-import uk.gov.hmrc.mongo.lock.MongoLockRepository
 import views.html.GuaranteeReferenceNumberViewV2
 
 class GuaranteeReferenceNumberControllerV2Spec extends SpecBase with AppWithDefaultMockFixtures {
 
   override protected def applicationBuilder(): GuiceApplicationBuilder =
-    new GuiceApplicationBuilder()
-      .overrides(
-        bind[DataRequiredAction].to[DataRequiredActionImpl],
-        bind[IdentifierAction].to[FakeIdentifierAction],
-        bind[SessionRepository].toInstance(mockSessionRepository),
-        bind[MongoLockRepository].toInstance(mockMongoLockRepository),
-        bind[GuaranteeBalanceService].toInstance(mockGuaranteeBalanceService),
-        bind[AuditService].toInstance(mockAuditService),
-        bind[Navigator].toInstance(fakeNavigator)
-      )
-      .configure("guaranteeBalanceApi.version" -> "2.0")
+    super.v2ApplicationBuilder()
 
-  private val formProvider                       = new GuaranteeReferenceNumberFormProvider(mockAppConfig)
+  private val formProvider                       = new V2GuaranteeReferenceNumberFormProvider()
   private val form                               = formProvider()
   private val mode                               = NormalMode
   private lazy val guaranteeReferenceNumberRoute = routes.GuaranteeReferenceNumberController.onPageLoad(mode).url
@@ -59,8 +42,6 @@ class GuaranteeReferenceNumberControllerV2Spec extends SpecBase with AppWithDefa
     "must return OK and the correct view for a GET" in {
 
       setExistingUserAnswers(emptyUserAnswers)
-
-      when(mockAppConfig.guaranteeBalanceApiV2).thenReturn(true)
 
       val request = FakeRequest(GET, guaranteeReferenceNumberRoute)
       val view    = injector.instanceOf[GuaranteeReferenceNumberViewV2]
