@@ -16,14 +16,15 @@
 
 @import controllers.routes
 @import viewModels.components.InputTextViewModel._
-@import views.html.components.{Button, ErrorSummary, InputText}
+@import views.html.components.{Button, ErrorSummary, InputText, HeadingCaption}
 
 @this(
     mainTemplate: MainTemplate,
     formHelper: FormWithCSRF,
     inputText: InputText,
     errorSummary: ErrorSummary,
-    button: Button
+    button: Button,
+    caption: HeadingCaption
 )
 
 @(form: Form[String], mode: Mode)(implicit request: Request[_], messages: Messages)
@@ -33,9 +34,11 @@
     showBackLink = true
 ) {
 
-    @formHelper(action = routes.AccessCodeController.onSubmit(mode), Symbol("autoComplete") -> "off") {
+    @errorSummary(form.errors)
 
-        @errorSummary(form.errors)
+    @caption(messages("accessCode.v2.caption"))
+
+    @formHelper(action = routes.AccessCodeController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
         @inputText(
             field = form("value"),
