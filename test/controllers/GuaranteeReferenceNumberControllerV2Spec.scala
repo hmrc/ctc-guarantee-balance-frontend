@@ -17,20 +17,20 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import forms.V1GuaranteeReferenceNumberFormProvider
+import forms.V2GuaranteeReferenceNumberFormProvider
 import models.NormalMode
 import pages.GuaranteeReferenceNumberPage
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import views.html.GuaranteeReferenceNumberView
+import views.html.GuaranteeReferenceNumberViewV2
 
-class GuaranteeReferenceNumberControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
+class GuaranteeReferenceNumberControllerV2Spec extends SpecBase with AppWithDefaultMockFixtures {
 
   override protected def applicationBuilder(): GuiceApplicationBuilder =
-    super.v1ApplicationBuilder()
+    super.v2ApplicationBuilder()
 
-  private val formProvider                       = new V1GuaranteeReferenceNumberFormProvider()
+  private val formProvider                       = new V2GuaranteeReferenceNumberFormProvider()
   private val form                               = formProvider()
   private val mode                               = NormalMode
   private lazy val guaranteeReferenceNumberRoute = routes.GuaranteeReferenceNumberController.onPageLoad(mode).url
@@ -44,9 +44,8 @@ class GuaranteeReferenceNumberControllerSpec extends SpecBase with AppWithDefaul
       setExistingUserAnswers(emptyUserAnswers)
 
       val request = FakeRequest(GET, guaranteeReferenceNumberRoute)
-      val view    = injector.instanceOf[GuaranteeReferenceNumberView]
-
-      val result = route(app, request).value
+      val view    = injector.instanceOf[GuaranteeReferenceNumberViewV2]
+      val result  = route(app, request).value
 
       status(result) mustEqual OK
 
@@ -60,7 +59,7 @@ class GuaranteeReferenceNumberControllerSpec extends SpecBase with AppWithDefaul
       setExistingUserAnswers(userAnswers)
 
       val request = FakeRequest(GET, guaranteeReferenceNumberRoute)
-      val view    = injector.instanceOf[GuaranteeReferenceNumberView]
+      val view    = injector.instanceOf[GuaranteeReferenceNumberViewV2]
       val result  = route(app, request).value
 
       status(result) mustEqual OK
@@ -89,7 +88,7 @@ class GuaranteeReferenceNumberControllerSpec extends SpecBase with AppWithDefaul
       setExistingUserAnswers(emptyUserAnswers)
 
       val request = FakeRequest(POST, guaranteeReferenceNumberRoute).withFormUrlEncodedBody(("value", ""))
-      val view    = injector.instanceOf[GuaranteeReferenceNumberView]
+      val view    = injector.instanceOf[GuaranteeReferenceNumberViewV2]
       val result  = route(app, request).value
 
       status(result) mustEqual BAD_REQUEST

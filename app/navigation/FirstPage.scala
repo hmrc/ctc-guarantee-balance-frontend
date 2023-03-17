@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package forms
+package navigation
 
-object Constants {
+import models.NormalMode
+import play.api.mvc.Call
 
-  lazy val maxEoriNumberLength: Int                 = 17
-  lazy val minEoriNumberLength: Int                 = 14
-  lazy val maxGuaranteeReferenceNumberLength: Int   = 17
-  lazy val maxGuaranteeReferenceNumberLengthV2: Int = 24
-  lazy val accessCodeLength: Int                    = 4
+sealed trait FirstPage {
+  def call: Call
+}
 
-  lazy val alphaNumericRegex: String     = "^[a-zA-Z0-9]*$"
-  lazy val eoriNumberPrefixRegex: String = "^(?i)(gb|xi).*$"
-  lazy val eoriNumberRegex: String       = "^(?i)(gb|xi)[0-9]*$"
+class V1FirstPage extends FirstPage {
+  override def call: Call = controllers.routes.EoriNumberController.onPageLoad(NormalMode)
+}
 
+class V2FirstPage extends FirstPage {
+  override def call: Call = controllers.routes.GuaranteeReferenceNumberController.onPageLoad(NormalMode)
 }

@@ -16,23 +16,23 @@
 
 package views
 
-import forms.V1GuaranteeReferenceNumberFormProvider
+import forms.AccessCodeFormProvider
 import models.NormalMode
 import org.scalacheck.{Arbitrary, Gen}
 import play.api.data.Form
 import play.twirl.api.HtmlFormat
 import viewModels.InputSize
 import views.behaviours.InputTextViewBehaviours
-import views.html.GuaranteeReferenceNumberView
+import views.html.AccessCodeViewV2
 
-class GuaranteeReferenceNumberViewSpec extends InputTextViewBehaviours[String] {
+class AccessCodeViewV2Spec extends InputTextViewBehaviours[String] {
 
-  override def form: Form[String] = new V1GuaranteeReferenceNumberFormProvider()()
+  override def form: Form[String] = new AccessCodeFormProvider()()
 
   override def applyView(form: Form[String]): HtmlFormat.Appendable =
-    injector.instanceOf[GuaranteeReferenceNumberView].apply(form, NormalMode)(fakeRequest, messages)
+    injector.instanceOf[AccessCodeViewV2].apply(form, NormalMode)(fakeRequest, messages)
 
-  override val prefix: String = "guaranteeReferenceNumber"
+  override val prefix: String = "accessCode.v2"
 
   implicit override val arbitraryT: Arbitrary[String] = Arbitrary(Gen.alphaNumStr)
 
@@ -42,18 +42,11 @@ class GuaranteeReferenceNumberViewSpec extends InputTextViewBehaviours[String] {
 
   behave like pageWithHeading()
 
-  behave like pageWithContent("p", "You can only check the balance for:")
+  behave like pageWithContent("p", "This is set up by the Principal and works just like a bank PIN code.")
 
-  behave like pageWithList(
-    "govuk-list--bullet",
-    "comprehensive guarantee",
-    "guarantee waiver",
-    "individual guarantee with multiple usage"
-  )
+  behave like pageWithHint("The code will be 4 characters long, like 0000 or X9X9.")
 
-  behave like pageWithContent("p", "You must make sure this reference is up to date.")
-
-  behave like pageWithInputText(Some(InputSize.Width20))
+  behave like pageWithInputText(Some(InputSize.Width5), "password")
 
   behave like pageWithContinueButton("Continue")
 }

@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package forms
+package models.requests
 
-object Constants {
+import models.values._
+import play.api.libs.json.Json
 
-  lazy val maxEoriNumberLength: Int                 = 17
-  lazy val minEoriNumberLength: Int                 = 14
-  lazy val maxGuaranteeReferenceNumberLength: Int   = 17
-  lazy val maxGuaranteeReferenceNumberLengthV2: Int = 24
-  lazy val accessCodeLength: Int                    = 4
+case class BalanceRequestV2(
+  accessCode: AccessCode
+)
 
-  lazy val alphaNumericRegex: String     = "^[a-zA-Z0-9]*$"
-  lazy val eoriNumberPrefixRegex: String = "^(?i)(gb|xi).*$"
-  lazy val eoriNumberRegex: String       = "^(?i)(gb|xi)[0-9]*$"
-
+object BalanceRequestV2 {
+  implicit val balanceRequestJsonFormat = Json.format[BalanceRequestV2]
 }

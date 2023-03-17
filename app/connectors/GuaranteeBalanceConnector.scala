@@ -21,7 +21,7 @@ import config.FrontendAppConfig
 import models.RichHttpResponse
 import models.backend._
 import models.backend.errors.FunctionalError
-import models.requests.BalanceRequest
+import models.requests.{BalanceRequest, BalanceRequestV2}
 import models.values.BalanceId
 import models.values.ErrorType.{InvalidDataErrorType, NotMatchedErrorType}
 import play.api.Logging
@@ -41,6 +41,10 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
 
   private val headers = Seq(
     HeaderNames.ACCEPT -> "application/vnd.hmrc.1.0+json"
+  )
+
+  private val headersV2 = Seq(
+    HeaderNames.ACCEPT -> "application/vnd.hmrc.2.0+json"
   )
 
   def submitBalanceRequest(request: BalanceRequest)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] = {
@@ -68,6 +72,39 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
       url,
       request,
       headers
+    )
+  }
+
+  def submitBalanceRequestV2(request: BalanceRequestV2, grn: String)(implicit
+    hc: HeaderCarrier
+  ): Future[Either[HttpResponse, BalanceRequestResponse]] = {
+    val url = s"${appConfig.guaranteeBalanceUrl}/$grn/balance"
+
+    implicit val eitherBalanceIdOrResponseReads: HttpReads[Either[HttpResponse, BalanceRequestResponse]] =
+      HttpReads[HttpResponse].map {
+        response =>
+          response.status match {
+            case Status.OK =>
+              Right(response.json.as[BalanceRequestResponse])
+            case Status.TOO_MANY_REQUESTS =>
+              logger.warn("[GuaranteeBalanceConnector][submitBalanceRequestV2] TOO_MANY_REQUESTS response from back end call")
+              Right(BalanceRequestRateLimit)
+            case Status.BAD_REQUEST =>
+              logger.warn(s"[GuaranteeBalanceConnector][submitBalanceRequestV2] BAD_REQUEST response: ${response.body}")
+              Left(response)
+            case Status.NOT_FOUND =>
+              logger.info(s"[GuaranteeBalanceConnector][submitBalanceRequestV2] NOT_FOUND response: ${response.body}")
+              Right(BalanceRequestNotMatched(response.body))
+            case _ =>
+              logger.warn(s"[GuaranteeBalanceConnector][submitBalanceRequestV2] INTERNAL_SERVER_ERROR response: ${response.body}")
+              Left(response)
+          }
+      }
+
+    http.POST[BalanceRequestV2, Either[HttpResponse, BalanceRequestResponse]](
+      url,
+      request,
+      headersV2
     )
   }
 

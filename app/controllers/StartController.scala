@@ -17,10 +17,11 @@
 package controllers
 
 import controllers.actions._
-import models.{NormalMode, Referral, UserAnswers}
+import models.{Referral, UserAnswers}
+import navigation.FirstPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc._
 import repositories.SessionRepository
 import services.DateTimeService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -34,7 +35,8 @@ class StartController @Inject() (
   updateSession: ReferralActionProvider,
   actions: Actions,
   val controllerComponents: MessagesControllerComponents,
-  dateTimeService: DateTimeService
+  dateTimeService: DateTimeService,
+  firstPage: FirstPage
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
@@ -42,11 +44,14 @@ class StartController @Inject() (
   def start(referral: Option[Referral]): Action[AnyContent] = (updateSession(referral) andThen actions.getData).async {
     implicit request =>
       sessionRepository.set(UserAnswers(request.internalId, Json.obj(), dateTimeService.now)) map {
-        _ => Redirect(routes.EoriNumberController.onPageLoad(NormalMode))
+        _ => redirect
       }
   }
 
   def startAgain(): Action[AnyContent] = actions.requireData {
-    _ => Redirect(routes.EoriNumberController.onPageLoad(NormalMode))
+    _ => redirect
   }
+
+  private def redirect: Result =
+    Redirect(firstPage.call)
 }

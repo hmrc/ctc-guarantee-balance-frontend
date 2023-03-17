@@ -22,7 +22,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
 import models.backend._
 import models.backend.errors.FunctionalError
-import models.requests.BalanceRequest
+import models.requests._
 import models.values.ErrorType.{InvalidDataErrorType, NotMatchedErrorType}
 import models.values._
 import org.scalacheck.Arbitrary.arbitrary
@@ -45,10 +45,11 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
     .build()
 
   implicit private val hc: HeaderCarrier = HeaderCarrier()
+  private val grn: GuaranteeReference    = GuaranteeReference("guarref")
 
-  private val submitBalanceRequestUrl = s"/balances"
-
+  private val submitBalanceRequestUrl                         = s"/balances"
   private def queryBalanceRequestUrlFor(balanceId: BalanceId) = s"/balances/${balanceId.value}"
+  private def submitBalanceRequestV2Url(grn: String)          = s"/$grn/balance"
 
   private lazy val connector = app.injector.instanceOf[GuaranteeBalanceConnector]
 
@@ -58,7 +59,12 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
     AccessCode("1234")
   )
 
-  private val requestAsJsonString: String = Json.stringify(Json.toJson(request))
+  private val requestV2 = BalanceRequestV2(
+    AccessCode("1234")
+  )
+
+  private val requestAsJsonString: String   = Json.stringify(Json.toJson(request))
+  private val requestV2AsJsonString: String = Json.stringify(Json.toJson(requestV2))
 
   private val testUuid = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
 
@@ -84,7 +90,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
             .willReturn(okJson(balanceRequestSuccessResponseJson))
         )
 
-        val expectedResponse = BalanceRequestSuccess(BigDecimal(3.14), CurrencyCode("EUR"))
+        val expectedResponse = BalanceRequestSuccess(BigDecimal(3.14), Some(CurrencyCode("EUR")))
 
         val result = connector.submitBalanceRequest(request).futureValue
         result mustBe Right(expectedResponse)
@@ -350,7 +356,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
             .willReturn(okJson(balanceRequestSuccessResponseJson))
         )
 
-        val expectedResponse = BalanceRequestSuccess(BigDecimal(3.14), CurrencyCode("EUR"))
+        val expectedResponse = BalanceRequestSuccess(BigDecimal(3.14), Some(CurrencyCode("EUR")))
 
         val result = connector.queryPendingBalance(BalanceId(testUuid)).futureValue
         result mustBe Right(expectedResponse)
@@ -530,6 +536,129 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
         val result          = connector.queryPendingBalance(balanceId).futureValue
         val functionalError = FunctionalError(InvalidDataErrorType, "GRR(1).GQY(1).Query identifier", None)
         result mustBe Right(BalanceRequestFunctionalError(NonEmptyList[FunctionalError](functionalError, Nil)))
+      }
+    }
+
+    "submitBalanceRequestV2" - {
+
+      "must return balance success response for Ok" in {
+        val balanceRequestSuccessResponseJson: String =
+          """
+            | {
+            |   "balance": 3.14
+            | }
+            |""".stripMargin
+
+        server.stubFor(
+          post(urlEqualTo(submitBalanceRequestV2Url(grn.value)))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
+            .withRequestBody(equalToJson(requestV2AsJsonString))
+            .willReturn(okJson(balanceRequestSuccessResponseJson))
+        )
+
+        val expectedResponse = BalanceRequestSuccess(BigDecimal(3.14), None)
+
+        val result = connector.submitBalanceRequestV2(requestV2, grn.value).futureValue
+        result mustBe Right(expectedResponse)
+      }
+
+      "must return rate limit balance type when we have an http response TOO_MANY_REQUESTS" in {
+        val tooManyRequestsJson: String =
+          """
+            | {
+            |   "code": "TOO_MANY_REQUESTS",
+            |   "message": "The request was rejected by the guarantee management system"
+            | }
+            |""".stripMargin
+
+        server.stubFor(
+          post(urlEqualTo(submitBalanceRequestV2Url(grn.value)))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
+            .withRequestBody(equalToJson(requestV2AsJsonString))
+            .willReturn(
+              aResponse()
+                .withStatus(Status.TOO_MANY_REQUESTS)
+                .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
+                .withBody(tooManyRequestsJson)
+            )
+        )
+
+        val result = connector.submitBalanceRequestV2(requestV2, grn.value).futureValue
+        result mustBe Right(BalanceRequestRateLimit)
+      }
+
+      "must return non matched when we have an http response NOT_FOUND" in {
+        val notFoundJson: String =
+          """
+            | {
+            |   "code": "NOT_FOUND",
+            |   "message": "Not found"
+            | }
+            |""".stripMargin
+
+        server.stubFor(
+          post(urlEqualTo(submitBalanceRequestV2Url(grn.value)))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
+            .withRequestBody(equalToJson(requestV2AsJsonString))
+            .willReturn(
+              aResponse()
+                .withStatus(Status.NOT_FOUND)
+                .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
+                .withBody(notFoundJson)
+            )
+        )
+
+        val result = connector.submitBalanceRequestV2(requestV2, grn.value).futureValue
+        result mustBe Right(BalanceRequestNotMatched(notFoundJson))
+      }
+
+      "must return the HttpResponse when there is a BAD_REQUEST" in {
+        val errorResponses = Gen
+          .chooseNum(400, 499)
+          .suchThat(_ != Status.TOO_MANY_REQUESTS)
+          .suchThat(_ != Status.NOT_FOUND)
+
+        forAll(errorResponses) {
+          errorResponse =>
+            server.stubFor(
+              post(urlEqualTo(submitBalanceRequestV2Url(grn.value)))
+                .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
+                .withRequestBody(equalToJson(requestV2AsJsonString))
+                .willReturn(
+                  aResponse()
+                    .withStatus(errorResponse)
+                )
+            )
+
+            val result = connector.submitBalanceRequestV2(requestV2, grn.value).futureValue
+
+            val response = result.left.value
+
+            response.status mustBe errorResponse
+        }
+      }
+
+      "must return the HttpResponse when there is an INTERNAL_SERVER_ERROR" in {
+        val errorResponses = Gen.chooseNum(500, 599).suchThat(_ != Status.TOO_MANY_REQUESTS)
+
+        forAll(errorResponses) {
+          errorResponse =>
+            server.stubFor(
+              post(urlEqualTo(submitBalanceRequestV2Url(grn.value)))
+                .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
+                .withRequestBody(equalToJson(requestV2AsJsonString))
+                .willReturn(
+                  aResponse()
+                    .withStatus(errorResponse)
+                )
+            )
+
+            val result = connector.submitBalanceRequestV2(requestV2, grn.value).futureValue
+
+            val response = result.left.value
+
+            response.status mustBe errorResponse
+        }
       }
     }
   }

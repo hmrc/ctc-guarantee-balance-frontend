@@ -21,7 +21,7 @@ import akka.pattern.after
 import config.FrontendAppConfig
 import connectors.GuaranteeBalanceConnector
 import models.backend.{BalanceRequestPending, BalanceRequestRateLimit, BalanceRequestResponse, BalanceRequestSessionExpired}
-import models.requests.{BalanceRequest, DataRequest}
+import models.requests.{BalanceRequest, BalanceRequestV2, DataRequest}
 import models.values._
 import pages.{AccessCodePage, BalanceIdPage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.Logging
@@ -32,15 +32,30 @@ import javax.inject.Inject
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
-class GuaranteeBalanceService @Inject() (
+sealed trait GuaranteeBalanceService extends Logging {
+
+  val mongoLockRepository: MongoLockRepository
+
+  val config: FrontendAppConfig
+
+  def retrieveBalanceResponse()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]]
+
+  def checkRateLimit(internalId: String, guaranteeReferenceNumber: String): Future[Boolean] = {
+    val lockId   = LockId(internalId, guaranteeReferenceNumber).toString
+    val duration = config.rateLimitDuration.seconds
+    mongoLockRepository.takeLock(lockId, internalId, duration)
+  }
+}
+
+class V1GuaranteeBalanceService @Inject() (
   actorSystem: ActorSystem,
   connector: GuaranteeBalanceConnector,
-  mongoLockRepository: MongoLockRepository,
-  config: FrontendAppConfig
+  override val mongoLockRepository: MongoLockRepository,
+  override val config: FrontendAppConfig
 )(implicit ec: ExecutionContext)
-    extends Logging {
+    extends GuaranteeBalanceService {
 
-  def retrieveBalanceResponse()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] =
+  override def retrieveBalanceResponse()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] =
     request.userAnswers.get(BalanceIdPage) match {
       case Some(balanceId: BalanceId) => pollForGuaranteeBalance(balanceId)
       case None                       => submitBalanceRequest()
@@ -73,12 +88,6 @@ class GuaranteeBalanceService @Inject() (
     }
   }
 
-  private def checkRateLimit(internalId: String, guaranteeReferenceNumber: String): Future[Boolean] = {
-    val lockId   = LockId(internalId, guaranteeReferenceNumber).toString
-    val duration = config.rateLimitDuration.seconds
-    mongoLockRepository.takeLock(lockId, internalId, duration)
-  }
-
   private def pollForGuaranteeBalance(balanceId: BalanceId)(implicit
     hc: HeaderCarrier
   ): Future[Either[HttpResponse, BalanceRequestResponse]] = {
@@ -102,5 +111,39 @@ class GuaranteeBalanceService @Inject() (
     val currentTimeMillis: Long = System.nanoTime()
     val durationInSeconds       = (currentTimeMillis - startTimeMillis) / 1e9d
     durationInSeconds < maxTime.toSeconds
+  }
+}
+
+class V2GuaranteeBalanceService @Inject() (
+  connector: GuaranteeBalanceConnector,
+  override val mongoLockRepository: MongoLockRepository,
+  override val config: FrontendAppConfig
+)(implicit ec: ExecutionContext)
+    extends GuaranteeBalanceService {
+
+  override def retrieveBalanceResponse()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] =
+    submitBalanceRequest()
+
+  private def submitBalanceRequest()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] = {
+    logger.info("[GuaranteeBalanceService][submitBalanceRequestV2] submit balance request")
+    (for {
+      guaranteeReferenceNumber <- request.userAnswers.get(GuaranteeReferenceNumberPage)
+      accessCode               <- request.userAnswers.get(AccessCodePage)
+    } yield checkRateLimit(request.internalId, guaranteeReferenceNumber).flatMap {
+      lockFree =>
+        if (lockFree) {
+          connector
+            .submitBalanceRequestV2(
+              BalanceRequestV2(AccessCode(accessCode)),
+              guaranteeReferenceNumber
+            )
+        } else {
+          logger.warn("[GuaranteeBalanceService][submit][V2] Rate Limit hit")
+          Future.successful(Right(BalanceRequestRateLimit))
+        }
+    }).getOrElse {
+      logger.warn("[GuaranteeBalanceService][submit][V2] Insufficient data in user answers.")
+      Future.successful(Right(BalanceRequestSessionExpired))
+    }
   }
 }

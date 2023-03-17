@@ -29,18 +29,21 @@ sealed abstract class BalanceRequestResponse
 
 case class BalanceRequestSuccess(
   balance: BigDecimal,
-  currency: CurrencyCode
+  currency: Option[CurrencyCode]
 ) extends BalanceRequestResponse {
 
-  def formatForDisplay: String =
+  def formatForDisplay: String = {
+    val currencyCode: String = currency.map(_.value).getOrElse("")
+
     try {
       val formatter = NumberFormat.getCurrencyInstance(Locale.UK)
-      formatter.setCurrency(Currency.getInstance(currency.value))
+      formatter.setCurrency(Currency.getInstance(currencyCode))
       formatter.format(balance)
     } catch {
       case _: Exception =>
-        s"${currency.value}$balance"
+        s"$currencyCode$balance"
     }
+  }
 }
 
 case class BalanceRequestPending(balanceId: BalanceId) extends BalanceRequestResponse

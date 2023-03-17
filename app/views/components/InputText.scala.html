@@ -21,7 +21,8 @@
 
 @this(
     govukInput: GovukInput,
-    headingWithNoCaption: Heading
+    headingWithNoCaption: Heading,
+    hmrcHeading: Heading
 )
 
 @(
@@ -61,6 +62,11 @@
         @headingWithNoCaption(heading)
         @additionalHtml
         @govukInput(input.copy(label = Label(isPageHeading = false, content = Text(label), classes = "govuk-visually-hidden")))
+    }
+    case x @ TextInputWithHiddenLabelV2(heading, caption, additionalHtml) => {
+        @hmrcHeading(heading, caption, Some(x.headingClasses))
+        @additionalHtml
+        @govukInput(input.copy(label = Label(isPageHeading = false, content = Text(heading), classes = "govuk-visually-hidden")))
     }
     case TextInputWithStatementHeading(heading, label, additionalHtml) => {
         @headingWithNoCaption(heading)
