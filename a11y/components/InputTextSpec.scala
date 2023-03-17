@@ -31,13 +31,15 @@ class InputTextSpec extends A11ySpecBase {
     val template  = app.injector.instanceOf[MainTemplate]
     val component = app.injector.instanceOf[InputText]
 
-    val title      = nonEmptyString.sample.value
-    val label      = nonEmptyString.sample.value
-    val inputClass = Gen.option(Gen.alphaNumStr).sample.value
-    val hint       = Gen.option(nonEmptyString).sample.value
-    val prefix     = Gen.option(Gen.alphaNumStr).sample.value
-    val suffix     = Gen.option(Gen.alphaNumStr).sample.value
-    val inputMode  = Gen.option(Gen.alphaNumStr).sample.value
+    val messageKeyPrefix = Gen.alphaNumStr.sample.value
+    val title            = nonEmptyString.sample.value
+    val label            = nonEmptyString.sample.value
+    val inputClass       = Gen.option(Gen.alphaNumStr).sample.value
+    val hint             = Gen.option(nonEmptyString).sample.value
+    val prefix           = Gen.option(Gen.alphaNumStr).sample.value
+    val suffix           = Gen.option(Gen.alphaNumStr).sample.value
+    val inputMode        = Gen.option(Gen.alphaNumStr).sample.value
+    val caption          = Gen.option(nonEmptyString).sample.value
     val (inputType, autocomplete) = Gen
       .oneOf(
         ("tel", Gen.option(Gen.const("tel")).sample.value),
@@ -46,7 +48,7 @@ class InputTextSpec extends A11ySpecBase {
       .sample
       .value
     val additionalHtml = arbitrary[Html].sample.value
-    val form           = new AccessCodeFormProvider()()
+    val form           = new AccessCodeFormProvider()(messageKeyPrefix)
 
     "pass accessibility checks" when {
 
@@ -54,7 +56,7 @@ class InputTextSpec extends A11ySpecBase {
         val content = template.apply(title) {
           component.apply(
             form("value"),
-            OrdinaryTextInput(title),
+            OrdinaryTextInput(title, caption),
             inputClass,
             hint,
             prefix,
@@ -72,7 +74,7 @@ class InputTextSpec extends A11ySpecBase {
           component
             .apply(
               form("value"),
-              TextInputWithHiddenLabel(title, label, additionalHtml),
+              TextInputWithHiddenLabel(title, caption, additionalHtml),
               inputClass,
               hint,
               prefix,
@@ -90,7 +92,7 @@ class InputTextSpec extends A11ySpecBase {
           component
             .apply(
               form("value"),
-              TextInputWithStatementHeading(title, label, additionalHtml),
+              TextInputWithStatementHeading(title, caption, label, additionalHtml),
               inputClass,
               hint,
               prefix,
@@ -108,7 +110,7 @@ class InputTextSpec extends A11ySpecBase {
           component
             .apply(
               form("value"),
-              AddressTextInput(label),
+              MultiTextInput(label),
               inputClass,
               hint,
               prefix,

@@ -18,10 +18,11 @@ package views.utils
 
 import play.api.i18n.Messages
 import play.twirl.api.Html
-import uk.gov.hmrc.govukfrontend.views.implicits.{RichCharacterCountSupport, RichRadiosSupport, RichTextareaSupport}
+import uk.gov.hmrc.govukfrontend.views.implicits.{RichCharacterCountSupport, RichInputSupport, RichRadiosSupport, RichTextareaSupport}
 import uk.gov.hmrc.govukfrontend.views.viewmodels.charactercount.CharacterCount
 import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.fieldset.{Fieldset, Legend}
+import uk.gov.hmrc.govukfrontend.views.viewmodels.input.Input
 import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.Radios
 import uk.gov.hmrc.govukfrontend.views.viewmodels.textarea.Textarea
 
@@ -31,7 +32,14 @@ object ViewUtils {
     (if (mainContent.body.contains("govuk-error-summary")) s"${messages("error.title.prefix")} " else "") +
       s"$title - ${messages("site.service_name")} - GOV.UK"
 
-  // TODO refactor this maybe? Going to need this for every ViewModel type going forward
+  implicit class InputImplicits(input: Input)(implicit messages: Messages) extends RichInputSupport {
+
+    def withHeadingAndCaption(heading: String, caption: Option[String]): Input =
+      caption match {
+        case Some(value) => input.withHeadingAndSectionCaption(Text(heading), Text(value))
+        case None        => input.withHeading(Text(heading))
+      }
+  }
 
   implicit class RadiosImplicits(radios: Radios)(implicit messages: Messages) extends RichRadiosSupport {
 
@@ -67,4 +75,7 @@ object ViewUtils {
       }
   }
 
+  implicit class StringImplicits(string: String) {
+    def toParagraph: Html = Html(s"""<p class="govuk-body">$string</p>""")
+  }
 }

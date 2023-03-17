@@ -37,7 +37,8 @@ lazy val root = (project in file("."))
       "controllers.routes._",
       "views.html.helper.CSPNonce",
       "viewModels.{InputSize, LabelSize, LegendSize}",
-      "templates._"
+      "templates._",
+      "views.utils.ViewUtils._"
     ),
     PlayKeys.playDefaultPort := 9462,
     ScoverageKeys.coverageExcludedFiles := "<empty>;Reverse.*;.*handlers.*;.*repositories.*;" +

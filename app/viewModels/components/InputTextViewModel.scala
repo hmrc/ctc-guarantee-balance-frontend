@@ -23,31 +23,27 @@ sealed trait InputTextViewModel
 object InputTextViewModel {
 
   case class OrdinaryTextInput(
-    heading: String
+    heading: String,
+    caption: Option[String] = None
   ) extends InputTextViewModel
 
   case class TextInputWithHiddenLabel(
     heading: String,
-    label: String,
+    caption: Option[String] = None,
     additionalHtml: Html
   ) extends InputTextViewModel
       with AdditionalHtmlViewModel
 
   case class TextInputWithStatementHeading(
     heading: String,
+    caption: Option[String] = None,
     label: String,
     additionalHtml: Html
   ) extends InputTextViewModel
       with AdditionalHtmlViewModel
 
-  case class AddressTextInput(
+  case class MultiTextInput(
     label: String
   ) extends InputTextViewModel
 
-  case class TextInputWithHiddenLabelV2(
-    heading: String,
-    caption: Option[String] = None,
-    additionalHtml: Html
-  ) extends InputTextViewModel
-      with AdditionalHtmlViewModel
 }
