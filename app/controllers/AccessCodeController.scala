@@ -25,7 +25,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.AccessCodeView
+import views.ViewProvider
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,7 +37,7 @@ class AccessCodeController @Inject() (
   actions: Actions,
   formProvider: AccessCodeFormProvider,
   val controllerComponents: MessagesControllerComponents,
-  view: AccessCodeView
+  viewProvider: ViewProvider
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
@@ -51,7 +51,7 @@ class AccessCodeController @Inject() (
         case Some(value) => form.fill(value)
       }
 
-      Ok(view(preparedForm, mode))
+      Ok(viewProvider.accessCodeView(preparedForm, mode))
   }
 
   def onSubmit(mode: Mode): Action[AnyContent] = actions.requireData.async {
@@ -59,7 +59,7 @@ class AccessCodeController @Inject() (
       form
         .bindFromRequest()
         .fold(
-          formWithErrors => Future.successful(BadRequest(view(formWithErrors, mode))),
+          formWithErrors => Future.successful(BadRequest(viewProvider.accessCodeView(formWithErrors, mode))),
           value =>
             for {
               updatedAnswers <- Future.fromTry(request.userAnswers.set(AccessCodePage, value))

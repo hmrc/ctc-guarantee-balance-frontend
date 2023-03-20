@@ -20,18 +20,34 @@ import forms.Constants._
 import forms.mappings.Mappings
 import play.api.data.Form
 
-import javax.inject.Inject
+sealed trait GuaranteeReferenceNumberFormProvider extends Mappings {
 
-class GuaranteeReferenceNumberFormProvider @Inject() extends Mappings {
+  val prefix: String
+
+  val maxGuaranteeReferenceNumberLength: Int
 
   def apply(): Form[String] =
     Form(
-      "value" -> textWithSpacesRemoved("guaranteeReferenceNumber.error.required")
+      "value" -> textWithSpacesRemoved(s"$prefix.error.required")
         .verifying(
           forms.StopOnFirstFail[String](
-            maxLength(maxGuaranteeReferenceNumberLength, "guaranteeReferenceNumber.error.length"),
-            regexp(alphaNumericRegex, "guaranteeReferenceNumber.error.invalid")
+            maxLength(maxGuaranteeReferenceNumberLength, s"$prefix.error.length"),
+            regexp(alphaNumericRegex, s"$prefix.error.invalid")
           )
         )
     )
+}
+
+class V1GuaranteeReferenceNumberFormProvider extends GuaranteeReferenceNumberFormProvider {
+
+  override val maxGuaranteeReferenceNumberLength: Int = Constants.maxGuaranteeReferenceNumberLength
+
+  override val prefix: String = "guaranteeReferenceNumber"
+}
+
+class V2GuaranteeReferenceNumberFormProvider extends GuaranteeReferenceNumberFormProvider {
+
+  override val maxGuaranteeReferenceNumberLength: Int = Constants.maxGuaranteeReferenceNumberLengthV2
+
+  override val prefix: String = "guaranteeReferenceNumber.v2"
 }

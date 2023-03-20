@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,20 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package forms
+@this()
 
-object Constants {
+@(caption: String, hiddenText: Option[String] = Some("This section is: "), visuallyHiddenClass: String = "govuk-visually-hidden")
 
-  lazy val maxEoriNumberLength: Int                 = 17
-  lazy val minEoriNumberLength: Int                 = 14
-  lazy val maxGuaranteeReferenceNumberLength: Int   = 17
-  lazy val maxGuaranteeReferenceNumberLengthV2: Int = 24
-  lazy val accessCodeLength: Int                    = 4
-
-  lazy val alphaNumericRegex: String     = "^[a-zA-Z0-9]*$"
-  lazy val eoriNumberPrefixRegex: String = "^(?i)(gb|xi).*$"
-  lazy val eoriNumberRegex: String       = "^(?i)(gb|xi)[0-9]*$"
-
-}
+<h2 class="govuk-caption-xl hmrc-caption-xl"><span class=@visuallyHiddenClass>@hiddenText </span>@caption</h2>

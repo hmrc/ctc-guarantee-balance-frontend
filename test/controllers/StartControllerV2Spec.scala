@@ -28,10 +28,10 @@ import play.api.test.Helpers._
 import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class StartControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
+class StartControllerV2Spec extends SpecBase with AppWithDefaultMockFixtures {
 
   override protected def applicationBuilder(): GuiceApplicationBuilder =
-    super.v1ApplicationBuilder()
+    super.v2ApplicationBuilder()
 
   "Start Controller" - {
 
@@ -52,7 +52,7 @@ class StartControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
               val result  = route(app, request).value
 
               status(result) mustEqual SEE_OTHER
-              redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
+              redirectLocation(result).value mustEqual routes.GuaranteeReferenceNumberController.onPageLoad(NormalMode).url
               result.map(_.session(request).get(Referral.key).get mustEqual referral.toString)
 
               val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
@@ -74,7 +74,7 @@ class StartControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
               val result  = route(app, request).value
 
               status(result) mustEqual SEE_OTHER
-              redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
+              redirectLocation(result).value mustEqual routes.GuaranteeReferenceNumberController.onPageLoad(NormalMode).url
               result.map(_.session(request).get(Referral.key) mustNot be(defined))
 
               val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
@@ -98,7 +98,7 @@ class StartControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
           val result  = route(app, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
+          redirectLocation(result).value mustEqual routes.GuaranteeReferenceNumberController.onPageLoad(NormalMode).url
         }
       }
 

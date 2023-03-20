@@ -26,7 +26,7 @@ import models.values.BalanceId
 import models.values.ErrorType.{InvalidDataErrorType, NotMatchedErrorType}
 import play.api.Logging
 import play.api.http.{HeaderNames, Status}
-import play.api.libs.json.{JsResult, Json}
+import play.api.libs.json.JsResult
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions, HttpReads, HttpResponse}
 
@@ -85,19 +85,21 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
         response =>
           response.status match {
             case Status.OK =>
-              Right(response.json.as[PostBalanceRequestSuccessResponse].response)
+              Right(response.json.as[BalanceRequestResponse])
             case Status.TOO_MANY_REQUESTS =>
-              logger.warn("[GuaranteeBalanceConnector][submitBalanceRequest] TOO_MANY_REQUESTS response from back end call")
+              logger.warn("[GuaranteeBalanceConnector][submitBalanceRequestV2] TOO_MANY_REQUESTS response from back end call")
               Right(BalanceRequestRateLimit)
             case Status.BAD_REQUEST =>
-              logger.warn(s"[GuaranteeBalanceConnector][submitBalanceRequest] BAD_REQUEST response: ${response.body}")
+              logger.warn(s"[GuaranteeBalanceConnector][submitBalanceRequestV2] BAD_REQUEST response: ${response.body}")
               Left(response)
+            case Status.NOT_FOUND =>
+              logger.info(s"[GuaranteeBalanceConnector][submitBalanceRequestV2] NOT_FOUND response: ${response.body}")
+              Right(BalanceRequestNotMatched(response.body))
             case _ =>
+              logger.warn(s"[GuaranteeBalanceConnector][submitBalanceRequestV2] INTERNAL_SERVER_ERROR response: ${response.body}")
               Left(response)
           }
       }
-
-    println(s"ACHI - request: ${Json.toJson(request)}")
 
     http.POST[BalanceRequestV2, Either[HttpResponse, BalanceRequestResponse]](
       url,
