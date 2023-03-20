@@ -21,7 +21,7 @@ import viewModels.Section
 import views.behaviours.CheckYourAnswersViewBehaviours
 import views.html.CheckYourAnswersView
 
-class CheckYourAnswersViewSpec extends CheckYourAnswersViewBehaviours {
+class CheckYourAnswersViewV1Spec extends CheckYourAnswersViewBehaviours {
 
   override val prefix: String = "checkYourAnswers"
 
@@ -38,7 +38,7 @@ class CheckYourAnswersViewSpec extends CheckYourAnswersViewBehaviours {
 
   behave like pageWithCheckYourAnswers()
 
-  behave like pageWithFormAction(controllers.routes.CheckYourAnswersController.onSubmit().url)
+  behave like pageWithFormAction(controllers.routes.CheckYourAnswersControllerV1.onSubmit().url)
 
   behave like pageWithContinueButton("Continue")
 

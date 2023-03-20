@@ -23,7 +23,8 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.GuaranteeBalanceService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import viewModels.CheckYourAnswersViewModel.CheckYourAnswersViewModelProvider
+import viewModels.CheckYourAnswersViewModelV1.CheckYourAnswersViewModelProviderV1
+import viewModels.CheckYourAnswersViewModelV2.CheckYourAnswersViewModelProviderV2
 import views.ViewProvider
 
 import javax.inject.Inject
@@ -42,7 +43,7 @@ class CheckYourAnswersControllerV1 @Inject() (
   actions: Actions,
   val controllerComponents: MessagesControllerComponents,
   guaranteeBalanceService: GuaranteeBalanceService,
-  viewModelProvider: CheckYourAnswersViewModelProvider,
+  viewModelProvider: CheckYourAnswersViewModelProviderV1,
   responseHandler: GuaranteeBalanceResponseHandlerV1,
   view: ViewProvider
 )(implicit ec: ExecutionContext)
@@ -68,7 +69,7 @@ class CheckYourAnswersControllerV2 @Inject() (
   actions: Actions,
   val controllerComponents: MessagesControllerComponents,
   guaranteeBalanceService: GuaranteeBalanceService,
-  viewModelProvider: CheckYourAnswersViewModelProvider,
+  viewModelProvider: CheckYourAnswersViewModelProviderV2,
   responseHandler: GuaranteeBalanceResponseHandlerV2,
   view: ViewProvider
 )(implicit ec: ExecutionContext)

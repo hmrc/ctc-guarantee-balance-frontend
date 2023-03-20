@@ -19,7 +19,7 @@ package base
 import config.{FrontendAppConfig, V1Module, V2Module}
 import controllers.actions._
 import models.UserAnswers
-import navigation.{FakeNavigator, Navigator}
+import navigation.{FakeNavigatorV1, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, when}
 import org.scalatest.{BeforeAndAfterEach, TestSuite}
@@ -57,7 +57,7 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
   val mockAppConfig: FrontendAppConfig                     = mock[FrontendAppConfig]
 
   protected val onwardRoute: Call        = Call("GET", "/foo")
-  protected val fakeNavigator: Navigator = new FakeNavigator(onwardRoute)
+  protected val fakeNavigator: Navigator = new FakeNavigatorV1(onwardRoute)
 
   final override def fakeApplication(): Application =
     applicationBuilder()

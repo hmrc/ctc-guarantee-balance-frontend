@@ -20,20 +20,20 @@ import models.{CheckMode, UserAnswers}
 import play.api.i18n.Messages
 import utils.CheckYourAnswersHelper
 
-case class CheckYourAnswersViewModel(section: Section)
+case class CheckYourAnswersViewModelV2(section: Section)
 
-object CheckYourAnswersViewModel {
+object CheckYourAnswersViewModelV2 {
 
-  class CheckYourAnswersViewModelProvider {
+  class CheckYourAnswersViewModelProviderV2 {
 
-    def apply(userAnswers: UserAnswers)(implicit messages: Messages): CheckYourAnswersViewModel = {
+    def apply(userAnswers: UserAnswers)(implicit messages: Messages): CheckYourAnswersViewModelV2 = {
       val helper = new CheckYourAnswersHelper(userAnswers, CheckMode)
 
-      CheckYourAnswersViewModel(
+      CheckYourAnswersViewModelV2(
         Section(
           Seq(
             helper.eoriNumber,
-            helper.guaranteeReferenceNumber,
+            helper.guaranteeReferenceNumberV2,
             helper.accessCode
           ).flatten
         )

@@ -19,11 +19,11 @@ package viewModels
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
-import viewModels.CheckYourAnswersViewModel.CheckYourAnswersViewModelProvider
+import viewModels.CheckYourAnswersViewModelV1.CheckYourAnswersViewModelProviderV1
 
-class CheckYourAnswersViewModelSpec extends SpecBase with AppWithDefaultMockFixtures {
+class CheckYourAnswersViewModelV1Spec extends SpecBase with AppWithDefaultMockFixtures {
 
-  val viewModelProvider: CheckYourAnswersViewModelProvider = injector.instanceOf[CheckYourAnswersViewModelProvider]
+  val viewModelProvider: CheckYourAnswersViewModelProviderV1 = injector.instanceOf[CheckYourAnswersViewModelProviderV1]
 
   "when user answers are empty" - {
 

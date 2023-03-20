@@ -21,14 +21,14 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import views.html.DetailsDontMatchView
 
-class DetailsDontMatchControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
+class DetailsDontMatchControllerV1Spec extends SpecBase with AppWithDefaultMockFixtures {
 
   "DetailsDontMatch Controller" - {
 
     "return OK and the correct view for a GET" in {
 
       setExistingUserAnswers(emptyUserAnswers)
-      val request = FakeRequest(GET, routes.DetailsDontMatchController.onPageLoad().url)
+      val request = FakeRequest(GET, routes.DetailsDontMatchControllerV1.onPageLoad().url)
       val view    = injector.instanceOf[DetailsDontMatchView]
       val result  = route(app, request).value
 

@@ -22,7 +22,7 @@ import play.twirl.api.HtmlFormat
 import views.behaviours.ViewBehaviours
 import views.html.TryAgainView
 
-class TryAgainViewSpec extends ViewBehaviours {
+class TryAgainViewV1Spec extends ViewBehaviours {
 
   private val balanceId = arbitrary[Option[BalanceId]].sample.value.map(_.value)
 
@@ -41,7 +41,7 @@ class TryAgainViewSpec extends ViewBehaviours {
   behave like pageWithLink(
     "check-details",
     "check that your details are correct",
-    controllers.routes.CheckYourAnswersController.onPageLoad().url
+    controllers.routes.CheckYourAnswersControllerV1.onPageLoad().url
   )
   behave like pageWithPartialContent("p", s"or you can try again in ${frontendAppConfig.rateLimitDuration} seconds.")
 

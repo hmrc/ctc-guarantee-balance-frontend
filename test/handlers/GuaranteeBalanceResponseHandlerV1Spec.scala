@@ -38,7 +38,7 @@ import viewModels.audit.{SuccessfulBalanceAuditModel, UnsuccessfulBalanceAuditMo
 import java.util.UUID
 import scala.concurrent.Future
 
-class GuaranteeBalanceResponseHandlerSpec extends SpecBase with AppWithDefaultMockFixtures {
+class GuaranteeBalanceResponseHandlerV1Spec extends SpecBase with AppWithDefaultMockFixtures {
 
   private val expectedUuid    = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
   private val balanceId       = BalanceId(expectedUuid)
@@ -79,8 +79,8 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with AppWithDefaultMo
   private val mockRequest                      = mock[Request[AnyContent]]
   implicit private val request: DataRequest[_] = DataRequest(mockRequest, "eoriNumber", baseAnswers)
 
-  private lazy val handler: GuaranteeBalanceResponseHandler = app.injector.instanceOf[GuaranteeBalanceResponseHandler]
-  private lazy val auditService: AuditService               = app.injector.instanceOf[AuditService]
+  private lazy val handler: GuaranteeBalanceResponseHandlerV1 = app.injector.instanceOf[GuaranteeBalanceResponseHandlerV1]
+  private lazy val auditService: AuditService                 = app.injector.instanceOf[AuditService]
 
   "GuaranteeBalanceResponseHandlerSpec" - {
 
@@ -88,7 +88,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with AppWithDefaultMo
       val result: Future[Result] = handler.processResponse(tryAgainResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.TryAgainController.onPageLoad().url
+      redirectLocation(result).value mustEqual controllers.routes.TryAgainControllerV1.onPageLoad().url
 
       verify(mockSessionRepository, times(1)).set(any())
     }
@@ -97,7 +97,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with AppWithDefaultMo
       val result: Future[Result] = handler.processResponse(noMatchResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
+      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchControllerV1.onPageLoad().url
       val auditCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
       verify(auditService, times(1)).audit(auditCaptor.capture())(any(), any(), any())
@@ -112,7 +112,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with AppWithDefaultMo
       val result: Future[Result] = handler.processResponse(eoriNoMatchResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
+      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchControllerV1.onPageLoad().url
       val auditCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
       verify(auditService, times(1)).audit(auditCaptor.capture())(any(), any(), any())
@@ -127,7 +127,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with AppWithDefaultMo
       val result: Future[Result] = handler.processResponse(grnNoMatchResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
+      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchControllerV1.onPageLoad().url
       val auditCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
       verify(auditService, times(1)).audit(auditCaptor.capture())(any(), any(), any())
@@ -142,7 +142,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with AppWithDefaultMo
       val result: Future[Result] = handler.processResponse(accessCodeNoMatchResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
+      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchControllerV1.onPageLoad().url
       val auditCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
       verify(auditService, times(1)).audit(auditCaptor.capture())(any(), any(), any())
@@ -157,7 +157,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with AppWithDefaultMo
       val result: Future[Result] = handler.processResponse(eoriAndGrnMatchResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
+      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchControllerV1.onPageLoad().url
       val auditCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
       verify(auditService, times(1)).audit(auditCaptor.capture())(any(), any(), any())
@@ -181,7 +181,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with AppWithDefaultMo
       val result: Future[Result] = handler.processResponse(pendingResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.TryAgainController.onPageLoad().url
+      redirectLocation(result).value mustEqual controllers.routes.TryAgainControllerV1.onPageLoad().url
 
       val userAnswersCapture: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
       verify(mockSessionRepository, times(2)).set(userAnswersCapture.capture())
@@ -237,7 +237,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with AppWithDefaultMo
       val result: Future[Result] = handler.processResponse(tooManyRequestsResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.TryAgainController.onPageLoad().url
+      redirectLocation(result).value mustEqual controllers.routes.TryAgainControllerV1.onPageLoad().url
 
       val auditCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 

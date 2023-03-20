@@ -24,9 +24,9 @@ import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import pages._
 
-class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
+class NavigatorV1Spec extends SpecBase with ScalaCheckPropertyChecks with Generators {
 
-  val navigator = new Navigator
+  val navigator = new NavigatorV1
 
   "Navigator" - {
 
@@ -60,7 +60,7 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
           answers =>
             navigator
               .nextPage(AccessCodePage, mode, answers)
-              .mustBe(routes.CheckYourAnswersController.onPageLoad())
+              .mustBe(routes.CheckYourAnswersControllerV1.onPageLoad())
         }
       }
 
@@ -87,7 +87,7 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
           answers =>
             navigator
               .nextPage(EoriNumberPage, mode, answers)
-              .mustBe(routes.CheckYourAnswersController.onPageLoad())
+              .mustBe(routes.CheckYourAnswersControllerV1.onPageLoad())
         }
       }
 
@@ -97,7 +97,7 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
           answers =>
             navigator
               .nextPage(GuaranteeReferenceNumberPage, mode, answers)
-              .mustBe(routes.CheckYourAnswersController.onPageLoad())
+              .mustBe(routes.CheckYourAnswersControllerV1.onPageLoad())
         }
       }
 
@@ -107,7 +107,7 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
           answers =>
             navigator
               .nextPage(AccessCodePage, mode, answers)
-              .mustBe(routes.CheckYourAnswersController.onPageLoad())
+              .mustBe(routes.CheckYourAnswersControllerV1.onPageLoad())
         }
       }
 
@@ -119,7 +119,7 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
           answers =>
             navigator
               .nextPage(UnknownPage, mode, answers)
-              .mustBe(routes.CheckYourAnswersController.onPageLoad())
+              .mustBe(routes.CheckYourAnswersControllerV1.onPageLoad())
         }
       }
 

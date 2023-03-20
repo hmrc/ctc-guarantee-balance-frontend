@@ -60,7 +60,7 @@ class V2GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixt
     "submitBalanceRequest" - {
       "must submit the return the balance response for a successful call" in {
         val userAnswers                          = baseAnswers
-        val request                              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+        val request                              = FakeRequest(POST, routes.CheckYourAnswersControllerV2.onSubmit().url)
         implicit val dataRequest: DataRequest[_] = DataRequest(request, userAnswers.id, baseAnswers)
 
         when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
@@ -82,7 +82,7 @@ class V2GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixt
 
       "must redirect to Session Expired if no existing data is found" in {
         val userAnswers                          = emptyUserAnswers
-        val request                              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+        val request                              = FakeRequest(POST, routes.CheckYourAnswersControllerV2.onSubmit().url)
         implicit val dataRequest: DataRequest[_] = DataRequest(request, userAnswers.id, userAnswers)
 
         val service = new V2GuaranteeBalanceService(mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
@@ -92,7 +92,7 @@ class V2GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixt
 
       "must redirect to rate limit if lock in mongo repository for that user and GRN" in {
         val userAnswers                          = baseAnswers
-        val request                              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+        val request                              = FakeRequest(POST, routes.CheckYourAnswersControllerV2.onSubmit().url)
         implicit val dataRequest: DataRequest[_] = DataRequest(request, userAnswers.id, userAnswers)
 
         val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
@@ -114,7 +114,7 @@ class V2GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixt
             val userAnswers = emptyUserAnswers
               .setValue(GuaranteeReferenceNumberPage, grn)
               .setValue(AccessCodePage, accessCode)
-            val request                              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
+            val request                              = FakeRequest(POST, routes.CheckYourAnswersControllerV2.onSubmit().url)
             implicit val dataRequest: DataRequest[_] = DataRequest(request, "id", userAnswers)
 
             when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))

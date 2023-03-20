@@ -42,6 +42,15 @@ class CheckYourAnswersHelper(userAnswers: UserAnswers, mode: Mode)(implicit mess
       call = routes.GuaranteeReferenceNumberController.onPageLoad(mode)
     )
 
+  def guaranteeReferenceNumberV2: Option[SummaryListRow] =
+    getAnswerAndBuildRow[String](
+      page = GuaranteeReferenceNumberPage,
+      formatAnswer = formatAsText,
+      prefix = "guaranteeReferenceNumber.v2",
+      id = Some("change-guarantee-reference-number"),
+      call = routes.GuaranteeReferenceNumberController.onPageLoad(mode)
+    )
+
   def accessCode: Option[SummaryListRow] =
     getAnswerAndBuildRow[String](
       page = AccessCodePage,
