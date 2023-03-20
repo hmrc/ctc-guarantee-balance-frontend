@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.v2
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import controllers.routes
 import models.{NormalMode, Referral, UserAnswers}
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.verify

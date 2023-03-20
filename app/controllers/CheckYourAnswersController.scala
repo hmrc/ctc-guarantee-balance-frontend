@@ -25,7 +25,8 @@ import services.GuaranteeBalanceService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewModels.CheckYourAnswersViewModelV1.CheckYourAnswersViewModelProviderV1
 import viewModels.CheckYourAnswersViewModelV2.CheckYourAnswersViewModelProviderV2
-import views.ViewProvider
+import views.html.CheckYourAnswersView
+import views.html.v2.CheckYourAnswersViewV2
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
@@ -45,7 +46,7 @@ class CheckYourAnswersControllerV1 @Inject() (
   guaranteeBalanceService: GuaranteeBalanceService,
   viewModelProvider: CheckYourAnswersViewModelProviderV1,
   responseHandler: GuaranteeBalanceResponseHandlerV1,
-  view: ViewProvider
+  view: CheckYourAnswersView
 )(implicit ec: ExecutionContext)
     extends CheckYourAnswersController
     with FrontendBaseController
@@ -55,7 +56,7 @@ class CheckYourAnswersControllerV1 @Inject() (
   def onPageLoad(): Action[AnyContent] = actions.requireData {
     implicit request =>
       val viewModel = viewModelProvider(request.userAnswers)
-      Ok(view.checkYourAnswers(Seq(viewModel.section)))
+      Ok(view(Seq(viewModel.section)))
   }
 
   def onSubmit(): Action[AnyContent] = actions.requireData.async {
@@ -71,7 +72,7 @@ class CheckYourAnswersControllerV2 @Inject() (
   guaranteeBalanceService: GuaranteeBalanceService,
   viewModelProvider: CheckYourAnswersViewModelProviderV2,
   responseHandler: GuaranteeBalanceResponseHandlerV2,
-  view: ViewProvider
+  view: CheckYourAnswersViewV2
 )(implicit ec: ExecutionContext)
     extends CheckYourAnswersController
     with FrontendBaseController
@@ -81,7 +82,7 @@ class CheckYourAnswersControllerV2 @Inject() (
   def onPageLoad(): Action[AnyContent] = actions.requireData {
     implicit request =>
       val viewModel = viewModelProvider(request.userAnswers)
-      Ok(view.checkYourAnswers(Seq(viewModel.section)))
+      Ok(view(Seq(viewModel.section)))
   }
 
   def onSubmit(): Action[AnyContent] = actions.requireData.async {

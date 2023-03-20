@@ -18,14 +18,14 @@ package views
 
 import play.twirl.api.HtmlFormat
 import views.behaviours.ViewBehaviours
-import views.html.UnsupportedGuaranteeTypeView
+import views.html.DetailsDontMatchView
 
-class UnsupportedGuaranteeTypeViewV1Spec extends ViewBehaviours {
+class DetailsDontMatchViewSpec extends ViewBehaviours {
 
   override def view: HtmlFormat.Appendable =
-    injector.instanceOf[UnsupportedGuaranteeTypeView].apply()(fakeRequest, messages)
+    injector.instanceOf[DetailsDontMatchView].apply()(fakeRequest, messages)
 
-  override val prefix: String = "unsupportedGuaranteeType"
+  override val prefix: String = "detailsDontMatch"
 
   behave like pageWithTitle()
 
@@ -33,22 +33,17 @@ class UnsupportedGuaranteeTypeViewV1Spec extends ViewBehaviours {
 
   behave like pageWithHeading()
 
-  behave like pageWithContent("p", "We can only get the balance for:")
-
-  behave like pageWithList(
-    "govuk-list--bullet",
-    "comprehensive guarantee",
-    "guarantee waiver",
-    "individual guarantee with multiple usage"
-  )
-
-  behave like pageWithPartialContent("p", "You can")
+  behave like pageWithPartialContent("p", "You must")
   behave like pageWithLink(
-    "checkDetails-link",
-    "change the reference of the guarantee you are checking",
+    "try-again",
+    "check your answers and try again",
     controllers.routes.CheckYourAnswersControllerV1.onPageLoad().url
   )
-  behave like pageWithPartialContent("p", "or you can start again.")
 
-  behave like pageWithSubmitButton("Start again")
+  behave like pageWithPartialContent("p", "If your details are correct, you must")
+  behave like pageWithLink(
+    "contact",
+    "contact the NCTS helpdesk (opens in a new tab)",
+    frontendAppConfig.nctsEnquiriesUrl
+  )
 }

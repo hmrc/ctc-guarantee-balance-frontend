@@ -17,15 +17,18 @@
 package views
 
 import play.twirl.api.HtmlFormat
-import views.behaviours.ViewBehaviours
-import views.html.DetailsDontMatchView
+import viewModels.Section
+import views.behaviours.CheckYourAnswersViewBehaviours
+import views.html.CheckYourAnswersView
 
-class DetailsDontMatchViewV1Spec extends ViewBehaviours {
+class CheckYourAnswersViewSpec extends CheckYourAnswersViewBehaviours {
 
-  override def view: HtmlFormat.Appendable =
-    injector.instanceOf[DetailsDontMatchView].apply()(fakeRequest, messages)
+  override val prefix: String = "checkYourAnswers"
 
-  override val prefix: String = "detailsDontMatch"
+  override def view: HtmlFormat.Appendable = viewWithSections(sections)
+
+  override def viewWithSections(sections: Seq[Section]): HtmlFormat.Appendable =
+    injector.instanceOf[CheckYourAnswersView].apply(sections)(fakeRequest, messages)
 
   behave like pageWithTitle()
 
@@ -33,17 +36,10 @@ class DetailsDontMatchViewV1Spec extends ViewBehaviours {
 
   behave like pageWithHeading()
 
-  behave like pageWithPartialContent("p", "You must")
-  behave like pageWithLink(
-    "try-again",
-    "check your answers and try again",
-    controllers.routes.CheckYourAnswersControllerV1.onPageLoad().url
-  )
+  behave like pageWithCheckYourAnswers()
 
-  behave like pageWithPartialContent("p", "If your details are correct, you must")
-  behave like pageWithLink(
-    "contact",
-    "contact the NCTS helpdesk (opens in a new tab)",
-    frontendAppConfig.nctsEnquiriesUrl
-  )
+  behave like pageWithFormAction(controllers.routes.CheckYourAnswersControllerV1.onSubmit().url)
+
+  behave like pageWithContinueButton("Continue")
+
 }

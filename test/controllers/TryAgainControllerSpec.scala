@@ -32,7 +32,7 @@ import views.html.TryAgainView
 import java.util.UUID
 import scala.concurrent.Future
 
-class TryAgainControllerV1Spec extends SpecBase with AppWithDefaultMockFixtures {
+class TryAgainControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   private val expectedUuid: UUID   = arbitrary[UUID].sample.value
   private val balanceId: BalanceId = BalanceId(expectedUuid)

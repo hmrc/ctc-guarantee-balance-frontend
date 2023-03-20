@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package views
+package views.v2
 
 import play.twirl.api.HtmlFormat
-import viewModels.Section
-import views.behaviours.CheckYourAnswersViewBehaviours
-import views.html.CheckYourAnswersView
+import views.behaviours.ViewBehaviours
+import views.html.v2.DetailsDontMatchViewV2
 
-class CheckYourAnswersViewV1Spec extends CheckYourAnswersViewBehaviours {
+class DetailsDontMatchViewV2Spec extends ViewBehaviours {
 
-  override val prefix: String = "checkYourAnswers"
+  override def view: HtmlFormat.Appendable =
+    injector.instanceOf[DetailsDontMatchViewV2].apply()(fakeRequest, messages)
 
-  override def view: HtmlFormat.Appendable = viewWithSections(sections)
-
-  override def viewWithSections(sections: Seq[Section]): HtmlFormat.Appendable =
-    injector.instanceOf[CheckYourAnswersView].apply(sections)(fakeRequest, messages)
+  override val prefix: String = "detailsDontMatch.v2"
 
   behave like pageWithTitle()
 
@@ -36,10 +33,16 @@ class CheckYourAnswersViewV1Spec extends CheckYourAnswersViewBehaviours {
 
   behave like pageWithHeading()
 
-  behave like pageWithCheckYourAnswers()
+  behave like pageWithLink(
+    "try-again",
+    "Check your details and try again",
+    controllers.routes.CheckYourAnswersControllerV2.onPageLoad().url
+  )
 
-  behave like pageWithFormAction(controllers.routes.CheckYourAnswersControllerV1.onSubmit().url)
-
-  behave like pageWithContinueButton("Continue")
-
+  behave like pageWithPartialContent("p", "If your details are correct,")
+  behave like pageWithLink(
+    "contact",
+    "contact the NCTS helpdesk (opens in a new tab)",
+    frontendAppConfig.nctsEnquiriesUrl
+  )
 }

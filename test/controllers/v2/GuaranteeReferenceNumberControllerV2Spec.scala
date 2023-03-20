@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.v2
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import controllers.routes
 import forms.V2GuaranteeReferenceNumberFormProvider
 import models.NormalMode
 import pages.GuaranteeReferenceNumberPage
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import views.html.GuaranteeReferenceNumberViewV2
+import views.html.v2.GuaranteeReferenceNumberViewV2
 
 class GuaranteeReferenceNumberControllerV2Spec extends SpecBase with AppWithDefaultMockFixtures {
 

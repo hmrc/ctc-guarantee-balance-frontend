@@ -22,7 +22,7 @@ import play.twirl.api.HtmlFormat
 import views.behaviours.ViewBehaviours
 import views.html.TryAgainView
 
-class TryAgainViewV1Spec extends ViewBehaviours {
+class TryAgainViewSpec extends ViewBehaviours {
 
   private val balanceId = arbitrary[Option[BalanceId]].sample.value.map(_.value)
 

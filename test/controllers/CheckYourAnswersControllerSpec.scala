@@ -35,7 +35,7 @@ import views.html.CheckYourAnswersView
 
 import scala.concurrent.Future
 
-class CheckYourAnswersControllerV1Spec extends SpecBase with AppWithDefaultMockFixtures {
+class CheckYourAnswersControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   private val baseAnswers: UserAnswers = emptyUserAnswers
     .setValue(GuaranteeReferenceNumberPage, Gen.alphaNumStr.sample.value)

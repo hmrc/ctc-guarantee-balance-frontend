@@ -27,7 +27,7 @@
 @(balance: String, referral: Option[String])(implicit request: Request[_], messages: Messages)
 
 @mainTemplate(
-    title = messages("balanceConfirmation.title")
+    title = messages("balanceConfirmation.v2.title")
 ) {
 
     @govukPanel(Panel(
@@ -38,14 +38,14 @@
 
     @referral match {
         case Some(NCTS.toString) => {
-            <p class="govuk-body">@messages("balanceConfirmation.fromNcts.p")</p>
+            <p class="govuk-body">@messages("balanceConfirmation.v2.fromNcts.p")</p>
             <ul class="govuk-list govuk-list--bullet">
                 <li><a class="govuk-link" href=@routes.BalanceConfirmationController.checkAnotherGuaranteeBalance() id="check-another-guarantee-balance">@messages("balanceConfirmation.v2.fromNcts.link1")</a></li>
                 <li><a class="govuk-link" href=@routes.BalanceConfirmationController.manageTransitMovements() id="manage-transit-movements">@messages("balanceConfirmation.v2.fromNcts.link2")</a></li>
             </ul>
         }
         case _ => {
-            <p class="govuk-body">@messages("balanceConfirmation.fromGovUk.p")
+            <p class="govuk-body">@messages("balanceConfirmation.v2.fromGovUk.p")
                 <a class="govuk-link" href=@routes.BalanceConfirmationController.checkAnotherGuaranteeBalance() id="check-another-guarantee-balance">@messages("balanceConfirmation.v2.fromGovUk.link")</a>.
             </p>
         }

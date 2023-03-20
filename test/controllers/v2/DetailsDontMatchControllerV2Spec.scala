@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.v2
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import controllers.routes
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import views.html.DetailsDontMatchView
+import views.html.v2.DetailsDontMatchViewV2
 
-class DetailsDontMatchControllerV1Spec extends SpecBase with AppWithDefaultMockFixtures {
+class DetailsDontMatchControllerV2Spec extends SpecBase with AppWithDefaultMockFixtures {
 
   "DetailsDontMatch Controller" - {
 
     "return OK and the correct view for a GET" in {
 
       setExistingUserAnswers(emptyUserAnswers)
-      val request = FakeRequest(GET, routes.DetailsDontMatchControllerV1.onPageLoad().url)
-      val view    = injector.instanceOf[DetailsDontMatchView]
+      val request = FakeRequest(GET, routes.DetailsDontMatchControllerV2.onPageLoad().url)
+      val view    = injector.instanceOf[DetailsDontMatchViewV2]
       val result  = route(app, request).value
 
       status(result) mustEqual OK

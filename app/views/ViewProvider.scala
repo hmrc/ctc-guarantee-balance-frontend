@@ -21,8 +21,8 @@ import play.api.data.Form
 import play.api.i18n.Messages
 import play.api.mvc.Request
 import play.twirl.api.HtmlFormat
-import viewModels.Section
 import views.html._
+import views.html.v2._
 
 import java.util.UUID
 import javax.inject.Inject
@@ -41,20 +41,14 @@ sealed trait ViewProvider {
 
   def balanceConfirmationView(balance: String, referral: Option[String])(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable
 
-  def detailsDoNotMatch()(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable
-
   def couldNotCheckBalance(balanceId: Option[UUID])(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable
-
-  def checkYourAnswers(sections: Seq[Section])(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable
 }
 
 class V1ViewProvider @Inject() (
   guaranteeReferenceNumberView: GuaranteeReferenceNumberView,
   accessCodeView: AccessCodeView,
   balanceConfirmationView: BalanceConfirmationView,
-  detailsDoNotMatchV1: DetailsDontMatchView,
-  tryAgainView: TryAgainView,
-  checkYourAnswersView: CheckYourAnswersView
+  tryAgainView: TryAgainView
 ) extends ViewProvider {
 
   override def guaranteeReferenceNumberView(
@@ -72,14 +66,8 @@ class V1ViewProvider @Inject() (
   override def balanceConfirmationView(balance: String, referral: Option[String])(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable =
     balanceConfirmationView.apply(balance, referral)
 
-  override def detailsDoNotMatch()(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable =
-    detailsDoNotMatchV1.apply()
-
   override def couldNotCheckBalance(balanceId: Option[UUID])(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable =
     tryAgainView.apply(balanceId)
-
-  override def checkYourAnswers(sections: Seq[Section])(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable =
-    checkYourAnswersView.apply(sections)
 
 }
 
@@ -88,8 +76,7 @@ class V2ViewProvider @Inject() (
   accessCodeView: AccessCodeViewV2,
   balanceConfirmationView: BalanceConfirmationViewV2,
   detailsDoNotMatchV2: DetailsDontMatchViewV2,
-  tryAgainViewV2: TryAgainViewV2,
-  checkYourAnswersViewV2: CheckYourAnswersViewV2
+  tryAgainViewV2: TryAgainViewV2
 ) extends ViewProvider {
 
   override def guaranteeReferenceNumberView(
@@ -107,12 +94,7 @@ class V2ViewProvider @Inject() (
   override def balanceConfirmationView(balance: String, referral: Option[String])(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable =
     balanceConfirmationView.apply(balance, referral)
 
-  override def detailsDoNotMatch()(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable =
-    detailsDoNotMatchV2.apply()
-
   override def couldNotCheckBalance(balanceId: Option[UUID])(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable =
     tryAgainViewV2.apply(balanceId)
 
-  override def checkYourAnswers(sections: Seq[Section])(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable =
-    checkYourAnswersViewV2.apply(sections)
 }

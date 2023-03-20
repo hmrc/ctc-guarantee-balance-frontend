@@ -64,7 +64,7 @@ tryAgain.checkDetails.postlink = or you can try again in {0} seconds.
 
 tryAgain.v2.title = We could not check your guarantee balance
 tryAgain.v2.heading = We could not check your guarantee balance
-tryAgain.v2.checkDetails.link = Check that your details are correct
+tryAgain.v2.checkDetails.link = Check your details are correct
 tryAgain.v2.checkDetails.postlink = and try again in {0} seconds.
 tryAgain.v2.caption = Guarantee balance
 tryAgain.v2.problems = If your details are correct and you keep having problems,
@@ -144,11 +144,14 @@ balanceConfirmation.fromNcts.p = You can:
 balanceConfirmation.fromNcts.link1 = check another guarantee balance
 balanceConfirmation.fromNcts.link2 = manage your transit movements
 
-balanceConfirmation.v2.currency.p = This balance is in the same currency selected for the liability amount.
+balanceConfirmation.v2.title = Your balance
 balanceConfirmation.v2.heading = Your balance is
-balanceConfirmation.v2.fromNcts.link1 = Check another guarantee balance
+balanceConfirmation.v2.fromGovUk.p = You can
 balanceConfirmation.v2.fromGovUk.link = Check another guarantee balance
+balanceConfirmation.v2.fromNcts.p = You can:
+balanceConfirmation.v2.fromNcts.link1 = Check another guarantee balance
 balanceConfirmation.v2.fromNcts.link2 = Manage your transit movements
+balanceConfirmation.v2.currency.p = This balance is in the same currency selected for the liability amount.
 
 detailsDontMatch.title = Your details do not match our records
 detailsDontMatch.heading = Your details do not match our records
