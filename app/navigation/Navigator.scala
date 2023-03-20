@@ -23,20 +23,45 @@ import play.api.mvc.Call
 
 import javax.inject.{Inject, Singleton}
 
+sealed trait Navigator {
+  def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call
+}
+
 @Singleton
-class Navigator @Inject() () {
+class NavigatorV1 @Inject() () extends Navigator {
 
   private val normalRoutes: Page => UserAnswers => Call = {
     case EoriNumberPage               => _ => routes.GuaranteeReferenceNumberController.onPageLoad(NormalMode)
     case GuaranteeReferenceNumberPage => _ => routes.AccessCodeController.onPageLoad(NormalMode)
-    case AccessCodePage               => _ => routes.CheckYourAnswersController.onPageLoad()
+    case AccessCodePage               => _ => routes.CheckYourAnswersControllerV1.onPageLoad()
     case _                            => _ => routes.StartController.startAgain()
   }
 
   private val checkRoutes: Page => UserAnswers => Call =
-    _ => _ => routes.CheckYourAnswersController.onPageLoad()
+    _ => _ => routes.CheckYourAnswersControllerV1.onPageLoad()
 
-  def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call = mode match {
+  override def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call = mode match {
+    case NormalMode =>
+      normalRoutes(page)(userAnswers)
+    case CheckMode =>
+      checkRoutes(page)(userAnswers)
+  }
+}
+
+@Singleton
+class NavigatorV2 @Inject() () extends Navigator {
+
+  private val normalRoutes: Page => UserAnswers => Call = {
+    case EoriNumberPage               => _ => routes.GuaranteeReferenceNumberController.onPageLoad(NormalMode)
+    case GuaranteeReferenceNumberPage => _ => routes.AccessCodeController.onPageLoad(NormalMode)
+    case AccessCodePage               => _ => routes.CheckYourAnswersControllerV2.onPageLoad()
+    case _                            => _ => routes.StartController.startAgain()
+  }
+
+  private val checkRoutes: Page => UserAnswers => Call =
+    _ => _ => routes.CheckYourAnswersControllerV2.onPageLoad()
+
+  override def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call = mode match {
     case NormalMode =>
       normalRoutes(page)(userAnswers)
     case CheckMode =>

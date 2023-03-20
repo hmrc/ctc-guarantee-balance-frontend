@@ -41,7 +41,7 @@
     </ul>
     
     <p class="govuk-body">@messages("unsupportedGuaranteeType.checkDetails")
-        <a class="govuk-link" id="checkDetails-link" href="@routes.CheckYourAnswersController.onPageLoad()">@messages("unsupportedGuaranteeType.checkDetails.link")</a> @messages("unsupportedGuaranteeType.checkDetails.postLink")
+        <a class="govuk-link" id="checkDetails-link" href="@routes.CheckYourAnswersControllerV1.onPageLoad()">@messages("unsupportedGuaranteeType.checkDetails.link")</a> @messages("unsupportedGuaranteeType.checkDetails.postLink")
     </p>
 
     @formHelper(action = routes.UnsupportedGuaranteeTypeController.onSubmit(), Symbol("autoComplete") -> "off") {

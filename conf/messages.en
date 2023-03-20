@@ -62,6 +62,14 @@ tryAgain.checkDetails.prelink = You can
 tryAgain.checkDetails.link = check that your details are correct
 tryAgain.checkDetails.postlink = or you can try again in {0} seconds.
 
+tryAgain.v2.title = We could not check your guarantee balance
+tryAgain.v2.heading = We could not check your guarantee balance
+tryAgain.v2.checkDetails.link = Check that your details are correct
+tryAgain.v2.checkDetails.postlink = and try again in {0} seconds.
+tryAgain.v2.caption = Guarantee balance
+tryAgain.v2.problems = If your details are correct and you keep having problems,
+tryAgain.v2.problems.link = contact the NCTS helpdesk (opens in a new tab)
+
 guaranteeReferenceNumber.heading = Guarantee reference number
 guaranteeReferenceNumber.title = Guarantee reference number
 guaranteeReferenceNumber.label = What is the guarantee reference number?
@@ -79,12 +87,14 @@ guaranteeReferenceNumber.change.hidden = guarantee reference number
 guaranteeReferenceNumber.v2.caption = Guarantee balance
 guaranteeReferenceNumber.v2.heading = What is the Guarantee Reference Number (GRN)?
 guaranteeReferenceNumber.v2.title = What is the Guarantee Reference Number (GRN)?
+guaranteeReferenceNumber.checkYourAnswersLabel = Guarantee Reference Number (GRN)
 guaranteeReferenceNumber.v2.paragraph1 = You can only check the balance of a comprehensive guarantee, guarantee waiver or individual guarantee with multiple usage.
 guaranteeReferenceNumber.v2.hint = The Guarantee Reference Number (GRN) can be up to 24 characters long and include both letters and numbers. For example, 01GB1234567890120A123456.
 guaranteeReferenceNumber.v2.error.length = The guarantee reference number must be 24 characters or less
 guaranteeReferenceNumber.v2.error.required = Enter the guarantee reference number
 guaranteeReferenceNumber.v2.error.length = The guarantee reference number must be 17 characters or less
 guaranteeReferenceNumber.v2.error.invalid = The guarantee reference number must only include letters a to z without accents and numbers 0 to 9
+guaranteeReferenceNumber.change.hidden = Guarantee Reference Number (GRN)
 
 unsupportedGuaranteeType.title = We cannot get the balance for this type of guarantee
 unsupportedGuaranteeType.heading = We cannot get the balance for this type of guarantee
@@ -115,10 +125,15 @@ accessCode.v2.hint = The code will be 4 characters long, like 0000 or X9X9.
 accessCode.v2.error.required = Enter the access code
 accessCode.v2.error.length = The access code must be 4 characters long, like 0000 or X9X9
 accessCode.v2.error.invalidCharacters = The access code must only include letters a to z and numbers 0 to 9
+accessCode.v2.change.hidden = access code
 
 checkYourAnswers.title = Check your answers
 checkYourAnswers.heading = Check your answers
 checkYourAnswers.preHeading = Guarantee balance details
+
+checkYourAnswers.v2.title = Check your answers
+checkYourAnswers.v2.heading = Check your answers
+checkYourAnswers.v2.caption = Guarantee balance
 
 balanceConfirmation.title = Your balance
 balanceConfirmation.heading = Your balance
@@ -128,9 +143,22 @@ balanceConfirmation.fromNcts.p = You can:
 balanceConfirmation.fromNcts.link1 = check another guarantee balance
 balanceConfirmation.fromNcts.link2 = manage your transit movements
 
+balanceConfirmation.v2.currency.p = This balance is in the same currency selected for the liability amount.
+balanceConfirmation.v2.heading = Your balance is
+balanceConfirmation.v2.fromNcts.link1 = Check another guarantee balance
+balanceConfirmation.v2.fromGovUk.link = Check another guarantee balance
+balanceConfirmation.v2.fromNcts.link2 = Manage your transit movements
+
 detailsDontMatch.title = Your details do not match our records
 detailsDontMatch.heading = Your details do not match our records
 detailsDontMatch.p1 = You must
 detailsDontMatch.p1.a = check your answers and try again
 detailsDontMatch.p2 = If your details are correct, you must
 detailsDontMatch.p2.a = contact the NCTS helpdesk (opens in a new tab)
+
+detailsDontMatch.v2.title = The Guarantee Reference Number (GRN) and access code do match
+detailsDontMatch.v2.heading = The Guarantee Reference Number (GRN) and access code do match
+detailsDontMatch.v2.p1 = Check your details and try again
+detailsDontMatch.v2.p2 = If your details are correct,
+detailsDontMatch.v2.p2.a = contact the NCTS helpdesk (opens in a new tab)
+detailsDontMatch.v2.caption = Guarantee balance

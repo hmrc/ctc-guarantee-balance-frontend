@@ -17,35 +17,70 @@
 package controllers
 
 import controllers.actions._
-import handlers.GuaranteeBalanceResponseHandler
+import handlers.{GuaranteeBalanceResponseHandlerV1, GuaranteeBalanceResponseHandlerV2}
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.GuaranteeBalanceService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewModels.CheckYourAnswersViewModel.CheckYourAnswersViewModelProvider
-import views.html.CheckYourAnswersView
+import views.ViewProvider
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class CheckYourAnswersController @Inject() (
+sealed trait CheckYourAnswersController extends Logging {
+
+  def onPageLoad(): Action[AnyContent]
+
+  def onSubmit(): Action[AnyContent]
+
+}
+
+class CheckYourAnswersControllerV1 @Inject() (
   override val messagesApi: MessagesApi,
   actions: Actions,
   val controllerComponents: MessagesControllerComponents,
   guaranteeBalanceService: GuaranteeBalanceService,
   viewModelProvider: CheckYourAnswersViewModelProvider,
-  responseHandler: GuaranteeBalanceResponseHandler,
-  view: CheckYourAnswersView
+  responseHandler: GuaranteeBalanceResponseHandlerV1,
+  view: ViewProvider
 )(implicit ec: ExecutionContext)
-    extends FrontendBaseController
+    extends CheckYourAnswersController
+    with FrontendBaseController
     with I18nSupport
     with Logging {
 
   def onPageLoad(): Action[AnyContent] = actions.requireData {
     implicit request =>
       val viewModel = viewModelProvider(request.userAnswers)
-      Ok(view(Seq(viewModel.section)))
+      Ok(view.checkYourAnswers(Seq(viewModel.section)))
+  }
+
+  def onSubmit(): Action[AnyContent] = actions.requireData.async {
+    implicit request =>
+      guaranteeBalanceService.retrieveBalanceResponse().flatMap(responseHandler.processResponse(_))
+  }
+}
+
+class CheckYourAnswersControllerV2 @Inject() (
+  override val messagesApi: MessagesApi,
+  actions: Actions,
+  val controllerComponents: MessagesControllerComponents,
+  guaranteeBalanceService: GuaranteeBalanceService,
+  viewModelProvider: CheckYourAnswersViewModelProvider,
+  responseHandler: GuaranteeBalanceResponseHandlerV2,
+  view: ViewProvider
+)(implicit ec: ExecutionContext)
+    extends CheckYourAnswersController
+    with FrontendBaseController
+    with I18nSupport
+    with Logging {
+
+  def onPageLoad(): Action[AnyContent] = actions.requireData {
+    implicit request =>
+      val viewModel = viewModelProvider(request.userAnswers)
+      Ok(view.checkYourAnswers(Seq(viewModel.section)))
   }
 
   def onSubmit(): Action[AnyContent] = actions.requireData.async {

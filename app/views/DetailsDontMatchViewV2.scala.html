@@ -17,27 +17,30 @@
 @import config.FrontendAppConfig
 @import controllers.routes
 @import viewModels.components.InputTextViewModel._
-@import views.html.components.Heading
+@import views.html.components.{Heading, HeadingCaption}
 
 @this(
     mainTemplate: MainTemplate,
     heading: Heading,
-    config: FrontendAppConfig
+    config: FrontendAppConfig,
+    caption: HeadingCaption
 )
 
 @()(implicit request: Request[_], messages: Messages)
 
 @mainTemplate(
-    title = messages("detailsDontMatch.title")
+    title = messages("detailsDontMatch.v2.title")
 ) {
 
-    @heading(messages("detailsDontMatch.heading"))
+    @caption(messages("detailsDontMatch.v2.caption"))
 
-    <p class="govuk-body">@messages("detailsDontMatch.p1")
-        <a class="govuk-link" id="try-again" href=@routes.CheckYourAnswersControllerV1.onPageLoad()>@messages("detailsDontMatch.p1.a")</a>.
+    @heading(messages("detailsDontMatch.v2.heading"))
+
+    <p class="govuk-body">
+        <a class="govuk-link" id="try-again" href=@routes.CheckYourAnswersControllerV2.onPageLoad()>@messages("detailsDontMatch.v2.p1")</a>.
     </p>
 
-    <p class="govuk-body">@messages("detailsDontMatch.p2")
-        <a class="govuk-link" target="_blank" id="contact" rel="noopener noreferrer" href=@config.nctsEnquiriesUrl>@messages("detailsDontMatch.p2.a")</a>.
+    <p class="govuk-body">@messages("detailsDontMatch.v2.p2")
+        <a class="govuk-link" target="_blank" id="contact" rel="noopener noreferrer" href=@config.nctsEnquiriesUrl>@messages("detailsDontMatch.v2.p2.a")</a>
     </p>
 }

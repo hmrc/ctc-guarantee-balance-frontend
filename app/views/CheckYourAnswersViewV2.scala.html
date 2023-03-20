@@ -16,27 +16,30 @@
 
 @import controllers.routes
 @import viewModels.Section
-@import views.html.components.{AnswerSections, Button, Heading}
+@import views.html.components.{AnswerSections, Button, Heading, HeadingCaption}
 
 @this(
     mainTemplate: MainTemplate,
     heading: Heading,
     answerSections: AnswerSections,
     button: Button,
-    formHelper: FormWithCSRF
+    formHelper: FormWithCSRF,
+    caption: HeadingCaption
 )
 
 @(sections: Seq[Section])(implicit request: Request[_], messages: Messages)
 
 @mainTemplate(
-    title = messages("checkYourAnswers.title")
+    title = messages("checkYourAnswers.v2.title")
 ) {
 
-    @heading(messages("checkYourAnswers.heading"))
+    @caption(messages("checkYourAnswers.v2.caption"))
+
+    @heading(messages("checkYourAnswers.v2.heading"))
 
     @answerSections(sections)
 
-    @formHelper(action = routes.CheckYourAnswersControllerV1.onSubmit(), Symbol("autoComplete") -> "off") {
+    @formHelper(action = routes.CheckYourAnswersControllerV2.onSubmit(), Symbol("autoComplete") -> "off") {
         @button(
             attributes = Map("id" -> "continue"),
             preventDoubleClick = true

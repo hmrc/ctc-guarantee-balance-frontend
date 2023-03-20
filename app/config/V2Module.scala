@@ -16,8 +16,17 @@
 
 package config
 
+import controllers.{
+  CheckYourAnswersController,
+  CheckYourAnswersControllerV2,
+  DetailsDontMatchController,
+  DetailsDontMatchControllerV2,
+  TryAgainController,
+  TryAgainControllerV2
+}
 import forms.{GuaranteeReferenceNumberFormProvider, V2GuaranteeReferenceNumberFormProvider}
-import navigation.{FirstPage, V2FirstPage}
+import handlers.{GuaranteeBalanceResponseHandler, GuaranteeBalanceResponseHandlerV2}
+import navigation.{FirstPage, Navigator, NavigatorV2, V2FirstPage}
 import services.{GuaranteeBalanceService, V2GuaranteeBalanceService}
 import views.{V2ViewProvider, ViewProvider}
 
@@ -30,6 +39,11 @@ class V2Module extends Module {
     bind(classOf[GuaranteeBalanceService]).to(classOf[V2GuaranteeBalanceService])
     bind(classOf[GuaranteeReferenceNumberFormProvider]).to(classOf[V2GuaranteeReferenceNumberFormProvider])
     bind(classOf[FirstPage]).to(classOf[V2FirstPage])
+    bind(classOf[CheckYourAnswersController]).to(classOf[CheckYourAnswersControllerV2])
+    bind(classOf[Navigator]).to(classOf[NavigatorV2])
+    bind(classOf[DetailsDontMatchController]).to(classOf[DetailsDontMatchControllerV2])
+    bind(classOf[GuaranteeBalanceResponseHandler]).to(classOf[GuaranteeBalanceResponseHandlerV2])
+    bind(classOf[TryAgainController]).to(classOf[TryAgainControllerV2])
   }
 
 }

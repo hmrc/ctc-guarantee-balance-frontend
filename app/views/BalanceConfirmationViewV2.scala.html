@@ -1,0 +1,53 @@
+@*
+ * Copyright 2023 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import controllers.routes
+@import models.Referral._
+@import viewModels.components.InputTextViewModel._
+
+@this(
+    mainTemplate: MainTemplate,
+    formHelper: FormWithCSRF,
+    govukPanel: GovukPanel
+)
+
+@(balance: String, referral: Option[String])(implicit request: Request[_], messages: Messages)
+
+@mainTemplate(
+    title = messages("balanceConfirmation.title")
+) {
+
+    @govukPanel(Panel(
+        title = Text(messages("balanceConfirmation.v2.heading")),
+        content = HtmlContent(s"""<strong>${balance}</strong><p>${messages("balanceConfirmation.v2.currency.p")}</p>"""),
+        classes = "break-all"
+    ))
+
+    @referral match {
+        case Some(NCTS.toString) => {
+            <p class="govuk-body">@messages("balanceConfirmation.fromNcts.p")</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li><a class="govuk-link" href=@routes.BalanceConfirmationController.checkAnotherGuaranteeBalance() id="check-another-guarantee-balance">@messages("balanceConfirmation.v2.fromNcts.link1")</a></li>
+                <li><a class="govuk-link" href=@routes.BalanceConfirmationController.manageTransitMovements() id="manage-transit-movements">@messages("balanceConfirmation.v2.fromNcts.link2")</a></li>
+            </ul>
+        }
+        case _ => {
+            <p class="govuk-body">@messages("balanceConfirmation.fromGovUk.p")
+                <a class="govuk-link" href=@routes.BalanceConfirmationController.checkAnotherGuaranteeBalance() id="check-another-guarantee-balance">@messages("balanceConfirmation.v2.fromGovUk.link")</a>.
+            </p>
+        }
+    }
+}

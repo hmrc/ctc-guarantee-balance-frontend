@@ -34,17 +34,25 @@ POST       /access-code                             controllers.AccessCodeContro
 GET        /change-access-code                      controllers.AccessCodeController.onPageLoad(mode: Mode = CheckMode)
 POST       /change-access-code                      controllers.AccessCodeController.onSubmit(mode: Mode = CheckMode)
 
-GET        /check-your-answers                      controllers.CheckYourAnswersController.onPageLoad()
-POST       /check-your-answers                      controllers.CheckYourAnswersController.onSubmit()
+GET        /check-your-answers                      controllers.CheckYourAnswersControllerV1.onPageLoad()
+POST       /check-your-answers                      controllers.CheckYourAnswersControllerV1.onSubmit()
 
-GET        /try-again                               controllers.TryAgainController.onPageLoad()
-POST       /try-again                               controllers.TryAgainController.onSubmit()
+GET        /check-answers                           controllers.CheckYourAnswersControllerV2.onPageLoad()
+POST       /check-answers                           controllers.CheckYourAnswersControllerV2.onSubmit()
+
+GET        /try-again                               controllers.TryAgainControllerV1.onPageLoad()
+POST       /try-again                               controllers.TryAgainControllerV1.onSubmit()
+
+
+GET        /try-again                               controllers.TryAgainControllerV2.onPageLoad()
+POST       /try-again                               controllers.TryAgainControllerV2.onSubmit()
 
 GET        /balance                                 controllers.BalanceConfirmationController.onPageLoad()
 GET        /check-another-guarantee-balance         controllers.BalanceConfirmationController.checkAnotherGuaranteeBalance()
 GET        /manage-transit-movements                controllers.BalanceConfirmationController.manageTransitMovements()
 
-GET        /details-do-not-match                    controllers.DetailsDontMatchController.onPageLoad()
+GET        /details-do-not-match                    controllers.DetailsDontMatchControllerV1.onPageLoad()
+GET        /grn-access-code-mismatch                controllers.DetailsDontMatchControllerV2.onPageLoad()
 
 GET        /guarantee-not-supported                 controllers.UnsupportedGuaranteeTypeController.onPageLoad()
 POST       /guarantee-not-supported                 controllers.UnsupportedGuaranteeTypeController.onSubmit()
