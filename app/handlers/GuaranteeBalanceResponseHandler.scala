@@ -42,7 +42,7 @@ sealed trait GuaranteeBalanceResponseHandler extends Logging {
 
   implicit val ec: ExecutionContext
 
-  val detailsDoNotMatch: Call
+  def detailsDoNotMatch: Call
 
   def processResponse(response: Either[HttpResponse, BalanceRequestResponse])(implicit
     hc: HeaderCarrier,
@@ -207,7 +207,7 @@ class GuaranteeBalanceResponseHandlerV1 @Inject() (
 )(implicit override val ec: ExecutionContext)
     extends GuaranteeBalanceResponseHandler {
 
-  override val detailsDoNotMatch: Call = controllers.routes.DetailsDontMatchControllerV1.onPageLoad()
+  override def detailsDoNotMatch: Call = controllers.routes.DetailsDontMatchControllerV1.onPageLoad()
 }
 
 class GuaranteeBalanceResponseHandlerV2 @Inject() (
@@ -217,5 +217,5 @@ class GuaranteeBalanceResponseHandlerV2 @Inject() (
 )(implicit override val ec: ExecutionContext)
     extends GuaranteeBalanceResponseHandler {
 
-  override val detailsDoNotMatch: Call = controllers.routes.DetailsDontMatchControllerV2.onPageLoad()
+  override def detailsDoNotMatch: Call = controllers.routes.DetailsDontMatchControllerV2.onPageLoad()
 }
