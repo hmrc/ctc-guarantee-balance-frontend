@@ -24,9 +24,9 @@ import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import pages._
 
-class NavigatorV1Spec extends SpecBase with ScalaCheckPropertyChecks with Generators {
+class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
 
-  val navigator = new NavigatorV1
+  val navigator = new Navigator
 
   "Navigator" - {
 

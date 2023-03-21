@@ -30,8 +30,8 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import viewModels.CheckYourAnswersViewModelV2.CheckYourAnswersViewModelProviderV2
-import viewModels.{CheckYourAnswersViewModelV2, Section}
+import viewModels.CheckYourAnswersViewModel.CheckYourAnswersViewModelProvider
+import viewModels.{CheckYourAnswersViewModel, Section}
 import views.html.v2.CheckYourAnswersViewV2
 
 import scala.concurrent.Future
@@ -43,19 +43,19 @@ class CheckYourAnswersControllerV2Spec extends SpecBase with AppWithDefaultMockF
     .setValue(AccessCodePage, Gen.alphaNumStr.sample.value)
     .setValue(EoriNumberPage, Gen.alphaNumStr.sample.value)
 
-  private val mockViewModelProvider: CheckYourAnswersViewModelProviderV2 = mock[CheckYourAnswersViewModelProviderV2]
+  private val mockViewModelProvider: CheckYourAnswersViewModelProvider = mock[CheckYourAnswersViewModelProvider]
 
   override protected def applicationBuilder(): GuiceApplicationBuilder =
     super
-      .applicationBuilder()
-      .overrides(bind[CheckYourAnswersViewModelProviderV2].toInstance(mockViewModelProvider))
+      .v2ApplicationBuilder()
+      .overrides(bind[CheckYourAnswersViewModelProvider].toInstance(mockViewModelProvider))
 
   private val section: Section = arbitrary[Section].sample.value
 
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockViewModelProvider)
-    when(mockViewModelProvider.apply(any())(any())).thenReturn(CheckYourAnswersViewModelV2(section))
+    when(mockViewModelProvider.apply(any())(any())).thenReturn(CheckYourAnswersViewModel(section))
   }
 
   "CheckYourAnswers Controller" - {
