@@ -37,7 +37,7 @@ class DetailsDontMatchViewSpec extends ViewBehaviours {
   behave like pageWithLink(
     "try-again",
     "check your answers and try again",
-    controllers.routes.CheckYourAnswersControllerV1.onPageLoad().url
+    controllers.routes.CheckYourAnswersController.onPageLoad().url
   )
 
   behave like pageWithPartialContent("p", "If your details are correct, you must")

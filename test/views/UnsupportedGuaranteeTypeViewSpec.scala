@@ -46,7 +46,7 @@ class UnsupportedGuaranteeTypeViewSpec extends ViewBehaviours {
   behave like pageWithLink(
     "checkDetails-link",
     "change the reference of the guarantee you are checking",
-    controllers.routes.CheckYourAnswersControllerV1.onPageLoad().url
+    controllers.routes.CheckYourAnswersController.onPageLoad().url
   )
   behave like pageWithPartialContent("p", "or you can start again.")
 

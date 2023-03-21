@@ -60,7 +60,7 @@ class NavigatorV1Spec extends SpecBase with ScalaCheckPropertyChecks with Genera
           answers =>
             navigator
               .nextPage(AccessCodePage, mode, answers)
-              .mustBe(routes.CheckYourAnswersControllerV1.onPageLoad())
+              .mustBe(routes.CheckYourAnswersController.onPageLoad())
         }
       }
 
@@ -87,7 +87,7 @@ class NavigatorV1Spec extends SpecBase with ScalaCheckPropertyChecks with Genera
           answers =>
             navigator
               .nextPage(EoriNumberPage, mode, answers)
-              .mustBe(routes.CheckYourAnswersControllerV1.onPageLoad())
+              .mustBe(routes.CheckYourAnswersController.onPageLoad())
         }
       }
 
@@ -97,7 +97,7 @@ class NavigatorV1Spec extends SpecBase with ScalaCheckPropertyChecks with Genera
           answers =>
             navigator
               .nextPage(GuaranteeReferenceNumberPage, mode, answers)
-              .mustBe(routes.CheckYourAnswersControllerV1.onPageLoad())
+              .mustBe(routes.CheckYourAnswersController.onPageLoad())
         }
       }
 
@@ -107,7 +107,7 @@ class NavigatorV1Spec extends SpecBase with ScalaCheckPropertyChecks with Genera
           answers =>
             navigator
               .nextPage(AccessCodePage, mode, answers)
-              .mustBe(routes.CheckYourAnswersControllerV1.onPageLoad())
+              .mustBe(routes.CheckYourAnswersController.onPageLoad())
         }
       }
 
@@ -119,7 +119,7 @@ class NavigatorV1Spec extends SpecBase with ScalaCheckPropertyChecks with Genera
           answers =>
             navigator
               .nextPage(UnknownPage, mode, answers)
-              .mustBe(routes.CheckYourAnswersControllerV1.onPageLoad())
+              .mustBe(routes.CheckYourAnswersController.onPageLoad())
         }
       }
 

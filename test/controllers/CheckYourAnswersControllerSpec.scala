@@ -63,7 +63,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with AppWithDefaultMockFix
       val userAnswers = baseAnswers
       setExistingUserAnswers(userAnswers)
 
-      val request = FakeRequest(GET, routes.CheckYourAnswersControllerV1.onPageLoad().url)
+      val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
       val view    = injector.instanceOf[CheckYourAnswersView]
       val result  = route(app, request).value
 
@@ -78,7 +78,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with AppWithDefaultMockFix
     "must redirect to Session Expired for a GET if no existing data is found" in {
       setNoExistingUserAnswers()
 
-      val request = FakeRequest(GET, routes.CheckYourAnswersControllerV1.onPageLoad().url)
+      val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
       val result  = route(app, request).value
 
       status(result) mustEqual SEE_OTHER
@@ -93,7 +93,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with AppWithDefaultMockFix
       when(mockGuaranteeBalanceService.retrieveBalanceResponse()(any(), any()))
         .thenReturn(Future.successful(Right(BalanceRequestSuccess(123.45, Some(CurrencyCode("GBP"))))))
 
-      val request = FakeRequest(POST, routes.CheckYourAnswersControllerV1.onSubmit().url)
+      val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
       val result  = route(app, request).value
 
       status(result) mustEqual SEE_OTHER

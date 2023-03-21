@@ -39,7 +39,7 @@
 
     @answerSections(sections)
 
-    @formHelper(action = routes.CheckYourAnswersControllerV2.onSubmit(), Symbol("autoComplete") -> "off") {
+    @formHelper(action = routes.CheckYourAnswersController.onSubmit(), Symbol("autoComplete") -> "off") {
         @button(
             attributes = Map("id" -> "continue"),
             preventDoubleClick = true

@@ -21,6 +21,7 @@ import play.api.data.Form
 import play.api.i18n.Messages
 import play.api.mvc.Request
 import play.twirl.api.HtmlFormat
+import viewModels.Section
 import views.html._
 import views.html.v2._
 
@@ -39,6 +40,8 @@ sealed trait ViewProvider {
     mode: Mode
   )(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable
 
+  def checkYourAnswersView(sections: Seq[Section])(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable
+
   def balanceConfirmationView(balance: String, referral: Option[String])(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable
 
   def couldNotCheckBalance(balanceId: Option[UUID])(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable
@@ -47,6 +50,7 @@ sealed trait ViewProvider {
 class V1ViewProvider @Inject() (
   guaranteeReferenceNumberView: GuaranteeReferenceNumberView,
   accessCodeView: AccessCodeView,
+  checkYourAnswersView: CheckYourAnswersView,
   balanceConfirmationView: BalanceConfirmationView,
   tryAgainView: TryAgainView
 ) extends ViewProvider {
@@ -63,6 +67,9 @@ class V1ViewProvider @Inject() (
   )(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable =
     accessCodeView.apply(form, mode)
 
+  override def checkYourAnswersView(sections: Seq[Section])(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable =
+    checkYourAnswersView.apply(sections)
+
   override def balanceConfirmationView(balance: String, referral: Option[String])(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable =
     balanceConfirmationView.apply(balance, referral)
 
@@ -74,8 +81,8 @@ class V1ViewProvider @Inject() (
 class V2ViewProvider @Inject() (
   guaranteeReferenceNumberView: GuaranteeReferenceNumberViewV2,
   accessCodeView: AccessCodeViewV2,
+  checkYourAnswersView: CheckYourAnswersViewV2,
   balanceConfirmationView: BalanceConfirmationViewV2,
-  detailsDoNotMatchV2: DetailsDontMatchViewV2,
   tryAgainViewV2: TryAgainViewV2
 ) extends ViewProvider {
 
@@ -90,6 +97,9 @@ class V2ViewProvider @Inject() (
     mode: Mode
   )(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable =
     accessCodeView.apply(form, mode)
+
+  override def checkYourAnswersView(sections: Seq[Section])(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable =
+    checkYourAnswersView.apply(sections)
 
   override def balanceConfirmationView(balance: String, referral: Option[String])(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable =
     balanceConfirmationView.apply(balance, referral)

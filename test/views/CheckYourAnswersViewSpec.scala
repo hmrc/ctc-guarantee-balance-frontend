@@ -38,7 +38,7 @@ class CheckYourAnswersViewSpec extends CheckYourAnswersViewBehaviours {
 
   behave like pageWithCheckYourAnswers()
 
-  behave like pageWithFormAction(controllers.routes.CheckYourAnswersControllerV1.onSubmit().url)
+  behave like pageWithFormAction(controllers.routes.CheckYourAnswersController.onSubmit().url)
 
   behave like pageWithContinueButton("Continue")
 

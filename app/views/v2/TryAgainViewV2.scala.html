@@ -40,7 +40,7 @@
     @heading(messages("tryAgain.v2.heading"))
 
     <p class="govuk-body">
-        <a class="govuk-link" id="check-details" href="@routes.CheckYourAnswersControllerV2.onPageLoad()">@messages("tryAgain.v2.checkDetails.link")</a> @messages("tryAgain.v2.checkDetails.postlink", config.rateLimitDuration)
+        <a class="govuk-link" id="check-details" href="@routes.CheckYourAnswersController.onPageLoad()">@messages("tryAgain.v2.checkDetails.link")</a> @messages("tryAgain.v2.checkDetails.postlink", config.rateLimitDuration)
     </p>
 
     <p class="govuk-body">@messages("tryAgain.v2.problems")
