@@ -41,7 +41,7 @@ class TryAgainViewSpec extends ViewBehaviours {
   behave like pageWithLink(
     "check-details",
     "check that your details are correct",
-    controllers.routes.CheckYourAnswersControllerV1.onPageLoad().url
+    controllers.routes.CheckYourAnswersController.onPageLoad().url
   )
   behave like pageWithPartialContent("p", s"or you can try again in ${frontendAppConfig.rateLimitDuration} seconds.")
 

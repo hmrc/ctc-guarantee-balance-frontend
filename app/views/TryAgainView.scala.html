@@ -37,7 +37,7 @@
     @heading(messages("tryAgain.heading"))
 
     <p class="govuk-body">@messages("tryAgain.checkDetails.prelink")
-        <a class="govuk-link" id="check-details" href="@routes.CheckYourAnswersControllerV1.onPageLoad()">@messages("tryAgain.checkDetails.link")</a> @messages("tryAgain.checkDetails.postlink", config.rateLimitDuration)
+        <a class="govuk-link" id="check-details" href="@routes.CheckYourAnswersController.onPageLoad()">@messages("tryAgain.checkDetails.link")</a> @messages("tryAgain.checkDetails.postlink", config.rateLimitDuration)
     </p>
 
     @formHelper(action = routes.TryAgainController.onSubmit(), Symbol("autoComplete") -> "off") {
