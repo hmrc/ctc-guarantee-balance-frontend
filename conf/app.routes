@@ -40,12 +40,8 @@ POST       /check-your-answers                      controllers.CheckYourAnswers
 GET        /check-answers                           controllers.CheckYourAnswersControllerV2.onPageLoad()
 POST       /check-answers                           controllers.CheckYourAnswersControllerV2.onSubmit()
 
-GET        /try-again                               controllers.TryAgainControllerV1.onPageLoad()
-POST       /try-again                               controllers.TryAgainControllerV1.onSubmit()
-
-
-GET        /try-again                               controllers.TryAgainControllerV2.onPageLoad()
-POST       /try-again                               controllers.TryAgainControllerV2.onSubmit()
+GET        /try-again                               controllers.TryAgainController.onPageLoad()
+POST       /try-again                               controllers.TryAgainController.onSubmit()
 
 GET        /balance                                 controllers.BalanceConfirmationController.onPageLoad()
 GET        /check-another-guarantee-balance         controllers.BalanceConfirmationController.checkAnotherGuaranteeBalance()

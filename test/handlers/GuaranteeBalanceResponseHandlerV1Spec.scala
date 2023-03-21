@@ -28,6 +28,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify}
 import pages._
 import play.api.http.Status.{OK, SEE_OTHER}
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.Helpers._
 import services.AuditService
@@ -79,8 +80,11 @@ class GuaranteeBalanceResponseHandlerV1Spec extends SpecBase with AppWithDefault
   private val mockRequest                      = mock[Request[AnyContent]]
   implicit private val request: DataRequest[_] = DataRequest(mockRequest, "eoriNumber", baseAnswers)
 
-  private lazy val handler: GuaranteeBalanceResponseHandlerV1 = app.injector.instanceOf[GuaranteeBalanceResponseHandlerV1]
-  private lazy val auditService: AuditService                 = app.injector.instanceOf[AuditService]
+  private lazy val handler: GuaranteeBalanceResponseHandler = app.injector.instanceOf[GuaranteeBalanceResponseHandler]
+  private lazy val auditService: AuditService               = app.injector.instanceOf[AuditService]
+
+  override protected def applicationBuilder(): GuiceApplicationBuilder =
+    super.v1ApplicationBuilder()
 
   "GuaranteeBalanceResponseHandlerSpec" - {
 
@@ -88,7 +92,7 @@ class GuaranteeBalanceResponseHandlerV1Spec extends SpecBase with AppWithDefault
       val result: Future[Result] = handler.processResponse(tryAgainResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.TryAgainControllerV1.onPageLoad().url
+      redirectLocation(result).value mustEqual controllers.routes.TryAgainController.onPageLoad().url
 
       verify(mockSessionRepository, times(1)).set(any())
     }
@@ -181,7 +185,7 @@ class GuaranteeBalanceResponseHandlerV1Spec extends SpecBase with AppWithDefault
       val result: Future[Result] = handler.processResponse(pendingResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.TryAgainControllerV1.onPageLoad().url
+      redirectLocation(result).value mustEqual controllers.routes.TryAgainController.onPageLoad().url
 
       val userAnswersCapture: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
       verify(mockSessionRepository, times(2)).set(userAnswersCapture.capture())
@@ -237,7 +241,7 @@ class GuaranteeBalanceResponseHandlerV1Spec extends SpecBase with AppWithDefault
       val result: Future[Result] = handler.processResponse(tooManyRequestsResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.TryAgainControllerV1.onPageLoad().url
+      redirectLocation(result).value mustEqual controllers.routes.TryAgainController.onPageLoad().url
 
       val auditCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 

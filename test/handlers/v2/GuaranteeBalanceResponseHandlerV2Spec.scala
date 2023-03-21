@@ -18,7 +18,7 @@ package handlers.v2
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import cats.data.NonEmptyList
-import handlers.GuaranteeBalanceResponseHandlerV2
+import handlers.GuaranteeBalanceResponseHandler
 import models.UserAnswers
 import models.backend._
 import models.backend.errors.FunctionalError
@@ -29,6 +29,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify}
 import pages._
 import play.api.http.Status.{OK, SEE_OTHER}
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.Helpers._
 import services.AuditService
@@ -80,8 +81,11 @@ class GuaranteeBalanceResponseHandlerV2Spec extends SpecBase with AppWithDefault
   private val mockRequest                      = mock[Request[AnyContent]]
   implicit private val request: DataRequest[_] = DataRequest(mockRequest, "eoriNumber", baseAnswers)
 
-  private lazy val handler: GuaranteeBalanceResponseHandlerV2 = app.injector.instanceOf[GuaranteeBalanceResponseHandlerV2]
-  private lazy val auditService: AuditService                 = app.injector.instanceOf[AuditService]
+  private lazy val handler: GuaranteeBalanceResponseHandler = app.injector.instanceOf[GuaranteeBalanceResponseHandler]
+  private lazy val auditService: AuditService               = app.injector.instanceOf[AuditService]
+
+  override protected def applicationBuilder(): GuiceApplicationBuilder =
+    super.v2ApplicationBuilder()
 
   "GuaranteeBalanceResponseHandlerSpec" - {
 
@@ -89,7 +93,7 @@ class GuaranteeBalanceResponseHandlerV2Spec extends SpecBase with AppWithDefault
       val result: Future[Result] = handler.processResponse(tryAgainResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.TryAgainControllerV2.onPageLoad().url
+      redirectLocation(result).value mustEqual controllers.routes.TryAgainController.onPageLoad().url
 
       verify(mockSessionRepository, times(1)).set(any())
     }
@@ -182,7 +186,7 @@ class GuaranteeBalanceResponseHandlerV2Spec extends SpecBase with AppWithDefault
       val result: Future[Result] = handler.processResponse(pendingResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.TryAgainControllerV2.onPageLoad().url
+      redirectLocation(result).value mustEqual controllers.routes.TryAgainController.onPageLoad().url
 
       val userAnswersCapture: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
       verify(mockSessionRepository, times(2)).set(userAnswersCapture.capture())
@@ -238,7 +242,7 @@ class GuaranteeBalanceResponseHandlerV2Spec extends SpecBase with AppWithDefault
       val result: Future[Result] = handler.processResponse(tooManyRequestsResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.TryAgainControllerV2.onPageLoad().url
+      redirectLocation(result).value mustEqual controllers.routes.TryAgainController.onPageLoad().url
 
       val auditCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 

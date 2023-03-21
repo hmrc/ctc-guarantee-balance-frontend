@@ -47,7 +47,7 @@
         <a class="govuk-link" target="_blank" id="contact" rel="noopener noreferrer" href=@config.nctsEnquiriesUrl>@messages("tryAgain.v2.problems.link")</a>
     </p>
 
-    @formHelper(action = routes.TryAgainControllerV2.onSubmit(), Symbol("autoComplete") -> "off") {
+    @formHelper(action = routes.TryAgainController.onSubmit(), Symbol("autoComplete") -> "off") {
 
         @balanceId.map { value =>
             <input type="hidden" id="balanceId" value="@value"/>

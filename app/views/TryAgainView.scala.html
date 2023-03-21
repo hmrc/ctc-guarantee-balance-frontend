@@ -40,7 +40,7 @@
         <a class="govuk-link" id="check-details" href="@routes.CheckYourAnswersControllerV1.onPageLoad()">@messages("tryAgain.checkDetails.link")</a> @messages("tryAgain.checkDetails.postlink", config.rateLimitDuration)
     </p>
 
-    @formHelper(action = routes.TryAgainControllerV1.onSubmit(), Symbol("autoComplete") -> "off") {
+    @formHelper(action = routes.TryAgainController.onSubmit(), Symbol("autoComplete") -> "off") {
 
         @balanceId.map { value =>
             <input type="hidden" id="balanceId" value="@value"/>

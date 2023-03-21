@@ -56,7 +56,7 @@ class TryAgainControllerV2Spec extends SpecBase with AppWithDefaultMockFixtures 
         "when balance ID exists in user answers" in {
           setExistingUserAnswers(baseAnswers)
 
-          val request = FakeRequest(GET, routes.TryAgainControllerV2.onPageLoad().url)
+          val request = FakeRequest(GET, routes.TryAgainController.onPageLoad().url)
           val view    = injector.instanceOf[TryAgainViewV2]
           val result  = route(app, request).value
 
@@ -69,7 +69,7 @@ class TryAgainControllerV2Spec extends SpecBase with AppWithDefaultMockFixtures 
         "when balance ID doesn't exist in user answers" in {
           setExistingUserAnswers(emptyUserAnswers)
 
-          val request = FakeRequest(GET, routes.TryAgainControllerV2.onPageLoad().url)
+          val request = FakeRequest(GET, routes.TryAgainController.onPageLoad().url)
           val view    = injector.instanceOf[TryAgainViewV2]
           val result  = route(app, request).value
 
@@ -87,7 +87,7 @@ class TryAgainControllerV2Spec extends SpecBase with AppWithDefaultMockFixtures 
           when(mockGuaranteeBalanceService.retrieveBalanceResponse()(any(), any())).thenReturn(Future.successful(successResponse))
           setExistingUserAnswers(baseAnswers)
 
-          val request = FakeRequest(POST, routes.TryAgainControllerV2.onSubmit().url)
+          val request = FakeRequest(POST, routes.TryAgainController.onSubmit().url)
           val result  = route(app, request).value
 
           status(result) mustEqual SEE_OTHER
@@ -102,7 +102,7 @@ class TryAgainControllerV2Spec extends SpecBase with AppWithDefaultMockFixtures 
           when(mockGuaranteeBalanceService.retrieveBalanceResponse()(any(), any())).thenReturn(Future.successful(errorResponse))
           setExistingUserAnswers(baseAnswers)
 
-          val request = FakeRequest(POST, routes.TryAgainControllerV2.onSubmit().url)
+          val request = FakeRequest(POST, routes.TryAgainController.onSubmit().url)
           val result  = route(app, request).value
 
           status(result) mustEqual SEE_OTHER

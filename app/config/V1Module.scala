@@ -16,14 +16,7 @@
 
 package config
 
-import controllers.{
-  CheckYourAnswersController,
-  CheckYourAnswersControllerV1,
-  DetailsDontMatchController,
-  DetailsDontMatchControllerV1,
-  TryAgainController,
-  TryAgainControllerV1
-}
+import controllers.{CheckYourAnswersController, CheckYourAnswersControllerV1, DetailsDontMatchController, DetailsDontMatchControllerV1}
 import forms.{GuaranteeReferenceNumberFormProvider, V1GuaranteeReferenceNumberFormProvider}
 import handlers.{GuaranteeBalanceResponseHandler, GuaranteeBalanceResponseHandlerV1}
 import navigation.{FirstPage, Navigator, NavigatorV1, V1FirstPage}
@@ -43,7 +36,6 @@ class V1Module extends Module {
     bind(classOf[Navigator]).to(classOf[NavigatorV1])
     bind(classOf[DetailsDontMatchController]).to(classOf[DetailsDontMatchControllerV1])
     bind(classOf[GuaranteeBalanceResponseHandler]).to(classOf[GuaranteeBalanceResponseHandlerV1])
-    bind(classOf[TryAgainController]).to(classOf[TryAgainControllerV1])
   }
 
 }

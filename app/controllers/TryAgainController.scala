@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.actions.Actions
-import handlers.{GuaranteeBalanceResponseHandlerV1, GuaranteeBalanceResponseHandlerV2}
+import handlers.GuaranteeBalanceResponseHandler
 import pages.BalanceIdPage
 import play.api.i18n.I18nSupport
 import play.api.mvc._
@@ -28,39 +28,14 @@ import views.ViewProvider
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-sealed trait TryAgainController
-
-class TryAgainControllerV1 @Inject() (
+class TryAgainController @Inject() (
   balanceService: GuaranteeBalanceService,
   val controllerComponents: MessagesControllerComponents,
-  responseHandler: GuaranteeBalanceResponseHandlerV1,
+  responseHandler: GuaranteeBalanceResponseHandler,
   actions: Actions,
   view: ViewProvider
 )(implicit ec: ExecutionContext)
-    extends TryAgainController
-    with FrontendBaseController
-    with I18nSupport {
-
-  def onPageLoad(): Action[AnyContent] = actions.requireData {
-    implicit request =>
-      Ok(view.couldNotCheckBalance(request.userAnswers.get(BalanceIdPage).map(_.value)))
-  }
-
-  def onSubmit(): Action[AnyContent] = actions.requireData.async {
-    implicit request =>
-      balanceService.retrieveBalanceResponse().flatMap(responseHandler.processResponse(_))
-  }
-}
-
-class TryAgainControllerV2 @Inject() (
-  balanceService: GuaranteeBalanceService,
-  val controllerComponents: MessagesControllerComponents,
-  responseHandler: GuaranteeBalanceResponseHandlerV2,
-  actions: Actions,
-  view: ViewProvider
-)(implicit ec: ExecutionContext)
-    extends TryAgainController
-    with FrontendBaseController
+    extends FrontendBaseController
     with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = actions.requireData {
