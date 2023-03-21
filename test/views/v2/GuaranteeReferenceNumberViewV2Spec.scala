@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package views
+package views.v2
 
 import forms.V2GuaranteeReferenceNumberFormProvider
 import models.NormalMode
@@ -23,9 +23,9 @@ import play.api.data.Form
 import play.twirl.api.HtmlFormat
 import viewModels.InputSize
 import views.behaviours.InputTextViewBehaviours
-import views.html.GuaranteeReferenceNumberViewV2
+import views.html.v2.GuaranteeReferenceNumberViewV2
 
-class GuaranteeReferenceNumberV2ViewSpec extends InputTextViewBehaviours[String] {
+class GuaranteeReferenceNumberViewV2Spec extends InputTextViewBehaviours[String] {
 
   override def form: Form[String] = new V2GuaranteeReferenceNumberFormProvider()()
 

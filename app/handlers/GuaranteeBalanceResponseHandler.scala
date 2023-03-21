@@ -16,7 +16,6 @@
 
 package handlers
 
-import javax.inject.Inject
 import models.UserAnswers
 import models.backend._
 import models.requests.DataRequest
@@ -32,14 +31,18 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import viewModels.audit.AuditConstants._
 import viewModels.audit.{ErrorMessage, SuccessfulBalanceAuditModel, UnsuccessfulBalanceAuditModel}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class GuaranteeBalanceResponseHandler @Inject() (
-  sessionRepository: SessionRepository,
-  auditService: AuditService,
-  errorHandler: ErrorHandler
-)(implicit ec: ExecutionContext)
-    extends Logging {
+sealed trait GuaranteeBalanceResponseHandler extends Logging {
+
+  val sessionRepository: SessionRepository
+  val auditService: AuditService
+  val errorHandler: ErrorHandler
+
+  implicit val ec: ExecutionContext
+
+  def detailsDoNotMatch: Call
 
   def processResponse(response: Either[HttpResponse, BalanceRequestResponse])(implicit
     hc: HeaderCarrier,
@@ -71,7 +74,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
 
       case BalanceRequestNotMatched(errorPointer) =>
         auditBalanceRequestNotMatched(errorPointer)
-        Future.successful(Redirect(controllers.routes.DetailsDontMatchController.onPageLoad()))
+        Future.successful(Redirect(detailsDoNotMatch))
 
       case BalanceRequestRateLimit =>
         auditRateLimit()
@@ -195,4 +198,24 @@ class GuaranteeBalanceResponseHandler @Inject() (
       )
     )
   }
+}
+
+class GuaranteeBalanceResponseHandlerV1 @Inject() (
+  override val sessionRepository: SessionRepository,
+  override val auditService: AuditService,
+  override val errorHandler: ErrorHandler
+)(implicit override val ec: ExecutionContext)
+    extends GuaranteeBalanceResponseHandler {
+
+  override def detailsDoNotMatch: Call = controllers.routes.DetailsDontMatchControllerV1.onPageLoad()
+}
+
+class GuaranteeBalanceResponseHandlerV2 @Inject() (
+  override val sessionRepository: SessionRepository,
+  override val auditService: AuditService,
+  override val errorHandler: ErrorHandler
+)(implicit override val ec: ExecutionContext)
+    extends GuaranteeBalanceResponseHandler {
+
+  override def detailsDoNotMatch: Call = controllers.routes.DetailsDontMatchControllerV2.onPageLoad()
 }

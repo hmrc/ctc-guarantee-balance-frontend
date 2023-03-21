@@ -91,7 +91,12 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
               Right(BalanceRequestRateLimit)
             case Status.BAD_REQUEST =>
               logger.warn(s"[GuaranteeBalanceConnector][submitBalanceRequestV2] BAD_REQUEST response: ${response.body}")
-              Left(response)
+
+              if (response.body.toLowerCase.contains("the guarantee reference number is not in the correct format")) {
+                Right(BalanceRequestNotMatched(response.body))
+              } else {
+                Left(response)
+              }
             case Status.NOT_FOUND =>
               logger.info(s"[GuaranteeBalanceConnector][submitBalanceRequestV2] NOT_FOUND response: ${response.body}")
               Right(BalanceRequestNotMatched(response.body))

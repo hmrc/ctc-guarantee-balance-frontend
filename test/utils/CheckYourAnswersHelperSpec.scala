@@ -90,33 +90,70 @@ class CheckYourAnswersHelperSpec extends SpecBase {
     }
 
     "must return Some(row)" - {
-      "when GuaranteeReferenceNumberPage defined" in {
 
-        forAll(arbitrary[Mode], arbitrary[String]) {
-          (mode, answer) =>
-            val answers: UserAnswers = emptyUserAnswers.setValue(GuaranteeReferenceNumberPage, answer)
+      "for V1" - {
 
-            val helper = new CheckYourAnswersHelper(answers, mode)
-            val result = helper.guaranteeReferenceNumber
+        "when GuaranteeReferenceNumberPage defined" in {
 
-            result mustBe Some(
-              SummaryListRow(
-                key = Key("Guarantee reference number".toText),
-                value = Value(answer.toText),
-                actions = Some(
-                  Actions(
-                    items = List(
-                      ActionItem(
-                        content = "Change".toText,
-                        href = routes.GuaranteeReferenceNumberController.onPageLoad(mode).url,
-                        visuallyHiddenText = Some("guarantee reference number"),
-                        attributes = Map("id" -> "change-guarantee-reference-number")
+          forAll(arbitrary[Mode], arbitrary[String]) {
+            (mode, answer) =>
+              val answers: UserAnswers = emptyUserAnswers.setValue(GuaranteeReferenceNumberPage, answer)
+
+              val helper = new CheckYourAnswersHelper(answers, mode)
+              val result = helper.guaranteeReferenceNumber
+
+              result mustBe Some(
+                SummaryListRow(
+                  key = Key("Guarantee reference number".toText),
+                  value = Value(answer.toText),
+                  actions = Some(
+                    Actions(
+                      items = List(
+                        ActionItem(
+                          content = "Change".toText,
+                          href = routes.GuaranteeReferenceNumberController.onPageLoad(mode).url,
+                          visuallyHiddenText = Some("guarantee reference number"),
+                          attributes = Map("id" -> "change-guarantee-reference-number")
+                        )
                       )
                     )
                   )
                 )
               )
-            )
+          }
+        }
+      }
+
+      "for V2" - {
+
+        "when GuaranteeReferenceNumberPage defined" in {
+
+          forAll(arbitrary[Mode], arbitrary[String]) {
+            (mode, answer) =>
+              val answers: UserAnswers = emptyUserAnswers.setValue(GuaranteeReferenceNumberPage, answer)
+
+              val helper = new CheckYourAnswersHelper(answers, mode)
+              val result = helper.guaranteeReferenceNumberV2
+
+              result mustBe Some(
+                SummaryListRow(
+                  key = Key("Guarantee Reference Number (GRN)".toText),
+                  value = Value(answer.toText),
+                  actions = Some(
+                    Actions(
+                      items = List(
+                        ActionItem(
+                          content = "Change".toText,
+                          href = routes.GuaranteeReferenceNumberController.onPageLoad(mode).url,
+                          visuallyHiddenText = Some("Guarantee Reference Number (GRN)"),
+                          attributes = Map("id" -> "change-guarantee-reference-number")
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+          }
         }
       }
     }

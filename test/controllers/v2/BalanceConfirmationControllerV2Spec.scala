@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.v2
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import controllers.routes
 import models.{Referral, UserAnswers}
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.verify
@@ -27,13 +28,12 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import views.html.BalanceConfirmationView
+import views.html.v2.BalanceConfirmationViewV2
 
-class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with AppWithDefaultMockFixtures {
+class BalanceConfirmationControllerV2Spec extends SpecBase with MockitoSugar with AppWithDefaultMockFixtures {
 
   override protected def applicationBuilder(): GuiceApplicationBuilder =
-    super
-      .v1ApplicationBuilder()
+    super.v2ApplicationBuilder()
 
   "BalanceConfirmation Controller" - {
 
@@ -55,7 +55,7 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
 
                 val request = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
                   .withSession(Referral.key -> referral.toString)
-                val view   = injector.instanceOf[BalanceConfirmationView]
+                val view   = injector.instanceOf[BalanceConfirmationViewV2]
                 val result = route(app, request).value
 
                 status(result) mustEqual OK
@@ -72,7 +72,7 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
             setExistingUserAnswers(userAnswers)
 
             val request = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
-            val view    = injector.instanceOf[BalanceConfirmationView]
+            val view    = injector.instanceOf[BalanceConfirmationViewV2]
             val result  = route(app, request).value
 
             status(result) mustEqual OK

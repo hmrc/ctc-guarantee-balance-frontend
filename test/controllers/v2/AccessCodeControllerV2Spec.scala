@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.v2
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import controllers.routes
 import forms.AccessCodeFormProvider
 import models.NormalMode
 import pages.AccessCodePage
@@ -24,7 +25,7 @@ import play.api.data.Form
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import views.html.AccessCodeViewV2
+import views.html.v2.AccessCodeViewV2
 
 class AccessCodeControllerV2Spec extends SpecBase with AppWithDefaultMockFixtures {
 

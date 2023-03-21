@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package views
+package views.v2
 
 import forms.AccessCodeFormProvider
 import models.NormalMode
@@ -23,7 +23,7 @@ import play.api.data.Form
 import play.twirl.api.HtmlFormat
 import viewModels.InputSize
 import views.behaviours.InputTextViewBehaviours
-import views.html.AccessCodeViewV2
+import views.html.v2.AccessCodeViewV2
 
 class AccessCodeViewV2Spec extends InputTextViewBehaviours[String] {
 

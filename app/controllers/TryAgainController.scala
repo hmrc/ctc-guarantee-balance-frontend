@@ -23,7 +23,7 @@ import play.api.i18n.I18nSupport
 import play.api.mvc._
 import services.GuaranteeBalanceService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.TryAgainView
+import views.ViewProvider
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
@@ -33,14 +33,14 @@ class TryAgainController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   responseHandler: GuaranteeBalanceResponseHandler,
   actions: Actions,
-  view: TryAgainView
+  view: ViewProvider
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
 
   def onPageLoad(): Action[AnyContent] = actions.requireData {
     implicit request =>
-      Ok(view(request.userAnswers.get(BalanceIdPage).map(_.value)))
+      Ok(view.couldNotCheckBalance(request.userAnswers.get(BalanceIdPage).map(_.value)))
   }
 
   def onSubmit(): Action[AnyContent] = actions.requireData.async {

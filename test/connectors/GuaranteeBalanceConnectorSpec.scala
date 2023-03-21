@@ -612,6 +612,31 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
         result mustBe Right(BalanceRequestNotMatched(notFoundJson))
       }
 
+      "must return non matched when we have an http response BAD_REQUEST with invalid GRN" in {
+        val notFoundJson: String =
+          """
+            | {
+            |   "code": "BAD_REQUEST",
+            |   "message": "The guarantee reference number is not in the correct format"
+            | }
+            |""".stripMargin
+
+        server.stubFor(
+          post(urlEqualTo(submitBalanceRequestV2Url(grn.value)))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
+            .withRequestBody(equalToJson(requestV2AsJsonString))
+            .willReturn(
+              aResponse()
+                .withStatus(Status.NOT_FOUND)
+                .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
+                .withBody(notFoundJson)
+            )
+        )
+
+        val result = connector.submitBalanceRequestV2(requestV2, grn.value).futureValue
+        result mustBe Right(BalanceRequestNotMatched(notFoundJson))
+      }
+
       "must return the HttpResponse when there is a BAD_REQUEST" in {
         val errorResponses = Gen
           .chooseNum(400, 499)

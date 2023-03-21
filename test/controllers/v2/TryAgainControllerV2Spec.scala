@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.v2
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import controllers.routes
 import models.UserAnswers
 import models.backend.BalanceRequestSuccess
 import models.values.{BalanceId, CurrencyCode}
@@ -28,15 +29,15 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpResponse}
-import views.html.TryAgainView
+import views.html.v2.TryAgainViewV2
 
 import java.util.UUID
 import scala.concurrent.Future
 
-class TryAgainControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
+class TryAgainControllerV2Spec extends SpecBase with AppWithDefaultMockFixtures {
 
   override protected def applicationBuilder(): GuiceApplicationBuilder =
-    super.v1ApplicationBuilder()
+    super.v2ApplicationBuilder()
 
   private val expectedUuid: UUID   = arbitrary[UUID].sample.value
   private val balanceId: BalanceId = BalanceId(expectedUuid)
@@ -56,7 +57,7 @@ class TryAgainControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
           setExistingUserAnswers(baseAnswers)
 
           val request = FakeRequest(GET, routes.TryAgainController.onPageLoad().url)
-          val view    = injector.instanceOf[TryAgainView]
+          val view    = injector.instanceOf[TryAgainViewV2]
           val result  = route(app, request).value
 
           status(result) mustEqual OK
@@ -69,7 +70,7 @@ class TryAgainControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
           setExistingUserAnswers(emptyUserAnswers)
 
           val request = FakeRequest(GET, routes.TryAgainController.onPageLoad().url)
-          val view    = injector.instanceOf[TryAgainView]
+          val view    = injector.instanceOf[TryAgainViewV2]
           val result  = route(app, request).value
 
           status(result) mustEqual OK

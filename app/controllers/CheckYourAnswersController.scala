@@ -24,7 +24,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.GuaranteeBalanceService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import viewModels.CheckYourAnswersViewModel.CheckYourAnswersViewModelProvider
-import views.html.CheckYourAnswersView
+import views.ViewProvider
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
@@ -36,7 +36,7 @@ class CheckYourAnswersController @Inject() (
   guaranteeBalanceService: GuaranteeBalanceService,
   viewModelProvider: CheckYourAnswersViewModelProvider,
   responseHandler: GuaranteeBalanceResponseHandler,
-  view: CheckYourAnswersView
+  viewProvider: ViewProvider
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -45,7 +45,7 @@ class CheckYourAnswersController @Inject() (
   def onPageLoad(): Action[AnyContent] = actions.requireData {
     implicit request =>
       val viewModel = viewModelProvider(request.userAnswers)
-      Ok(view(Seq(viewModel.section)))
+      Ok(viewProvider.checkYourAnswersView(Seq(viewModel.section)))
   }
 
   def onSubmit(): Action[AnyContent] = actions.requireData.async {

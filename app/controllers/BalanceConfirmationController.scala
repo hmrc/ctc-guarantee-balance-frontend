@@ -25,7 +25,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
 import services.ReferralService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import views.html.BalanceConfirmationView
+import views.ViewProvider
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
@@ -38,7 +38,7 @@ class BalanceConfirmationController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   appConfig: FrontendAppConfig,
   referralService: ReferralService,
-  view: BalanceConfirmationView
+  view: ViewProvider
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -46,7 +46,7 @@ class BalanceConfirmationController @Inject() (
 
   def onPageLoad: Action[AnyContent] = actions.requireData.andThen(getMandatoryPage(BalancePage)) {
     implicit request =>
-      Ok(view(balance = request.arg, referral = referralService.getReferralFromSession))
+      Ok(view.balanceConfirmationView(balance = request.arg, referral = referralService.getReferralFromSession))
   }
 
   def checkAnotherGuaranteeBalance: Action[AnyContent] =

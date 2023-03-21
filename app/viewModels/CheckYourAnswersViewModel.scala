@@ -18,13 +18,15 @@ package viewModels
 
 import models.{CheckMode, UserAnswers}
 import play.api.i18n.Messages
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 import utils.CheckYourAnswersHelper
 
 case class CheckYourAnswersViewModel(section: Section)
 
 object CheckYourAnswersViewModel {
 
-  class CheckYourAnswersViewModelProvider {
+  sealed trait CheckYourAnswersViewModelProvider {
+    val guaranteeReferenceNumber: CheckYourAnswersHelper => Option[SummaryListRow]
 
     def apply(userAnswers: UserAnswers)(implicit messages: Messages): CheckYourAnswersViewModel = {
       val helper = new CheckYourAnswersHelper(userAnswers, CheckMode)
@@ -33,13 +35,20 @@ object CheckYourAnswersViewModel {
         Section(
           Seq(
             helper.eoriNumber,
-            helper.guaranteeReferenceNumber,
+            guaranteeReferenceNumber(helper),
             helper.accessCode
           ).flatten
         )
       )
     }
+  }
 
+  class CheckYourAnswersViewModelProviderV1 extends CheckYourAnswersViewModelProvider {
+    override val guaranteeReferenceNumber: CheckYourAnswersHelper => Option[SummaryListRow] = _.guaranteeReferenceNumber
+  }
+
+  class CheckYourAnswersViewModelProviderV2 extends CheckYourAnswersViewModelProvider {
+    override val guaranteeReferenceNumber: CheckYourAnswersHelper => Option[SummaryListRow] = _.guaranteeReferenceNumberV2
   }
 
 }
