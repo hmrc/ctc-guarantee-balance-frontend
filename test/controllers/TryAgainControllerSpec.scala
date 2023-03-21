@@ -24,6 +24,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
 import org.scalacheck.Arbitrary.arbitrary
 import pages.BalanceIdPage
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpResponse}
@@ -33,6 +34,9 @@ import java.util.UUID
 import scala.concurrent.Future
 
 class TryAgainControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
+
+  override protected def applicationBuilder(): GuiceApplicationBuilder =
+    super.v1ApplicationBuilder()
 
   private val expectedUuid: UUID   = arbitrary[UUID].sample.value
   private val balanceId: BalanceId = BalanceId(expectedUuid)

@@ -23,12 +23,17 @@ import org.mockito.Mockito.verify
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{BalancePage, EoriNumberPage}
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import views.html.BalanceConfirmationView
 
 class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with AppWithDefaultMockFixtures {
+
+  override protected def applicationBuilder(): GuiceApplicationBuilder =
+    super
+      .v1ApplicationBuilder()
 
   "BalanceConfirmation Controller" - {
 

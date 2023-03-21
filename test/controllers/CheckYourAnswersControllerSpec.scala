@@ -37,17 +37,17 @@ import scala.concurrent.Future
 
 class CheckYourAnswersControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
+  override protected def applicationBuilder(): GuiceApplicationBuilder =
+    super
+      .v1ApplicationBuilder()
+      .overrides(bind[CheckYourAnswersViewModelProviderV1].toInstance(mockViewModelProvider))
+
   private val baseAnswers: UserAnswers = emptyUserAnswers
     .setValue(GuaranteeReferenceNumberPage, Gen.alphaNumStr.sample.value)
     .setValue(AccessCodePage, Gen.alphaNumStr.sample.value)
     .setValue(EoriNumberPage, Gen.alphaNumStr.sample.value)
 
   private val mockViewModelProvider: CheckYourAnswersViewModelProviderV1 = mock[CheckYourAnswersViewModelProviderV1]
-
-  override protected def applicationBuilder(): GuiceApplicationBuilder =
-    super
-      .applicationBuilder()
-      .overrides(bind[CheckYourAnswersViewModelProviderV1].toInstance(mockViewModelProvider))
 
   private val section: Section = arbitrary[Section].sample.value
 
