@@ -160,8 +160,8 @@ detailsDontMatch.p1.a = check your answers and try again
 detailsDontMatch.p2 = If your details are correct, you must
 detailsDontMatch.p2.a = contact the NCTS helpdesk (opens in a new tab)
 
-detailsDontMatch.v2.title = The Guarantee Reference Number (GRN) and access code do match
-detailsDontMatch.v2.heading = The Guarantee Reference Number (GRN) and access code do match
+detailsDontMatch.v2.title = The Guarantee Reference Number (GRN) and access code do not match
+detailsDontMatch.v2.heading = The Guarantee Reference Number (GRN) and access code do not match
 detailsDontMatch.v2.p1 = Check your details and try again
 detailsDontMatch.v2.p2 = If your details are correct,
 detailsDontMatch.v2.p2.a = contact the NCTS helpdesk (opens in a new tab)
