@@ -541,7 +541,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
 
     "submitBalanceRequestV2" - {
 
-      "must return balance success response for Ok" in {
+      "must return balance success response for Ok no currency" in {
         val balanceRequestSuccessResponseJson: String =
           """
             | {
@@ -557,6 +557,28 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
         )
 
         val expectedResponse = BalanceRequestSuccess(BigDecimal(3.14), None)
+
+        val result = connector.submitBalanceRequestV2(requestV2, grn.value).futureValue
+        result mustBe Right(expectedResponse)
+      }
+
+      "must return balance success response for Ok with a currency" in {
+        val balanceRequestSuccessResponseJson: String =
+          """
+            | {
+            |   "balance": 3.14,
+            |   "currency": "GBP"
+            | }
+            |""".stripMargin
+
+        server.stubFor(
+          post(urlEqualTo(submitBalanceRequestV2Url(grn.value)))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
+            .withRequestBody(equalToJson(requestV2AsJsonString))
+            .willReturn(okJson(balanceRequestSuccessResponseJson))
+        )
+
+        val expectedResponse = BalanceRequestSuccess(BigDecimal(3.14), Some(CurrencyCode("GBP")))
 
         val result = connector.submitBalanceRequestV2(requestV2, grn.value).futureValue
         result mustBe Right(expectedResponse)
