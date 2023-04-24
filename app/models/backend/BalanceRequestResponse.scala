@@ -35,7 +35,7 @@ case class BalanceRequestSuccess(
   def formatForDisplay: String =
     try {
       val formatter = NumberFormat.getCurrencyInstance(Locale.UK)
-      if (currency.isDefined) {
+      if (currency.nonEmpty) {
         formatter.setCurrency(Currency.getInstance(currency.get.value))
       }
       formatter.format(balance)
