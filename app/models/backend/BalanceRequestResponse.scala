@@ -32,23 +32,19 @@ case class BalanceRequestSuccess(
   currency: Option[CurrencyCode]
 ) extends BalanceRequestResponse {
 
-  private def roundUp(balance: BigDecimal): BigDecimal = balance.setScale(2, BigDecimal.RoundingMode.UP)
-
-  def formatForDisplay: String = {
-    val currencyCode: String = currency.map(_.value).getOrElse("")
-
+  def formatForDisplay: String =
     try {
       val formatter = NumberFormat.getCurrencyInstance(Locale.UK)
-      formatter.setCurrency(Currency.getInstance(currencyCode))
+      if (currency.isDefined) {
+        formatter.setCurrency(Currency.getInstance(currency.get.value))
+      }
       formatter.format(balance)
     } catch {
       case _: Exception =>
-        // TODO = round up here?
-        currency.fold(s"$currencyCode${roundUp(balance)}")(
-          _ => s"$currencyCode$balance"
+        currency.fold(s"$balance")(
+          x => s"${x.value}$balance"
         )
     }
-  }
 }
 
 case class BalanceRequestPending(balanceId: BalanceId) extends BalanceRequestResponse
