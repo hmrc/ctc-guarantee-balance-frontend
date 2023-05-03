@@ -31,6 +31,16 @@ class BalanceRequestResponseSpec extends SpecBase {
 
       "must display currencies correctly for different currency codes" - {
 
+        "when not present defaults to pounds sterling" - {
+
+          val currency: Option[CurrencyCode] = None
+
+          "when balance of 10" in {
+            val balance = BalanceRequestSuccess(10, currency)
+            balance.formatForDisplay mustEqual "£10.00"
+          }
+        }
+
         "when pounds sterling" - {
 
           val currency: Option[CurrencyCode] = Some(CurrencyCode("GBP"))

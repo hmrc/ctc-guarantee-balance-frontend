@@ -32,18 +32,19 @@ case class BalanceRequestSuccess(
   currency: Option[CurrencyCode]
 ) extends BalanceRequestResponse {
 
-  def formatForDisplay: String = {
-    val currencyCode: String = currency.map(_.value).getOrElse("")
-
+  def formatForDisplay: String =
     try {
       val formatter = NumberFormat.getCurrencyInstance(Locale.UK)
-      formatter.setCurrency(Currency.getInstance(currencyCode))
+      if (currency.nonEmpty) {
+        formatter.setCurrency(Currency.getInstance(currency.get.value))
+      }
       formatter.format(balance)
     } catch {
       case _: Exception =>
-        s"$currencyCode$balance"
+        currency.fold(s"$balance")(
+          x => s"${x.value}$balance"
+        )
     }
-  }
 }
 
 case class BalanceRequestPending(balanceId: BalanceId) extends BalanceRequestResponse

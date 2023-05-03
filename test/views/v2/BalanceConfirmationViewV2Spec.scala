@@ -40,7 +40,7 @@ class BalanceConfirmationViewV2Spec extends PanelViewBehaviours {
 
   behave like pageWithHeading()
 
-  behave like pageWithPanel(s"$balance This balance is in the same currency selected for the liability amount.")
+  behave like pageWithPanel(s"$balance")
 
   "when NCTS referral" - {
     val view = injector.instanceOf[BalanceConfirmationViewV2].apply(balance, Some(NCTS.toString))(fakeRequest, messages)

@@ -151,7 +151,6 @@ balanceConfirmation.v2.fromGovUk.link = Check another guarantee balance
 balanceConfirmation.v2.fromNcts.p = You can:
 balanceConfirmation.v2.fromNcts.link1 = Check another guarantee balance
 balanceConfirmation.v2.fromNcts.link2 = Manage your transit movements
-balanceConfirmation.v2.currency.p = This balance is in the same currency selected for the liability amount.
 
 detailsDontMatch.title = Your details do not match our records
 detailsDontMatch.heading = Your details do not match our records
