@@ -62,8 +62,7 @@
 @hmrcLayout(
     pageTitle = Some(breadCrumbTitle(title, mainContent)),
     additionalHeadBlock = Some(hmrcInternalHead(
-        headBlock = Some(headScripts),
-        nonce = CSPNonce.get
+        headBlock = Some(headScripts)
     )),
     userResearchBannerUrl = if (appConfig.showUserResearchBanner) Some(appConfig.userResearchUrl) else None,
     serviceName = Some(messages("site.service_name")),
@@ -71,6 +70,5 @@
     signOutUrl = if (canSignOut) Some(appConfig.signOutUrl) else None,
     phaseBanner = Some(standardBetaBanner(url = appConfig.feedbackUrl)),
     backLinkUrl = if (showBackLink) Some("#") else None, // This is overridden in ctc.js
-    nonce = CSPNonce.get,
     additionalScriptsBlock = Some(javascripts())
 )(mainContentWithGetHelp)
