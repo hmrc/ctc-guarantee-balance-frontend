@@ -20,6 +20,7 @@ import base.SpecBase
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import org.scalatest.Assertion
+import play.twirl.api.TwirlHelperImports._
 import play.twirl.api.HtmlFormat
 import play.twirl.api.TwirlHelperImports._
 import views.viewBase.ViewSpecAssertions
