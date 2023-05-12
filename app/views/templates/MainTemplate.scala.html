@@ -20,6 +20,7 @@
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.timeoutdialog.TimeoutDialog
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.footer.{Footer, FooterItem, Meta}
 @import resources._
+@import views.html.components.UserResearchBanner
 @import views.utils.ViewUtils._
 
 @this(
@@ -31,7 +32,8 @@
     stylesheets: Stylesheets,
     javascripts: Javascripts,
     govukBackLink: GovukBackLink,
-    hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper
+    hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
+    userResearchBanner: UserResearchBanner
 )
 
 @(
@@ -64,7 +66,7 @@
     additionalHeadBlock = Some(hmrcInternalHead(
         headBlock = Some(headScripts)
     )),
-    userResearchBannerUrl = if (appConfig.showUserResearchBanner) Some(appConfig.userResearchUrl) else None,
+    additionalBannersBlock = if (appConfig.showUserResearchBanner) Some(userResearchBanner()) else None,
     serviceName = Some(messages("site.service_name")),
     serviceUrl = Some(routes.StartController.startAgain().url),
     signOutUrl = if (canSignOut) Some(appConfig.signOutUrl) else None,
