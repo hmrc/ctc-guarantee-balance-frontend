@@ -16,7 +16,7 @@ site.service_name = Check your transit guarantee balance
 site.section = This section is
 
 site.userResearch.h2 = NCTS Phase 5 coming soon. Help us improve it
-site.userResearch.yes = Sign up to our user research and we’ll pay you for your feedback (opens in new tab)
+site.userResearch.yes = Sign up to our user research and give us your feedback (opens in new tab)
 site.userResearch.no = No thanks
 site.userResearch.no.hidden = No thanks. I do not want to take part in research
 
