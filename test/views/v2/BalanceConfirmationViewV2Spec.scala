@@ -16,8 +16,8 @@
 
 package views.v2
 
-import models.Referral
 import models.Referral._
+import models.{Referral, Timestamp}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import play.twirl.api.HtmlFormat
@@ -26,11 +26,12 @@ import views.html.v2.BalanceConfirmationViewV2
 
 class BalanceConfirmationViewV2Spec extends PanelViewBehaviours {
 
-  private val balance  = Gen.numStr.sample.value
-  private val referral = arbitrary[Option[Referral]].sample.value.map(_.toString)
+  private val balance   = Gen.numStr.sample.value
+  private val timestamp = arbitrary[Timestamp].sample.value
+  private val referral  = arbitrary[Option[Referral]].sample.value.map(_.toString)
 
   override def view: HtmlFormat.Appendable =
-    injector.instanceOf[BalanceConfirmationViewV2].apply(balance, referral)(fakeRequest, messages)
+    injector.instanceOf[BalanceConfirmationViewV2].apply(balance, timestamp, referral)(fakeRequest, messages)
 
   override val prefix: String = "balanceConfirmation.v2"
 
@@ -40,13 +41,14 @@ class BalanceConfirmationViewV2Spec extends PanelViewBehaviours {
 
   behave like pageWithHeading()
 
-  behave like pageWithPanel(s"$balance")
+  behave like pageWithPanel(s"$balance as of ${timestamp.date} at ${timestamp.time}")
+
+  behave like pageWithContent(doc, "p", "This is your guarantee limit minus the liability amounts for your open movements.")
 
   "when NCTS referral" - {
-    val view = injector.instanceOf[BalanceConfirmationViewV2].apply(balance, Some(NCTS.toString))(fakeRequest, messages)
+    val view = injector.instanceOf[BalanceConfirmationViewV2].apply(balance, timestamp, Some(NCTS.toString))(fakeRequest, messages)
     val doc  = parseView(view)
 
-    behave like pageWithContent(doc, "p", "You can:")
     behave like pageWithLinkedList(
       doc,
       "govuk-list--bullet",
@@ -65,10 +67,9 @@ class BalanceConfirmationViewV2Spec extends PanelViewBehaviours {
 
   "when GovUK or no referral" - {
     val referral = Gen.oneOf(Some(GovUK.toString), None).sample.value
-    val view     = injector.instanceOf[BalanceConfirmationViewV2].apply(balance, referral)(fakeRequest, messages)
+    val view     = injector.instanceOf[BalanceConfirmationViewV2].apply(balance, timestamp, referral)(fakeRequest, messages)
     val doc      = parseView(view)
 
-    behave like pageWithPartialContent(doc, "p", "You can")
     behave like pageWithLink(
       doc,
       "check-another-guarantee-balance",

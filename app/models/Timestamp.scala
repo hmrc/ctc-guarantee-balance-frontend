@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package services
-
-import models.Timestamp
+package models
 
 import java.time.{Clock, Instant}
-import javax.inject.Inject
+import java.time.format.DateTimeFormatter
 
-class DateTimeService @Inject() (clock: Clock) {
+case class Timestamp(date: String, time: String)
 
-  def now: Instant = Instant.now(clock)
+object Timestamp {
 
-  def timestamp: Timestamp = Timestamp(now)(clock)
+  def apply(instant: Instant)(implicit clock: Clock): Timestamp = {
+    val dateFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy").withZone(clock.getZone)
+    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm").withZone(clock.getZone)
+    new Timestamp(dateFormatter.format(instant), timeFormatter.format(instant))
+  }
 }

@@ -23,7 +23,7 @@ import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import repositories.SessionRepository
-import services.ReferralService
+import services.{DateTimeService, ReferralService}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.ViewProvider
 
@@ -38,7 +38,8 @@ class BalanceConfirmationController @Inject() (
   val controllerComponents: MessagesControllerComponents,
   appConfig: FrontendAppConfig,
   referralService: ReferralService,
-  view: ViewProvider
+  view: ViewProvider,
+  dateTimeService: DateTimeService
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -46,7 +47,13 @@ class BalanceConfirmationController @Inject() (
 
   def onPageLoad: Action[AnyContent] = actions.requireData.andThen(getMandatoryPage(BalancePage)) {
     implicit request =>
-      Ok(view.balanceConfirmationView(balance = request.arg, referral = referralService.getReferralFromSession))
+      Ok(
+        view.balanceConfirmationView(
+          balance = request.arg,
+          timestamp = dateTimeService.timestamp,
+          referral = referralService.getReferralFromSession
+        )
+      )
   }
 
   def checkAnotherGuaranteeBalance: Action[AnyContent] =

@@ -16,6 +16,7 @@
 
 @import controllers.routes
 @import models.Referral._
+@import models.Timestamp
 @import viewModels.components.InputTextViewModel._
 
 @this(
@@ -24,7 +25,16 @@
     govukPanel: GovukPanel
 )
 
-@(balance: String, referral: Option[String])(implicit request: Request[_], messages: Messages)
+@(balance: String, timestamp: Timestamp, referral: Option[String])(implicit request: Request[_], messages: Messages)
+
+@panelContent = {
+    <strong>@balance</strong>
+    <br>
+    <br>
+    @messages("balanceConfirmation.v2.timestamp.1")
+    <br>
+    @messages("balanceConfirmation.v2.timestamp.2", timestamp.date, timestamp.time)
+}
 
 @mainTemplate(
     title = messages("balanceConfirmation.v2.title")
@@ -32,22 +42,16 @@
 
     @govukPanel(Panel(
         title = Text(messages("balanceConfirmation.v2.heading")),
-        content = HtmlContent(s"""<strong>${balance}</strong>"""),
+        content = HtmlContent(panelContent),
         classes = "break-all"
     ))
 
-    @referral match {
-        case Some(NCTS.toString) => {
-            <p class="govuk-body">@messages("balanceConfirmation.v2.fromNcts.p")</p>
-            <ul class="govuk-list govuk-list--bullet">
-                <li><a class="govuk-link" href=@routes.BalanceConfirmationController.checkAnotherGuaranteeBalance() id="check-another-guarantee-balance">@messages("balanceConfirmation.v2.fromNcts.link1")</a></li>
-                <li><a class="govuk-link" href=@routes.BalanceConfirmationController.manageTransitMovements() id="manage-transit-movements">@messages("balanceConfirmation.v2.fromNcts.link2")</a></li>
-            </ul>
+    <p class="govuk-body">@messages("balanceConfirmation.v2.p")</p>
+
+    <ul class="govuk-list govuk-list--bullet">
+        <li><a class="govuk-link" href=@routes.BalanceConfirmationController.checkAnotherGuaranteeBalance() id="check-another-guarantee-balance">@messages("balanceConfirmation.v2.link1")</a></li>
+        @if(referral.contains(NCTS.toString)) {
+            <li><a class="govuk-link" href=@routes.BalanceConfirmationController.manageTransitMovements() id="manage-transit-movements">@messages("balanceConfirmation.v2.link2")</a></li>
         }
-        case _ => {
-            <p class="govuk-body">@messages("balanceConfirmation.v2.fromGovUk.p")
-                <a class="govuk-link" href=@routes.BalanceConfirmationController.checkAnotherGuaranteeBalance() id="check-another-guarantee-balance">@messages("balanceConfirmation.v2.fromGovUk.link")</a>.
-            </p>
-        }
-    }
+    </ul>
 }
