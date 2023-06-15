@@ -48,10 +48,11 @@
 
     <p class="govuk-body">@messages("balanceConfirmation.v2.p")</p>
 
-    <ul class="govuk-list govuk-list--bullet">
-        <li><a class="govuk-link" href=@routes.BalanceConfirmationController.checkAnotherGuaranteeBalance() id="check-another-guarantee-balance">@messages("balanceConfirmation.v2.link1")</a></li>
-        @if(referral.contains(NCTS.toString)) {
-            <li><a class="govuk-link" href=@routes.BalanceConfirmationController.manageTransitMovements() id="manage-transit-movements">@messages("balanceConfirmation.v2.link2")</a></li>
-        }
-    </ul>
+    <p class="govuk-body">
+        <a class="govuk-link" href=@routes.BalanceConfirmationController.checkAnotherGuaranteeBalance() id="check-another-guarantee-balance">@messages("balanceConfirmation.v2.link1")</a>
+    </p>
+
+    <p class="govuk-body">
+        <a class="govuk-link" href=@routes.BalanceConfirmationController.manageTransitMovements() id="manage-transit-movements">@messages("balanceConfirmation.v2.link2")</a>
+    </p>
 }

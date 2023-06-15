@@ -49,19 +49,18 @@ class BalanceConfirmationViewV2Spec extends PanelViewBehaviours {
     val view = injector.instanceOf[BalanceConfirmationViewV2].apply(balance, timestamp, Some(NCTS.toString))(fakeRequest, messages)
     val doc  = parseView(view)
 
-    behave like pageWithLinkedList(
+    behave like pageWithLink(
       doc,
-      "govuk-list--bullet",
-      (
-        "check-another-guarantee-balance",
-        "Check another guarantee balance",
-        controllers.routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
-      ),
-      (
-        "manage-transit-movements",
-        "Manage your transit movements",
-        controllers.routes.BalanceConfirmationController.manageTransitMovements().url
-      )
+      "check-another-guarantee-balance",
+      "Check another guarantee balance",
+      controllers.routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
+    )
+
+    behave like pageWithLink(
+      doc,
+      "manage-transit-movements",
+      "Manage your transit movements",
+      controllers.routes.BalanceConfirmationController.manageTransitMovements().url
     )
   }
 

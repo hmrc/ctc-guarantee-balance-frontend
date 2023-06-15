@@ -25,5 +25,5 @@ class DateTimeService @Inject() (clock: Clock) {
 
   def now: Instant = Instant.now(clock)
 
-  def timestamp: Timestamp = Timestamp(now)(clock)
+  def timestamp: Timestamp = Timestamp(now)(Clock.systemDefaultZone())
 }
