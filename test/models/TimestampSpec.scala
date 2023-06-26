@@ -14,16 +14,23 @@
  * limitations under the License.
  */
 
-package services
+package models
 
-import models.Timestamp
+import base.SpecBase
 
 import java.time.{Clock, Instant}
-import javax.inject.Inject
 
-class DateTimeService @Inject() (clock: Clock) {
+class TimestampSpec extends SpecBase {
 
-  def now: Instant = Instant.now(clock)
+  implicit private val clock: Clock = injector.instanceOf[Clock]
 
-  def timestamp: Timestamp = Timestamp(now)(Clock.systemDefaultZone())
+  "apply" - {
+    "must convert instant to timestamp with formatted date and time" in {
+      val instant   = Instant.ofEpochSecond(1686834570: Long)
+      val timestamp = Timestamp(instant)
+      timestamp.date mustBe "15 June 2023"
+      timestamp.time mustBe "13:09"
+    }
+  }
+
 }

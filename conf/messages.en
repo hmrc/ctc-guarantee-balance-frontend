@@ -150,12 +150,12 @@ balanceConfirmation.fromNcts.link1 = check another guarantee balance
 balanceConfirmation.fromNcts.link2 = manage your transit movements
 
 balanceConfirmation.v2.title = Your balance
-balanceConfirmation.v2.heading = Your balance is
-balanceConfirmation.v2.fromGovUk.p = You can
-balanceConfirmation.v2.fromGovUk.link = Check another guarantee balance
-balanceConfirmation.v2.fromNcts.p = You can:
-balanceConfirmation.v2.fromNcts.link1 = Check another guarantee balance
-balanceConfirmation.v2.fromNcts.link2 = Manage your transit movements
+balanceConfirmation.v2.heading = Available balance
+balanceConfirmation.v2.p = This is your guarantee limit minus the liability amounts for your open movements.
+balanceConfirmation.v2.link1 = Check another guarantee balance
+balanceConfirmation.v2.link2 = Manage your transit movements
+balanceConfirmation.v2.timestamp.1 = as of
+balanceConfirmation.v2.timestamp.2 = {0} at {1}
 
 detailsDontMatch.title = Your details do not match our records
 detailsDontMatch.heading = Your details do not match our records

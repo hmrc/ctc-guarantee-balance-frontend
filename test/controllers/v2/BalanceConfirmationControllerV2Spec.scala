@@ -18,22 +18,33 @@ package controllers.v2
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import controllers.routes
-import models.{Referral, UserAnswers}
+import models.{Referral, Timestamp, UserAnswers}
 import org.mockito.ArgumentCaptor
-import org.mockito.Mockito.verify
+import org.mockito.Mockito.{reset, verify, when}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.mockito.MockitoSugar
 import pages.{BalancePage, EoriNumberPage}
+import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import services.DateTimeService
 import views.html.v2.BalanceConfirmationViewV2
 
 class BalanceConfirmationControllerV2Spec extends SpecBase with MockitoSugar with AppWithDefaultMockFixtures {
 
+  private val mockDateTimeService: DateTimeService = mock[DateTimeService]
+
   override protected def applicationBuilder(): GuiceApplicationBuilder =
-    super.v2ApplicationBuilder()
+    super
+      .v2ApplicationBuilder()
+      .overrides(bind[DateTimeService].toInstance(mockDateTimeService))
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockDateTimeService)
+  }
 
   "BalanceConfirmation Controller" - {
 
@@ -46,9 +57,11 @@ class BalanceConfirmationControllerV2Spec extends SpecBase with MockitoSugar wit
 
           "when session has referral value" in {
 
-            forAll(arbitrary[Referral]) {
-              referral =>
+            forAll(arbitrary[Timestamp], arbitrary[Referral]) {
+              (timestamp, referral) =>
                 beforeEach()
+
+                when(mockDateTimeService.timestamp).thenReturn(timestamp)
 
                 val userAnswers = emptyUserAnswers.setValue(BalancePage, balance)
                 setExistingUserAnswers(userAnswers)
@@ -61,24 +74,32 @@ class BalanceConfirmationControllerV2Spec extends SpecBase with MockitoSugar wit
                 status(result) mustEqual OK
 
                 contentAsString(result) mustEqual
-                  view(balance, Some(referral.toString))(request, messages).toString
+                  view(balance, timestamp, Some(referral.toString))(request, messages).toString
+
+                verify(mockDateTimeService).timestamp
             }
           }
 
           "when session does not have referral value" in {
+            forAll(arbitrary[Timestamp]) {
+              timestamp =>
+                beforeEach()
 
-            val userAnswers = emptyUserAnswers.setValue(BalancePage, balance)
+                when(mockDateTimeService.timestamp).thenReturn(timestamp)
 
-            setExistingUserAnswers(userAnswers)
+                val userAnswers = emptyUserAnswers.setValue(BalancePage, balance)
 
-            val request = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
-            val view    = injector.instanceOf[BalanceConfirmationViewV2]
-            val result  = route(app, request).value
+                setExistingUserAnswers(userAnswers)
 
-            status(result) mustEqual OK
+                val request = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
+                val view    = injector.instanceOf[BalanceConfirmationViewV2]
+                val result  = route(app, request).value
 
-            contentAsString(result) mustEqual
-              view(balance, None)(request, messages).toString
+                status(result) mustEqual OK
+
+                contentAsString(result) mustEqual
+                  view(balance, timestamp, None)(request, messages).toString
+            }
           }
         }
       }
