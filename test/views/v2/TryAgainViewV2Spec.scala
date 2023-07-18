@@ -38,14 +38,13 @@ class TryAgainViewV2Spec extends ViewBehaviours {
 
   behave like pageWithHeading()
 
+  behave like pageWithPartialContent("p", s"Wait for 60 seconds - then")
+
   behave like pageWithLink(
     "check-details",
-    "Check your details are correct",
+    "check your details are correct and try again",
     controllers.routes.CheckYourAnswersController.onPageLoad().url
   )
-  behave like pageWithPartialContent("p", s"and try again in ${frontendAppConfig.rateLimitDuration} seconds.")
-
-  behave like pageWithSubmitButton("Try again")
 
   "when balance ID is defined" - {
     val balanceId = arbitrary[BalanceId].sample.value.value
