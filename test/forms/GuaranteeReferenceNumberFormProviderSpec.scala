@@ -25,9 +25,11 @@ class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
   "v1" - {
 
     val maxLength = maxGuaranteeReferenceNumberLength
+    val minLength = minGuaranteeReferenceNumberLength
 
     val requiredKey  = "guaranteeReferenceNumber.error.required"
     val maxLengthKey = "guaranteeReferenceNumber.error.length"
+    val minLengthKey = "guaranteeReferenceNumber.error.length"
     val invalidKey   = "guaranteeReferenceNumber.error.invalid"
 
     val form = new V1GuaranteeReferenceNumberFormProvider()()
@@ -75,9 +77,11 @@ class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
   "v2" - {
 
     val maxLength = maxGuaranteeReferenceNumberLengthV2
+    val minLength = minGuaranteeReferenceNumberLengthV2
 
     val requiredKey  = "guaranteeReferenceNumber.v2.error.required"
     val maxLengthKey = "guaranteeReferenceNumber.v2.error.length"
+    val minLengthKey = "guaranteeReferenceNumber.v2.error.length"
     val invalidKey   = "guaranteeReferenceNumber.v2.error.invalid"
 
     val form = new V2GuaranteeReferenceNumberFormProvider()()
@@ -99,6 +103,13 @@ class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
         lengthError = FormError(fieldName, maxLengthKey, Seq(maxLength))
       )
 
+      behave like fieldWithMinLength(
+        form = form,
+        fieldName = fieldName,
+        minLength = minLength,
+        lengthError = FormError(fieldName, minLengthKey, Seq(minLength))
+      )
+
       behave like mandatoryField(
         form = form,
         fieldName = fieldName,
@@ -114,9 +125,9 @@ class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
       )
 
       "must remove spaces on bound strings" in {
-        val result = form.bind(Map(fieldName -> " 123 456 "))
+        val result = form.bind(Map(fieldName -> " 01GB1234567 890120 "))
         result.errors mustEqual Nil
-        result.get mustEqual "123456"
+        result.get mustEqual "01GB1234567890120"
       }
 
     }

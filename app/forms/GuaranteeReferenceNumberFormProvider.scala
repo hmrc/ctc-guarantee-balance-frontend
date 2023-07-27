@@ -25,6 +25,7 @@ sealed trait GuaranteeReferenceNumberFormProvider extends Mappings {
   val prefix: String
 
   val maxGuaranteeReferenceNumberLength: Int
+  val minGuaranteeReferenceNumberLength: Int
 
   def apply(): Form[String] =
     Form(
@@ -32,6 +33,7 @@ sealed trait GuaranteeReferenceNumberFormProvider extends Mappings {
         .verifying(
           forms.StopOnFirstFail[String](
             maxLength(maxGuaranteeReferenceNumberLength, s"$prefix.error.length"),
+            minLength(minGuaranteeReferenceNumberLength, s"$prefix.error.length"),
             regexp(alphaNumericRegex, s"$prefix.error.invalid")
           )
         )
@@ -41,13 +43,13 @@ sealed trait GuaranteeReferenceNumberFormProvider extends Mappings {
 class V1GuaranteeReferenceNumberFormProvider extends GuaranteeReferenceNumberFormProvider {
 
   override val maxGuaranteeReferenceNumberLength: Int = Constants.maxGuaranteeReferenceNumberLength
-
-  override val prefix: String = "guaranteeReferenceNumber"
+  override val minGuaranteeReferenceNumberLength: Int = Constants.minGuaranteeReferenceNumberLength
+  override val prefix: String                         = "guaranteeReferenceNumber"
 }
 
 class V2GuaranteeReferenceNumberFormProvider extends GuaranteeReferenceNumberFormProvider {
 
   override val maxGuaranteeReferenceNumberLength: Int = Constants.maxGuaranteeReferenceNumberLengthV2
-
-  override val prefix: String = "guaranteeReferenceNumber.v2"
+  override val minGuaranteeReferenceNumberLength: Int = Constants.minGuaranteeReferenceNumberLengthV2
+  override val prefix: String                         = "guaranteeReferenceNumber.v2"
 }
