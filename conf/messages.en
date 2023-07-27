@@ -69,8 +69,8 @@ tryAgain.checkDetails.postlink = or you can try again in {0} seconds.
 
 tryAgain.v2.title = We could not check your guarantee balance
 tryAgain.v2.heading = We could not check your guarantee balance
-tryAgain.v2.checkDetails.link = Check your details are correct
-tryAgain.v2.checkDetails.postlink = and try again in {0} seconds.
+tryAgain.v2.checkDetails.prelink = Wait for 60 seconds - then
+tryAgain.v2.checkDetails.link = check your details are correct and try again
 tryAgain.v2.caption = Guarantee balance
 tryAgain.v2.problems = If your details are correct and you keep having problems,
 tryAgain.v2.problems.link = contact the NCTS helpdesk (opens in a new tab)
