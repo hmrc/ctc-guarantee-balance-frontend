@@ -26,7 +26,7 @@ import views.html.v2.BalanceConfirmationViewV2
 
 class BalanceConfirmationViewV2Spec extends PanelViewBehaviours {
 
-  private val balance   = Gen.numStr.sample.value
+  private val balance   = nonEmptyString.sample.value
   private val timestamp = arbitrary[Timestamp].sample.value
   private val referral  = arbitrary[Option[Referral]].sample.value.map(_.toString)
 
