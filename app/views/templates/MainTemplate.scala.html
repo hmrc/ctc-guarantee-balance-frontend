@@ -63,9 +63,7 @@
 
 @hmrcLayout(
     pageTitle = Some(breadCrumbTitle(title, mainContent)),
-    additionalHeadBlock = Some(hmrcInternalHead(
-        headBlock = Some(headScripts)
-    )),
+    additionalHeadBlock = Some(headScripts),
     additionalBannersBlock = if (appConfig.showUserResearchBanner) Some(userResearchBanner()) else None,
     serviceName = Some(messages("site.service_name")),
     serviceUrl = Some(routes.StartController.startAgain().url),
