@@ -75,6 +75,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
     )
   }
 
+  // scalastyle:off cyclomatic.complexity
   def submitBalanceRequestV2(request: BalanceRequestV2, grn: String)(implicit
     hc: HeaderCarrier
   ): Future[Either[HttpResponse, BalanceRequestResponse]] = {
@@ -91,11 +92,13 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
               Right(BalanceRequestRateLimit)
             case Status.BAD_REQUEST =>
               logger.warn(s"[GuaranteeBalanceConnector][submitBalanceRequestV2] BAD_REQUEST response: ${response.body}")
-
-              if (response.body.toLowerCase.contains("the guarantee reference number is not in the correct format")) {
-                Right(BalanceRequestNotMatched(response.body))
-              } else {
-                Left(response)
+              response.json.as[BadRequestResponse] match {
+                case BadRequestResponse("INVALID_GUARANTEE_TYPE", _) =>
+                  Right(BalanceRequestUnsupportedGuaranteeType)
+                case BadRequestResponse(_, message) if message.toLowerCase.contains("the guarantee reference number is not in the correct format") =>
+                  Right(BalanceRequestNotMatched(response.body))
+                case _ =>
+                  Left(response)
               }
             case Status.NOT_FOUND =>
               logger.info(s"[GuaranteeBalanceConnector][submitBalanceRequestV2] NOT_FOUND response: ${response.body}")
@@ -112,6 +115,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
       headersV2
     )
   }
+  // scalastyle:on cyclomatic.complexity
 
   def queryPendingBalance(balanceId: BalanceId)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] = {
     val url = s"${appConfig.guaranteeBalanceUrl}/balances/${balanceId.value}"

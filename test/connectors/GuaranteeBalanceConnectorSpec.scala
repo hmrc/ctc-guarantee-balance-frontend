@@ -635,7 +635,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
       }
 
       "must return non matched when we have an http response BAD_REQUEST with invalid GRN" in {
-        val notFoundJson: String =
+        val badRequestJson: String =
           """
             | {
             |   "code": "BAD_REQUEST",
@@ -649,21 +649,47 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
             .withRequestBody(equalToJson(requestV2AsJsonString))
             .willReturn(
               aResponse()
-                .withStatus(Status.NOT_FOUND)
+                .withStatus(Status.BAD_REQUEST)
                 .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
-                .withBody(notFoundJson)
+                .withBody(badRequestJson)
             )
         )
 
         val result = connector.submitBalanceRequestV2(requestV2, grn.value).futureValue
-        result mustBe Right(BalanceRequestNotMatched(notFoundJson))
+        result mustBe Right(BalanceRequestNotMatched(badRequestJson))
       }
 
-      "must return the HttpResponse when there is a BAD_REQUEST" in {
+      "must return BalanceRequestUnsupportedGuaranteeType when we have an http response BAD_REQUEST with invalid guarantee type" in {
+        val invalidGuaranteeTypeJson: String =
+          """
+            | {
+            |   "code": "INVALID_GUARANTEE_TYPE",
+            |   "message": "Guarantee type is not supported."
+            | }
+            |""".stripMargin
+
+        server.stubFor(
+          post(urlEqualTo(submitBalanceRequestV2Url(grn.value)))
+            .withHeader(HeaderNames.ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
+            .withRequestBody(equalToJson(requestV2AsJsonString))
+            .willReturn(
+              aResponse()
+                .withStatus(Status.BAD_REQUEST)
+                .withHeader(HeaderNames.CONTENT_TYPE, ContentTypes.JSON)
+                .withBody(invalidGuaranteeTypeJson)
+            )
+        )
+
+        val result = connector.submitBalanceRequestV2(requestV2, grn.value).futureValue
+        result mustBe Right(BalanceRequestUnsupportedGuaranteeType)
+      }
+
+      "must return the HttpResponse for any other 4xx" in {
         val errorResponses = Gen
           .chooseNum(400, 499)
-          .suchThat(_ != Status.TOO_MANY_REQUESTS)
+          .suchThat(_ != Status.BAD_REQUEST)
           .suchThat(_ != Status.NOT_FOUND)
+          .suchThat(_ != Status.TOO_MANY_REQUESTS)
 
         forAll(errorResponses) {
           errorResponse =>
@@ -685,7 +711,7 @@ class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler 
         }
       }
 
-      "must return the HttpResponse when there is an INTERNAL_SERVER_ERROR" in {
+      "must return the HttpResponse for a 5xx" in {
         val errorResponses = Gen.chooseNum(500, 599).suchThat(_ != Status.TOO_MANY_REQUESTS)
 
         forAll(errorResponses) {

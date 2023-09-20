@@ -25,11 +25,9 @@ class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
   "v1" - {
 
     val maxLength = maxGuaranteeReferenceNumberLength
-    val minLength = minGuaranteeReferenceNumberLength
 
     val requiredKey  = "guaranteeReferenceNumber.error.required"
     val maxLengthKey = "guaranteeReferenceNumber.error.length"
-    val minLengthKey = "guaranteeReferenceNumber.error.length"
     val invalidKey   = "guaranteeReferenceNumber.error.invalid"
 
     val form = new V1GuaranteeReferenceNumberFormProvider()()
