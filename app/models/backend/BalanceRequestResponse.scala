@@ -25,7 +25,7 @@ import play.api.libs.json.{Json, OFormat, Reads}
 import java.text.NumberFormat
 import java.util.{Currency, Locale}
 
-sealed abstract class BalanceRequestResponse
+sealed trait BalanceRequestResponse
 
 case class BalanceRequestSuccess(
   balance: BigDecimal,
@@ -47,10 +47,16 @@ case class BalanceRequestSuccess(
     }
 }
 
+case class BadRequestResponse(code: String, message: String)
+
+object BadRequestResponse {
+  implicit val format: OFormat[BadRequestResponse] = Json.format[BadRequestResponse]
+}
+
 case class BalanceRequestPending(balanceId: BalanceId) extends BalanceRequestResponse
 
 case class BalanceRequestNotMatched(errorPointer: String) extends BalanceRequestResponse
-object BalanceRequestUnsupportedGuaranteeType extends BalanceRequestResponse
+case object BalanceRequestUnsupportedGuaranteeType extends BalanceRequestResponse
 
 case class BalanceRequestPendingExpired(balanceId: BalanceId) extends BalanceRequestResponse
 
