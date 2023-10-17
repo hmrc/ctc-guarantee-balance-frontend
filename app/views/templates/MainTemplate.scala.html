@@ -16,16 +16,17 @@
 
 @import config.FrontendAppConfig
 @import uk.gov.hmrc.hmrcfrontend.views.config.StandardBetaBanner
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcLayout
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.timeoutdialog.TimeoutDialog
-@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.footer.{Footer, FooterItem, Meta}
 @import resources._
 @import views.html.components.UserResearchBanner
 @import views.utils.ViewUtils._
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcStandardPage
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage._
+@import uk.gov.hmrc.hmrcfrontend.config.ContactFrontendConfig
 
 @this(
     appConfig: FrontendAppConfig,
-    hmrcLayout: HmrcLayout,
+    hmrcStandardPage: HmrcStandardPage,
     hmrcInternalHead: HmrcInternalHead,
     hmrcTimeoutDialog: HmrcTimeoutDialog,
     standardBetaBanner: StandardBetaBanner,
@@ -34,7 +35,7 @@
     govukBackLink: GovukBackLink,
     hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
     userResearchBanner: UserResearchBanner
-)
+)(implicit cfConfig: ContactFrontendConfig)
 
 @(
     title: String,
@@ -61,14 +62,22 @@
     @hmrcReportTechnicalIssueHelper()
 }
 
-@hmrcLayout(
-    pageTitle = Some(breadCrumbTitle(title, mainContent)),
-    additionalHeadBlock = Some(headScripts),
-    additionalBannersBlock = if (appConfig.showUserResearchBanner) Some(userResearchBanner()) else None,
-    serviceName = Some(messages("site.service_name")),
-    serviceUrl = Some(routes.StartController.startAgain().url),
-    signOutUrl = if (canSignOut) Some(appConfig.signOutUrl) else None,
-    phaseBanner = Some(standardBetaBanner(url = appConfig.feedbackUrl)),
-    backLinkUrl = if (showBackLink) Some("#") else None, // This is overridden in ctc.js
-    additionalScriptsBlock = Some(javascripts())
+@hmrcStandardPage(
+    HmrcStandardPageParams(
+        serviceURLs = ServiceURLs(
+            serviceUrl = Some(routes.StartController.startAgain().url),
+            signOutUrl = if(canSignOut) Some(appConfig.signOutUrl) else None
+        ),
+        banners = Banners(
+            phaseBanner = Some(standardBetaBanner()),
+            userResearchBanner = if(appConfig.showUserResearchBanner) Some(UserResearchBanner(url = appConfig.userResearchUrl)) else None
+        ),
+        templateOverrides = TemplateOverrides(
+            additionalHeadBlock = Some(headScripts),
+            additionalScriptsBlock = Some(javascripts())
+        ),
+        pageTitle = Some(breadCrumbTitle(title, mainContent)),
+        serviceName = Some(messages("site.service_name")),
+        backLink = if(showBackLink) Some(BackLink.withDefaultText(href = "#")) else None, // This is overridden in ctc.js
+    )
 )(mainContentWithGetHelp)

@@ -18,8 +18,6 @@ package config
 
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
-import play.api.mvc.RequestHeader
-import uk.gov.hmrc.play.bootstrap.binders.SafeRedirectUrl
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
@@ -27,16 +25,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration, service: Servic
 
   lazy val appName: String = configuration.get[String]("appName")
 
-  lazy val contactHost: String = configuration.get[String]("contact-frontend.host")
-
-  val contactFormServiceIdentifier = "CTCTraders"
-
   val signOutUrl: String = configuration.get[String]("urls.logoutContinue") + configuration.get[String]("urls.feedback")
-
-  private val host: String = configuration.get[String]("host")
-
-  def feedbackUrl(implicit request: RequestHeader): String =
-    s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=${SafeRedirectUrl(host + request.uri).encodedUrl}"
 
   val showPhaseBanner: Boolean        = configuration.get[Boolean]("banners.showPhase")
   val userResearchUrl: String         = configuration.get[String]("urls.userResearch")
