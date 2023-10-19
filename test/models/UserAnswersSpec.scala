@@ -16,14 +16,15 @@
 
 package models
 
-import base.SpecBase
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import org.scalacheck.Arbitrary.arbitrary
 import pages.QuestionPage
-import play.api.libs.json.{JsObject, JsPath, JsString, Json}
+import play.api.libs.json._
+import play.api.test.Helpers.running
 
 import java.time.Instant
 
-class UserAnswersSpec extends SpecBase {
+class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   "UserAnswers" - {
 
@@ -82,6 +83,81 @@ class UserAnswersSpec extends SpecBase {
 
         forAll(arbitrary[UserAnswers]) {
           _.clear.data mustEqual Json.obj()
+        }
+      }
+    }
+
+    "formats" - {
+
+      val userAnswers = UserAnswers(
+        id = userAnswersId,
+        data = Json.obj(),
+        lastUpdated = Instant.ofEpochMilli(1662546803472L)
+      )
+
+      "when encryption enabled" - {
+        val app = applicationBuilder()
+          .configure("encryption.enabled" -> true)
+          .build()
+
+        running(app) {
+          val sensitiveFormats                     = app.injector.instanceOf[SensitiveFormats]
+          implicit val format: Format[UserAnswers] = UserAnswers.format(sensitiveFormats)
+
+          val json: JsValue = Json.parse(s"""
+               |{
+               |  "_id" : "$userAnswersId",
+               |  "data" : "T+FWrvLPJMKyRZ1aoW8rdZmETyL89CdpWxaog0joG6B/hxCF",
+               |  "lastUpdated" : {
+               |    "$$date" : {
+               |      "$$numberLong" : "1662546803472"
+               |    }
+               |  }
+               |}
+               |""".stripMargin)
+
+          "read correctly" in {
+            val result = json.as[UserAnswers]
+            result mustBe userAnswers
+          }
+
+          "write and read correctly" in {
+            val result = Json.toJson(userAnswers).as[UserAnswers]
+            result mustBe userAnswers
+          }
+        }
+      }
+
+      "when encryption disabled" - {
+        val app = applicationBuilder()
+          .configure("encryption.enabled" -> false)
+          .build()
+
+        running(app) {
+          val sensitiveFormats                     = app.injector.instanceOf[SensitiveFormats]
+          implicit val format: Format[UserAnswers] = UserAnswers.format(sensitiveFormats)
+
+          val json: JsValue = Json.parse(s"""
+               |{
+               |  "_id" : "$userAnswersId",
+               |  "data" : {},
+               |  "lastUpdated" : {
+               |    "$$date" : {
+               |      "$$numberLong" : "1662546803472"
+               |    }
+               |  }
+               |}
+               |""".stripMargin)
+
+          "must read correctly" in {
+            val result = json.as[UserAnswers]
+            result mustBe userAnswers
+          }
+
+          "write correctly" in {
+            val result = Json.toJson(userAnswers)
+            result mustBe json
+          }
         }
       }
     }

@@ -74,19 +74,20 @@ object UserAnswers {
 
   import play.api.libs.functional.syntax._
 
-  implicit lazy val reads: Reads[UserAnswers] =
+  implicit def reads(implicit sensitiveFormats: SensitiveFormats): Reads[UserAnswers] =
     (
       (__ \ "_id").read[String] and
-        (__ \ "data").read[JsObject] and
+        (__ \ "data").read[JsObject](sensitiveFormats.jsObjectReads) and
         (__ \ "lastUpdated").read(MongoJavatimeFormats.instantReads)
     )(UserAnswers.apply _)
 
-  implicit lazy val writes: OWrites[UserAnswers] =
+  implicit def writes(implicit sensitiveFormats: SensitiveFormats): OWrites[UserAnswers] =
     (
       (__ \ "_id").write[String] and
-        (__ \ "data").write[JsObject] and
+        (__ \ "data").write[JsObject](sensitiveFormats.jsObjectWrites) and
         (__ \ "lastUpdated").write(MongoJavatimeFormats.instantWrites)
     )(unlift(UserAnswers.unapply))
 
-  implicit lazy val format: Format[UserAnswers] = Format(reads, writes)
+  implicit def format(implicit sensitiveFormats: SensitiveFormats): Format[UserAnswers] =
+    Format(reads, writes)
 }

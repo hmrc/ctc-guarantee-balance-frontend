@@ -17,7 +17,7 @@
 package repositories
 
 import config.FrontendAppConfig
-import models.UserAnswers
+import models.{SensitiveFormats, UserAnswers}
 import org.mongodb.scala.bson.{BsonDocument, BsonInt64, BsonString}
 import org.scalatest.OptionValues
 import org.scalatest.freespec.AnyFreeSpec
@@ -33,6 +33,8 @@ class SessionRepositorySpec extends AnyFreeSpec with Matchers with DefaultPlayMo
 
   private val config: FrontendAppConfig        = app.injector.instanceOf[FrontendAppConfig]
   private val dateTimeService: DateTimeService = app.injector.instanceOf[DateTimeService]
+
+  implicit private val sensitiveFormats: SensitiveFormats = app.injector.instanceOf[SensitiveFormats]
 
   override protected val repository = new SessionRepository(mongoComponent, config, dateTimeService)
 
