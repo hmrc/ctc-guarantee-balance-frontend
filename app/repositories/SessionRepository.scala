@@ -17,7 +17,7 @@
 package repositories
 
 import config.FrontendAppConfig
-import models.UserAnswers
+import models.{SensitiveFormats, UserAnswers}
 import org.mongodb.scala.model._
 import services.DateTimeService
 import uk.gov.hmrc.mongo.MongoComponent
@@ -32,7 +32,7 @@ class SessionRepository @Inject() (
   mongoComponent: MongoComponent,
   config: FrontendAppConfig,
   dateTimeService: DateTimeService
-)(implicit ec: ExecutionContext)
+)(implicit ec: ExecutionContext, sensitiveFormats: SensitiveFormats)
     extends PlayMongoRepository[UserAnswers](
       mongoComponent = mongoComponent,
       collectionName = "user-answers",

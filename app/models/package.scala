@@ -16,11 +16,16 @@
 
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import play.api.libs.json._
+import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 import uk.gov.hmrc.http.HttpResponse
 
 import scala.annotation.nowarn
 
 package object models {
+
+  implicit class RichSensitiveString(sensitiveString: SensitiveString) {
+    def decrypt: JsObject = Json.parse(sensitiveString.decryptedValue).as[JsObject]
+  }
 
   implicit class RichJsObject(jsObject: JsObject) {
 
@@ -29,6 +34,8 @@ package object models {
 
     def removeObject(path: JsPath): JsResult[JsObject] =
       jsObject.remove(path).flatMap(_.validate[JsObject])
+
+    def encrypt: SensitiveString = SensitiveString(Json.stringify(jsObject))
   }
 
   implicit class RichJsValue(jsValue: JsValue) {
