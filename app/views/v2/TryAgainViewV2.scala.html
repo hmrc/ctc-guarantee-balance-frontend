@@ -35,9 +35,7 @@
     title = messages("tryAgain.v2.title")
 ) {
 
-    @caption(messages("tryAgain.v2.caption"))
-
-    @heading(messages("tryAgain.v2.heading"))
+    @heading(messages("tryAgain.v2.heading"), Some(messages("tryAgain.v2.caption")))
 
     <p class="govuk-body">
         @messages("tryAgain.v2.checkDetails.prelink") <a class="govuk-link" id="check-details" href="@routes.CheckYourAnswersController.onPageLoad()">@messages("tryAgain.v2.checkDetails.link")</a>.

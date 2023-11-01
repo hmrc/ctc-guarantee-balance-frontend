@@ -17,13 +17,12 @@
 @import config.FrontendAppConfig
 @import controllers.routes
 @import viewModels.components.InputTextViewModel._
-@import views.html.components.{Heading, HeadingCaption}
+@import views.html.components.{Heading}
 
 @this(
     mainTemplate: MainTemplate,
     heading: Heading,
-    config: FrontendAppConfig,
-    caption: HeadingCaption
+    config: FrontendAppConfig
 )
 
 @()(implicit request: Request[_], messages: Messages)
@@ -32,9 +31,7 @@
     title = messages("detailsDontMatch.v2.title")
 ) {
 
-    @caption(messages("detailsDontMatch.v2.caption"))
-
-    @heading(messages("detailsDontMatch.v2.heading"))
+    @heading(messages("detailsDontMatch.v2.heading"), Some(messages("detailsDontMatch.v2.caption")))
 
     <p class="govuk-body">
         <a class="govuk-link" id="try-again" href=@routes.CheckYourAnswersController.onPageLoad()>@messages("detailsDontMatch.v2.p1")</a>.

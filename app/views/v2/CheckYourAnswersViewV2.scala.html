@@ -16,15 +16,14 @@
 
 @import controllers.routes
 @import viewModels.Section
-@import views.html.components.{AnswerSections, Button, Heading, HeadingCaption}
+@import views.html.components.{AnswerSections, Button, Heading}
 
 @this(
     mainTemplate: MainTemplate,
     heading: Heading,
     answerSections: AnswerSections,
     button: Button,
-    formHelper: FormWithCSRF,
-    caption: HeadingCaption
+    formHelper: FormWithCSRF
 )
 
 @(sections: Seq[Section])(implicit request: Request[_], messages: Messages)
@@ -33,9 +32,7 @@
     title = messages("checkYourAnswers.v2.title")
 ) {
 
-    @caption(messages("checkYourAnswers.v2.caption"))
-
-    @heading(messages("checkYourAnswers.v2.heading"))
+    @heading(messages("checkYourAnswers.v2.heading"), Some(messages("checkYourAnswers.v2.caption")))
 
     @answerSections(sections)
 
