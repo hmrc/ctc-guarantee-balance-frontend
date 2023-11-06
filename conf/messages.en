@@ -148,7 +148,7 @@ balanceConfirmation.fromNcts.p = You can:
 balanceConfirmation.fromNcts.link1 = check another guarantee balance
 balanceConfirmation.fromNcts.link2 = manage your transit movements
 
-balanceConfirmation.v2.title = Your balance
+balanceConfirmation.v2.title = Available balance
 balanceConfirmation.v2.heading = Available balance
 balanceConfirmation.v2.p = This is your guarantee limit minus the liability amounts for your open movements.
 balanceConfirmation.v2.link1 = Check another guarantee balance
