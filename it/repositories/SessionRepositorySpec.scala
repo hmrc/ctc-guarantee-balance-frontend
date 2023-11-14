@@ -18,7 +18,7 @@ package repositories
 
 import config.FrontendAppConfig
 import models.{SensitiveFormats, UserAnswers}
-import org.mongodb.scala.bson.{BsonDocument, BsonNumber, BsonString}
+import org.mongodb.scala.bson.{BsonDocument, BsonString}
 import org.scalatest.OptionValues
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
