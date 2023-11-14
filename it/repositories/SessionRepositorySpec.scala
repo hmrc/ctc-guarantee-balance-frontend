@@ -18,7 +18,7 @@ package repositories
 
 import config.FrontendAppConfig
 import models.{SensitiveFormats, UserAnswers}
-import org.mongodb.scala.bson.{BsonDocument, BsonInt64, BsonString}
+import org.mongodb.scala.bson.{BsonDocument, BsonString}
 import org.scalatest.OptionValues
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
@@ -111,7 +111,7 @@ class SessionRepositorySpec extends AnyFreeSpec with Matchers with DefaultPlayMo
 
       indexes(1).get("name").get mustEqual BsonString("user-answers-last-updated-index")
       indexes(1).get("key").get mustEqual BsonDocument("lastUpdated" -> 1)
-      indexes(1).get("expireAfterSeconds").get mustEqual BsonInt64(config.mongoDbTtl)
+      indexes(1).get("expireAfterSeconds").get.asNumber().intValue() mustEqual config.mongoDbTtl
 
     }
   }
