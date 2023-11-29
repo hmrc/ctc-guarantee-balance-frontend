@@ -1,7 +1,4 @@
-$govuk-assets-path: "/check-transit-guarantee-balance/assets/lib/govuk-frontend/govuk/assets/";
-$hmrc-assets-path: "/check-transit-guarantee-balance/assets/lib/hmrc-frontend/hmrc/assets/";
-
-@import "lib/govuk-frontend/govuk/all";
-@import "lib/hmrc-frontend/hmrc/all";
+$govuk-include-default-font-face: false;
+@import "lib/govuk-frontend/govuk/base";
 
 @import "components/shame";
