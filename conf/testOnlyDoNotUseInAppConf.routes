@@ -12,5 +12,10 @@
 + nocsrf
 DELETE     /check-transit-guarantee-balance/test-only/mongo-collections         controllers.testOnly.TestOnlyMongoController.dropMongoCollections()
 
++ nocsrf
+GET        /check-transit-guarantee-balance/test-only/input                     controllers.testOnly.TestOnlyInputController.onPageLoad()
++ nocsrf
+POST       /check-transit-guarantee-balance/test-only/input                     controllers.testOnly.TestOnlyInputController.onSubmit()
+
 # Add all the application routes to the prod.routes file
 ->         /                          prod.Routes
