@@ -125,5 +125,10 @@ class EoriNumberFormProviderSpec extends StringFieldBehaviours with FieldBehavio
       result.get mustEqual "GB123456789123"
     }
 
+    "must not accept HTML/JavaScript characters" in {
+      val result = form.bind(Map(fieldName -> "GB000142;<script>print()</script>"))
+      result.errors must contain(FormError(fieldName, invalidCharactersKey, Seq(alphaNumericRegex)))
+    }
+
   }
 }

@@ -69,6 +69,11 @@ class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
         result.get mustEqual "123456"
       }
 
+      "must not accept HTML/JavaScript characters" in {
+        val result = form.bind(Map(fieldName -> "Test;<p>Hello</p>"))
+        result.errors must contain(FormError(fieldName, invalidKey, Seq(alphaNumericRegex)))
+      }
+
     }
   }
 
@@ -126,6 +131,11 @@ class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
         val result = form.bind(Map(fieldName -> " 01GB1234567 890120 "))
         result.errors mustEqual Nil
         result.get mustEqual "01GB1234567890120"
+      }
+
+      "must not accept HTML/JavaScript characters" in {
+        val result = form.bind(Map(fieldName -> "Test;<p>Hello</p>"))
+        result.errors must contain(FormError(fieldName, invalidKey, Seq(alphaNumericRegex)))
       }
 
     }
