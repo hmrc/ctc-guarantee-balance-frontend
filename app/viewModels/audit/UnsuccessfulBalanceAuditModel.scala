@@ -16,10 +16,11 @@
 
 package viewModels.audit
 
-import org.joda.time.LocalDateTime
 import play.api.libs.json.{JsValue, Json}
 import services.JsonAuditModel
 import viewModels.audit.AuditConstants._
+
+import java.time.LocalDateTime
 
 case class UnsuccessfulBalanceAuditModel(override val auditType: String,
                                          eoriNumber: String,

@@ -16,8 +16,8 @@
 
 package services
 
-import akka.actor.ActorSystem
-import akka.pattern.after
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.pattern.after
 import config.FrontendAppConfig
 import connectors.GuaranteeBalanceConnector
 import models.backend.{BalanceRequestPending, BalanceRequestRateLimit, BalanceRequestResponse, BalanceRequestSessionExpired}
@@ -43,7 +43,7 @@ sealed trait GuaranteeBalanceService extends Logging {
   def checkRateLimit(internalId: String, guaranteeReferenceNumber: String): Future[Boolean] = {
     val lockId   = LockId(internalId, guaranteeReferenceNumber).toString
     val duration = config.rateLimitDuration.seconds
-    mongoLockRepository.takeLock(lockId, internalId, duration)
+    mongoLockRepository.takeLock(lockId, internalId, duration) // Future[Option[Lock]]
   }
 }
 

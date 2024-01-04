@@ -16,7 +16,7 @@
 
 package viewModels.audit
 
-import org.joda.time.LocalDateTime
+import java.time.LocalDateTime
 import play.api.libs.json.{JsValue, Json}
 import services.JsonAuditModel
 import viewModels.audit.AuditConstants._

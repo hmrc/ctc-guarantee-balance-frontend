@@ -22,7 +22,7 @@ lazy val root = (project in file("."))
   .settings(automateHeaderSettings(IntegrationTest))
   .settings(headerSettings(A11yTest): _*)
   .settings(automateHeaderSettings(A11yTest))
-  .settings(scalaVersion := "2.13.8")
+  .settings(scalaVersion := "2.13.12")
   .settings(
     name := appName,
     RoutesKeys.routesImport ++= Seq("models._", "models.OptionBinder._", "models.Referral._"),
