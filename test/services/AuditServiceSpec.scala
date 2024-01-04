@@ -18,7 +18,6 @@ package services
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import config.FrontendAppConfig
-import org.joda.time.LocalDateTime
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
@@ -29,6 +28,7 @@ import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 import viewModels.audit.SuccessfulBalanceAuditModel
 
+import java.time.LocalDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuditServiceSpec extends SpecBase with AppWithDefaultMockFixtures {

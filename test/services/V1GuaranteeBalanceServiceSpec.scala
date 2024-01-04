@@ -16,7 +16,6 @@
 
 package services
 
-import akka.actor.ActorSystem
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import connectors.GuaranteeBalanceConnector
 import controllers.routes
@@ -24,15 +23,18 @@ import models.UserAnswers
 import models.backend._
 import models.requests.{BalanceRequest, DataRequest}
 import models.values._
+import org.apache.pekko.actor.ActorSystem
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, times, verify, when}
 import org.scalacheck.Arbitrary.arbitrary
-import org.scalatest.BeforeAndAfterEach
+import org.scalatest.{Assertion, BeforeAndAfterEach}
 import pages.{AccessCodePage, BalanceIdPage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
+import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.mongo.lock.Lock
 
+import java.time.Instant
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
@@ -55,6 +57,8 @@ class V1GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixt
   private val access: String = "access"
   private val taxId: String  = "taxId"
   private val balance        = BalanceRequestSuccess(8500: Int, Some(CurrencyCode("GBP")))
+
+  private val lock = Lock("id", "owner", Instant.now(), Instant.now())
 
   private val baseAnswers: UserAnswers = emptyUserAnswers
     .setValue(GuaranteeReferenceNumberPage, grn)
@@ -79,7 +83,7 @@ class V1GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixt
         val request                              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
         implicit val dataRequest: DataRequest[_] = DataRequest(request, userAnswers.id, baseAnswers)
 
-        when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
+        when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(None))
         when(mockGuaranteeBalanceConnector.submitBalanceRequest(any())(any()))
           .thenReturn(Future.successful(Right(balance)))
 
@@ -110,7 +114,7 @@ class V1GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixt
 
         val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
 
-        when(mockMongoLockRepository.takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())).thenReturn(Future.successful(false))
+        when(mockMongoLockRepository.takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())).thenReturn(Future.successful(Some(lock)))
         val service = new V1GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
         val result  = service.retrieveBalanceResponse().futureValue
         result.value mustEqual BalanceRequestRateLimit
@@ -131,7 +135,7 @@ class V1GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixt
             val request                              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
             implicit val dataRequest: DataRequest[_] = DataRequest(request, "id", userAnswers)
 
-            when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
+            when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(None))
 
             when(mockGuaranteeBalanceConnector.submitBalanceRequest(any())(any()))
               .thenReturn(Future.successful(Right(balance)))
@@ -155,7 +159,7 @@ class V1GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixt
         val service = new V1GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
 
         val result = service.retrieveBalanceResponse()
-        whenReady(result) {
+        whenReady[Either[HttpResponse, BalanceRequestResponse], Assertion](result) {
           _ mustEqual successResponse
         }
 
@@ -169,7 +173,7 @@ class V1GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixt
         val service = new V1GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
 
         val result = service.retrieveBalanceResponse()
-        whenReady(result) {
+        whenReady[Either[HttpResponse, BalanceRequestResponse], Assertion](result) {
           _ mustEqual successResponse
         }
 
@@ -183,7 +187,7 @@ class V1GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixt
         val service = new V1GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
 
         val result = service.retrieveBalanceResponse()
-        whenReady(result) {
+        whenReady[Either[HttpResponse, BalanceRequestResponse], Assertion](result) {
           _ mustEqual tryAgainResponse
         }
 
@@ -199,7 +203,7 @@ class V1GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixt
         val service = new V1GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
 
         val result = service.retrieveBalanceResponse()
-        whenReady(result) {
+        whenReady[Either[HttpResponse, BalanceRequestResponse], Assertion](result) {
           _ mustEqual successResponse
         }
 
@@ -217,7 +221,7 @@ class V1GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixt
 
         val result = service.retrieveBalanceResponse()
 
-        whenReady(result) {
+        whenReady[Either[HttpResponse, BalanceRequestResponse], Assertion](result) {
           _ mustEqual tryAgainResponse
         }
 
@@ -231,7 +235,7 @@ class V1GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixt
         val service = new V1GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
 
         val result = service.retrieveBalanceResponse()
-        whenReady(result) {
+        whenReady[Either[HttpResponse, BalanceRequestResponse], Assertion](result) {
           _ mustEqual pendingResponse
         }
         // With test.application.conf waitTimeInSeconds = 1 and maxTimeInSeconds = 3

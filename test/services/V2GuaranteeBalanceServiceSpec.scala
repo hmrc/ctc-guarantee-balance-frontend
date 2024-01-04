@@ -31,7 +31,9 @@ import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
+import uk.gov.hmrc.mongo.lock.Lock
 
+import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits._
 import scala.concurrent.Future
 
@@ -45,6 +47,8 @@ class V2GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixt
   private val access: String = "access"
   private val taxId: String  = "taxId"
   private val balance        = BalanceRequestSuccess(8500: Int, None)
+
+  private val lock = Lock("id", "owner", Instant.now(), Instant.now())
 
   private val baseAnswers: UserAnswers = emptyUserAnswers
     .setValue(GuaranteeReferenceNumberPage, grn)
@@ -63,7 +67,7 @@ class V2GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixt
         val request                              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
         implicit val dataRequest: DataRequest[_] = DataRequest(request, userAnswers.id, baseAnswers)
 
-        when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
+        when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(None))
         when(mockGuaranteeBalanceConnector.submitBalanceRequestV2(any(), any())(any()))
           .thenReturn(Future.successful(Right(balance)))
 
@@ -97,7 +101,7 @@ class V2GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixt
 
         val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
 
-        when(mockMongoLockRepository.takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())).thenReturn(Future.successful(false))
+        when(mockMongoLockRepository.takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())).thenReturn(Future.successful(Some(lock)))
         val service = new V2GuaranteeBalanceService(mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
         val result  = service.retrieveBalanceResponse().futureValue
         result.value mustEqual BalanceRequestRateLimit
@@ -117,7 +121,7 @@ class V2GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixt
             val request                              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
             implicit val dataRequest: DataRequest[_] = DataRequest(request, "id", userAnswers)
 
-            when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(true))
+            when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(None))
 
             when(mockGuaranteeBalanceConnector.submitBalanceRequestV2(any(), any())(any()))
               .thenReturn(Future.successful(Right(balance)))
