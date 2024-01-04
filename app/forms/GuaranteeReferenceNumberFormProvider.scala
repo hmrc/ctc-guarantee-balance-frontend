@@ -18,6 +18,7 @@ package forms
 
 import forms.Constants._
 import forms.mappings.Mappings
+import models.RichString
 import play.api.data.Form
 
 sealed trait GuaranteeReferenceNumberFormProvider extends Mappings {
@@ -29,7 +30,7 @@ sealed trait GuaranteeReferenceNumberFormProvider extends Mappings {
 
   def apply(): Form[String] =
     Form(
-      "value" -> textWithSpacesRemoved(s"$prefix.error.required")
+      "value" -> adaptedText(s"$prefix.error.required")(_.removeSpaces())
         .verifying(
           forms.StopOnFirstFail[String](
             maxLength(maxGuaranteeReferenceNumberLength, s"$prefix.error.length"),

@@ -57,52 +57,13 @@ class MappingsSpec extends AnyFreeSpec with Matchers with OptionValues with Mapp
       result.get mustEqual "foobar"
     }
 
-    "must not bind an empty string" in {
-      val result = testForm.bind(Map("value" -> ""))
-      result.errors must contain(FormError("value", "error.required"))
-    }
-
-    "must not bind an empty map" in {
-      val result = testForm.bind(Map.empty[String, String])
-      result.errors must contain(FormError("value", "error.required"))
-    }
-
-    "must return a custom error message" in {
-      val form   = Form("value" -> text("custom.error"))
-      val result = form.bind(Map("value" -> ""))
-      result.errors must contain(FormError("value", "custom.error"))
-    }
-
-    "must unbind a valid value" in {
-      val result = testForm.fill("foobar")
-      result.apply("value").value.value mustEqual "foobar"
-    }
-  }
-
-  "textWithSpacesRemoved" - {
-
-    val testForm: Form[String] =
-      Form(
-        "value" -> textWithSpacesRemoved()
-      )
-
-    "must bind a valid string" in {
-      val result = testForm.bind(Map("value" -> "foobar"))
-      result.get mustEqual "foobar"
-    }
-
-    "must bind a valid string with spaces" in {
-      val result = testForm.bind(Map("value" -> " foo bar "))
+    "must bind a valid string with trailing whitespace" in {
+      val result = testForm.bind(Map("value" -> "foobar   "))
       result.get mustEqual "foobar"
     }
 
     "must not bind an empty string" in {
       val result = testForm.bind(Map("value" -> ""))
-      result.errors must contain(FormError("value", "error.required"))
-    }
-
-    "must not bind a string with only spaces" in {
-      val result = testForm.bind(Map("value" -> " "))
       result.errors must contain(FormError("value", "error.required"))
     }
 
@@ -171,6 +132,16 @@ class MappingsSpec extends AnyFreeSpec with Matchers with OptionValues with Mapp
     "must bind a valid integer" in {
       val result = testForm.bind(Map("value" -> "1"))
       result.get mustEqual 1
+    }
+
+    "must bind a valid integer with comma separators" in {
+      val result = testForm.bind(Map("value" -> "1,000"))
+      result.get mustEqual 1000
+    }
+
+    "must bind a valid integer spaces" in {
+      val result = testForm.bind(Map("value" -> "1 000 000"))
+      result.get mustEqual 1000000
     }
 
     "must not bind an empty value" in {
