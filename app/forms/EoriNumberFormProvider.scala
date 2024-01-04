@@ -18,6 +18,7 @@ package forms
 
 import forms.Constants._
 import forms.mappings.Mappings
+import models.RichString
 import play.api.data.Form
 
 import javax.inject.Inject
@@ -26,7 +27,7 @@ class EoriNumberFormProvider @Inject() extends Mappings {
 
   def apply(): Form[String] =
     Form(
-      "value" -> textWithSpacesRemoved("eoriNumber.error.required")
+      "value" -> adaptedText("eoriNumber.error.required")(_.removeSpaces())
         .verifying(
           forms.StopOnFirstFail[String](
             regexp(alphaNumericRegex, "eoriNumber.error.invalidCharacters"),
