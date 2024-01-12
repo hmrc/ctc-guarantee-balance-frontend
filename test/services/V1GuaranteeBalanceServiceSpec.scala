@@ -83,7 +83,7 @@ class V1GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixt
         val request                              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
         implicit val dataRequest: DataRequest[_] = DataRequest(request, userAnswers.id, baseAnswers)
 
-        when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(None))
+        when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(Some(lock)))
         when(mockGuaranteeBalanceConnector.submitBalanceRequest(any())(any()))
           .thenReturn(Future.successful(Right(balance)))
 
@@ -114,7 +114,7 @@ class V1GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixt
 
         val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
 
-        when(mockMongoLockRepository.takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())).thenReturn(Future.successful(Some(lock)))
+        when(mockMongoLockRepository.takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())).thenReturn(Future.successful(None))
         val service = new V1GuaranteeBalanceService(actorSystem, mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
         val result  = service.retrieveBalanceResponse().futureValue
         result.value mustEqual BalanceRequestRateLimit
@@ -134,8 +134,6 @@ class V1GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixt
               .setValue(AccessCodePage, accessCode)
             val request                              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
             implicit val dataRequest: DataRequest[_] = DataRequest(request, "id", userAnswers)
-
-            when(mockMongoLockRepository.takeLock(any(), any(), any())).thenReturn(Future.successful(None))
 
             when(mockGuaranteeBalanceConnector.submitBalanceRequest(any())(any()))
               .thenReturn(Future.successful(Right(balance)))
