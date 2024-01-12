@@ -17,9 +17,10 @@
 package viewModels.audit
 
 import base.SpecBase
-import org.joda.time.LocalDateTime
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
+
+import java.time.LocalDateTime
 
 class SuccessfulBalanceAuditModelSpec extends SpecBase with MockitoSugar {
 

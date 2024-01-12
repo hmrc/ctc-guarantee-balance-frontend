@@ -16,8 +16,8 @@
 
 package services
 
-import akka.actor.ActorSystem
-import akka.pattern.after
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.pattern.after
 import config.FrontendAppConfig
 import connectors.GuaranteeBalanceConnector
 import models.backend.{BalanceRequestPending, BalanceRequestRateLimit, BalanceRequestResponse, BalanceRequestSessionExpired}
@@ -26,7 +26,7 @@ import models.values._
 import pages.{AccessCodePage, BalanceIdPage, EoriNumberPage, GuaranteeReferenceNumberPage}
 import play.api.Logging
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.mongo.lock.MongoLockRepository
+import uk.gov.hmrc.mongo.lock.{Lock, MongoLockRepository}
 
 import javax.inject.Inject
 import scala.concurrent.duration._
@@ -40,7 +40,7 @@ sealed trait GuaranteeBalanceService extends Logging {
 
   def retrieveBalanceResponse()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]]
 
-  def checkRateLimit(internalId: String, guaranteeReferenceNumber: String): Future[Boolean] = {
+  def checkRateLimit(internalId: String, guaranteeReferenceNumber: String): Future[Option[Lock]] = {
     val lockId   = LockId(internalId, guaranteeReferenceNumber).toString
     val duration = config.rateLimitDuration.seconds
     mongoLockRepository.takeLock(lockId, internalId, duration)
@@ -68,20 +68,18 @@ class V1GuaranteeBalanceService @Inject() (
       taxIdentifier            <- request.userAnswers.get(EoriNumberPage)
       accessCode               <- request.userAnswers.get(AccessCodePage)
     } yield checkRateLimit(request.internalId, guaranteeReferenceNumber).flatMap {
-      lockFree =>
-        if (lockFree) {
-          connector
-            .submitBalanceRequest(
-              BalanceRequest(
-                TaxIdentifier(taxIdentifier),
-                GuaranteeReference(guaranteeReferenceNumber),
-                AccessCode(accessCode)
-              )
+      case None =>
+        connector
+          .submitBalanceRequest(
+            BalanceRequest(
+              TaxIdentifier(taxIdentifier),
+              GuaranteeReference(guaranteeReferenceNumber),
+              AccessCode(accessCode)
             )
-        } else {
-          logger.warn("[GuaranteeBalanceService][submit] Rate Limit hit")
-          Future.successful(Right(BalanceRequestRateLimit))
-        }
+          )
+      case _ =>
+        logger.warn("[GuaranteeBalanceService][submit] Rate Limit hit")
+        Future.successful(Right(BalanceRequestRateLimit))
     }).getOrElse {
       logger.warn("[GuaranteeBalanceService][submit] Insufficient data in user answers.")
       Future.successful(Right(BalanceRequestSessionExpired))
@@ -130,17 +128,15 @@ class V2GuaranteeBalanceService @Inject() (
       guaranteeReferenceNumber <- request.userAnswers.get(GuaranteeReferenceNumberPage)
       accessCode               <- request.userAnswers.get(AccessCodePage)
     } yield checkRateLimit(request.internalId, guaranteeReferenceNumber).flatMap {
-      lockFree =>
-        if (lockFree) {
-          connector
-            .submitBalanceRequestV2(
-              BalanceRequestV2(AccessCode(accessCode)),
-              guaranteeReferenceNumber
-            )
-        } else {
-          logger.warn("[GuaranteeBalanceService][submit][V2] Rate Limit hit")
-          Future.successful(Right(BalanceRequestRateLimit))
-        }
+      case None =>
+        connector
+          .submitBalanceRequestV2(
+            BalanceRequestV2(AccessCode(accessCode)),
+            guaranteeReferenceNumber
+          )
+      case _ =>
+        logger.warn("[GuaranteeBalanceService][submit][V2] Rate Limit hit")
+        Future.successful(Right(BalanceRequestRateLimit))
     }).getOrElse {
       logger.warn("[GuaranteeBalanceService][submit][V2] Insufficient data in user answers.")
       Future.successful(Right(BalanceRequestSessionExpired))

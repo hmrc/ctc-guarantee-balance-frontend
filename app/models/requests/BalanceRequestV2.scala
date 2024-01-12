@@ -17,12 +17,12 @@
 package models.requests
 
 import models.values._
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class BalanceRequestV2(
   accessCode: AccessCode
 )
 
 object BalanceRequestV2 {
-  implicit val balanceRequestJsonFormat = Json.format[BalanceRequestV2]
+  implicit val balanceRequestJsonFormat: OFormat[BalanceRequestV2] = Json.format[BalanceRequestV2]
 }
