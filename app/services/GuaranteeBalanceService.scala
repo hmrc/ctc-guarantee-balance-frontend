@@ -40,6 +40,12 @@ sealed trait GuaranteeBalanceService extends Logging {
 
   def retrieveBalanceResponse()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]]
 
+  /** @param internalId internal ID
+    * @param guaranteeReferenceNumber Guarantee Reference Number
+    * @return
+    *  - None if there is already a lock for the given lock ID (rate limit hit)
+    *  - Some(lock) if there is not already a lock for the given lock ID and a lock has been successfully created
+    */
   def checkRateLimit(internalId: String, guaranteeReferenceNumber: String): Future[Option[Lock]] = {
     val lockId   = LockId(internalId, guaranteeReferenceNumber).toString
     val duration = config.rateLimitDuration.seconds
@@ -68,7 +74,7 @@ class V1GuaranteeBalanceService @Inject() (
       taxIdentifier            <- request.userAnswers.get(EoriNumberPage)
       accessCode               <- request.userAnswers.get(AccessCodePage)
     } yield checkRateLimit(request.internalId, guaranteeReferenceNumber).flatMap {
-      case None =>
+      case Some(_) =>
         connector
           .submitBalanceRequest(
             BalanceRequest(
@@ -128,7 +134,7 @@ class V2GuaranteeBalanceService @Inject() (
       guaranteeReferenceNumber <- request.userAnswers.get(GuaranteeReferenceNumberPage)
       accessCode               <- request.userAnswers.get(AccessCodePage)
     } yield checkRateLimit(request.internalId, guaranteeReferenceNumber).flatMap {
-      case None =>
+      case Some(_) =>
         connector
           .submitBalanceRequestV2(
             BalanceRequestV2(AccessCode(accessCode)),
