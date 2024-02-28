@@ -25,15 +25,14 @@ error.summary.title = There is a problem
 
 session_expired.title = For your security, we signed you out
 session_expired.heading = For your security, we signed you out
-session_expired.guidance = We did not save your answers.
+session_expired.guidance = We saved your answers. They will be available for 15 minutes.
 session_expired.button = Sign in
 
 pageNotFound.title = Page not found
 pageNotFound.heading = Page not found
 pageNotFound.paragraph1 = If you typed the web address, check it is correct.
 pageNotFound.paragraph2 = If you pasted the web address, check you copied the entire address.
-pageNotFound.paragraph3Start = If the web address is correct or you selected a link or button,
-pageNotFound.contactLink = contact the New Computerised Transit System (NCTS) helpdesk if you need to speak to someone about your guarantee balance (opens in a new tab)
+pageNotFound.contactLink = Contact the New Computerised Transit System (NCTS) helpdesk if you need to speak to someone about your guarantee balance (opens in a new tab)
 
 unauthorised.title = You cannot use this service
 unauthorised.heading = You cannot use this service
@@ -45,9 +44,8 @@ unauthorised.again.later = again later.
 technicalDifficulties.title = Sorry, there is a problem with the service
 technicalDifficulties.heading = Sorry, there is a problem with the service
 technicalDifficulties.tryAgain = Try again later.
-technicalDifficulties.savedAnswers = We have not saved your answers.
-technicalDifficulties.contact = You can
-technicalDifficulties.contact.link = contact the New Computerised Transit System helpdesk if you need to speak to someone about your guarantee balance (opens in a new tab)
+technicalDifficulties.savedAnswers = We saved your answers. They will be available for 15 minutes.
+technicalDifficulties.contact.link = Contact the New Computerised Transit System (NCTS) helpdesk if you need to speak to someone about your guarantee balance (opens in a new tab)
 
 eoriNumber.title = What is your EORI number?
 eoriNumber.heading = What is your EORI number?
