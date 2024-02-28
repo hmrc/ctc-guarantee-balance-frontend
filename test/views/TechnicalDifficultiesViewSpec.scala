@@ -37,10 +37,11 @@ class TechnicalDifficultiesViewSpec extends ViewBehaviours {
 
   behave like pageWithContent("p", "Try again later.")
 
-  behave like pageWithPartialContent("p", "You can ")
+  behave like pageWithContent("p", "We saved your answers. They will be available for 15 minutes.")
+
   behave like pageWithLink(
     "contact",
-    "contact the New Computerised Transit System helpdesk if you need to speak to someone about your guarantee balance (opens in a new tab)",
+    "Contact the New Computerised Transit System (NCTS) helpdesk if you need to speak to someone about your guarantee balance (opens in a new tab)",
     contactUrl
   )
 }
