@@ -78,6 +78,6 @@
         ),
         pageTitle = Some(breadCrumbTitle(title, mainContent)),
         serviceName = Some(messages("site.service_name")),
-        backLink = if(showBackLink) Some(BackLink.withDefaultText(href = "#")) else None, // This is overridden in ctc.js
+        backLink = if(showBackLink) Some(BackLink.mimicsBrowserBackButtonViaJavaScript) else None
     )
 )(mainContentWithGetHelp)
