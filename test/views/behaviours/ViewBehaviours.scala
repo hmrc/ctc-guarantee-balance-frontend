@@ -20,11 +20,17 @@ import base.SpecBase
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element}
 import org.scalatest.Assertion
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat
 import play.twirl.api.TwirlHelperImports._
 import views.viewBase.ViewSpecAssertions
 
 trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
+
+  private val path = "foo"
+
+  override def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", path)
 
   def view: HtmlFormat.Appendable
 
@@ -63,14 +69,14 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
   }
 
   "must render service name link in header" in {
-    val link = getElementByClass(doc, "hmrc-header__service-name--linked")
+    val link = getElementByClass(doc, "govuk-header__service-name")
     assertElementContainsText(link, "Check your transit guarantee balance")
     assertElementContainsHref(link, "/check-transit-guarantee-balance/start-again")
   }
 
   "must append service to feedback link" in {
     val link = getElementBySelector(doc, ".govuk-phase-banner__text > .govuk-link")
-    getElementHref(link) must fullyMatch regex "http:\\/\\/localhost:9250\\/contact\\/beta-feedback\\?service=CTCTraders&referrerUrl=.*"
+    getElementHref(link) mustBe s"http://localhost:9250/contact/beta-feedback?service=CTCTraders&referrerUrl=$path"
   }
 
   "must render accessibility statement link" in {
@@ -80,7 +86,7 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
       .find(_.text() == "Accessibility statement")
       .get
 
-    getElementHref(link) must include("http://localhost:12346/accessibility-statement/check-transit-guarantee-balance?referrerUrl=")
+    getElementHref(link) mustBe s"http://localhost:12346/accessibility-statement/check-transit-guarantee-balance?referrerUrl=$path"
   }
 
   "must not render language toggle" in {
@@ -91,9 +97,7 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
     val link = getElementByClass(doc, "hmrc-report-technical-issue")
 
     assertElementContainsText(link, "Is this page not working properly? (opens in new tab)")
-    getElementHref(link) must include(
-      "http://localhost:9250/contact/report-technical-problem?newTab=true&service=CTCTraders&referrerUrl="
-    )
+    getElementHref(link) mustBe s"http://localhost:9250/contact/report-technical-problem?newTab=true&service=CTCTraders&referrerUrl=$path"
   }
 
   def pageWithTitle(args: Any*): Unit =
