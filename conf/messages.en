@@ -10,9 +10,10 @@ site.tryAgain = Try again
 site.startAgain = Start again
 site.confirmAndSend = Confirm and send
 site.textarea.char_limit = (Limit is {0} characters)
-site.title.suffix = - Guarantee balance - Manage your transit movements - GOV.UK
+site.title.suffix = Manage your transit movements - GOV.UK
+site.title.prefix = Guarantee balance
 site.youMust = You must
-site.service_name = Guarantee balance - Manage your transit movements
+site.service_name = Manage your transit movements
 site.section = This section is
 
 site.userResearch.h2 = NCTS Phase 5 coming soon. Help us improve it
