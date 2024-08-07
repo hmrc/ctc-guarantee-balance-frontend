@@ -1,9 +1,9 @@
-import sbt._
+import sbt.*
 
 object AppDependencies {
 
   private val mongoVersion = "1.9.0"
-  private val bootstrapVersion = "8.3.0"
+  private val bootstrapVersion = "9.0.0"
   private val pekkoVersion = "1.0.2"
 
   val compile: Seq[ModuleID] = Seq(
@@ -11,7 +11,7 @@ object AppDependencies {
     "uk.gov.hmrc.mongo"          %% "hmrc-mongo-play-30"                      % mongoVersion,
     "uk.gov.hmrc"                %% "play-conditional-form-mapping-play-30"   % "2.0.0",
     "uk.gov.hmrc"                %% "bootstrap-frontend-play-30"              % bootstrapVersion,
-    "uk.gov.hmrc"                %% "play-frontend-hmrc-play-30"              % "9.11.0",
+    "uk.gov.hmrc"                %% "play-frontend-hmrc-play-30"              % "10.3.0",
     "org.typelevel"              %% "cats-core"                               % "2.10.0",
     "uk.gov.hmrc"                %% "crypto-json-play-30"                     % "8.0.0",
     "org.apache.pekko"           %% "pekko-actor"                             % pekkoVersion,
