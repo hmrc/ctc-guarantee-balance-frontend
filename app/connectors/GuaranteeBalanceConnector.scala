@@ -19,7 +19,7 @@ package connectors
 import cats.data.NonEmptyList
 import config.FrontendAppConfig
 import models.RichHttpResponse
-import models.backend._
+import models.backend.*
 import models.backend.errors.FunctionalError
 import models.requests.{BalanceRequest, BalanceRequestV2}
 import models.values.BalanceId
@@ -27,13 +27,12 @@ import models.values.ErrorType.{InvalidDataErrorType, NotMatchedErrorType}
 import play.api.Logging
 import play.api.http.{HeaderNames, Status}
 import play.api.libs.json.JsResult
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
-import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpReads, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpReads, HttpResponse, StringContextOps}
 import play.api.libs.json.Json
-import play.api.libs.ws.JsonBodyWritables._
+import play.api.libs.ws.JsonBodyWritables.*
 
-import java.net.URL
 import java.time.Instant
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -52,7 +51,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClientV2, appConfig: Fronte
   )
 
   def submitBalanceRequest(request: BalanceRequest)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] = {
-    val url = new URL(s"${appConfig.guaranteeBalanceUrl}/balances")
+    val url = url"${appConfig.guaranteeBalanceUrl}/balances"
 
     implicit val eitherBalanceIdOrResponseReads: HttpReads[Either[HttpResponse, BalanceRequestResponse]] =
       HttpReads[HttpResponse].map {
@@ -83,7 +82,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClientV2, appConfig: Fronte
   def submitBalanceRequestV2(request: BalanceRequestV2, grn: String)(implicit
     hc: HeaderCarrier
   ): Future[Either[HttpResponse, BalanceRequestResponse]] = {
-    val url = new URL(s"${appConfig.guaranteeBalanceUrl}/$grn/balance")
+    val url = url"${appConfig.guaranteeBalanceUrl}/$grn/balance"
 
     implicit val eitherBalanceIdOrResponseReads: HttpReads[Either[HttpResponse, BalanceRequestResponse]] =
       HttpReads[HttpResponse].map {
@@ -122,7 +121,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClientV2, appConfig: Fronte
   // scalastyle:on cyclomatic.complexity
 
   def queryPendingBalance(balanceId: BalanceId)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] = {
-    val url = new URL(s"${appConfig.guaranteeBalanceUrl}/balances/${balanceId.value}")
+    val url = url"${appConfig.guaranteeBalanceUrl}/balances/${balanceId.value}"
 
     implicit val eitherBalanceIdOrPendingResponseReads: HttpReads[Either[HttpResponse, BalanceRequestResponse]] =
       HttpReads[HttpResponse].map {
@@ -146,7 +145,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClientV2, appConfig: Fronte
       fe                     <- json.asOpt
       balanceRequestResponse <- convertErrorTypeToBalanceRequestResponse(fe.response.errors)
     } yield Right(balanceRequestResponse)).getOrElse {
-      val outputErrorMsg = json.fold(_.toString(), fe => s"Response `contains` functional error type(s) ${fe.errorTypes}")
+      val outputErrorMsg = json.fold(_.toString(), fe => s"Response contains functional error type(s) ${fe.errorTypes}")
       logger.info(s"[GuaranteeBalanceConnector][processSubmitErrorResponse] $outputErrorMsg")
       Left(response)
     }

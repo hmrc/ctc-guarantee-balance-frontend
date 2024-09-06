@@ -29,7 +29,7 @@
 @(form: Form[String])(implicit request: Request[?], messages: Messages)
 
 @mainTemplate(
-    title = "Test `only`"
+    title = "Test only"
 ) {
 
     @formHelper(action = routes.TestOnlyInputController.onSubmit(), Symbol("autoComplete") -> "off") {
@@ -39,7 +39,7 @@
         @inputText(
             field = form("value"),
             inputTextType = OrdinaryTextInput(
-                heading = "Test `only` page for testing different malicious inputs and how these are sanitized by the Play framework"
+                heading = "Test only page for testing different malicious inputs and how these are sanitized by the Play framework"
             )
         )
 
