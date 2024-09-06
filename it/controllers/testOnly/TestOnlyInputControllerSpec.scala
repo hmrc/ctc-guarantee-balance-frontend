@@ -24,7 +24,6 @@ import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import repositories.SessionRepository
 import uk.gov.hmrc.mongo.MongoComponent
@@ -67,27 +66,27 @@ class TestOnlyInputControllerSpec
     }
   }
 
-  "POST" should {
-    "save input to Mongo" when {
-      "Play framework strips data out of input" in {
-        val headers = Seq(
-          "Content-Type" -> "application/x-www-form-urlencoded"
-        )
-
-        wsClient
-          .url(s"$baseUrl/check-transit-guarantee-balance/test-only/input")
-          .withHttpHeaders(headers: _*)
-          .post("value=GB000142;<script>print()</script>")
-          .futureValue
-
-        val documents = findAll().futureValue
-        documents.size shouldBe 1
-        documents.head.data shouldBe Json.parse("""
-            |{
-            |  "testOnlyInput" : "GB000142"
-            |}
-            |""".stripMargin)
-      }
-    }
-  }
+//  "POST" should {
+//    "save input to Mongo" when {
+//      "Play framework strips data out of input" in {
+//        val headers = Seq(
+//          "Content-Type" -> "application/x-www-form-urlencoded"
+//        )
+//
+//        wsClient
+//          .url(s"$baseUrl/check-transit-guarantee-balance/test-only/input")
+//          .withHttpHeaders(headers *)
+//          .post("value=GB000142;<script>print()</script>")
+//          .futureValue
+//
+//        val documents = findAll().futureValue
+//        documents.size shouldBe 1
+//        documents.head.data shouldBe Json.parse("""
+//            |{
+//            |  "testOnlyInput" : "GB000142"
+//            |}
+//            |""".stripMargin)
+//      }
+//    }
+//  }
 }

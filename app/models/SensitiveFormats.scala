@@ -21,7 +21,7 @@ import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 import uk.gov.hmrc.crypto.json.JsonEncryption
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 
-class SensitiveFormats(encryptionEnabled: Boolean)(implicit crypto: Encrypter with Decrypter) {
+class SensitiveFormats(encryptionEnabled: Boolean)(implicit crypto: Encrypter & Decrypter) {
 
   val jsObjectReads: Reads[JsObject] =
     JsonEncryption.sensitiveDecrypter(SensitiveString.apply).map(_.decrypt) orElse

@@ -75,7 +75,7 @@ trait SpecBase
     def setValue[T](page: QuestionPage[T], value: Option[T])(implicit rds: Reads[T], wts: Writes[T]): UserAnswers =
       value.map(setValue(page, _)).getOrElse(userAnswers)
 
-    def removeValue(page: QuestionPage[_]): UserAnswers =
+    def removeValue(page: QuestionPage[?]): UserAnswers =
       userAnswers.remove(page).success.value
   }
 

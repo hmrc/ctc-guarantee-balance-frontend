@@ -23,6 +23,7 @@
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcStandardPage
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage._
 @import uk.gov.hmrc.hmrcfrontend.config.ContactFrontendConfig
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.userresearchbanner.{UserResearchBanner => HUserResearchBanner}
 
 @this(
     appConfig: FrontendAppConfig,
@@ -42,7 +43,7 @@
     timeoutEnabled: Boolean = true,
     canSignOut: Boolean = true,
     showBackLink: Boolean = false
-)(mainContent: Html)(implicit request: Request[_], messages: Messages)
+)(mainContent: Html)(implicit request: Request[?], messages: Messages)
 
 @headScripts = {
     @if(canSignOut) {
@@ -70,7 +71,7 @@
         ),
         banners = Banners(
             phaseBanner = Some(standardBetaBanner()),
-            userResearchBanner = if(appConfig.showUserResearchBanner) Some(UserResearchBanner(url = appConfig.userResearchUrl)) else None
+            userResearchBanner = if(appConfig.showUserResearchBanner) Some(HUserResearchBanner(url = appConfig.userResearchUrl)) else None
         ),
         templateOverrides = TemplateOverrides(
             additionalHeadBlock = Some(headScripts),

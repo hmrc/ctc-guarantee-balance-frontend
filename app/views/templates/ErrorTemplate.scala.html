@@ -21,7 +21,7 @@
     heading: Heading
 )
 
-@(title: String, header: String, message: String)(implicit request: Request[_], messages: Messages)
+@(title: String, header: String, message: String)(implicit request: Request[?], messages: Messages)
 
 @main_template(
     title = messages(title),

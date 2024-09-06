@@ -22,6 +22,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import org.mongodb.scala._
 
 class TestOnlyMongoController @Inject() (
   mongo: MongoComponent,

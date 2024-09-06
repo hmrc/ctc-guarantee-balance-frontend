@@ -42,7 +42,9 @@ class GuaranteeReferenceNumberViewV2Spec extends InputTextViewBehaviours[String]
 
   behave like pageWithHeading()
 
-  behave like pageWithContent("p", "You can only check the balance of a comprehensive guarantee, guarantee waiver or individual guarantee with multiple usage.")
+  behave like pageWithContent("p",
+                              "You can `only` check the balance of a comprehensive guarantee, guarantee waiver or individual guarantee with multiple usage."
+  )
 
   behave like pageWithHint(
     "The Guarantee Reference Number (GRN) will be 17 characters long and include both letters and numbers. For example, 01GB1234567890120."

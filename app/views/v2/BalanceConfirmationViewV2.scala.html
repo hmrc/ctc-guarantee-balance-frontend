@@ -25,7 +25,7 @@
     govukPanel: GovukPanel
 )
 
-@(balance: String, timestamp: Timestamp, referral: Option[String])(implicit request: Request[_], messages: Messages)
+@(balance: String, timestamp: Timestamp, referral: Option[String])(implicit request: Request[?], messages: Messages)
 
 @panelContent = {
     <strong>@balance</strong>

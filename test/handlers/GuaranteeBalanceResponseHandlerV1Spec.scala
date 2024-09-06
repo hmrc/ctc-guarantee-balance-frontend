@@ -27,7 +27,6 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify}
 import pages._
-import play.api.http.Status.{OK, SEE_OTHER}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.Helpers._
@@ -78,7 +77,7 @@ class GuaranteeBalanceResponseHandlerV1Spec extends SpecBase with AppWithDefault
   implicit private val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
 
   private val mockRequest                      = mock[Request[AnyContent]]
-  implicit private val request: DataRequest[_] = DataRequest(mockRequest, "eoriNumber", baseAnswers)
+  implicit private val request: DataRequest[?] = DataRequest(mockRequest, "eoriNumber", baseAnswers)
 
   private lazy val handler: GuaranteeBalanceResponseHandler = app.injector.instanceOf[GuaranteeBalanceResponseHandler]
   private lazy val auditService: AuditService               = app.injector.instanceOf[AuditService]
@@ -196,7 +195,7 @@ class GuaranteeBalanceResponseHandlerV1Spec extends SpecBase with AppWithDefault
 
     "must Redirect to the Balance Confirmation Controller if the status is DataReturned " in {
       val mockRequest                      = mock[Request[AnyContent]]
-      implicit val request: DataRequest[_] = DataRequest(mockRequest, "eoriNumber", baseAnswersWithBalanceId)
+      implicit val request: DataRequest[?] = DataRequest(mockRequest, "eoriNumber", baseAnswersWithBalanceId)
 
       val result: Future[Result] = handler.processResponse(successResponse)
 

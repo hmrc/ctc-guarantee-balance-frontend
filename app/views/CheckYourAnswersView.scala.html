@@ -26,7 +26,7 @@
     formHelper: FormWithCSRF
 )
 
-@(sections: Seq[Section])(implicit request: Request[_], messages: Messages)
+@(sections: Seq[Section])(implicit request: Request[?], messages: Messages)
 
 @mainTemplate(
     title = messages("checkYourAnswers.title")

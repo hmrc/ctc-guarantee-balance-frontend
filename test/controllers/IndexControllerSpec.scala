@@ -19,7 +19,6 @@ package controllers
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import models.{Referral, UserAnswers}
 import org.scalacheck.Arbitrary.arbitrary
-import play.api.http.Status.SEE_OTHER
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 

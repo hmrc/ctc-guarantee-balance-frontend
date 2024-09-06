@@ -22,7 +22,7 @@ import queries.Settable
 
 trait ClearValueOnChangePage[A] extends QuestionPage[A] {
 
-  val pageToClear: Settable[_]
+  val pageToClear: Settable[?]
 
   override def cleanup(value: Option[A], userAnswers: UserAnswers, hasValueChanged: Boolean): Try[UserAnswers] =
     if (hasValueChanged) {

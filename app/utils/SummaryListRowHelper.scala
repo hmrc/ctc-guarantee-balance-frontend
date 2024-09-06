@@ -36,11 +36,11 @@ private[utils] class SummaryListRowHelper(implicit messages: Messages) {
   ): SummaryListRow =
     buildSimpleRow(
       prefix = prefix,
-      label = messages(s"$prefix.checkYourAnswersLabel", args: _*).toText,
+      label = messages(s"$prefix.checkYourAnswersLabel", args *).toText,
       answer = answer,
       id = id,
       call = call,
-      args = args: _*
+      args = args *
     )
 
   protected def buildSimpleRow(
@@ -60,7 +60,7 @@ private[utils] class SummaryListRowHelper(implicit messages: Messages) {
             ActionItem(
               content = messages("site.edit").toText,
               href = call.url,
-              visuallyHiddenText = Some(messages(s"$prefix.change.hidden", args: _*)),
+              visuallyHiddenText = Some(messages(s"$prefix.change.hidden", args *)),
               attributes = id.fold[Map[String, String]](Map.empty)(
                 id => Map("id" -> id)
               )

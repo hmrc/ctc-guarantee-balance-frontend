@@ -33,7 +33,7 @@ class UnsupportedGuaranteeTypeViewSpec extends ViewBehaviours {
 
   behave like pageWithHeading()
 
-  behave like pageWithContent("p", "We can only get the balance for:")
+  behave like pageWithContent("p", "We can `only` get the balance for:")
 
   behave like pageWithList(
     "govuk-list--bullet",

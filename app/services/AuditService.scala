@@ -29,7 +29,7 @@ import scala.concurrent.ExecutionContext
 
 class AuditService @Inject() (appConfig: FrontendAppConfig, auditConnector: AuditConnector) {
 
-  def audit(dataSource: JsonAuditModel)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[_]): Unit = {
+  def audit(dataSource: JsonAuditModel)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[?]): Unit = {
     val evt = extendedDataEvent(dataSource, request.path)
     auditConnector.sendExtendedEvent(evt)
   }

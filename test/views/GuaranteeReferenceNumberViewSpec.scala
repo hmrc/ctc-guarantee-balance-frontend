@@ -42,7 +42,7 @@ class GuaranteeReferenceNumberViewSpec extends InputTextViewBehaviours[String] {
 
   behave like pageWithHeading()
 
-  behave like pageWithContent("p", "You can only check the balance for:")
+  behave like pageWithContent("p", "You can `only` check the balance for:")
 
   behave like pageWithList(
     "govuk-list--bullet",
