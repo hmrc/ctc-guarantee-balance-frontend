@@ -28,6 +28,7 @@ import services.DateTimeService
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import org.mongodb.scala._
 
 class SessionRepositorySpec extends AnyFreeSpec with Matchers with DefaultPlayMongoRepositorySupport[UserAnswers] with GuiceOneAppPerSuite with OptionValues {
 
@@ -36,7 +37,7 @@ class SessionRepositorySpec extends AnyFreeSpec with Matchers with DefaultPlayMo
 
   implicit private val sensitiveFormats: SensitiveFormats = app.injector.instanceOf[SensitiveFormats]
 
-  override protected val repository = new SessionRepository(mongoComponent, config, dateTimeService)
+  override protected val repository: SessionRepository = new SessionRepository(mongoComponent, config, dateTimeService)
 
   private val internalId1 = "internalId1"
   private val internalId2 = "internalId2"
@@ -57,7 +58,7 @@ class SessionRepositorySpec extends AnyFreeSpec with Matchers with DefaultPlayMo
         result.value.id mustBe userAnswers1.id
         result.value.data mustBe userAnswers1.data
 
-        result.value.lastUpdated equals userAnswers1.lastUpdated.truncatedTo(
+        result.value.lastUpdated `equals` userAnswers1.lastUpdated.truncatedTo(
           java.time.temporal.ChronoUnit.MILLIS
         ) mustBe true
       }
@@ -82,7 +83,7 @@ class SessionRepositorySpec extends AnyFreeSpec with Matchers with DefaultPlayMo
         getResult.id mustBe userAnswers1.id
         getResult.data mustBe userAnswers1.data
 
-        getResult.lastUpdated isAfter userAnswers1.lastUpdated.truncatedTo(
+        getResult.lastUpdated `isAfter` userAnswers1.lastUpdated.truncatedTo(
           java.time.temporal.ChronoUnit.MILLIS
         ) mustBe true
       }
@@ -97,7 +98,7 @@ class SessionRepositorySpec extends AnyFreeSpec with Matchers with DefaultPlayMo
         getResult.id mustBe userAnswers2.id
         getResult.data mustBe userAnswers2.data
 
-        getResult.lastUpdated isAfter userAnswers2.lastUpdated.truncatedTo(
+        getResult.lastUpdated `isAfter` userAnswers2.lastUpdated.truncatedTo(
           java.time.temporal.ChronoUnit.MILLIS
         ) mustBe true
       }

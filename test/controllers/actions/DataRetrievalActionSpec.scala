@@ -39,7 +39,7 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar with ScalaFutur
       "must set userAnswers to 'None' in the request" in {
 
         val sessionRepository = mock[SessionRepository]
-        when(sessionRepository.get("id")) thenReturn Future(None)
+        when(sessionRepository.get("id")) `thenReturn` Future(None)
         val action = new Harness(sessionRepository)
 
         val futureResult = action.callTransform(new IdentifierRequest(fakeRequest, "id"))
@@ -57,7 +57,7 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar with ScalaFutur
 
         val id                = "id"
         val sessionRepository = mock[SessionRepository]
-        when(sessionRepository.get(id)) thenReturn Future(Some(emptyUserAnswers.copy(id = id)))
+        when(sessionRepository.get(id)) `thenReturn` Future(Some(emptyUserAnswers.copy(id = id)))
         val action = new Harness(sessionRepository)
 
         val futureResult = action.callTransform(IdentifierRequest(fakeRequest, id))

@@ -40,7 +40,7 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
 
   val prefix: String
 
-  val hasSignOutLink: Boolean = true
+  def hasSignOutLink: Boolean = true
 
   if (hasSignOutLink) {
     "must render sign out link in header" in {
@@ -101,24 +101,24 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
   }
 
   def pageWithTitle(args: Any*): Unit =
-    pageWithTitle(doc, prefix, args: _*)
+    pageWithTitle(doc, prefix, args *)
 
   def pageWithTitle(doc: Document, prefix: String, args: Any*): Unit =
     "must render title" in {
       val title      = doc.title()
       val messageKey = s"$prefix.title"
-      title mustBe s"${messages(messageKey, args: _*)} - Guarantee balance - Manage your transit movements - GOV.UK"
+      title mustBe s"${messages(messageKey, args *)} - Guarantee balance - Manage your transit movements - GOV.UK"
       assert(messages.isDefinedAt(messageKey))
     }
 
   def pageWithHeading(args: Any*): Unit =
-    pageWithHeading(doc, prefix, args: _*)
+    pageWithHeading(doc, prefix, args *)
 
   def pageWithHeading(doc: Document, prefix: String, args: Any*): Unit =
     "must render heading" in {
       val heading    = getElementByTag(doc, "h1")
       val messageKey = s"$prefix.heading"
-      assertElementIncludesText(heading, messages(messageKey, args: _*))
+      assertElementIncludesText(heading, messages(messageKey, args *))
       assert(messages.isDefinedAt(messageKey))
     }
 
@@ -181,13 +181,13 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
     pageWithContent(doc, tag, expectedText)
 
   def pageWithContent(doc: Document, tag: String, expectedText: String): Unit =
-    pageWithContent(doc, tag, expectedText, _ equals _)
+    pageWithContent(doc, tag, expectedText, _ `equals` _)
 
   def pageWithPartialContent(tag: String, expectedText: String): Unit =
     pageWithPartialContent(doc, tag, expectedText)
 
   def pageWithPartialContent(doc: Document, tag: String, expectedText: String): Unit =
-    pageWithContent(doc, tag, expectedText, _ contains _)
+    pageWithContent(doc, tag, expectedText, _ `contains` _)
 
   private def pageWithContent(doc: Document, tag: String, expectedText: String, condition: (String, String) => Boolean): Unit =
     s"must render $tag with text $expectedText" in {

@@ -26,6 +26,7 @@ import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import org.mongodb.scala._
 
 @Singleton
 class SessionRepository @Inject() (
@@ -40,7 +41,7 @@ class SessionRepository @Inject() (
       indexes = Seq(
         IndexModel(
           Indexes.ascending("lastUpdated"),
-          IndexOptions().name("user-answers-last-updated-index").expireAfter(config.mongoDbTtl, TimeUnit.SECONDS)
+          IndexOptions().name("user-answers-last-updated-index").expireAfter(config.mongoDbTtl.toLong, TimeUnit.SECONDS)
         )
       )
     ) {

@@ -28,7 +28,7 @@
     button: Button
 )
 
-@(balanceId: Option[UUID])(implicit request: Request[_], messages: Messages)
+@(balanceId: Option[UUID])(implicit request: Request[?], messages: Messages)
 
 @mainTemplate(
     title = messages("tryAgain.title")

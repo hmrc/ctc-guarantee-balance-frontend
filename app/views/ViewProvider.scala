@@ -33,22 +33,22 @@ sealed trait ViewProvider {
   def guaranteeReferenceNumberView(
     form: Form[String],
     mode: Mode
-  )(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable
+  )(implicit request: Request[?], messages: Messages): HtmlFormat.Appendable
 
   def accessCodeView(
     form: Form[String],
     mode: Mode
-  )(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable
+  )(implicit request: Request[?], messages: Messages): HtmlFormat.Appendable
 
-  def checkYourAnswersView(sections: Seq[Section])(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable
+  def checkYourAnswersView(sections: Seq[Section])(implicit request: Request[?], messages: Messages): HtmlFormat.Appendable
 
   def balanceConfirmationView(
     balance: String,
     timestamp: Timestamp,
     referral: Option[String]
-  )(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable
+  )(implicit request: Request[?], messages: Messages): HtmlFormat.Appendable
 
-  def couldNotCheckBalance(balanceId: Option[UUID])(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable
+  def couldNotCheckBalance(balanceId: Option[UUID])(implicit request: Request[?], messages: Messages): HtmlFormat.Appendable
 }
 
 class V1ViewProvider @Inject() (
@@ -62,26 +62,26 @@ class V1ViewProvider @Inject() (
   override def guaranteeReferenceNumberView(
     form: Form[String],
     mode: Mode
-  )(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable =
+  )(implicit request: Request[?], messages: Messages): HtmlFormat.Appendable =
     guaranteeReferenceNumberView.apply(form, mode)
 
   override def accessCodeView(
     form: Form[String],
     mode: Mode
-  )(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable =
+  )(implicit request: Request[?], messages: Messages): HtmlFormat.Appendable =
     accessCodeView.apply(form, mode)
 
-  override def checkYourAnswersView(sections: Seq[Section])(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable =
+  override def checkYourAnswersView(sections: Seq[Section])(implicit request: Request[?], messages: Messages): HtmlFormat.Appendable =
     checkYourAnswersView.apply(sections)
 
   override def balanceConfirmationView(
     balance: String,
     timestamp: Timestamp,
     referral: Option[String]
-  )(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable =
+  )(implicit request: Request[?], messages: Messages): HtmlFormat.Appendable =
     balanceConfirmationView.apply(balance, referral)
 
-  override def couldNotCheckBalance(balanceId: Option[UUID])(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable =
+  override def couldNotCheckBalance(balanceId: Option[UUID])(implicit request: Request[?], messages: Messages): HtmlFormat.Appendable =
     tryAgainView.apply(balanceId)
 
 }
@@ -97,26 +97,26 @@ class V2ViewProvider @Inject() (
   override def guaranteeReferenceNumberView(
     form: Form[String],
     mode: Mode
-  )(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable =
+  )(implicit request: Request[?], messages: Messages): HtmlFormat.Appendable =
     guaranteeReferenceNumberView.apply(form, mode)
 
   override def accessCodeView(
     form: Form[String],
     mode: Mode
-  )(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable =
+  )(implicit request: Request[?], messages: Messages): HtmlFormat.Appendable =
     accessCodeView.apply(form, mode)
 
-  override def checkYourAnswersView(sections: Seq[Section])(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable =
+  override def checkYourAnswersView(sections: Seq[Section])(implicit request: Request[?], messages: Messages): HtmlFormat.Appendable =
     checkYourAnswersView.apply(sections)
 
   override def balanceConfirmationView(
     balance: String,
     timestamp: Timestamp,
     referral: Option[String]
-  )(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable =
+  )(implicit request: Request[?], messages: Messages): HtmlFormat.Appendable =
     balanceConfirmationView.apply(balance, timestamp, referral)
 
-  override def couldNotCheckBalance(balanceId: Option[UUID])(implicit request: Request[_], messages: Messages): HtmlFormat.Appendable =
+  override def couldNotCheckBalance(balanceId: Option[UUID])(implicit request: Request[?], messages: Messages): HtmlFormat.Appendable =
     tryAgainViewV2.apply(balanceId)
 
 }

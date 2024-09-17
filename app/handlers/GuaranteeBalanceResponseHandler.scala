@@ -46,7 +46,7 @@ sealed trait GuaranteeBalanceResponseHandler extends Logging {
 
   def processResponse(response: Either[HttpResponse, BalanceRequestResponse])(implicit
     hc: HeaderCarrier,
-    request: DataRequest[_]
+    request: DataRequest[?]
   ): Future[Result] =
     for {
       updateAnswers <- removeBalanceIdFromUserAnswers()
@@ -58,7 +58,7 @@ sealed trait GuaranteeBalanceResponseHandler extends Logging {
 
   private def processBalanceRequestResponse(response: BalanceRequestResponse, userAnswers: UserAnswers)(implicit
     hc: HeaderCarrier,
-    request: DataRequest[_]
+    request: DataRequest[?]
   ): Future[Result] =
     response match {
       case pendingResponse: BalanceRequestPending =>
@@ -102,7 +102,7 @@ sealed trait GuaranteeBalanceResponseHandler extends Logging {
         errorHandler.onClientError(request, INTERNAL_SERVER_ERROR)
     }
 
-  private def processHttpResponse(failureResponse: HttpResponse)(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Result] = {
+  private def processHttpResponse(failureResponse: HttpResponse)(implicit hc: HeaderCarrier, request: DataRequest[?]): Future[Result] = {
     logger.warn(s"[GuaranteeBalanceResponseHandler][processHttpResponse] Failed to process Response: $failureResponse")
 
     auditError(
@@ -126,13 +126,13 @@ sealed trait GuaranteeBalanceResponseHandler extends Logging {
       _              <- sessionRepository.set(updatedAnswers)
     } yield Redirect(controllers.routes.BalanceConfirmationController.onPageLoad())
 
-  private def removeBalanceIdFromUserAnswers()(implicit request: DataRequest[_]): Future[UserAnswers] =
+  private def removeBalanceIdFromUserAnswers()(implicit request: DataRequest[?]): Future[UserAnswers] =
     for {
       updatedAnswers <- Future.fromTry(request.userAnswers.remove(BalanceIdPage))
       _              <- sessionRepository.set(updatedAnswers)
     } yield updatedAnswers
 
-  private def auditBalanceRequestNotMatched(errorPointer: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]): Unit = {
+  private def auditBalanceRequestNotMatched(errorPointer: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[?]): Unit = {
     val balanceRequestNotMatchedMessage = errorPointer match {
       case "RC1.TIN"                                 => AUDIT_ERROR_INCORRECT_EORI
       case "GRR(1).Guarantee reference number (GRN)" => AUDIT_ERROR_INCORRECT_GRN
@@ -147,7 +147,7 @@ sealed trait GuaranteeBalanceResponseHandler extends Logging {
     )
   }
 
-  private def auditSuccess(successResponse: BalanceRequestSuccess)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]): Unit = {
+  private def auditSuccess(successResponse: BalanceRequestSuccess)(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[?]): Unit = {
     logger.info(s"[GuaranteeBalanceResponseHandler][auditSuccess]")
 
     auditService.audit(
@@ -163,7 +163,7 @@ sealed trait GuaranteeBalanceResponseHandler extends Logging {
     )
   }
 
-  private def auditRateLimit()(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[_]): Unit = {
+  private def auditRateLimit()(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[?]): Unit = {
     logger.info(s"[GuaranteeBalanceResponseHandler][auditRateLimit] Request limit exceeded")
     auditService.audit(
       UnsuccessfulBalanceAuditModel.build(
@@ -182,7 +182,7 @@ sealed trait GuaranteeBalanceResponseHandler extends Logging {
   private def auditError(errorCode: Int, errorMessage: ErrorMessage)(implicit
     hc: HeaderCarrier,
     ec: ExecutionContext,
-    request: DataRequest[_]
+    request: DataRequest[?]
   ): Unit = {
     logger.warn(s"[GuaranteeBalanceResponseHandler][auditError] Failed to process errorMessage: $errorMessage, status Code: $errorCode")
     auditService.audit(

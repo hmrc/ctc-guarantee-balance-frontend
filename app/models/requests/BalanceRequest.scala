@@ -32,5 +32,5 @@ object BalanceRequest {
     (__ \ "taxIdentifier").format[TaxIdentifier] and
       (__ \ "guaranteeReference").format[GuaranteeReference] and
       (__ \ "accessCode").format[AccessCode]
-  )(BalanceRequest.apply, unlift(BalanceRequest.unapply))
+  )(BalanceRequest.apply, (o => Tuple.fromProductTyped(o)))
 }

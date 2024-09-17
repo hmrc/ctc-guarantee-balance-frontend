@@ -27,7 +27,7 @@ class SensitiveModule extends AbstractModule {
   @Provides
   @Singleton
   def provideSensitiveFormats(appConfig: FrontendAppConfig): SensitiveFormats = {
-    implicit val crypto: Encrypter with Decrypter = SymmetricCryptoFactory.aesGcmCrypto(appConfig.encryptionKey)
+    implicit val crypto: Encrypter & Decrypter = SymmetricCryptoFactory.aesGcmCrypto(appConfig.encryptionKey)
     new SensitiveFormats(appConfig.encryptionEnabled)
   }
 

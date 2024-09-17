@@ -18,7 +18,7 @@ package models.values
 
 import play.api.libs.json.{Format, Json}
 
-case class AccessCode(value: String)
+case class AccessCode(value: String) extends AnyVal
 
 object AccessCode {
 

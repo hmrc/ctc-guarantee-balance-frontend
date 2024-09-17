@@ -32,7 +32,7 @@ final case class UserAnswers(
   def get[A](page: Gettable[A])(implicit rds: Reads[A]): Option[A] =
     Reads.optionNoError(Reads.at(page.path)).reads(data).getOrElse(None)
 
-  def set[A](page: Settable[A] with Gettable[A], newValue: A)(implicit writes: Writes[A], rds: Reads[A]): Try[UserAnswers] = {
+  def set[A](page: Settable[A] & Gettable[A], newValue: A)(implicit writes: Writes[A], rds: Reads[A]): Try[UserAnswers] = {
 
     lazy val hasValueChanged = !get(page).contains(newValue)
 
@@ -79,14 +79,16 @@ object UserAnswers {
       (__ \ "_id").read[String] and
         (__ \ "data").read[JsObject](sensitiveFormats.jsObjectReads) and
         (__ \ "lastUpdated").read(MongoJavatimeFormats.instantReads)
-    )(UserAnswers.apply _)
+    )(UserAnswers.apply)
 
   implicit def writes(implicit sensitiveFormats: SensitiveFormats): OWrites[UserAnswers] =
     (
       (__ \ "_id").write[String] and
         (__ \ "data").write[JsObject](sensitiveFormats.jsObjectWrites) and
         (__ \ "lastUpdated").write(MongoJavatimeFormats.instantWrites)
-    )(unlift(UserAnswers.unapply))
+    )(
+      o => Tuple.fromProductTyped(o)
+    )
 
   implicit def format(implicit sensitiveFormats: SensitiveFormats): Format[UserAnswers] =
     Format(reads, writes)

@@ -21,10 +21,10 @@ import play.api.mvc.{Request, Result}
 
 class ReferralService {
 
-  def getReferralFromSession[A <: Request[_]](implicit request: A): Option[String] =
+  def getReferralFromSession[A <: Request[?]](implicit request: A): Option[String] =
     request.session.get(Referral.key)
 
-  def setReferralInSession[A <: Request[_]](result: Result, referral: Referral)(implicit request: A): Result =
+  def setReferralInSession[A <: Request[?]](result: Result, referral: Referral)(implicit request: A): Result =
     result.addingToSession(Referral.key -> referral.toString)(request)
 
 }

@@ -19,7 +19,7 @@ package connectors
 import cats.data.NonEmptyList
 import config.FrontendAppConfig
 import models.RichHttpResponse
-import models.backend._
+import models.backend.*
 import models.backend.errors.FunctionalError
 import models.requests.{BalanceRequest, BalanceRequestV2}
 import models.values.BalanceId
@@ -27,14 +27,17 @@ import models.values.ErrorType.{InvalidDataErrorType, NotMatchedErrorType}
 import play.api.Logging
 import play.api.http.{HeaderNames, Status}
 import play.api.libs.json.JsResult
-import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions, HttpReads, HttpResponse}
+import uk.gov.hmrc.http.HttpReads.Implicits.*
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpReads, HttpResponse, StringContextOps}
+import play.api.libs.json.Json
+import play.api.libs.ws.JsonBodyWritables.*
 
 import java.time.Instant
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: FrontendAppConfig)(implicit
+class GuaranteeBalanceConnector @Inject() (http: HttpClientV2, appConfig: FrontendAppConfig)(implicit
   ec: ExecutionContext
 ) extends HttpErrorFunctions
     with Logging {
@@ -48,7 +51,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
   )
 
   def submitBalanceRequest(request: BalanceRequest)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] = {
-    val url = s"${appConfig.guaranteeBalanceUrl}/balances"
+    val url = url"${appConfig.guaranteeBalanceUrl}/balances"
 
     implicit val eitherBalanceIdOrResponseReads: HttpReads[Either[HttpResponse, BalanceRequestResponse]] =
       HttpReads[HttpResponse].map {
@@ -68,18 +71,18 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
           }
       }
 
-    http.POST[BalanceRequest, Either[HttpResponse, BalanceRequestResponse]](
-      url,
-      request,
-      headers
-    )
+    http
+      .post(url)
+      .setHeader(headers *)
+      .withBody(Json.toJson(request))
+      .execute[Either[HttpResponse, BalanceRequestResponse]]
   }
 
   // scalastyle:off cyclomatic.complexity
   def submitBalanceRequestV2(request: BalanceRequestV2, grn: String)(implicit
     hc: HeaderCarrier
   ): Future[Either[HttpResponse, BalanceRequestResponse]] = {
-    val url = s"${appConfig.guaranteeBalanceUrl}/$grn/balance"
+    val url = url"${appConfig.guaranteeBalanceUrl}/$grn/balance"
 
     implicit val eitherBalanceIdOrResponseReads: HttpReads[Either[HttpResponse, BalanceRequestResponse]] =
       HttpReads[HttpResponse].map {
@@ -109,16 +112,16 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
           }
       }
 
-    http.POST[BalanceRequestV2, Either[HttpResponse, BalanceRequestResponse]](
-      url,
-      request,
-      headersV2
-    )
+    http
+      .post(url)
+      .setHeader(headersV2 *)
+      .withBody(Json.toJson(request))
+      .execute[Either[HttpResponse, BalanceRequestResponse]]
   }
   // scalastyle:on cyclomatic.complexity
 
   def queryPendingBalance(balanceId: BalanceId)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] = {
-    val url = s"${appConfig.guaranteeBalanceUrl}/balances/${balanceId.value}"
+    val url = url"${appConfig.guaranteeBalanceUrl}/balances/${balanceId.value}"
 
     implicit val eitherBalanceIdOrPendingResponseReads: HttpReads[Either[HttpResponse, BalanceRequestResponse]] =
       HttpReads[HttpResponse].map {
@@ -130,11 +133,10 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClient, appConfig: Frontend
           }
       }
 
-    http.GET[Either[HttpResponse, BalanceRequestResponse]](
-      url,
-      Seq.empty,
-      headers
-    )
+    http
+      .get(url)
+      .setHeader(headers *)
+      .execute[Either[HttpResponse, BalanceRequestResponse]]
   }
 
   private def processSubmitErrorResponse(response: HttpResponse): Either[HttpResponse, BalanceRequestResponse] = {

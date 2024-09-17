@@ -16,6 +16,6 @@
 
 @this()
 
-@()(implicit request: Request[_])
+@()(implicit request: Request[?])
 
 <script src='@routes.Assets.versioned("javascripts/application.min.js")' @{CSPNonce.attr}></script>

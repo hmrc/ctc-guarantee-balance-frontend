@@ -21,7 +21,7 @@ import play.api.mvc.PathBindable
 
 import java.util.UUID
 
-case class BalanceId(value: UUID)
+case class BalanceId(value: UUID) extends AnyVal
 
 object BalanceId {
 

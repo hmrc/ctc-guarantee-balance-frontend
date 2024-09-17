@@ -38,7 +38,7 @@ sealed trait GuaranteeBalanceService extends Logging {
 
   val config: FrontendAppConfig
 
-  def retrieveBalanceResponse()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]]
+  def retrieveBalanceResponse()(implicit hc: HeaderCarrier, request: DataRequest[?]): Future[Either[HttpResponse, BalanceRequestResponse]]
 
   /** @param internalId internal ID
     * @param guaranteeReferenceNumber Guarantee Reference Number
@@ -61,13 +61,13 @@ class V1GuaranteeBalanceService @Inject() (
 )(implicit ec: ExecutionContext)
     extends GuaranteeBalanceService {
 
-  override def retrieveBalanceResponse()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] =
+  override def retrieveBalanceResponse()(implicit hc: HeaderCarrier, request: DataRequest[?]): Future[Either[HttpResponse, BalanceRequestResponse]] =
     request.userAnswers.get(BalanceIdPage) match {
       case Some(balanceId: BalanceId) => pollForGuaranteeBalance(balanceId)
       case None                       => submitBalanceRequest()
     }
 
-  private def submitBalanceRequest()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] = {
+  private def submitBalanceRequest()(implicit hc: HeaderCarrier, request: DataRequest[?]): Future[Either[HttpResponse, BalanceRequestResponse]] = {
     logger.info("[GuaranteeBalanceService][submitBalanceRequest] submit balance request")
     (for {
       guaranteeReferenceNumber <- request.userAnswers.get(GuaranteeReferenceNumberPage)
@@ -125,10 +125,10 @@ class V2GuaranteeBalanceService @Inject() (
 )(implicit ec: ExecutionContext)
     extends GuaranteeBalanceService {
 
-  override def retrieveBalanceResponse()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] =
+  override def retrieveBalanceResponse()(implicit hc: HeaderCarrier, request: DataRequest[?]): Future[Either[HttpResponse, BalanceRequestResponse]] =
     submitBalanceRequest()
 
-  private def submitBalanceRequest()(implicit hc: HeaderCarrier, request: DataRequest[_]): Future[Either[HttpResponse, BalanceRequestResponse]] = {
+  private def submitBalanceRequest()(implicit hc: HeaderCarrier, request: DataRequest[?]): Future[Either[HttpResponse, BalanceRequestResponse]] = {
     logger.info("[GuaranteeBalanceService][submitBalanceRequestV2] submit balance request")
     (for {
       guaranteeReferenceNumber <- request.userAnswers.get(GuaranteeReferenceNumberPage)

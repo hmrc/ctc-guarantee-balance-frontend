@@ -40,7 +40,7 @@ class AuditServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
     val auditService                                               = new AuditService(mockFrontendAppConfig, mockAuditConnector)
     implicit val hc: HeaderCarrier                                 = HeaderCarrier()
     implicit val ec: ExecutionContext                              = ExecutionContext.global
-    implicit val request: FakeRequest[_]                           = FakeRequest(GET, "/check-transit-guarantee-balance/balance")
+    implicit val request: FakeRequest[?]                           = FakeRequest(GET, "/check-transit-guarantee-balance/balance")
     val extendedDataEventCaptor: ArgumentCaptor[ExtendedDataEvent] = ArgumentCaptor.forClass(classOf[ExtendedDataEvent])
 
     "audit must call sendExtendedEvent exactly once in audit connector if there's an event" in {

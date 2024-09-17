@@ -17,8 +17,9 @@
 package views.behaviours
 
 import org.jsoup.nodes.Document
+import org.scalatest.freespec.AnyFreeSpec
 
-trait ErrorSummaryViewBehaviours[T] {
+trait ErrorSummaryViewBehaviours[T] extends AnyFreeSpec {
   this: QuestionViewBehaviours[T] =>
 
   def pageWithErrorSummary(): Unit =

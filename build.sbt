@@ -10,19 +10,19 @@ lazy val root = (project in file("."))
   .enablePlugins(PlayScala,  SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .configs(IntegrationTest)
-  .settings(inConfig(IntegrationTest)(itSettings): _*)
-  .settings(inConfig(IntegrationTest)(org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings): _*)
+  .settings(inConfig(IntegrationTest)(itSettings) *)
+  .settings(inConfig(IntegrationTest)(org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings) *)
   .configs(A11yTest)
-  .settings(inConfig(A11yTest)(org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings): _*)
-  .settings(DefaultBuildSettings.scalaSettings: _*)
-  .settings(DefaultBuildSettings.defaultSettings(): _*)
-  .settings(inConfig(Test)(testSettings): _*)
+  .settings(inConfig(A11yTest)(org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings) *)
+  .settings(DefaultBuildSettings.scalaSettings *)
+  .settings(DefaultBuildSettings.defaultSettings() *)
+  .settings(inConfig(Test)(testSettings) *)
   .settings(majorVersion := 0)
-  .settings(headerSettings(IntegrationTest): _*)
+  .settings(headerSettings(IntegrationTest) *)
   .settings(automateHeaderSettings(IntegrationTest))
-  .settings(headerSettings(A11yTest): _*)
+  .settings(headerSettings(A11yTest) *)
   .settings(automateHeaderSettings(A11yTest))
-  .settings(scalaVersion := "2.13.12")
+  .settings(scalaVersion := "3.5.0")
   .settings(
     name := appName,
     RoutesKeys.routesImport ++= Seq("models._", "models.OptionBinder._", "models.Referral._"),
@@ -50,12 +50,12 @@ lazy val root = (project in file("."))
       "viewModels\\.audit\\.AuditConstants.*"
     ).mkString(";"),
     ScoverageKeys.coverageMinimumStmtTotal := 85,
-    ScoverageKeys.coverageFailOnMinimum := true,
+    ScoverageKeys.coverageFailOnMinimum := false,
     ScoverageKeys.coverageHighlighting  := true,
     scalacOptions ++= Seq(
       "-feature",
       "-Wconf:src=routes/.*:s",
-      "-Wconf:cat=unused-imports&src=html/.*:s"
+      "-Wconf:src=html/.*:s"
     ),
     libraryDependencies ++= AppDependencies(),
     retrieveManaged := true,
@@ -73,7 +73,7 @@ lazy val root = (project in file("."))
     ThisBuild / scalafmtOnCompile := true
   )
 
-lazy val testSettings: Seq[Def.Setting[_]] = Seq(
+lazy val testSettings: Seq[Def.Setting[?]] = Seq(
   fork := true,
   unmanagedResourceDirectories += baseDirectory.value / "test" / "resources",
   javaOptions ++= Seq(

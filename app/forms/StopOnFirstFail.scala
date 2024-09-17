@@ -21,7 +21,7 @@ import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 object StopOnFirstFail {
 
   def apply[T](constraints: Constraint[T]*) = Constraint {
-    field: T =>
+    (field: T) =>
       constraints.toList dropWhile (_(field) == Valid) match {
         case Nil             => Valid
         case constraint :: _ => constraint(field)

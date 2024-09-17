@@ -24,12 +24,13 @@ import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import repositories.SessionRepository
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
+import play.api.libs.json.Json
+import play.api.libs.ws.DefaultBodyWritables.writeableOf_String
 
 class TestOnlyInputControllerSpec
     extends AnyWordSpec
@@ -76,7 +77,7 @@ class TestOnlyInputControllerSpec
 
         wsClient
           .url(s"$baseUrl/check-transit-guarantee-balance/test-only/input")
-          .withHttpHeaders(headers: _*)
+          .withHttpHeaders(headers *)
           .post("value=GB000142;<script>print()</script>")
           .futureValue
 

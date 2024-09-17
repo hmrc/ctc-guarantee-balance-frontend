@@ -26,7 +26,7 @@
     errorSummary: ErrorSummary
 )
 
-@(form: Form[String])(implicit request: Request[_], messages: Messages)
+@(form: Form[String])(implicit request: Request[?], messages: Messages)
 
 @mainTemplate(
     title = "Test only"
