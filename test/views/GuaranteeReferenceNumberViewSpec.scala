@@ -16,7 +16,7 @@
 
 package views
 
-import forms.V1GuaranteeReferenceNumberFormProvider
+import forms.GuaranteeReferenceNumberFormProvider
 import models.NormalMode
 import org.scalacheck.{Arbitrary, Gen}
 import play.api.data.Form
@@ -27,7 +27,7 @@ import views.html.GuaranteeReferenceNumberView
 
 class GuaranteeReferenceNumberViewSpec extends InputTextViewBehaviours[String] {
 
-  override def form: Form[String] = new V1GuaranteeReferenceNumberFormProvider()()
+  override def form: Form[String] = new GuaranteeReferenceNumberFormProvider()()
 
   override def applyView(form: Form[String]): HtmlFormat.Appendable =
     injector.instanceOf[GuaranteeReferenceNumberView].apply(form, NormalMode)(fakeRequest, messages)
@@ -42,16 +42,11 @@ class GuaranteeReferenceNumberViewSpec extends InputTextViewBehaviours[String] {
 
   behave like pageWithHeading()
 
-  behave like pageWithContent("p", "You can only check the balance for:")
+  behave like pageWithContent("p", "You can only check the balance of a comprehensive guarantee, guarantee waiver or individual guarantee with multiple usage.")
 
-  behave like pageWithList(
-    "govuk-list--bullet",
-    "comprehensive guarantee",
-    "guarantee waiver",
-    "individual guarantee with multiple usage"
+  behave like pageWithHint(
+    "The Guarantee Reference Number (GRN) will be 17 characters long and include both letters and numbers. For example, 01GB1234567890120."
   )
-
-  behave like pageWithContent("p", "You must make sure this reference is up to date.")
 
   behave like pageWithInputText(Some(InputSize.Width20))
 

@@ -19,11 +19,6 @@ GET        /                                        controllers.IndexController.
 GET        /start                                   controllers.StartController.start(referral: Option[Referral] ?= None)
 GET        /start-again                             controllers.StartController.startAgain()
 
-GET        /eori-number                             controllers.EoriNumberController.onPageLoad(mode: Mode = NormalMode)
-POST       /eori-number                             controllers.EoriNumberController.onSubmit(mode: Mode = NormalMode)
-GET        /change-eori-number                      controllers.EoriNumberController.onPageLoad(mode: Mode = CheckMode)
-POST       /change-eori-number                      controllers.EoriNumberController.onSubmit(mode: Mode = CheckMode)
-
 GET        /guarantee-reference-number              controllers.GuaranteeReferenceNumberController.onPageLoad(mode: Mode = NormalMode)
 POST       /guarantee-reference-number              controllers.GuaranteeReferenceNumberController.onSubmit(mode: Mode = NormalMode)
 GET        /change-guarantee-reference-number       controllers.GuaranteeReferenceNumberController.onPageLoad(mode: Mode = CheckMode)
@@ -44,8 +39,8 @@ GET        /balance                                 controllers.BalanceConfirmat
 GET        /check-another-guarantee-balance         controllers.BalanceConfirmationController.checkAnotherGuaranteeBalance()
 GET        /manage-transit-movements                controllers.BalanceConfirmationController.manageTransitMovements()
 
-GET        /details-do-not-match                    controllers.DetailsDontMatchControllerV1.onPageLoad()
-GET        /grn-access-code-mismatch                controllers.DetailsDontMatchControllerV2.onPageLoad()
+GET        /details-do-not-match                    controllers.DetailsDontMatchController.onPageLoad()
+GET        /grn-access-code-mismatch                controllers.DetailsDontMatchController.onPageLoad()
 
 GET        /guarantee-not-supported                 controllers.UnsupportedGuaranteeTypeController.onPageLoad()
 POST       /guarantee-not-supported                 controllers.UnsupportedGuaranteeTypeController.onSubmit()

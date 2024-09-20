@@ -18,38 +18,30 @@
 @import controllers.routes
 @import java.util.UUID
 @import viewModels.components.InputTextViewModel._
-@import views.html.components.{Button, Heading}
+@import views.html.components.{Button, Heading, HeadingCaption}
 
 @this(
-    mainTemplate: MainTemplate,
-    formHelper: FormWithCSRF,
-    config: FrontendAppConfig,
-    heading: Heading,
-    button: Button
+        mainTemplate: MainTemplate,
+        formHelper: FormWithCSRF,
+        config: FrontendAppConfig,
+        heading: Heading,
+        button: Button,
+        caption: HeadingCaption
 )
 
 @(balanceId: Option[UUID])(implicit request: Request[?], messages: Messages)
 
-@mainTemplate(
-    title = messages("tryAgain.title")
-) {
+    @mainTemplate(
+        title = messages("tryAgain.title")
+    ) {
 
-    @heading(messages("tryAgain.heading"))
+        @heading(messages("tryAgain.heading"), Some(messages("tryAgain.caption")))
 
-    <p class="govuk-body">@messages("tryAgain.checkDetails.prelink")
-        <a class="govuk-link" id="check-details" href="@routes.CheckYourAnswersController.onPageLoad()">@messages("tryAgain.checkDetails.link")</a> @messages("tryAgain.checkDetails.postlink", config.rateLimitDuration)
-    </p>
+        <p class="govuk-body">
+            @messages("tryAgain.checkDetails.prelink") <a class="govuk-link" id="check-details" href="@routes.CheckYourAnswersController.onPageLoad()">@messages("tryAgain.checkDetails.link")</a>.
+        </p>
 
-    @formHelper(action = routes.TryAgainController.onSubmit(), Symbol("autoComplete") -> "off") {
-
-        @balanceId.map { value =>
-            <input type="hidden" id="balanceId" value="@value"/>
-        }
-
-        @button(
-            messageKey = "site.tryAgain",
-            preventDoubleClick = true,
-            attributes = Map("id" -> "submit")
-        )
+        <p class="govuk-body">@messages("tryAgain.problems")
+            <a class="govuk-link" target="_blank" id="contact" rel="noopener noreferrer" href=@config.nctsEnquiriesUrl>@messages("tryAgain.problems.link")</a>.
+        </p>
     }
-}

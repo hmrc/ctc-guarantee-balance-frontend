@@ -21,12 +21,12 @@ import forms.mappings.Mappings
 import models.RichString
 import play.api.data.Form
 
-sealed trait GuaranteeReferenceNumberFormProvider extends Mappings {
+class GuaranteeReferenceNumberFormProvider extends Mappings {
 
-  val prefix: String
+  val prefix: String = "guaranteeReferenceNumber"
 
-  val maxGuaranteeReferenceNumberLength: Int
-  val minGuaranteeReferenceNumberLength: Int
+  val maxGuaranteeReferenceNumberLength: Int = Constants.maxGuaranteeReferenceNumberLength
+  val minGuaranteeReferenceNumberLength: Int = Constants.minGuaranteeReferenceNumberLength
 
   def apply(): Form[String] =
     Form(
@@ -39,18 +39,4 @@ sealed trait GuaranteeReferenceNumberFormProvider extends Mappings {
           )
         )
     )
-}
-
-class V1GuaranteeReferenceNumberFormProvider extends GuaranteeReferenceNumberFormProvider {
-
-  override val maxGuaranteeReferenceNumberLength: Int = Constants.maxGuaranteeReferenceNumberLength
-  override val minGuaranteeReferenceNumberLength: Int = Constants.minGuaranteeReferenceNumberLength
-  override val prefix: String                         = "guaranteeReferenceNumber"
-}
-
-class V2GuaranteeReferenceNumberFormProvider extends GuaranteeReferenceNumberFormProvider {
-
-  override val maxGuaranteeReferenceNumberLength: Int = Constants.maxGuaranteeReferenceNumberLengthV2
-  override val minGuaranteeReferenceNumberLength: Int = Constants.minGuaranteeReferenceNumberLengthV2
-  override val prefix: String                         = "guaranteeReferenceNumber.v2"
 }

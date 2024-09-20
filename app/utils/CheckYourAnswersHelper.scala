@@ -24,29 +24,11 @@ import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 
 class CheckYourAnswersHelper(userAnswers: UserAnswers, mode: Mode)(implicit messages: Messages) extends AnswersHelper(userAnswers) {
 
-  def eoriNumber: Option[SummaryListRow] =
-    getAnswerAndBuildRow[String](
-      page = EoriNumberPage,
-      formatAnswer = formatAsText,
-      prefix = "eoriNumber",
-      id = Some("change-eori-number"),
-      call = routes.EoriNumberController.onPageLoad(mode)
-    )
-
   def guaranteeReferenceNumber: Option[SummaryListRow] =
     getAnswerAndBuildRow[String](
       page = GuaranteeReferenceNumberPage,
       formatAnswer = formatAsText,
       prefix = "guaranteeReferenceNumber",
-      id = Some("change-guarantee-reference-number"),
-      call = routes.GuaranteeReferenceNumberController.onPageLoad(mode)
-    )
-
-  def guaranteeReferenceNumberV2: Option[SummaryListRow] =
-    getAnswerAndBuildRow[String](
-      page = GuaranteeReferenceNumberPage,
-      formatAnswer = formatAsText,
-      prefix = "guaranteeReferenceNumber.v2",
       id = Some("change-guarantee-reference-number"),
       call = routes.GuaranteeReferenceNumberController.onPageLoad(mode)
     )

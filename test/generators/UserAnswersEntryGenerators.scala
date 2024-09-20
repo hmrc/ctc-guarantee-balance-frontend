@@ -32,14 +32,6 @@ trait UserAnswersEntryGenerators {
       } yield (page, value)
     }
 
-  implicit lazy val arbitraryEoriNumberUserAnswersEntry: Arbitrary[(EoriNumberPage.type, JsValue)] =
-    Arbitrary {
-      for {
-        page  <- arbitrary[EoriNumberPage.type]
-        value <- nonEmptyString.map(Json.toJson(_))
-      } yield (page, value)
-    }
-
   implicit lazy val arbitraryGuaranteeReferenceNumberUserAnswersEntry: Arbitrary[(GuaranteeReferenceNumberPage.type, JsValue)] =
     Arbitrary {
       for {

@@ -16,8 +16,8 @@
 
 package views
 
-import models.Referral
 import models.Referral._
+import models.{Referral, Timestamp}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import play.twirl.api.HtmlFormat
@@ -26,11 +26,12 @@ import views.html.BalanceConfirmationView
 
 class BalanceConfirmationViewSpec extends PanelViewBehaviours {
 
-  private val balance  = Gen.numStr.sample.value
-  private val referral = arbitrary[Option[Referral]].sample.value.map(_.toString)
+  private val balance   = nonEmptyString.sample.value
+  private val timestamp = arbitrary[Timestamp].sample.value
+  private val referral  = arbitrary[Option[Referral]].sample.value.map(_.toString)
 
   override def view: HtmlFormat.Appendable =
-    injector.instanceOf[BalanceConfirmationView].apply(balance, referral)(fakeRequest, messages)
+    injector.instanceOf[BalanceConfirmationView].apply(balance, timestamp, referral)(fakeRequest, messages)
 
   override val prefix: String = "balanceConfirmation"
 
@@ -40,39 +41,38 @@ class BalanceConfirmationViewSpec extends PanelViewBehaviours {
 
   behave like pageWithHeading()
 
-  behave like pageWithPanel(balance)
+  behave like pageWithPanel(s"$balance as of ${timestamp.date} at ${timestamp.time}")
+
+  behave like pageWithContent(doc, "p", "This is your guarantee limit minus the liability amounts for your open movements.")
 
   "when NCTS referral" - {
-    val view = injector.instanceOf[BalanceConfirmationView].apply(balance, Some(NCTS.toString))(fakeRequest, messages)
+    val view = injector.instanceOf[BalanceConfirmationView].apply(balance, timestamp, Some(NCTS.toString))(fakeRequest, messages)
     val doc  = parseView(view)
 
-    behave like pageWithContent(doc, "p", "You can:")
-    behave like pageWithLinkedList(
+    behave like pageWithLink(
       doc,
-      "govuk-list--bullet",
-      (
-        "check-another-guarantee-balance",
-        "check another guarantee balance",
-        controllers.routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
-      ),
-      (
-        "manage-transit-movements",
-        "manage your transit movements",
-        controllers.routes.BalanceConfirmationController.manageTransitMovements().url
-      )
+      "check-another-guarantee-balance",
+      "Check another guarantee balance",
+      controllers.routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
+    )
+
+    behave like pageWithLink(
+      doc,
+      "manage-transit-movements",
+      "Manage your transit movements",
+      controllers.routes.BalanceConfirmationController.manageTransitMovements().url
     )
   }
 
   "when GovUK or no referral" - {
     val referral = Gen.oneOf(Some(GovUK.toString), None).sample.value
-    val view     = injector.instanceOf[BalanceConfirmationView].apply(balance, referral)(fakeRequest, messages)
+    val view     = injector.instanceOf[BalanceConfirmationView].apply(balance, timestamp, referral)(fakeRequest, messages)
     val doc      = parseView(view)
 
-    behave like pageWithPartialContent(doc, "p", "You can")
     behave like pageWithLink(
       doc,
       "check-another-guarantee-balance",
-      "check another guarantee balance",
+      "Check another guarantee balance",
       controllers.routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
     )
   }

@@ -21,8 +21,7 @@ import play.api.libs.json.{JsValue, Json}
 import services.JsonAuditModel
 import viewModels.audit.AuditConstants._
 
-case class SuccessfulBalanceAuditModel(eoriNumber: String,
-                                       guaranteeReferenceNumber: String,
+case class SuccessfulBalanceAuditModel(guaranteeReferenceNumber: String,
                                        accessCode: String,
                                        internalId: String,
                                        dateTime: LocalDateTime,
@@ -33,7 +32,7 @@ case class SuccessfulBalanceAuditModel(eoriNumber: String,
   override val auditType: String = AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION
 
   override val detail: JsValue = Json.obj(
-    AUDIT_FIELD_EORI_NUMBER    -> eoriNumber,
+    AUDIT_FIELD_EORI_NUMBER    -> "-", // EORI is not captured in P5 but remains part of the pre-existing audit structure from P4
     AUDIT_FIELD_GRN_NUMBER     -> guaranteeReferenceNumber,
     AUDIT_FIELD_ACCESS_CODE    -> accessCode,
     AUDIT_FIELD_GG_INTERNAL_ID -> internalId,
@@ -45,13 +44,12 @@ case class SuccessfulBalanceAuditModel(eoriNumber: String,
 
 object SuccessfulBalanceAuditModel {
 
-  def build(eoriNumber: String,
-            guaranteeReferenceNumber: String,
+  def apply(guaranteeReferenceNumber: String,
             accessCode: String,
             internalId: String,
             dateTime: LocalDateTime,
             status: Int,
             balance: String
   ): SuccessfulBalanceAuditModel =
-    SuccessfulBalanceAuditModel(eoriNumber, guaranteeReferenceNumber, accessCode, internalId, dateTime, status, balance)
+    new SuccessfulBalanceAuditModel(guaranteeReferenceNumber, accessCode, internalId, dateTime, status, balance)
 }

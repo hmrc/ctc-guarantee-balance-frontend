@@ -17,7 +17,7 @@
 package viewModels
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
+import pages.{AccessCodePage, GuaranteeReferenceNumberPage}
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import viewModels.CheckYourAnswersViewModel.CheckYourAnswersViewModelProvider
 
@@ -40,12 +40,10 @@ class CheckYourAnswersViewModelSpec extends SpecBase with AppWithDefaultMockFixt
 
   "when user answers are not empty" - {
 
-    val eori = "eori"
     val grn  = "grn"
     val code = "••••"
 
     val userAnswers = emptyUserAnswers
-      .setValue(EoriNumberPage, eori)
       .setValue(GuaranteeReferenceNumberPage, grn)
       .setValue(AccessCodePage, code)
 
@@ -55,11 +53,11 @@ class CheckYourAnswersViewModelSpec extends SpecBase with AppWithDefaultMockFixt
       result.section.sectionTitle mustNot be(defined)
     }
 
-    "must have 3 rows" in {
-      result.section.rows.size mustBe 3
+    "must have 2 rows" in {
+      result.section.rows.size mustBe 2
     }
 
-    Seq(eori, grn, code).zipWithIndex.foreach {
+    Seq(grn, code).zipWithIndex.foreach {
       case (value, index) =>
         s"when row ${index + 1}" - {
           val row = result.section.rows(index)

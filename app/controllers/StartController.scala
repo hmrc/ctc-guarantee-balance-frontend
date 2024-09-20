@@ -16,12 +16,11 @@
 
 package controllers
 
-import controllers.actions._
-import models.{Referral, UserAnswers}
-import navigation.FirstPage
+import controllers.actions.*
+import models.{NormalMode, Referral, UserAnswers}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
-import play.api.mvc._
+import play.api.mvc.*
 import repositories.SessionRepository
 import services.DateTimeService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
@@ -35,8 +34,7 @@ class StartController @Inject() (
   updateSession: ReferralActionProvider,
   actions: Actions,
   val controllerComponents: MessagesControllerComponents,
-  dateTimeService: DateTimeService,
-  firstPage: FirstPage
+  dateTimeService: DateTimeService
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport {
@@ -53,5 +51,5 @@ class StartController @Inject() (
   }
 
   private def redirect: Result =
-    Redirect(firstPage.call)
+    Redirect(controllers.routes.GuaranteeReferenceNumberController.onPageLoad(NormalMode))
 }

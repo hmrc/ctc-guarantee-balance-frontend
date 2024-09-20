@@ -42,7 +42,9 @@ class AccessCodeViewSpec extends InputTextViewBehaviours[String] {
 
   behave like pageWithHeading()
 
-  behave like pageWithContent("p", "The person responsible for your transit movements will have received an email about access codes.")
+  behave like pageWithContent("p", "This is set up by the Principal and works just like a bank PIN code.")
+
+  behave like pageWithHint("The code will be 4 characters long, like 0000 or X9X9.")
 
   behave like pageWithInputText(Some(InputSize.Width5), "password")
 

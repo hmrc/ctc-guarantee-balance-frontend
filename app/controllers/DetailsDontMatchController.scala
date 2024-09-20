@@ -21,39 +21,15 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import views.html.DetailsDontMatchView
-import views.html.v2.DetailsDontMatchViewV2
 
 import javax.inject.Inject
 
-sealed trait DetailsDontMatchController {
-
-  def onPageLoad: Action[AnyContent]
-
-}
-
-class DetailsDontMatchControllerV1 @Inject() (
+class DetailsDontMatchController @Inject() (
   override val messagesApi: MessagesApi,
   actions: Actions,
   val controllerComponents: MessagesControllerComponents,
   view: DetailsDontMatchView
-) extends DetailsDontMatchController
-    with FrontendBaseController
-    with I18nSupport {
-
-  def onPageLoad: Action[AnyContent] = actions.requireData {
-    implicit request =>
-      Ok(view())
-  }
-
-}
-
-class DetailsDontMatchControllerV2 @Inject() (
-  override val messagesApi: MessagesApi,
-  actions: Actions,
-  val controllerComponents: MessagesControllerComponents,
-  view: DetailsDontMatchViewV2
-) extends DetailsDontMatchController
-    with FrontendBaseController
+) extends FrontendBaseController
     with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = actions.requireData {

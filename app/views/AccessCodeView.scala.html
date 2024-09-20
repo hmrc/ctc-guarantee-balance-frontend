@@ -33,17 +33,18 @@
     showBackLink = true
 ) {
 
-    @formHelper(action = routes.AccessCodeController.onSubmit(mode), Symbol("autoComplete") -> "off") {
+    @errorSummary(form.errors)
 
-        @errorSummary(form.errors)
+    @formHelper(action = routes.AccessCodeController.onSubmit(mode), Symbol("autoComplete") -> "off") {
 
         @inputText(
             field = form("value"),
-            inputTextType = TextInputWithStatementHeading(
+            inputTextType = TextInputWithHiddenLabel(
                 heading = messages("accessCode.heading"),
-                label = messages("accessCode.label"),
+                caption = Some(messages("accessCode.caption")),
                 additionalHtml = Html(s"""<p class="govuk-body">${messages("accessCode.paragraph")}</p>""")
             ),
+            hint = Some(messages("accessCode.hint")),
             inputClass = InputSize.Width5,
             inputType = "password",
             autocomplete = Some("off")

@@ -34,15 +34,14 @@ import java.time.LocalDateTime
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-sealed trait GuaranteeBalanceResponseHandler extends Logging {
-
-  val sessionRepository: SessionRepository
-  val auditService: AuditService
+class GuaranteeBalanceResponseHandler @Inject() (
+  val sessionRepository: SessionRepository,
+  val auditService: AuditService,
   val errorHandler: ErrorHandler
+)(implicit val ec: ExecutionContext)
+    extends Logging {
 
-  implicit val ec: ExecutionContext
-
-  def detailsDoNotMatch: Call
+  def detailsDoNotMatch: Call = controllers.routes.DetailsDontMatchController.onPageLoad()
 
   def processResponse(response: Either[HttpResponse, BalanceRequestResponse])(implicit
     hc: HeaderCarrier,
@@ -151,8 +150,7 @@ sealed trait GuaranteeBalanceResponseHandler extends Logging {
     logger.info(s"[GuaranteeBalanceResponseHandler][auditSuccess]")
 
     auditService.audit(
-      SuccessfulBalanceAuditModel.build(
-        request.userAnswers.get(EoriNumberPage).getOrElse("-"),
+      SuccessfulBalanceAuditModel.apply(
         request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-"),
         request.userAnswers.get(AccessCodePage).getOrElse("-"),
         request.internalId,
@@ -166,9 +164,8 @@ sealed trait GuaranteeBalanceResponseHandler extends Logging {
   private def auditRateLimit()(implicit hc: HeaderCarrier, ec: ExecutionContext, request: DataRequest[?]): Unit = {
     logger.info(s"[GuaranteeBalanceResponseHandler][auditRateLimit] Request limit exceeded")
     auditService.audit(
-      UnsuccessfulBalanceAuditModel.build(
+      UnsuccessfulBalanceAuditModel.apply(
         AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT,
-        request.userAnswers.get(EoriNumberPage).getOrElse("-"),
         request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-"),
         request.userAnswers.get(AccessCodePage).getOrElse("-"),
         request.internalId,
@@ -186,9 +183,8 @@ sealed trait GuaranteeBalanceResponseHandler extends Logging {
   ): Unit = {
     logger.warn(s"[GuaranteeBalanceResponseHandler][auditError] Failed to process errorMessage: $errorMessage, status Code: $errorCode")
     auditService.audit(
-      UnsuccessfulBalanceAuditModel.build(
+      UnsuccessfulBalanceAuditModel.apply(
         AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION,
-        request.userAnswers.get(EoriNumberPage).getOrElse("-"),
         request.userAnswers.get(GuaranteeReferenceNumberPage).getOrElse("-"),
         request.userAnswers.get(AccessCodePage).getOrElse("-"),
         request.internalId,
@@ -198,24 +194,4 @@ sealed trait GuaranteeBalanceResponseHandler extends Logging {
       )
     )
   }
-}
-
-class GuaranteeBalanceResponseHandlerV1 @Inject() (
-  override val sessionRepository: SessionRepository,
-  override val auditService: AuditService,
-  override val errorHandler: ErrorHandler
-)(implicit override val ec: ExecutionContext)
-    extends GuaranteeBalanceResponseHandler {
-
-  override def detailsDoNotMatch: Call = controllers.routes.DetailsDontMatchControllerV1.onPageLoad()
-}
-
-class GuaranteeBalanceResponseHandlerV2 @Inject() (
-  override val sessionRepository: SessionRepository,
-  override val auditService: AuditService,
-  override val errorHandler: ErrorHandler
-)(implicit override val ec: ExecutionContext)
-    extends GuaranteeBalanceResponseHandler {
-
-  override def detailsDoNotMatch: Call = controllers.routes.DetailsDontMatchControllerV2.onPageLoad()
 }

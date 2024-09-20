@@ -58,12 +58,7 @@
     case OrdinaryTextInput(heading) => {
         @govukInput(input.withHeading(heading = Text(heading)))
     }
-    case TextInputWithHiddenLabel(heading, label, additionalHtml) => {
-        @headingWithNoCaption(heading)
-        @additionalHtml
-        @govukInput(input.copy(label = Label(isPageHeading = false, content = Text(label), classes = "govuk-visually-hidden")))
-    }
-    case x @ TextInputWithHiddenLabelV2(heading, caption, additionalHtml) => {
+    case x @ TextInputWithHiddenLabel(heading, caption, additionalHtml) => {
         @hmrcHeading(heading, caption, Some(x.headingClasses))
         @additionalHtml
         @govukInput(input.copy(label = Label(isPageHeading = false, content = Text(heading), classes = "govuk-visually-hidden")))

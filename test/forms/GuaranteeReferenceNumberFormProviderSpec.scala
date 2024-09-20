@@ -22,72 +22,17 @@ import play.api.data.FormError
 
 class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
 
-  "v1" - {
+  "GuaranteeReferenceNumberFormProvider" - {
 
     val maxLength = maxGuaranteeReferenceNumberLength
+    val minLength = minGuaranteeReferenceNumberLength
 
     val requiredKey  = "guaranteeReferenceNumber.error.required"
     val maxLengthKey = "guaranteeReferenceNumber.error.length"
+    val minLengthKey = "guaranteeReferenceNumber.error.length"
     val invalidKey   = "guaranteeReferenceNumber.error.invalid"
 
-    val form = new V1GuaranteeReferenceNumberFormProvider()()
-
-    ".value" - {
-
-      val fieldName = "value"
-
-      behave like fieldThatBindsValidData(
-        form = form,
-        fieldName = fieldName,
-        validDataGenerator = stringsWithMaxLength(maxLength)
-      )
-
-      behave like fieldWithMaxLength(
-        form = form,
-        fieldName = fieldName,
-        maxLength = maxLength,
-        lengthError = FormError(fieldName, maxLengthKey, Seq(maxLength))
-      )
-
-      behave like mandatoryField(
-        form = form,
-        fieldName = fieldName,
-        requiredError = FormError(fieldName, requiredKey)
-      )
-
-      behave like fieldThatDoesNotBindInvalidData(
-        form = form,
-        fieldName = fieldName,
-        regex = alphaNumericRegex,
-        gen = stringsOfLength(maxLength),
-        invalidKey = invalidKey
-      )
-
-      "must remove spaces on bound strings" in {
-        val result = form.bind(Map(fieldName -> " 123 456 "))
-        result.errors mustEqual Nil
-        result.get mustEqual "123456"
-      }
-
-      "must not accept HTML/JavaScript characters" in {
-        val result = form.bind(Map(fieldName -> "Test;<p>Hello</p>"))
-        result.errors must contain(FormError(fieldName, invalidKey, Seq(alphaNumericRegex)))
-      }
-
-    }
-  }
-
-  "v2" - {
-
-    val maxLength = maxGuaranteeReferenceNumberLengthV2
-    val minLength = minGuaranteeReferenceNumberLengthV2
-
-    val requiredKey  = "guaranteeReferenceNumber.v2.error.required"
-    val maxLengthKey = "guaranteeReferenceNumber.v2.error.length"
-    val minLengthKey = "guaranteeReferenceNumber.v2.error.length"
-    val invalidKey   = "guaranteeReferenceNumber.v2.error.invalid"
-
-    val form = new V2GuaranteeReferenceNumberFormProvider()()
+    val form = new GuaranteeReferenceNumberFormProvider()()
 
     ".value" - {
 

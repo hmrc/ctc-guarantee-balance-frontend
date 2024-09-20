@@ -17,8 +17,8 @@
 package navigation
 
 import controllers.routes
-import models._
-import pages._
+import models.*
+import pages.*
 import play.api.mvc.Call
 
 import javax.inject.{Inject, Singleton}
@@ -27,7 +27,6 @@ import javax.inject.{Inject, Singleton}
 class Navigator @Inject() () {
 
   private val normalRoutes: Page => UserAnswers => Call = {
-    case EoriNumberPage               => _ => routes.GuaranteeReferenceNumberController.onPageLoad(NormalMode)
     case GuaranteeReferenceNumberPage => _ => routes.AccessCodeController.onPageLoad(NormalMode)
     case AccessCodePage               => _ => routes.CheckYourAnswersController.onPageLoad()
     case _                            => _ => routes.StartController.startAgain()

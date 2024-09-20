@@ -17,20 +17,20 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import forms.V1GuaranteeReferenceNumberFormProvider
+import forms.GuaranteeReferenceNumberFormProvider
 import models.NormalMode
 import pages.GuaranteeReferenceNumberPage
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import views.html.GuaranteeReferenceNumberView
 
 class GuaranteeReferenceNumberControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   override protected def applicationBuilder(): GuiceApplicationBuilder =
-    super.v1ApplicationBuilder()
+    super.applicationBuilder()
 
-  private val formProvider                       = new V1GuaranteeReferenceNumberFormProvider()
+  private val formProvider                       = new GuaranteeReferenceNumberFormProvider()
   private val form                               = formProvider()
   private val mode                               = NormalMode
   private lazy val guaranteeReferenceNumberRoute = routes.GuaranteeReferenceNumberController.onPageLoad(mode).url
@@ -45,8 +45,7 @@ class GuaranteeReferenceNumberControllerSpec extends SpecBase with AppWithDefaul
 
       val request = FakeRequest(GET, guaranteeReferenceNumberRoute)
       val view    = injector.instanceOf[GuaranteeReferenceNumberView]
-
-      val result = route(app, request).value
+      val result  = route(app, request).value
 
       status(result) mustEqual OK
 

@@ -25,8 +25,8 @@ case class CheckYourAnswersViewModel(section: Section)
 
 object CheckYourAnswersViewModel {
 
-  sealed trait CheckYourAnswersViewModelProvider {
-    val guaranteeReferenceNumber: CheckYourAnswersHelper => Option[SummaryListRow]
+  class CheckYourAnswersViewModelProvider {
+    val guaranteeReferenceNumber: CheckYourAnswersHelper => Option[SummaryListRow] = _.guaranteeReferenceNumber
 
     def apply(userAnswers: UserAnswers)(implicit messages: Messages): CheckYourAnswersViewModel = {
       val helper = new CheckYourAnswersHelper(userAnswers, CheckMode)
@@ -34,21 +34,12 @@ object CheckYourAnswersViewModel {
       CheckYourAnswersViewModel(
         Section(
           Seq(
-            helper.eoriNumber,
             guaranteeReferenceNumber(helper),
             helper.accessCode
           ).flatten
         )
       )
     }
-  }
-
-  class CheckYourAnswersViewModelProviderV1 extends CheckYourAnswersViewModelProvider {
-    override val guaranteeReferenceNumber: CheckYourAnswersHelper => Option[SummaryListRow] = _.guaranteeReferenceNumber
-  }
-
-  class CheckYourAnswersViewModelProviderV2 extends CheckYourAnswersViewModelProvider {
-    override val guaranteeReferenceNumber: CheckYourAnswersHelper => Option[SummaryListRow] = _.guaranteeReferenceNumberV2
   }
 
 }

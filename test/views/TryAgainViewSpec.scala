@@ -37,23 +37,13 @@ class TryAgainViewSpec extends ViewBehaviours {
 
   behave like pageWithHeading()
 
-  behave like pageWithPartialContent("p", "You can")
+  behave like pageWithPartialContent("p", s"Wait for 60 seconds - then")
 
   behave like pageWithLink(
     "check-details",
-    "check that your details are correct",
+    "check your details are correct and try again",
     controllers.routes.CheckYourAnswersController.onPageLoad().url
   )
-  behave like pageWithPartialContent("p", s"or you can try again in ${frontendAppConfig.rateLimitDuration} seconds.")
-
-  behave like pageWithSubmitButton("Try again")
-
-  "when balance ID is defined" - {
-    val balanceId = arbitrary[BalanceId].sample.value.value
-    val view      = injector.instanceOf[TryAgainView].apply(Some(balanceId))(fakeRequest, messages)
-    val doc       = parseView(view)
-    behave like pageWithHiddenInput(doc, balanceId.toString)
-  }
 
   "when balance ID is not defined" - {
     val view = injector.instanceOf[TryAgainView].apply(None)(fakeRequest, messages)

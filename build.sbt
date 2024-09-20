@@ -50,7 +50,7 @@ lazy val root = (project in file("."))
       "viewModels\\.audit\\.AuditConstants.*"
     ).mkString(";"),
     ScoverageKeys.coverageMinimumStmtTotal := 85,
-    ScoverageKeys.coverageFailOnMinimum := false,
+    ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting  := true,
     scalacOptions ++= Seq(
       "-feature",

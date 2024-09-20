@@ -31,13 +31,13 @@
     title = messages("detailsDontMatch.title")
 ) {
 
-    @heading(messages("detailsDontMatch.heading"))
+    @heading(messages("detailsDontMatch.heading"), Some(messages("detailsDontMatch.caption")))
 
-    <p class="govuk-body">@messages("detailsDontMatch.p1")
-        <a class="govuk-link" id="try-again" href=@routes.CheckYourAnswersController.onPageLoad()>@messages("detailsDontMatch.p1.a")</a>.
+    <p class="govuk-body">
+        <a class="govuk-link" id="try-again" href=@routes.CheckYourAnswersController.onPageLoad()>@messages("detailsDontMatch.p1")</a>.
     </p>
 
     <p class="govuk-body">@messages("detailsDontMatch.p2")
-        <a class="govuk-link" target="_blank" id="contact" rel="noopener noreferrer" href=@config.nctsEnquiriesUrl>@messages("detailsDontMatch.p2.a")</a>.
+        <a class="govuk-link" target="_blank" id="contact" rel="noopener noreferrer" href=@config.nctsEnquiriesUrl>@messages("detailsDontMatch.p2.a")</a>
     </p>
 }

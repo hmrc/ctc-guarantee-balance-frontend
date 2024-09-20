@@ -14,49 +14,45 @@
  * limitations under the License.
  */
 
-package handlers.v2
+package handlers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import cats.data.NonEmptyList
-import handlers.GuaranteeBalanceResponseHandler
 import models.UserAnswers
-import models.backend._
+import models.backend.*
 import models.backend.errors.FunctionalError
 import models.requests.DataRequest
 import models.values.{BalanceId, CurrencyCode, ErrorType}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify}
-import pages._
+import pages.*
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{AnyContent, Request, Result}
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import services.AuditService
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpResponse}
-import viewModels.audit.AuditConstants._
+import viewModels.audit.AuditConstants.*
 import viewModels.audit.{SuccessfulBalanceAuditModel, UnsuccessfulBalanceAuditModel}
 
 import java.util.UUID
 import scala.concurrent.Future
 
-class GuaranteeBalanceResponseHandlerV2Spec extends SpecBase with AppWithDefaultMockFixtures {
+class GuaranteeBalanceResponseHandlerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   private val expectedUuid    = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
   private val balanceId       = BalanceId(expectedUuid)
   private val balanceResponse = BalanceRequestSuccess(BigDecimal(99.9), Some(CurrencyCode("GBP")))
   private val grn: String     = "grn"
   private val access: String  = "access"
-  private val taxId: String   = "taxId"
 
   private val baseAnswers: UserAnswers = emptyUserAnswers
     .setValue(GuaranteeReferenceNumberPage, grn)
     .setValue(AccessCodePage, access)
-    .setValue(EoriNumberPage, taxId)
 
   private val baseAnswersWithBalanceId: UserAnswers = emptyUserAnswers
     .setValue(GuaranteeReferenceNumberPage, grn)
     .setValue(AccessCodePage, access)
-    .setValue(EoriNumberPage, taxId)
     .setValue(BalanceIdPage, balanceId)
 
   private val noMatchResponse           = Right(BalanceRequestNotMatched("test"))
@@ -84,7 +80,7 @@ class GuaranteeBalanceResponseHandlerV2Spec extends SpecBase with AppWithDefault
   private lazy val auditService: AuditService               = app.injector.instanceOf[AuditService]
 
   override protected def applicationBuilder(): GuiceApplicationBuilder =
-    super.v2ApplicationBuilder()
+    super.applicationBuilder()
 
   "GuaranteeBalanceResponseHandlerSpec" - {
 
@@ -101,7 +97,7 @@ class GuaranteeBalanceResponseHandlerV2Spec extends SpecBase with AppWithDefault
       val result: Future[Result] = handler.processResponse(noMatchResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchControllerV2.onPageLoad().url
+      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
       val auditCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
       verify(auditService, times(1)).audit(auditCaptor.capture())(any(), any(), any())
@@ -116,7 +112,7 @@ class GuaranteeBalanceResponseHandlerV2Spec extends SpecBase with AppWithDefault
       val result: Future[Result] = handler.processResponse(eoriNoMatchResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchControllerV2.onPageLoad().url
+      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
       val auditCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
       verify(auditService, times(1)).audit(auditCaptor.capture())(any(), any(), any())
@@ -131,7 +127,7 @@ class GuaranteeBalanceResponseHandlerV2Spec extends SpecBase with AppWithDefault
       val result: Future[Result] = handler.processResponse(grnNoMatchResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchControllerV2.onPageLoad().url
+      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
       val auditCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
       verify(auditService, times(1)).audit(auditCaptor.capture())(any(), any(), any())
@@ -146,7 +142,7 @@ class GuaranteeBalanceResponseHandlerV2Spec extends SpecBase with AppWithDefault
       val result: Future[Result] = handler.processResponse(accessCodeNoMatchResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchControllerV2.onPageLoad().url
+      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
       val auditCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
       verify(auditService, times(1)).audit(auditCaptor.capture())(any(), any(), any())
@@ -161,7 +157,7 @@ class GuaranteeBalanceResponseHandlerV2Spec extends SpecBase with AppWithDefault
       val result: Future[Result] = handler.processResponse(eoriAndGrnMatchResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchControllerV2.onPageLoad().url
+      redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
       val auditCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
       verify(auditService, times(1)).audit(auditCaptor.capture())(any(), any(), any())

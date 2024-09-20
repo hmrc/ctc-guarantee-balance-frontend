@@ -72,7 +72,7 @@ class InputTextSpec extends A11ySpecBase {
           component
             .apply(
               form("value"),
-              TextInputWithHiddenLabel(title, label, additionalHtml),
+              TextInputWithHiddenLabel(title, Some(label), additionalHtml),
               inputClass,
               hint,
               prefix,
