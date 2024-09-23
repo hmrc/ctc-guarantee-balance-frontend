@@ -43,6 +43,7 @@ class UnsupportedGuaranteeTypeViewSpec extends ViewBehaviours {
   )
 
   behave like pageWithPartialContent("p", "You can")
+
   behave like pageWithLink(
     "checkDetails-link",
     "change the reference of the guarantee you are checking",

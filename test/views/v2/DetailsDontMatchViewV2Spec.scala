@@ -40,6 +40,7 @@ class DetailsDontMatchViewV2Spec extends ViewBehaviours {
   )
 
   behave like pageWithPartialContent("p", "If your details are correct,")
+
   behave like pageWithLink(
     "contact",
     "contact the NCTS helpdesk (opens in a new tab)",

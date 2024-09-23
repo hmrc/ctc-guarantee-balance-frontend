@@ -34,6 +34,7 @@ class DetailsDontMatchViewSpec extends ViewBehaviours {
   behave like pageWithHeading()
 
   behave like pageWithPartialContent("p", "You must")
+
   behave like pageWithLink(
     "try-again",
     "check your answers and try again",
@@ -41,6 +42,7 @@ class DetailsDontMatchViewSpec extends ViewBehaviours {
   )
 
   behave like pageWithPartialContent("p", "If your details are correct, you must")
+
   behave like pageWithLink(
     "contact",
     "contact the NCTS helpdesk (opens in a new tab)",

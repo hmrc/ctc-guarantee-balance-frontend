@@ -40,7 +40,7 @@ object Referral extends Enumerable.Implicits {
       values.toSeq
         .map(
           v => v.toString -> v.asInstanceOf[T]
-        ) *
+        )*
     )
 
   implicit def queryStringBinder(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[Referral] = new QueryStringBindable[Referral] {
