@@ -77,7 +77,7 @@ class TestOnlyInputControllerSpec
 
         wsClient
           .url(s"$baseUrl/check-transit-guarantee-balance/test-only/input")
-          .withHttpHeaders(headers *)
+          .withHttpHeaders(headers*)
           .post("value=GB000142;<script>print()</script>")
           .futureValue
 

@@ -20,7 +20,7 @@ import play.api.libs.json.JsPath
 
 case object AccessCodePage extends ClearValueOnChangePage[String] {
 
-  override val pageToClear      = BalanceIdPage
-  override def path: JsPath     = JsPath \ toString
-  override def toString: String = "accessCode"
+  override val pageToClear: BalanceIdPage.type = BalanceIdPage
+  override def path: JsPath                    = JsPath \ toString
+  override def toString: String                = "accessCode"
 }

@@ -40,7 +40,7 @@ class AnswersHelper(userAnswers: UserAnswers)(implicit messages: Messages) exten
           answer = formatAnswer(answer),
           id = id,
           call = call,
-          args = args *
+          args = args*
         )
     }
 

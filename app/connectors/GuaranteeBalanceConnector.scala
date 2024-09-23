@@ -73,7 +73,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClientV2, appConfig: Fronte
 
     http
       .post(url)
-      .setHeader(headers *)
+      .setHeader(headers*)
       .withBody(Json.toJson(request))
       .execute[Either[HttpResponse, BalanceRequestResponse]]
   }
@@ -114,7 +114,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClientV2, appConfig: Fronte
 
     http
       .post(url)
-      .setHeader(headersV2 *)
+      .setHeader(headersV2*)
       .withBody(Json.toJson(request))
       .execute[Either[HttpResponse, BalanceRequestResponse]]
   }
@@ -135,7 +135,7 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClientV2, appConfig: Fronte
 
     http
       .get(url)
-      .setHeader(headers *)
+      .setHeader(headers*)
       .execute[Either[HttpResponse, BalanceRequestResponse]]
   }
 

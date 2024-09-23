@@ -38,6 +38,7 @@ class TryAgainViewSpec extends ViewBehaviours {
   behave like pageWithHeading()
 
   behave like pageWithPartialContent("p", "You can")
+
   behave like pageWithLink(
     "check-details",
     "check that your details are correct",

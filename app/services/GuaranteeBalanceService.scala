@@ -40,11 +40,13 @@ sealed trait GuaranteeBalanceService extends Logging {
 
   def retrieveBalanceResponse()(implicit hc: HeaderCarrier, request: DataRequest[?]): Future[Either[HttpResponse, BalanceRequestResponse]]
 
-  /** @param internalId internal ID
-    * @param guaranteeReferenceNumber Guarantee Reference Number
+  /** @param internalId
+    *   internal ID
+    * @param guaranteeReferenceNumber
+    *   Guarantee Reference Number
     * @return
-    *  - None if there is already a lock for the given lock ID (rate limit hit)
-    *  - Some(lock) if there is not already a lock for the given lock ID and a lock has been successfully created
+    *   - None if there is already a lock for the given lock ID (rate limit hit)
+    *   - Some(lock) if there is not already a lock for the given lock ID and a lock has been successfully created
     */
   def checkRateLimit(internalId: String, guaranteeReferenceNumber: String): Future[Option[Lock]] = {
     val lockId   = LockId(internalId, guaranteeReferenceNumber).toString
