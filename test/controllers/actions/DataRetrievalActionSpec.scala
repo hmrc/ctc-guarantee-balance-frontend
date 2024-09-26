@@ -53,7 +53,7 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar with ScalaFutur
 
     "when there is data in the cache" - {
 
-      "must build a userAnswers object and add it to the request" in {
+      "must apply a userAnswers object and add it to the request" in {
 
         val id                = "id"
         val sessionRepository = mock[SessionRepository]

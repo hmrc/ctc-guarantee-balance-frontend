@@ -16,7 +16,7 @@
 
 package base
 
-import config.{FrontendAppConfig, V1Module, V2Module}
+import config.FrontendAppConfig
 import controllers.actions._
 import models.UserAnswers
 import navigation.{FakeNavigator, Navigator}
@@ -86,14 +86,4 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
 
   protected def applicationBuilder(): GuiceApplicationBuilder =
     defaultApplicationBuilder()
-
-  protected def v1ApplicationBuilder(): GuiceApplicationBuilder =
-    defaultApplicationBuilder()
-      .disable[V2Module]
-      .bindings(new V1Module)
-
-  protected def v2ApplicationBuilder(): GuiceApplicationBuilder =
-    defaultApplicationBuilder()
-      .disable[V1Module]
-      .bindings(new V2Module)
 }

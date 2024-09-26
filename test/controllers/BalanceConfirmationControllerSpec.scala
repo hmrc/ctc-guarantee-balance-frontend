@@ -17,23 +17,31 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import models.{Referral, UserAnswers}
-import org.mockito.ArgumentCaptor
-import org.mockito.Mockito.verify
+import models.{Referral, Timestamp}
+import org.mockito.Mockito.{reset, verify, when}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.mockito.MockitoSugar
-import pages.{BalancePage, EoriNumberPage}
+import pages.BalancePage
+import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
+import services.DateTimeService
 import views.html.BalanceConfirmationView
 
 class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with AppWithDefaultMockFixtures {
 
+  private val mockDateTimeService: DateTimeService = mock[DateTimeService]
+
   override protected def applicationBuilder(): GuiceApplicationBuilder =
     super
-      .v1ApplicationBuilder()
+      .applicationBuilder()
+      .overrides(bind[DateTimeService].toInstance(mockDateTimeService))
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockDateTimeService)
+  }
 
   "BalanceConfirmation Controller" - {
 
@@ -46,9 +54,11 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
 
           "when session has referral value" in {
 
-            forAll(arbitrary[Referral]) {
-              referral =>
+            forAll(arbitrary[Timestamp], arbitrary[Referral]) {
+              (timestamp, referral) =>
                 beforeEach()
+
+                when(mockDateTimeService.timestamp).thenReturn(timestamp)
 
                 val userAnswers = emptyUserAnswers.setValue(BalancePage, balance)
                 setExistingUserAnswers(userAnswers)
@@ -61,24 +71,32 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
                 status(result) mustEqual OK
 
                 contentAsString(result) mustEqual
-                  view(balance, Some(referral.toString))(request, messages).toString
+                  view(balance, timestamp, Some(referral.toString))(request, messages).toString
+
+                verify(mockDateTimeService).timestamp
             }
           }
 
           "when session does not have referral value" in {
+            forAll(arbitrary[Timestamp]) {
+              timestamp =>
+                beforeEach()
 
-            val userAnswers = emptyUserAnswers.setValue(BalancePage, balance)
+                when(mockDateTimeService.timestamp).thenReturn(timestamp)
 
-            setExistingUserAnswers(userAnswers)
+                val userAnswers = emptyUserAnswers.setValue(BalancePage, balance)
 
-            val request = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
-            val view    = injector.instanceOf[BalanceConfirmationView]
-            val result  = route(app, request).value
+                setExistingUserAnswers(userAnswers)
 
-            status(result) mustEqual OK
+                val request = FakeRequest(GET, routes.BalanceConfirmationController.onPageLoad().url)
+                val view    = injector.instanceOf[BalanceConfirmationView]
+                val result  = route(app, request).value
 
-            contentAsString(result) mustEqual
-              view(balance, None)(request, messages).toString
+                status(result) mustEqual OK
+
+                contentAsString(result) mustEqual
+                  view(balance, timestamp, None)(request, messages).toString
+            }
           }
         }
       }
@@ -95,46 +113,6 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
 
           redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
         }
-      }
-    }
-
-    ".checkAnotherGuaranteeBalance" - {
-      "must clear user answers and redirect to EORI Number page" in {
-
-        val userAnswers = emptyUserAnswers.setValue(EoriNumberPage, "eori")
-
-        setExistingUserAnswers(userAnswers)
-        val request = FakeRequest(GET, routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url)
-
-        val result = route(app, request).value
-
-        status(result) mustEqual SEE_OTHER
-
-        redirectLocation(result).value mustEqual routes.StartController.startAgain().url
-
-        val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
-        verify(mockSessionRepository).set(uaCaptor.capture)
-        uaCaptor.getValue.data mustEqual Json.obj()
-      }
-    }
-
-    ".manageTransitMovements" - {
-      "must clear user answers and redirect to manage transit movements" in {
-
-        val userAnswers = emptyUserAnswers.setValue(EoriNumberPage, "eori")
-
-        setExistingUserAnswers(userAnswers)
-        val request = FakeRequest(GET, routes.BalanceConfirmationController.manageTransitMovements().url)
-
-        val result = route(app, request).value
-
-        status(result) mustEqual SEE_OTHER
-
-        redirectLocation(result).value mustEqual frontendAppConfig.manageTransitMovementsUrl
-
-        val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
-        verify(mockSessionRepository).set(uaCaptor.capture)
-        uaCaptor.getValue.data mustEqual Json.obj()
       }
     }
 

@@ -46,8 +46,7 @@ class AuditServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
     "audit must call sendExtendedEvent exactly once in audit connector if there's an event" in {
       when(mockAuditConnector.sendExtendedEvent(any())(any(), any())).thenReturn(Future.successful(AuditResult.Success))
 
-      val event = SuccessfulBalanceAuditModel.build(
-        "GB1234567890",
+      val event = SuccessfulBalanceAuditModel.apply(
         "123456789800",
         "1222",
         "internalId",

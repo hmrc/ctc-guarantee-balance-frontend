@@ -23,7 +23,6 @@ import viewModels.audit.AuditConstants._
 import java.time.LocalDateTime
 
 case class UnsuccessfulBalanceAuditModel(override val auditType: String,
-                                         eoriNumber: String,
                                          guaranteeReferenceNumber: String,
                                          accessCode: String,
                                          internalId: String,
@@ -33,7 +32,7 @@ case class UnsuccessfulBalanceAuditModel(override val auditType: String,
 ) extends JsonAuditModel {
 
   override val detail: JsValue = Json.obj(
-    AUDIT_FIELD_EORI_NUMBER             -> eoriNumber,
+    AUDIT_FIELD_EORI_NUMBER             -> "-", // EORI is not captured in P5 but remains part of the pre-existing audit structure from P4
     AUDIT_FIELD_GRN_NUMBER              -> guaranteeReferenceNumber,
     AUDIT_FIELD_ACCESS_CODE             -> accessCode,
     AUDIT_FIELD_GG_INTERNAL_ID          -> internalId,
@@ -46,9 +45,8 @@ case class UnsuccessfulBalanceAuditModel(override val auditType: String,
 
 object UnsuccessfulBalanceAuditModel {
 
-  def build(
+  def apply(
     auditType: String,
-    eoriNumber: String,
     guaranteeReferenceNumber: String,
     accessCode: String,
     internalId: String,
@@ -56,5 +54,5 @@ object UnsuccessfulBalanceAuditModel {
     status: Int,
     errorMessage: ErrorMessage
   ): UnsuccessfulBalanceAuditModel =
-    UnsuccessfulBalanceAuditModel(auditType, eoriNumber, guaranteeReferenceNumber, accessCode, internalId, dateTime, status, errorMessage)
+    new UnsuccessfulBalanceAuditModel(auditType, guaranteeReferenceNumber, accessCode, internalId, dateTime, status, errorMessage)
 }

@@ -26,13 +26,6 @@ object InputTextViewModel {
     heading: String
   ) extends InputTextViewModel
 
-  case class TextInputWithHiddenLabel(
-    heading: String,
-    label: String,
-    additionalHtml: Html
-  ) extends InputTextViewModel
-      with AdditionalHtmlViewModel
-
   case class TextInputWithStatementHeading(
     heading: String,
     label: String,
@@ -44,7 +37,7 @@ object InputTextViewModel {
     label: String
   ) extends InputTextViewModel
 
-  case class TextInputWithHiddenLabelV2(
+  case class TextInputWithHiddenLabel(
     heading: String,
     caption: Option[String] = None,
     additionalHtml: Html

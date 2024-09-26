@@ -27,12 +27,11 @@ class UnsuccessfulBalanceAuditModelSpec extends SpecBase with MockitoSugar {
 
   "UnuccessfulBalanceAuditModel" - {
 
-    "must build the correct details when build is called" in {
+    "must apply the correct details when apply is called" in {
       val localDateTime = LocalDateTime.now
       val actualDetails = UnsuccessfulBalanceAuditModel
-        .build(
+        .apply(
           "TestAuditType",
-          "GB1234567890",
           "123456789800",
           "1222",
           "internalId",
@@ -49,7 +48,7 @@ class UnsuccessfulBalanceAuditModelSpec extends SpecBase with MockitoSugar {
   }
 
   private def expectedDetails(localDateTime: LocalDateTime) = Json.obj(
-    "eoriNumber"               -> "GB1234567890",
+    "eoriNumber"               -> "-",
     "guaranteeReferenceNumber" -> "123456789800",
     "accessCode"               -> "1222",
     "internalId"               -> "internalId",

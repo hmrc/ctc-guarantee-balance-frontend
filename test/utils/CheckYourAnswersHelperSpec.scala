@@ -21,139 +21,44 @@ import controllers.routes
 import forms.Constants.accessCodeLength
 import models.{CheckMode, Mode, UserAnswers}
 import org.scalacheck.Arbitrary.arbitrary
-import pages.{AccessCodePage, EoriNumberPage, GuaranteeReferenceNumberPage}
+import pages.{AccessCodePage, GuaranteeReferenceNumberPage}
 import uk.gov.hmrc.govukfrontend.views.Aliases._
 import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
 import uk.gov.hmrc.govukfrontend.views.html.components.{ActionItem, Actions}
 
 class CheckYourAnswersHelperSpec extends SpecBase {
 
-  "eoriNumber" - {
-
-    "must return None" - {
-      "when EoriNumberPage undefined" in {
-
-        val answers = emptyUserAnswers
-
-        val helper = new CheckYourAnswersHelper(answers, CheckMode)
-        val result = helper.eoriNumber
-
-        result mustBe None
-      }
-    }
+  "guaranteeReferenceNumber" - {
 
     "must return Some(row)" - {
-      "when EoriNumberPage defined" in {
+
+      "when GuaranteeReferenceNumberPage defined" in {
 
         forAll(arbitrary[Mode], arbitrary[String]) {
           (mode, answer) =>
-            val answers: UserAnswers = emptyUserAnswers.setValue(EoriNumberPage, answer)
+            val answers: UserAnswers = emptyUserAnswers.setValue(GuaranteeReferenceNumberPage, answer)
 
             val helper = new CheckYourAnswersHelper(answers, mode)
-            val result = helper.eoriNumber
+            val result = helper.guaranteeReferenceNumber
 
             result mustBe Some(
               SummaryListRow(
-                key = Key("EORI number".toText),
+                key = Key("Guarantee Reference Number (GRN)".toText),
                 value = Value(answer.toText),
                 actions = Some(
                   Actions(
                     items = List(
                       ActionItem(
                         content = "Change".toText,
-                        href = routes.EoriNumberController.onPageLoad(mode).url,
-                        visuallyHiddenText = Some("EORI number"),
-                        attributes = Map("id" -> "change-eori-number")
+                        href = routes.GuaranteeReferenceNumberController.onPageLoad(mode).url,
+                        visuallyHiddenText = Some("Guarantee Reference Number (GRN)"),
+                        attributes = Map("id" -> "change-guarantee-reference-number")
                       )
                     )
                   )
                 )
               )
             )
-        }
-      }
-    }
-  }
-
-  "guaranteeReferenceNumber" - {
-
-    "must return None" - {
-      "when GuaranteeReferenceNumberPage undefined" in {
-
-        val answers = emptyUserAnswers
-
-        val helper = new CheckYourAnswersHelper(answers, CheckMode)
-        val result = helper.guaranteeReferenceNumber
-
-        result mustBe None
-      }
-    }
-
-    "must return Some(row)" - {
-
-      "for V1" - {
-
-        "when GuaranteeReferenceNumberPage defined" in {
-
-          forAll(arbitrary[Mode], arbitrary[String]) {
-            (mode, answer) =>
-              val answers: UserAnswers = emptyUserAnswers.setValue(GuaranteeReferenceNumberPage, answer)
-
-              val helper = new CheckYourAnswersHelper(answers, mode)
-              val result = helper.guaranteeReferenceNumber
-
-              result mustBe Some(
-                SummaryListRow(
-                  key = Key("Guarantee reference number".toText),
-                  value = Value(answer.toText),
-                  actions = Some(
-                    Actions(
-                      items = List(
-                        ActionItem(
-                          content = "Change".toText,
-                          href = routes.GuaranteeReferenceNumberController.onPageLoad(mode).url,
-                          visuallyHiddenText = Some("guarantee reference number"),
-                          attributes = Map("id" -> "change-guarantee-reference-number")
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-          }
-        }
-      }
-
-      "for V2" - {
-
-        "when GuaranteeReferenceNumberPage defined" in {
-
-          forAll(arbitrary[Mode], arbitrary[String]) {
-            (mode, answer) =>
-              val answers: UserAnswers = emptyUserAnswers.setValue(GuaranteeReferenceNumberPage, answer)
-
-              val helper = new CheckYourAnswersHelper(answers, mode)
-              val result = helper.guaranteeReferenceNumberV2
-
-              result mustBe Some(
-                SummaryListRow(
-                  key = Key("Guarantee Reference Number (GRN)".toText),
-                  value = Value(answer.toText),
-                  actions = Some(
-                    Actions(
-                      items = List(
-                        ActionItem(
-                          content = "Change".toText,
-                          href = routes.GuaranteeReferenceNumberController.onPageLoad(mode).url,
-                          visuallyHiddenText = Some("Guarantee Reference Number (GRN)"),
-                          attributes = Map("id" -> "change-guarantee-reference-number")
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-          }
         }
       }
     }

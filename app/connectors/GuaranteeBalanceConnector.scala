@@ -18,20 +18,18 @@ package connectors
 
 import cats.data.NonEmptyList
 import config.FrontendAppConfig
-import models.RichHttpResponse
 import models.backend.*
 import models.backend.errors.FunctionalError
-import models.requests.{BalanceRequest, BalanceRequestV2}
+import models.requests.BalanceRequest
 import models.values.BalanceId
 import models.values.ErrorType.{InvalidDataErrorType, NotMatchedErrorType}
 import play.api.Logging
 import play.api.http.{HeaderNames, Status}
-import play.api.libs.json.JsResult
+import play.api.libs.json.Json
+import play.api.libs.ws.JsonBodyWritables.*
 import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpReads, HttpResponse, StringContextOps}
-import play.api.libs.json.Json
-import play.api.libs.ws.JsonBodyWritables.*
 
 import java.time.Instant
 import javax.inject.Inject
@@ -43,43 +41,11 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClientV2, appConfig: Fronte
     with Logging {
 
   private val headers = Seq(
-    HeaderNames.ACCEPT -> "application/vnd.hmrc.1.0+json"
-  )
-
-  private val headersV2 = Seq(
     HeaderNames.ACCEPT -> "application/vnd.hmrc.2.0+json"
   )
 
-  def submitBalanceRequest(request: BalanceRequest)(implicit hc: HeaderCarrier): Future[Either[HttpResponse, BalanceRequestResponse]] = {
-    val url = url"${appConfig.guaranteeBalanceUrl}/balances"
-
-    implicit val eitherBalanceIdOrResponseReads: HttpReads[Either[HttpResponse, BalanceRequestResponse]] =
-      HttpReads[HttpResponse].map {
-        response =>
-          response.status match {
-            case Status.ACCEPTED =>
-              Right(BalanceRequestPending(response.json.as[PostBalanceRequestPendingResponse].balanceId))
-            case Status.TOO_MANY_REQUESTS =>
-              logger.warn("[GuaranteeBalanceConnector][submitBalanceRequest] TOO_MANY_REQUESTS response from back end call")
-              Right(BalanceRequestRateLimit)
-            case Status.OK =>
-              Right(response.json.as[PostBalanceRequestSuccessResponse].response)
-            case Status.BAD_REQUEST =>
-              processSubmitErrorResponse(response)
-            case _ =>
-              Left(response)
-          }
-      }
-
-    http
-      .post(url)
-      .setHeader(headers*)
-      .withBody(Json.toJson(request))
-      .execute[Either[HttpResponse, BalanceRequestResponse]]
-  }
-
   // scalastyle:off cyclomatic.complexity
-  def submitBalanceRequestV2(request: BalanceRequestV2, grn: String)(implicit
+  def submitBalanceRequest(request: BalanceRequest, grn: String)(implicit
     hc: HeaderCarrier
   ): Future[Either[HttpResponse, BalanceRequestResponse]] = {
     val url = url"${appConfig.guaranteeBalanceUrl}/$grn/balance"
@@ -91,10 +57,10 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClientV2, appConfig: Fronte
             case Status.OK =>
               Right(response.json.as[BalanceRequestResponse])
             case Status.TOO_MANY_REQUESTS =>
-              logger.warn("[GuaranteeBalanceConnector][submitBalanceRequestV2] TOO_MANY_REQUESTS response from back end call")
+              logger.warn("[GuaranteeBalanceConnector][submitBalanceRequest] TOO_MANY_REQUESTS response from back end call")
               Right(BalanceRequestRateLimit)
             case Status.BAD_REQUEST =>
-              logger.warn(s"[GuaranteeBalanceConnector][submitBalanceRequestV2] BAD_REQUEST response: ${response.body}")
+              logger.warn(s"[GuaranteeBalanceConnector][submitBalanceRequest] BAD_REQUEST response: ${response.body}")
               response.json.as[BadRequestResponse] match {
                 case BadRequestResponse("INVALID_GUARANTEE_TYPE", _) =>
                   Right(BalanceRequestUnsupportedGuaranteeType)
@@ -104,17 +70,17 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClientV2, appConfig: Fronte
                   Left(response)
               }
             case Status.NOT_FOUND =>
-              logger.info(s"[GuaranteeBalanceConnector][submitBalanceRequestV2] NOT_FOUND response: ${response.body}")
+              logger.info(s"[GuaranteeBalanceConnector][submitBalanceRequest] NOT_FOUND response: ${response.body}")
               Right(BalanceRequestNotMatched(response.body))
             case _ =>
-              logger.warn(s"[GuaranteeBalanceConnector][submitBalanceRequestV2] INTERNAL_SERVER_ERROR response: ${response.body}")
+              logger.warn(s"[GuaranteeBalanceConnector][submitBalanceRequest] INTERNAL_SERVER_ERROR response: ${response.body}")
               Left(response)
           }
       }
 
     http
       .post(url)
-      .setHeader(headersV2*)
+      .setHeader(headers*)
       .withBody(Json.toJson(request))
       .execute[Either[HttpResponse, BalanceRequestResponse]]
   }
@@ -137,18 +103,6 @@ class GuaranteeBalanceConnector @Inject() (http: HttpClientV2, appConfig: Fronte
       .get(url)
       .setHeader(headers*)
       .execute[Either[HttpResponse, BalanceRequestResponse]]
-  }
-
-  private def processSubmitErrorResponse(response: HttpResponse): Either[HttpResponse, BalanceRequestResponse] = {
-    val json: JsResult[PostBalanceRequestFunctionalErrorResponse] = response.validateJson[PostBalanceRequestFunctionalErrorResponse]
-    (for {
-      fe                     <- json.asOpt
-      balanceRequestResponse <- convertErrorTypeToBalanceRequestResponse(fe.response.errors)
-    } yield Right(balanceRequestResponse)).getOrElse {
-      val outputErrorMsg = json.fold(_.toString(), fe => s"Response contains functional error type(s) ${fe.errorTypes}")
-      logger.info(s"[GuaranteeBalanceConnector][processSubmitErrorResponse] $outputErrorMsg")
-      Left(response)
-    }
   }
 
   private def processQuerySuccessResponse(balanceId: BalanceId, response: HttpResponse): BalanceRequestResponse = {

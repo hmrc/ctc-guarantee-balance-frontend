@@ -23,7 +23,7 @@ import org.mockito.Mockito.verify
 import org.scalacheck.Arbitrary.arbitrary
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 
 import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -31,7 +31,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class StartControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   override protected def applicationBuilder(): GuiceApplicationBuilder =
-    super.v1ApplicationBuilder()
+    super.applicationBuilder()
 
   "Start Controller" - {
 
@@ -52,7 +52,7 @@ class StartControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
               val result  = route(app, request).value
 
               status(result) mustEqual SEE_OTHER
-              redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
+              redirectLocation(result).value mustEqual routes.GuaranteeReferenceNumberController.onPageLoad(NormalMode).url
               result.map(_.session(request).get(Referral.key).get mustEqual referral.toString)
 
               val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
@@ -74,7 +74,7 @@ class StartControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
               val result  = route(app, request).value
 
               status(result) mustEqual SEE_OTHER
-              redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
+              redirectLocation(result).value mustEqual routes.GuaranteeReferenceNumberController.onPageLoad(NormalMode).url
               result.map(_.session(request).get(Referral.key) mustNot be(defined))
 
               val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
@@ -98,7 +98,7 @@ class StartControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
           val result  = route(app, request).value
 
           status(result) mustEqual SEE_OTHER
-          redirectLocation(result).value mustEqual routes.EoriNumberController.onPageLoad(NormalMode).url
+          redirectLocation(result).value mustEqual routes.GuaranteeReferenceNumberController.onPageLoad(NormalMode).url
         }
       }
 

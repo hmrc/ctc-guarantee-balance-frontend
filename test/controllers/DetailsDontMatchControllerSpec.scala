@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package controllers
+package controllersGuaranteeBalanceService
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import controllers.routes
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import views.html.DetailsDontMatchView
 
 class DetailsDontMatchControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
@@ -28,7 +29,7 @@ class DetailsDontMatchControllerSpec extends SpecBase with AppWithDefaultMockFix
     "return OK and the correct view for a GET" in {
 
       setExistingUserAnswers(emptyUserAnswers)
-      val request = FakeRequest(GET, routes.DetailsDontMatchControllerV1.onPageLoad().url)
+      val request = FakeRequest(GET, routes.DetailsDontMatchController.onPageLoad().url)
       val view    = injector.instanceOf[DetailsDontMatchView]
       val result  = route(app, request).value
 

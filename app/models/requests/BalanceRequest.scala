@@ -17,20 +17,12 @@
 package models.requests
 
 import models.values._
-import play.api.libs.functional.syntax._
-import play.api.libs.json._
+import play.api.libs.json.{Json, OFormat}
 
 case class BalanceRequest(
-  taxIdentifier: TaxIdentifier,
-  guaranteeReference: GuaranteeReference,
   accessCode: AccessCode
 )
 
 object BalanceRequest {
-
-  implicit val balanceRequestFormat: OFormat[BalanceRequest] = (
-    (__ \ "taxIdentifier").format[TaxIdentifier] and
-      (__ \ "guaranteeReference").format[GuaranteeReference] and
-      (__ \ "accessCode").format[AccessCode]
-  )(BalanceRequest.apply, o => Tuple.fromProductTyped(o))
+  implicit val balanceRequestJsonFormat: OFormat[BalanceRequest] = Json.format[BalanceRequest]
 }

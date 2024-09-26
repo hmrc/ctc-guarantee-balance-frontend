@@ -33,15 +33,13 @@ class DetailsDontMatchViewSpec extends ViewBehaviours {
 
   behave like pageWithHeading()
 
-  behave like pageWithPartialContent("p", "You must")
-
   behave like pageWithLink(
     "try-again",
-    "check your answers and try again",
+    "Check your details and try again",
     controllers.routes.CheckYourAnswersController.onPageLoad().url
   )
 
-  behave like pageWithPartialContent("p", "If your details are correct, you must")
+  behave like pageWithPartialContent("p", "If your details are correct,")
 
   behave like pageWithLink(
     "contact",

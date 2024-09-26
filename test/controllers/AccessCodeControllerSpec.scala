@@ -23,13 +23,13 @@ import pages.AccessCodePage
 import play.api.data.Form
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import views.html.AccessCodeView
 
 class AccessCodeControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   override protected def applicationBuilder(): GuiceApplicationBuilder =
-    super.v1ApplicationBuilder()
+    super.applicationBuilder()
 
   private val formProvider                 = new AccessCodeFormProvider()
   private val form: Form[String]           = formProvider()
