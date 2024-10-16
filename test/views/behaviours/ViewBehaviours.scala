@@ -97,7 +97,7 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
     val link = getElementByClass(doc, "hmrc-report-technical-issue")
 
     assertElementContainsText(link, "Is this page not working properly? (opens in new tab)")
-    getElementHref(link) mustBe s"http://localhost:9250/contact/report-technical-problem?newTab=true&service=CTCTraders&referrerUrl=$path"
+    getElementHref(link) mustBe s"http://localhost:9250/contact/report-technical-problem?service=CTCTraders&referrerUrl=$path"
   }
 
   def pageWithTitle(args: Any*): Unit =
