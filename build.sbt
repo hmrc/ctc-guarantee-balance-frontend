@@ -62,10 +62,7 @@ lazy val root = (project in file("."))
     resolvers ++= Seq(
       Resolver.jcenterRepo
     ),
-    Concat.groups := Seq(
-      "javascripts/application.js" -> group(Seq("javascripts/ctc.js"))
-    ),
-    Assets / pipelineStages := Seq(digest, concat),
+    Assets / pipelineStages := Seq(digest),
     ThisBuild / useSuperShell := false,
     ThisBuild / scalafmtOnCompile := true
   )
