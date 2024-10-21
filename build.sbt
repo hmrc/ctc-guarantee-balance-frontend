@@ -6,23 +6,19 @@ import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
 lazy val appName: String = "ctc-guarantee-balance-frontend"
 
-lazy val root = (project in file("."))
+ThisBuild / majorVersion := 0
+ThisBuild / scalaVersion := "3.5.0"
+ThisBuild / scalafmtOnCompile := true
+
+lazy val microservice = (project in file("."))
   .enablePlugins(PlayScala,  SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
-  .configs(IntegrationTest)
-  .settings(inConfig(IntegrationTest)(itSettings) *)
-  .settings(inConfig(IntegrationTest)(org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings) *)
   .configs(A11yTest)
   .settings(inConfig(A11yTest)(org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings) *)
   .settings(DefaultBuildSettings.scalaSettings *)
   .settings(DefaultBuildSettings.defaultSettings() *)
-  .settings(inConfig(Test)(testSettings) *)
-  .settings(majorVersion := 0)
-  .settings(headerSettings(IntegrationTest) *)
-  .settings(automateHeaderSettings(IntegrationTest))
   .settings(headerSettings(A11yTest) *)
   .settings(automateHeaderSettings(A11yTest))
-  .settings(scalaVersion := "3.5.0")
   .settings(
     name := appName,
     RoutesKeys.routesImport ++= Seq("models._", "models.OptionBinder._", "models.Referral._"),
@@ -49,7 +45,7 @@ lazy val root = (project in file("."))
       "views\\.html\\.templates.*",
       "viewModels\\.audit\\.AuditConstants.*"
     ).mkString(";"),
-    ScoverageKeys.coverageMinimumStmtTotal := 85,
+    ScoverageKeys.coverageMinimumStmtTotal := 90,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting  := true,
     scalacOptions ++= Seq(
@@ -63,26 +59,13 @@ lazy val root = (project in file("."))
       Resolver.jcenterRepo
     ),
     Assets / pipelineStages := Seq(digest),
-    ThisBuild / useSuperShell := false,
-    ThisBuild / scalafmtOnCompile := true
+    ThisBuild / useSuperShell := false
   )
 
-lazy val testSettings: Seq[Def.Setting[?]] = Seq(
-  fork := true,
-  unmanagedResourceDirectories += baseDirectory.value / "test" / "resources",
-  javaOptions ++= Seq(
-    "-Dconfig.resource=test.application.conf"
+lazy val it = project
+  .enablePlugins(PlayScala)
+  .dependsOn(microservice % "test->test") // the "test->test" allows reusing test code and test dependencies
+  .settings(
+    libraryDependencies ++= AppDependencies.test,
+    DefaultBuildSettings.itSettings()
   )
-)
-
-lazy val itSettings = Defaults.itSettings ++ Seq(
-  unmanagedSourceDirectories := Seq(
-    baseDirectory.value / "it"
-  ),
-  unmanagedResourceDirectories += baseDirectory.value / "it" / "resources",
-  parallelExecution := false,
-  fork              := true,
-  javaOptions ++= Seq(
-    "-Dconfig.resource=it.application.conf"
-  )
-)

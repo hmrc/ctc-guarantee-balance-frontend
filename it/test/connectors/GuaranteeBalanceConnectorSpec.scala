@@ -16,10 +16,9 @@
 
 package connectors
 
-import base.{AppWithDefaultMockFixtures, SpecBase}
 import cats.data.NonEmptyList
 import com.github.tomakehurst.wiremock.client.WireMock.*
-import helper.WireMockServerHandler
+import itbase.{ItSpecBase, WireMockServerHandler}
 import models.backend.*
 import models.backend.errors.FunctionalError
 import models.requests.*
@@ -27,21 +26,20 @@ import models.values.*
 import models.values.ErrorType.InvalidDataErrorType
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import play.api.Application
 import play.api.http.{ContentTypes, HeaderNames, Status}
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.Instant
 import java.util.UUID
 
-class GuaranteeBalanceConnectorSpec extends SpecBase with WireMockServerHandler with ScalaCheckPropertyChecks with AppWithDefaultMockFixtures {
+class GuaranteeBalanceConnectorSpec extends ItSpecBase with WireMockServerHandler with ScalaCheckPropertyChecks {
 
-  override lazy val app: Application = applicationBuilder()
-    .configure(
-      conf = "microservice.services.common-transit-convention-guarantee-balance.port" -> server.port()
-    )
-    .build()
+  override def guiceApplicationBuilder(): GuiceApplicationBuilder =
+    super
+      .guiceApplicationBuilder()
+      .configure("microservice.services.common-transit-convention-guarantee-balance.port" -> server.port())
 
   implicit private val hc: HeaderCarrier = HeaderCarrier()
   private val grn: GuaranteeReference    = GuaranteeReference("guarref")
