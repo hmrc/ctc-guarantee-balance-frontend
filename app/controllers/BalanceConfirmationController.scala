@@ -18,6 +18,7 @@ package controllers
 
 import config.FrontendAppConfig
 import controllers.actions.*
+import models.Timestamp
 import pages.BalancePage
 import play.api.Logging
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -50,7 +51,7 @@ class BalanceConfirmationController @Inject() (
       Ok(
         view(
           balance = request.arg,
-          timestamp = dateTimeService.timestamp,
+          timestamp = Timestamp(dateTimeService.currentDateTime),
           referral = referralService.getReferralFromSession
         )
       )

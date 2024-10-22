@@ -116,6 +116,5 @@ class BalanceRequestResponseSpec extends SpecBase {
       }
     }
   }
-
 }
 // scalastyle:off magic.number

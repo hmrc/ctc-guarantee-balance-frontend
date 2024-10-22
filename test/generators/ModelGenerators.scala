@@ -16,12 +16,12 @@
 
 package generators
 
-import models._
+import models.*
 import models.values.BalanceId
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 
-import java.time.{Clock, Instant}
+import java.time.LocalDateTime
 import java.util.UUID
 
 trait ModelGenerators {
@@ -43,6 +43,6 @@ trait ModelGenerators {
 
   implicit lazy val arbitraryTimestamp: Arbitrary[Timestamp] =
     Arbitrary {
-      Timestamp(Instant.now())(Clock.systemUTC())
+      Timestamp(LocalDateTime.now())
     }
 }

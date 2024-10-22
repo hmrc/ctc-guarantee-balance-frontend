@@ -16,16 +16,16 @@
 
 package models
 
-import java.time.{Clock, Instant}
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 case class Timestamp(date: String, time: String)
 
 object Timestamp {
 
-  def apply(instant: Instant)(implicit clock: Clock): Timestamp = {
-    val dateFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy").withZone(clock.getZone)
-    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm").withZone(clock.getZone)
-    new Timestamp(dateFormatter.format(instant), timeFormatter.format(instant))
+  def apply(dateTime: LocalDateTime): Timestamp = {
+    val dateFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
+    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+    new Timestamp(dateFormatter.format(dateTime), timeFormatter.format(dateTime))
   }
 }

@@ -16,14 +16,12 @@
 
 package services
 
-import models.Timestamp
-
-import java.time.{Clock, Instant}
+import java.time.{Clock, Instant, LocalDateTime}
 import javax.inject.Inject
 
 class DateTimeService @Inject() (clock: Clock) {
 
-  def now: Instant = Instant.now(clock)
+  def now: Instant = Instant.now(clock) // Uses `systemUTC` clock
 
-  def timestamp: Timestamp = Timestamp(now)(Clock.systemDefaultZone())
+  def currentDateTime: LocalDateTime = LocalDateTime.now() // Uses `systemDefaultZone` clock
 }

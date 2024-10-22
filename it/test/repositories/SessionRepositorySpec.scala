@@ -17,24 +17,21 @@
 package repositories
 
 import config.FrontendAppConfig
+import itbase.ItSpecBase
 import models.{SensitiveFormats, UserAnswers}
+import org.mongodb.scala.*
 import org.mongodb.scala.bson.{BsonDocument, BsonString}
-import org.scalatest.OptionValues
 import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.must.Matchers
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.Json
 import services.DateTimeService
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.mongodb.scala._
 
-class SessionRepositorySpec extends AnyFreeSpec with Matchers with DefaultPlayMongoRepositorySupport[UserAnswers] with GuiceOneAppPerSuite with OptionValues {
+class SessionRepositorySpec extends ItSpecBase with DefaultPlayMongoRepositorySupport[UserAnswers] {
 
-  private val config: FrontendAppConfig        = app.injector.instanceOf[FrontendAppConfig]
-  private val dateTimeService: DateTimeService = app.injector.instanceOf[DateTimeService]
-
+  private val config: FrontendAppConfig                   = app.injector.instanceOf[FrontendAppConfig]
+  private val dateTimeService: DateTimeService            = app.injector.instanceOf[DateTimeService]
   implicit private val sensitiveFormats: SensitiveFormats = app.injector.instanceOf[SensitiveFormats]
 
   override protected val repository: SessionRepository = new SessionRepository(mongoComponent, config, dateTimeService)
@@ -106,14 +103,13 @@ class SessionRepositorySpec extends AnyFreeSpec with Matchers with DefaultPlayMo
 
     "must ensure indexes" in {
 
-      val indexes = mongoDatabase.getCollection("user-answers").listIndexes().toFuture().futureValue
+      val indexes = repository.collection.listIndexes().toFuture().futureValue
 
       indexes.length mustEqual 2
 
       indexes(1).get("name").get mustEqual BsonString("user-answers-last-updated-index")
       indexes(1).get("key").get mustEqual BsonDocument("lastUpdated" -> 1)
       indexes(1).get("expireAfterSeconds").get.asNumber().intValue() mustEqual config.mongoDbTtl
-
     }
   }
 

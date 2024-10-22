@@ -16,8 +16,8 @@
 
 package models.backend
 
-import models.values.{BalanceId, ErrorType}
-import play.api.libs.json.{Json, OFormat, Reads}
+import models.values.BalanceId
+import play.api.libs.json.{Json, Reads}
 
 sealed abstract class PostResponse
 
@@ -29,23 +29,20 @@ case class PostBalanceRequestFunctionalErrorResponse(
   code: String,
   message: String,
   response: BalanceRequestFunctionalError
-) extends PostResponse {
-  def containsErrorType(errorType: ErrorType): Boolean = response.containsErrorType(errorType)
-  def errorTypes: String                               = response.errors.map(_.errorType.value).toList.mkString(",")
-}
+) extends PostResponse
 
 case class GetBalanceRequestResponse(request: PendingBalanceRequest) extends PostResponse
 
 object PostResponse {
 
-  implicit lazy val balanceRequestSuccessFormat: OFormat[PostBalanceRequestSuccessResponse] =
-    Json.format[PostBalanceRequestSuccessResponse]
+  implicit lazy val balanceRequestSuccessFormat: Reads[PostBalanceRequestSuccessResponse] =
+    Json.reads[PostBalanceRequestSuccessResponse]
 
-  implicit lazy val balanceRequestPendingFormat: OFormat[PostBalanceRequestPendingResponse] =
-    Json.format[PostBalanceRequestPendingResponse]
+  implicit lazy val balanceRequestPendingFormat: Reads[PostBalanceRequestPendingResponse] =
+    Json.reads[PostBalanceRequestPendingResponse]
 
-  implicit lazy val balanceRequestFunctionalErrorFormat: OFormat[PostBalanceRequestFunctionalErrorResponse] =
-    Json.format[PostBalanceRequestFunctionalErrorResponse]
+  implicit lazy val balanceRequestFunctionalErrorFormat: Reads[PostBalanceRequestFunctionalErrorResponse] =
+    Json.reads[PostBalanceRequestFunctionalErrorResponse]
 
   implicit lazy val balanceRequestResponseFormat: Reads[GetBalanceRequestResponse] =
     Json.reads[GetBalanceRequestResponse]

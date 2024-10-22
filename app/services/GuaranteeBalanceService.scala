@@ -37,9 +37,6 @@ class GuaranteeBalanceService @Inject() (
 )(implicit ec: ExecutionContext)
     extends Logging {
 
-  def retrieveBalanceResponse()(implicit hc: HeaderCarrier, request: DataRequest[?]): Future[Either[HttpResponse, BalanceRequestResponse]] =
-    submitBalanceRequest()
-
   def submitBalanceRequest()(implicit hc: HeaderCarrier, request: DataRequest[?]): Future[Either[HttpResponse, BalanceRequestResponse]] = {
     logger.info("[GuaranteeBalanceService][submitBalanceRequest] submit balance request")
     (for {
@@ -69,7 +66,7 @@ class GuaranteeBalanceService @Inject() (
     *   - None if there is already a lock for the given lock ID (rate limit hit)
     *   - Some(lock) if there is not already a lock for the given lock ID and a lock has been successfully created
     */
-  def checkRateLimit(internalId: String, guaranteeReferenceNumber: String): Future[Option[Lock]] = {
+  private def checkRateLimit(internalId: String, guaranteeReferenceNumber: String): Future[Option[Lock]] = {
     val lockId   = LockId(internalId, guaranteeReferenceNumber).toString
     val duration = config.rateLimitDuration.seconds
     mongoLockRepository.takeLock(lockId, internalId, duration)

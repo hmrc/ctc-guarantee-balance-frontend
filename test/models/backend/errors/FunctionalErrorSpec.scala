@@ -14,30 +14,31 @@
  * limitations under the License.
  */
 
-package models.requests
+package models.backend.errors
 
 import base.SpecBase
-import models.values.*
+import models.values.ErrorType
 import play.api.libs.json.Json
 
-class BalanceRequestSpec extends SpecBase {
+class FunctionalErrorSpec extends SpecBase {
 
-  "BalanceRequest" - {
+  "deserialize from JSON" in {
+    val json = Json.parse("""
+        |{
+        |  "errorType" : 14,
+        |  "errorPointer" : "GRR(1).GQY(1).Query identifier",
+        |  "errorReason" : "R261"
+        |}
+        |""".stripMargin)
 
-    "serialise to JSON" in {
-      val value = "test-access-code"
+    val expectedResult = FunctionalError(
+      errorType = ErrorType(14: Int),
+      errorPointer = "GRR(1).GQY(1).Query identifier",
+      errorReason = Some("R261")
+    )
 
-      val request = BalanceRequest(AccessCode(value))
+    val result = json.validate[FunctionalError]
 
-      val expectedResult = Json.parse(s"""
-          |{
-          |  "accessCode" : "$value"
-          |}
-          |""".stripMargin)
-
-      val result = Json.toJson(request)
-
-      result.mustBe(expectedResult)
-    }
+    result.get.mustBe(expectedResult)
   }
 }
