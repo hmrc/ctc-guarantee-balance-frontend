@@ -19,8 +19,8 @@ package models.backend
 import cats.data.NonEmptyList
 import models.backend.errors.FunctionalError
 import models.formats.CommonFormats
-import models.values.{BalanceId, CurrencyCode, ErrorType}
-import play.api.libs.json.{Json, OFormat, Reads}
+import models.values.{BalanceId, CurrencyCode}
+import play.api.libs.json.{Json, Reads}
 
 import java.text.NumberFormat
 import java.util.{Currency, Locale}
@@ -50,7 +50,7 @@ case class BalanceRequestSuccess(
 case class BadRequestResponse(code: String, message: String)
 
 object BadRequestResponse {
-  implicit val format: OFormat[BadRequestResponse] = Json.format[BadRequestResponse]
+  implicit val reads: Reads[BadRequestResponse] = Json.reads[BadRequestResponse]
 }
 
 case class BalanceRequestPending(balanceId: BalanceId) extends BalanceRequestResponse
@@ -66,17 +66,15 @@ case object BalanceRequestSessionExpired extends BalanceRequestResponse
 
 case class BalanceRequestFunctionalError(
   errors: NonEmptyList[FunctionalError]
-) extends BalanceRequestResponse {
-  def containsErrorType(errorType: ErrorType): Boolean = errors.exists(_.errorType == errorType)
-}
+) extends BalanceRequestResponse
 
 object BalanceRequestResponse extends CommonFormats {
 
-  implicit lazy val balanceRequestSuccessFormat: OFormat[BalanceRequestSuccess] =
-    Json.format[BalanceRequestSuccess]
+  implicit lazy val balanceRequestSuccessFormat: Reads[BalanceRequestSuccess] =
+    Json.reads[BalanceRequestSuccess]
 
-  implicit lazy val balanceRequestFunctionalErrorFormat: OFormat[BalanceRequestFunctionalError] =
-    Json.format[BalanceRequestFunctionalError]
+  implicit lazy val balanceRequestFunctionalErrorFormat: Reads[BalanceRequestFunctionalError] =
+    Json.reads[BalanceRequestFunctionalError]
 
   implicit val reads: Reads[BalanceRequestResponse] = Reads[BalanceRequestResponse](
     value =>

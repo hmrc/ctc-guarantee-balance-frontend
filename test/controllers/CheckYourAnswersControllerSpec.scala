@@ -89,7 +89,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with AppWithDefaultMockFix
       val userAnswers = baseAnswers
       setExistingUserAnswers(userAnswers)
 
-      when(mockGuaranteeBalanceService.retrieveBalanceResponse()(any(), any()))
+      when(mockGuaranteeBalanceService.submitBalanceRequest()(any(), any()))
         .thenReturn(Future.successful(Right(BalanceRequestSuccess(123.45, Some(CurrencyCode("GBP"))))))
 
       val request = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
@@ -99,7 +99,7 @@ class CheckYourAnswersControllerSpec extends SpecBase with AppWithDefaultMockFix
 
       redirectLocation(result).value mustEqual routes.BalanceConfirmationController.onPageLoad().url
 
-      verify(mockGuaranteeBalanceService).retrieveBalanceResponse()(any(), any())
+      verify(mockGuaranteeBalanceService).submitBalanceRequest()(any(), any())
     }
   }
 }

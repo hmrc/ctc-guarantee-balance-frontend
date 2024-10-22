@@ -40,10 +40,11 @@ lazy val microservice = (project in file("."))
       ".*ControllerConfiguration",
     ScoverageKeys.coverageExcludedPackages := Seq(
       ".*testOnly.*",
-      "views\\.html\\.components.*",
-      "views\\.html\\.resources.*",
-      "views\\.html\\.templates.*",
-      "viewModels\\.audit\\.AuditConstants.*"
+      "views.html.components.*",
+      "views.html.resources.*",
+      "views.html.templates.*",
+      "views.utils.*",
+      "viewModels.audit.AuditConstants.*"
     ).mkString(";"),
     ScoverageKeys.coverageMinimumStmtTotal := 90,
     ScoverageKeys.coverageFailOnMinimum := true,

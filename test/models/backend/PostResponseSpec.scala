@@ -19,8 +19,8 @@ package models.backend
 import base.SpecBase
 import cats.data.NonEmptyList
 import models.backend.errors.FunctionalError
-import models.values.{BalanceId, ErrorType, GuaranteeReference, TaxIdentifier}
-import play.api.libs.json.{JsSuccess, Json}
+import models.values.*
+import play.api.libs.json.Json
 
 import java.time.Instant
 import java.util.UUID
@@ -29,40 +29,85 @@ class PostResponseSpec extends SpecBase {
 
   "PostBalanceRequestSuccessResponse" - {
 
-    "serialize and deserialize to/from JSON" in {
-      val balanceRequestSuccess = BalanceRequestSuccess(BigDecimal(3.14), None)
-      val successResponse       = PostBalanceRequestSuccessResponse(balanceRequestSuccess)
+    "deserialize from JSON" in {
+      val json = Json.parse("""
+          |{
+          |  "response" : {
+          |    "balance" : 3.14,
+          |    "currency" : "EUR"
+          |  }
+          |}
+          |""".stripMargin)
 
-      val json = Json.toJson(successResponse)
-      json.validate[PostBalanceRequestSuccessResponse] mustBe JsSuccess(successResponse)
+      val expectedResult = {
+        val balanceRequestSuccess = BalanceRequestSuccess(BigDecimal(3.14), Some(CurrencyCode("EUR")))
+        PostBalanceRequestSuccessResponse(balanceRequestSuccess)
+      }
+
+      val result = json.validate[PostBalanceRequestSuccessResponse]
+
+      result.get.mustBe(expectedResult)
     }
   }
 
   "PostBalanceRequestPendingResponse" - {
 
-    "serialize and deserialize to/from JSON" in {
-      val balanceId       = BalanceId(UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4"))
-      val pendingResponse = PostBalanceRequestPendingResponse(balanceId)
+    "deserialize from JSON" in {
+      val uuid = "22b9899e-24ee-48e6-a189-97d1f45391c4"
 
-      val json = Json.toJson(pendingResponse)
-      json.validate[PostBalanceRequestPendingResponse] mustBe JsSuccess(pendingResponse)
+      val json = Json.parse(s"""
+          |{
+          |  "balanceId" : "$uuid"
+          |}
+          |""".stripMargin)
+
+      val expectedResult = {
+        val balanceId = BalanceId(UUID.fromString(uuid))
+        PostBalanceRequestPendingResponse(balanceId)
+      }
+
+      val result = json.validate[PostBalanceRequestPendingResponse]
+
+      result.get.mustBe(expectedResult)
     }
   }
 
   "PostBalanceRequestFunctionalErrorResponse" - {
 
-    "serialize and deserialize to/from JSON" in {
-      val errorResponse = BalanceRequestFunctionalError(
-        errors = NonEmptyList.fromList(List(FunctionalError(ErrorType(1), "str", None))).get
-      )
-      val functionalErrorResponse = PostBalanceRequestFunctionalErrorResponse(
+    "deserialize from JSON" in {
+      val json = Json.parse("""
+          |{
+          |  "code" : "ERR123",
+          |  "message" : "Some error message",
+          |  "response" : {
+          |    "errors" : [
+          |      {
+          |        "errorType" : 14,
+          |        "errorPointer" : "GRR(1).GQY(1).Query identifier",
+          |        "errorReason" : "R261"
+          |      }
+          |    ]
+          |  }
+          |}
+          |""".stripMargin)
+
+      val expectedResult = PostBalanceRequestFunctionalErrorResponse(
         code = "ERR123",
         message = "Some error message",
-        response = errorResponse
+        response = BalanceRequestFunctionalError(
+          errors = NonEmptyList.one(
+            FunctionalError(
+              errorType = ErrorType(14: Int),
+              errorPointer = "GRR(1).GQY(1).Query identifier",
+              errorReason = Some("R261")
+            )
+          )
+        )
       )
 
-      val json = Json.toJson(functionalErrorResponse)
-      json.validate[PostBalanceRequestFunctionalErrorResponse] mustBe JsSuccess(functionalErrorResponse)
+      val result = json.validate[PostBalanceRequestFunctionalErrorResponse]
+
+      result.get.mustBe(expectedResult)
     }
   }
 
@@ -70,31 +115,32 @@ class PostResponseSpec extends SpecBase {
 
     "deserialize from a JSON string" in {
       val balanceId = "22b9899e-24ee-48e6-a189-97d1f45391c4"
-      val jsonString =
-        s"""
-          {
-            "request": {
-              "balanceId": "$balanceId",
-              "taxIdentifier": "tax-id-123",
-              "guaranteeReference": "guarantee-ref-123",
-              "requestedAt": "2024-09-18T10:15:30Z"
-            }
-          }
-        """
 
-      val expectedRequest = PendingBalanceRequest(
-        balanceId = BalanceId(UUID.fromString(balanceId)),
-        taxIdentifier = TaxIdentifier("tax-id-123"),
-        guaranteeReference = GuaranteeReference("guarantee-ref-123"),
-        requestedAt = Instant.parse("2024-09-18T10:15:30.00Z"),
-        completedAt = None,
-        response = None
+      val json = Json.parse(s"""
+           |{
+           |  "request": {
+           |    "balanceId": "$balanceId",
+           |    "taxIdentifier": "tax-id-123",
+           |    "guaranteeReference": "guarantee-ref-123",
+           |    "requestedAt": "2024-09-18T10:15:30Z"
+           |  }
+           |}
+           |""".stripMargin)
+
+      val expectedResult = GetBalanceRequestResponse(
+        PendingBalanceRequest(
+          balanceId = BalanceId(UUID.fromString(balanceId)),
+          taxIdentifier = TaxIdentifier("tax-id-123"),
+          guaranteeReference = GuaranteeReference("guarantee-ref-123"),
+          requestedAt = Instant.parse("2024-09-18T10:15:30.00Z"),
+          completedAt = None,
+          response = None
+        )
       )
 
-      val expectedResponse = GetBalanceRequestResponse(expectedRequest)
+      val result = json.validate[GetBalanceRequestResponse]
 
-      val json = Json.parse(jsonString)
-      json.validate[GetBalanceRequestResponse] mustBe JsSuccess(expectedResponse)
+      result.get.mustBe(expectedResult)
     }
   }
 }

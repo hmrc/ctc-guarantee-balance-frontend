@@ -16,13 +16,13 @@
 
 package models.requests
 
-import models.values._
-import play.api.libs.json.{Json, OFormat}
+import models.values.*
+import play.api.libs.json.{Json, Writes}
 
 case class BalanceRequest(
   accessCode: AccessCode
 )
 
 object BalanceRequest {
-  implicit val balanceRequestJsonFormat: OFormat[BalanceRequest] = Json.format[BalanceRequest]
+  implicit val writes: Writes[BalanceRequest] = Json.writes[BalanceRequest]
 }

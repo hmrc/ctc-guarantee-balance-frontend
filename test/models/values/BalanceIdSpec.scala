@@ -18,6 +18,7 @@ package models.values
 
 import base.SpecBase
 import org.scalacheck.Arbitrary.arbitrary
+import play.api.libs.json.{JsError, JsString, Json}
 
 import java.util.UUID
 
@@ -25,24 +26,55 @@ class BalanceIdSpec extends SpecBase {
 
   private val balanceIdKey: String = "balanceId"
 
-  "must bind a UUID" in {
-    forAll(arbitrary[UUID]) {
-      uuid =>
-        BalanceId.pathBinder.bind(balanceIdKey, uuid.toString) mustBe Right(BalanceId(uuid))
+  "balanceIdFormat" - {
+    "must serialise" in {
+      val uuid           = "22b9899e-24ee-48e6-a189-97d1f45391c4"
+      val balanceId      = BalanceId(UUID.fromString(uuid))
+      val expectedResult = JsString(uuid)
+      val result         = Json.toJson(balanceId)
+      result.mustBe(expectedResult)
+    }
+
+    "must deserialise" - {
+      "when json in expected shape" in {
+        val uuid           = "22b9899e-24ee-48e6-a189-97d1f45391c4"
+        val json           = JsString(uuid)
+        val result         = json.validate[BalanceId]
+        val expectedResult = BalanceId(UUID.fromString(uuid))
+        result.get.mustBe(expectedResult)
+      }
+    }
+
+    "must fail to deserialise" - {
+      "when json in unexpected shape" in {
+        val json   = Json.obj("foo" -> "bar")
+        val result = json.validate[BalanceId]
+        result.mustBe(a[JsError])
+      }
     }
   }
 
-  "must fail to bind a non-UUID" in {
-    forAll(arbitrary[String]) {
-      notAUuid =>
-        BalanceId.pathBinder.bind(balanceIdKey, notAUuid).isLeft mustBe true
-    }
-  }
+  "pathBinder" - {
 
-  "must unbind a UUID" in {
-    forAll(arbitrary[UUID]) {
-      uuid =>
-        BalanceId.pathBinder.unbind(balanceIdKey, BalanceId(uuid)) mustBe uuid.toString
+    "must bind a UUID" in {
+      forAll(arbitrary[UUID]) {
+        uuid =>
+          BalanceId.pathBinder.bind(balanceIdKey, uuid.toString) mustBe Right(BalanceId(uuid))
+      }
+    }
+
+    "must fail to bind a non-UUID" in {
+      forAll(arbitrary[String]) {
+        notAUuid =>
+          BalanceId.pathBinder.bind(balanceIdKey, notAUuid).isLeft mustBe true
+      }
+    }
+
+    "must unbind a UUID" in {
+      forAll(arbitrary[UUID]) {
+        uuid =>
+          BalanceId.pathBinder.unbind(balanceIdKey, BalanceId(uuid)) mustBe uuid.toString
+      }
     }
   }
 }

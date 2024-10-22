@@ -41,7 +41,7 @@ class GuaranteeBalanceResponseHandler @Inject() (
 )(implicit val ec: ExecutionContext)
     extends Logging {
 
-  def detailsDoNotMatch: Call = controllers.routes.DetailsDontMatchController.onPageLoad()
+  private def detailsDoNotMatch: Call = controllers.routes.DetailsDontMatchController.onPageLoad()
 
   def processResponse(response: Either[HttpResponse, BalanceRequestResponse])(implicit
     hc: HeaderCarrier,
