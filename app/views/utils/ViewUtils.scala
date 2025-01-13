@@ -31,8 +31,6 @@ object ViewUtils {
     (if (mainContent.body.contains("govuk-error-summary")) s"${messages("error.title.prefix")} " else "") +
       s"$title - ${messages("site.title.prefix")} - ${messages("site.service_name")} - GOV.UK"
 
-  // TODO refactor this maybe? Going to need this for every ViewModel type going forward
-
   implicit class RadiosImplicits(radios: Radios)(implicit messages: Messages) extends RichRadiosSupport {
 
     def withHeadingAndCaption(heading: String, caption: Option[String]): Radios =
