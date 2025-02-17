@@ -18,35 +18,55 @@ package forms.behaviours
 
 import org.scalacheck.Gen
 import play.api.data.{Field, Form, FormError}
+import wolfendale.scalacheck.regexp.RegexpGen
 
 trait StringFieldBehaviours extends FieldBehaviours {
 
-  def fieldWithMaxLength(form: Form[?], fieldName: String, maxLength: Int, lengthError: FormError): Unit =
+  def fieldWithMaxLength(form: Form[?], fieldName: String, maxLength: Int, lengthError: FormError, regex: String): Unit =
     s"must not bind strings longer than $maxLength characters" in {
 
-      forAll(stringsLongerThan(maxLength)) {
+      forAll(
+        stringsLongerThan(maxLength,
+                          RegexpGen
+                            .from(regex)
+                            .suchThat(_.nonEmpty)
+                            .flatMap(
+                              s => Gen.oneOf(s.toList)
+                            )
+        )
+      ) {
         string =>
           val result = form.bind(Map(fieldName -> string)).apply(fieldName)
           result.errors mustEqual Seq(lengthError)
       }
     }
 
-  def fieldWithMinLength(form: Form[?], fieldName: String, minLength: Int, lengthError: FormError): Unit =
+  def fieldWithMinLength(form: Form[?], fieldName: String, minLength: Int, lengthError: FormError, regex: String): Unit =
     s"must not bind strings shorter than $minLength characters" in {
 
-      forAll(stringsWithMaxLength(minLength - 1)) {
+      forAll(
+        stringsWithMaxLength(minLength - 1,
+                             RegexpGen
+                               .from(regex)
+                               .suchThat(_.nonEmpty)
+                               .flatMap(
+                                 s => Gen.oneOf(s.toList)
+                               )
+        )
+      ) {
         string =>
           val result = form.bind(Map(fieldName -> string)).apply(fieldName)
           result.errors mustEqual Seq(lengthError)
       }
     }
 
-  def fieldThatDoesNotBindInvalidData(form: Form[?], fieldName: String, regex: String, gen: Gen[String], invalidKey: String): Unit =
+  def fieldThatDoesNotBindInvalidData(form: Form[?], fieldName: String, regex: String, length: Int, invalidKey: String): Unit =
     s"must not bind strings which don't match $regex" in {
 
-      val expectedError = FormError(fieldName, invalidKey, Seq(regex))
+      val gen: Gen[String] = RegexpGen.from(s"[!£^*(){}_+=:;|`~<>,±üçñèé]{$length}")
+      val expectedError    = FormError(fieldName, invalidKey, Seq(regex))
 
-      forAll(gen.retryUntil(str => str.trim.nonEmpty && !str.matches(regex))) {
+      forAll(gen.retryUntil(_.length == length)) {
         invalidString =>
           val result: Field = form.bind(Map(fieldName -> invalidString)).apply(fieldName)
           result.errors must contain(expectedError)

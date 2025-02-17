@@ -42,7 +42,8 @@ class AccessCodeFormProviderSpec extends StringFieldBehaviours {
       form = form,
       fieldName = fieldName,
       maxLength = accessCodeLength,
-      lengthError = FormError(fieldName, lengthKey, Seq(accessCodeLength))
+      lengthError = FormError(fieldName, lengthKey, Seq(accessCodeLength)),
+      alphaNumericRegex
     )
 
     behave like mandatoryField(
@@ -54,8 +55,8 @@ class AccessCodeFormProviderSpec extends StringFieldBehaviours {
     behave like fieldThatDoesNotBindInvalidData(
       form = form,
       fieldName = fieldName,
-      regex = alphaNumericRegex,
-      gen = stringsOfLength(accessCodeLength),
+      alphaNumericRegex,
+      accessCodeLength,
       invalidKey = invalidKey
     )
 
