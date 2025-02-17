@@ -46,7 +46,7 @@ trait StringFieldBehaviours extends FieldBehaviours {
 
       val expectedError = FormError(fieldName, invalidKey, Seq(regex))
 
-      forAll(gen.retryUntil(!_.matches(regex))) {
+      forAll(gen.retryUntil(str => str.trim.nonEmpty && !str.matches(regex))) {
         invalidString =>
           val result: Field = form.bind(Map(fieldName -> invalidString)).apply(fieldName)
           result.errors must contain(expectedError)
