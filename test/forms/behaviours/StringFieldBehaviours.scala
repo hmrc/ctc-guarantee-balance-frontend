@@ -26,14 +26,7 @@ trait StringFieldBehaviours extends FieldBehaviours {
     s"must not bind strings longer than $maxLength characters" in {
 
       forAll(
-        stringsLongerThan(maxLength,
-                          RegexpGen
-                            .from(regex)
-                            .suchThat(_.nonEmpty)
-                            .flatMap(
-                              s => Gen.oneOf(s.toList)
-                            )
-        )
+        stringsLongerThan(maxLength, Gen.alphaNumChar)
       ) {
         string =>
           val result = form.bind(Map(fieldName -> string)).apply(fieldName)
@@ -45,14 +38,7 @@ trait StringFieldBehaviours extends FieldBehaviours {
     s"must not bind strings shorter than $minLength characters" in {
 
       forAll(
-        stringsWithMaxLength(minLength - 1,
-                             RegexpGen
-                               .from(regex)
-                               .suchThat(_.nonEmpty)
-                               .flatMap(
-                                 s => Gen.oneOf(s.toList)
-                               )
-        )
+        stringsWithMaxLength(minLength - 1, Gen.alphaNumChar)
       ) {
         string =>
           val result = form.bind(Map(fieldName -> string)).apply(fieldName)
@@ -66,7 +52,7 @@ trait StringFieldBehaviours extends FieldBehaviours {
       val gen: Gen[String] = RegexpGen.from(s"[!£^*(){}_+=:;|`~<>,±üçñèé]{$length}")
       val expectedError    = FormError(fieldName, invalidKey, Seq(regex))
 
-      forAll(gen.retryUntil(_.length == length)) {
+      forAll(gen) {
         invalidString =>
           val result: Field = form.bind(Map(fieldName -> invalidString)).apply(fieldName)
           result.errors must contain(expectedError)
