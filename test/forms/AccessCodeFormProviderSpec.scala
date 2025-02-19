@@ -38,11 +38,10 @@ class AccessCodeFormProviderSpec extends StringFieldBehaviours {
       validDataGenerator = stringsWithMaxLength(accessCodeLength)
     )
 
-    behave like fieldWithMaxLength(
-      form = form,
-      fieldName = fieldName,
-      maxLength = accessCodeLength,
-      lengthError = FormError(fieldName, lengthKey, Seq(accessCodeLength))
+    behave like fieldWithMaxLength(form = form,
+                                   fieldName = fieldName,
+                                   maxLength = accessCodeLength,
+                                   lengthError = FormError(fieldName, lengthKey, Seq(accessCodeLength))
     )
 
     behave like mandatoryField(
@@ -54,8 +53,8 @@ class AccessCodeFormProviderSpec extends StringFieldBehaviours {
     behave like fieldThatDoesNotBindInvalidData(
       form = form,
       fieldName = fieldName,
-      regex = alphaNumericRegex,
-      gen = stringsOfLength(accessCodeLength),
+      alphaNumericRegex,
+      accessCodeLength,
       invalidKey = invalidKey
     )
 

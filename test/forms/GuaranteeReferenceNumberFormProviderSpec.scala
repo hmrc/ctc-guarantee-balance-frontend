@@ -44,18 +44,16 @@ class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
         validDataGenerator = stringsWithMaxLength(maxLength)
       )
 
-      behave like fieldWithMaxLength(
-        form = form,
-        fieldName = fieldName,
-        maxLength = maxLength,
-        lengthError = FormError(fieldName, maxLengthKey, Seq(maxLength))
+      behave like fieldWithMaxLength(form = form,
+                                     fieldName = fieldName,
+                                     maxLength = maxLength,
+                                     lengthError = FormError(fieldName, maxLengthKey, Seq(maxLength))
       )
 
-      behave like fieldWithMinLength(
-        form = form,
-        fieldName = fieldName,
-        minLength = minLength,
-        lengthError = FormError(fieldName, minLengthKey, Seq(minLength))
+      behave like fieldWithMinLength(form = form,
+                                     fieldName = fieldName,
+                                     minLength = minLength,
+                                     lengthError = FormError(fieldName, minLengthKey, Seq(minLength))
       )
 
       behave like mandatoryField(
@@ -67,8 +65,8 @@ class GuaranteeReferenceNumberFormProviderSpec extends StringFieldBehaviours {
       behave like fieldThatDoesNotBindInvalidData(
         form = form,
         fieldName = fieldName,
-        regex = alphaNumericRegex,
-        gen = stringsOfLength(maxLength),
+        alphaNumericRegex,
+        maxLength,
         invalidKey = invalidKey
       )
 

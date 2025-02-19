@@ -54,8 +54,8 @@ class EoriNumberFormProviderSpec extends StringFieldBehaviours with FieldBehavio
     behave like fieldThatDoesNotBindInvalidData(
       form = form,
       fieldName = fieldName,
-      regex = alphaNumericRegex,
-      gen = stringsOfLength(maxEoriNumberLength),
+      alphaNumericRegex,
+      maxEoriNumberLength,
       invalidKey = invalidCharactersKey
     )
 
