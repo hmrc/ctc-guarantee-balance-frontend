@@ -22,7 +22,7 @@ import wolfendale.scalacheck.regexp.RegexpGen
 
 trait StringFieldBehaviours extends FieldBehaviours {
 
-  def fieldWithMaxLength(form: Form[?], fieldName: String, maxLength: Int, lengthError: FormError, regex: String): Unit =
+  def fieldWithMaxLength(form: Form[?], fieldName: String, maxLength: Int, lengthError: FormError) =
     s"must not bind strings longer than $maxLength characters" in {
 
       forAll(
@@ -34,7 +34,7 @@ trait StringFieldBehaviours extends FieldBehaviours {
       }
     }
 
-  def fieldWithMinLength(form: Form[?], fieldName: String, minLength: Int, lengthError: FormError, regex: String): Unit =
+  def fieldWithMinLength(form: Form[?], fieldName: String, minLength: Int, lengthError: FormError) =
     s"must not bind strings shorter than $minLength characters" in {
 
       forAll(
