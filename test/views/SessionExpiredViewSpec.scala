@@ -27,8 +27,6 @@ class SessionExpiredViewSpec extends ViewBehaviours {
 
   override val prefix: String = "session_expired"
 
-  override def hasSignOutLink: Boolean = false
-
   behave like pageWithTitle()
 
   behave like pageWithoutBackLink()
