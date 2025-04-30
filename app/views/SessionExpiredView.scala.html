@@ -27,8 +27,7 @@
 
 @mainTemplate(
     title = messages("session_expired.title"),
-    showBackLink = false,
-    canSignOut = false
+    showBackLink = false
 ) {
 
     @formHelper(action = routes.SessionExpiredController.onSubmit(), Symbol("autoComplete") -> "off") {
