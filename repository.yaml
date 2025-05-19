@@ -1,7 +1,5 @@
 repoVisibility: public_0C3F0CE3E6E6448FAD341E7BFA50FCD333E06A20CFF05FCACE61154DDBBADF71
 type: service
 test-repositories:
-  - ctc-guarantee-balance-perf-tests
-  - ctc-guarantee-balance-performance-tests
   - manage-transit-movements-performance-tests
-  - ctc-guarantee-balance-journey-tests
+  - manage-transit-movements-ui-journey-tests
