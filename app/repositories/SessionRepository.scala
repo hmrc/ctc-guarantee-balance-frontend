@@ -43,7 +43,8 @@ class SessionRepository @Inject() (
           Indexes.ascending("lastUpdated"),
           IndexOptions().name("user-answers-last-updated-index").expireAfter(config.mongoDbTtl.toLong, TimeUnit.SECONDS)
         )
-      )
+      ),
+      replaceIndexes = config.replaceIndexes
     ) {
 
   def get(id: String): Future[Option[UserAnswers]] =
