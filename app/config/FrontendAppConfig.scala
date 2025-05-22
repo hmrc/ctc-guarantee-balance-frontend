@@ -50,6 +50,7 @@ class FrontendAppConfig @Inject() (configuration: Configuration, service: Servic
   lazy val nctsUrl: String                   = configuration.get[String]("urls.ncts")
   lazy val nctsEnquiriesUrl: String          = configuration.get[String]("urls.nctsEnquiries")
   lazy val manageTransitMovementsUrl: String = configuration.get[String]("urls.manageTransitMovements")
+  lazy val replaceIndexes: Boolean           = configuration.get[Boolean]("feature-flags.replace-indexes")
 
   val encryptionKey: String      = configuration.get[String]("encryption.key")
   val encryptionEnabled: Boolean = configuration.get[Boolean]("encryption.enabled")
