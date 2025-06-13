@@ -24,6 +24,7 @@ import play.api.libs.json.{Json, Reads}
 
 import java.text.NumberFormat
 import java.util.{Currency, Locale}
+import scala.util.control.NonFatal
 
 sealed trait BalanceRequestResponse
 
@@ -40,7 +41,7 @@ case class BalanceRequestSuccess(
       }
       formatter.format(balance)
     } catch {
-      case _: Exception =>
+      case NonFatal(_: Exception) =>
         currency.fold(s"$balance")(
           x => s"${x.value}$balance"
         )

@@ -19,7 +19,6 @@ package views.templates
 import base.SpecBase
 import generators.Generators
 import org.jsoup.Jsoup
-import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.mvc.AnyContent
