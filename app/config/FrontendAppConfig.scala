@@ -23,7 +23,8 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 @Singleton
 class FrontendAppConfig @Inject() (configuration: Configuration, service: ServicesConfig) {
 
-  lazy val appName: String = configuration.get[String]("appName")
+  lazy val appName: String     = configuration.get[String]("appName")
+  lazy val feedbackUrl: String = configuration.get[String]("urls.feedback")
 
   val signOutUrl: String = configuration.get[String]("urls.logoutContinue") + configuration.get[String]("urls.feedback")
 

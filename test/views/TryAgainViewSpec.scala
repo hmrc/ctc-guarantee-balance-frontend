@@ -50,4 +50,12 @@ class TryAgainViewSpec extends ViewBehaviours {
     val doc  = parseView(view)
     behave like pageWithNoInput(doc)
   }
+
+  behave like pageWithContent("h2", "Before you go")
+
+  behave like pageWithLink(
+    "feedback",
+    "Take a short survey",
+    "http://localhost:9514/feedback/check-transit-guarantee-balance"
+  )
 }

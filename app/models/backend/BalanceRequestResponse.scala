@@ -25,7 +25,6 @@ import play.api.libs.json.{Json, Reads}
 import java.text.NumberFormat
 import java.util.{Currency, Locale}
 import scala.util.Try
-import scala.util.control.NonFatal
 
 sealed trait BalanceRequestResponse
 
