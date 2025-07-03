@@ -18,11 +18,15 @@
 @import models.Referral._
 @import models.Timestamp
 @import viewModels.components.InputTextViewModel._
+@import config.FrontendAppConfig
+@import views.html.components.Feedback
 
 @this(
     mainTemplate: MainTemplate,
     formHelper: FormWithCSRF,
-    govukPanel: GovukPanel
+    govukPanel: GovukPanel,
+    config: FrontendAppConfig,
+    feedback: Feedback
 )
 
 @(balance: String, timestamp: Timestamp, referral: Option[String])(implicit request: Request[?], messages: Messages)
@@ -55,4 +59,6 @@
     <p class="govuk-body">
         <a class="govuk-link" href=@routes.BalanceConfirmationController.manageTransitMovements() id="manage-transit-movements">@messages("balanceConfirmation.link2")</a>
     </p>
+
+    @feedback()
 }

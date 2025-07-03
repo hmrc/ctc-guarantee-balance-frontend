@@ -17,11 +17,12 @@
 @import config.FrontendAppConfig
 @import controllers.routes
 @import viewModels.components.InputTextViewModel._
-@import views.html.components.Heading
+@import views.html.components.{Heading, Feedback}
 
 @this(
     mainTemplate: MainTemplate,
     heading: Heading,
+    feedback: Feedback,
     config: FrontendAppConfig
 )
 
@@ -40,4 +41,6 @@
     <p class="govuk-body">@messages("detailsDontMatch.p2")
         <a class="govuk-link" target="_blank" id="contact" rel="noopener noreferrer" href=@config.nctsEnquiriesUrl>@messages("detailsDontMatch.p2.a")</a>
     </p>
+
+    @feedback()
 }

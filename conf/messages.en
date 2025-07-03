@@ -60,12 +60,6 @@ eoriNumber.error.invalidFormat = Your EORI number must start GB or XI followed b
 eoriNumber.error.prefix = Your EORI number must start with GB or XI, like GB123456789000
 eoriNumber.change.hidden = EORI number
 
-tryAgain.title = We have not been able to get your guarantee balance
-tryAgain.heading = We have not been able to get your guarantee balance
-tryAgain.checkDetails.prelink = You can
-tryAgain.checkDetails.link = check that your details are correct
-tryAgain.checkDetails.postlink = or you can try again in {0} seconds.
-
 tryAgain.title = We could not check your guarantee balance
 tryAgain.heading = We could not check your guarantee balance
 tryAgain.checkDetails.prelink = Wait for 60 seconds - then
@@ -168,3 +162,8 @@ detailsDontMatch.p1 = Check your details and try again
 detailsDontMatch.p2 = If your details are correct,
 detailsDontMatch.p2.a = contact the NCTS helpdesk (opens in a new tab)
 detailsDontMatch.caption = Guarantee balance
+
+survey.h2 = Before you go
+survey.link = Take a short survey
+survey.prelink = Your feedback helps us make our service better.
+survey.postlink = to share your feedback on this service.
