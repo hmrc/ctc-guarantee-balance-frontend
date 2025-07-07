@@ -26,6 +26,13 @@ object Referral extends Enumerable.Implicits {
 
   case object NCTS extends WithName("ncts") with Referral
 
+  def apply(value: String): Either[String, Referral] =
+    value match {
+      case x if x == GovUK.toString => Right(GovUK)
+      case x if x == NCTS.toString  => Right(NCTS)
+      case x                        => Left(s"Invalid Referral Type: $x")
+    }
+
   lazy val key: String = "referral"
 
   implicit val jsLiteral: JavascriptLiteral[Referral] = (referral: Referral) => s""""$referral""""
@@ -48,11 +55,7 @@ object Referral extends Enumerable.Implicits {
     override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, Referral]] =
       stringBinder.bind(key, params) match {
         case Some(Right(referral)) =>
-          referral.toLowerCase match {
-            case x if x == GovUK.toString => Some(Right(GovUK))
-            case x if x == NCTS.toString  => Some(Right(NCTS))
-            case x                        => Some(Left(s"Invalid Referral Type: $x"))
-          }
+          Some(Referral(referral.toLowerCase))
         case _ => None
       }
 

@@ -29,7 +29,7 @@
     feedback: Feedback
 )
 
-@(balance: String, timestamp: Timestamp, referral: Option[String])(implicit request: Request[?], messages: Messages)
+@(balance: String, timestamp: Timestamp, referral: Option[Referral])(implicit request: Request[?], messages: Messages)
 
 @panelContent = {
     <strong>@balance</strong>
@@ -56,9 +56,14 @@
         <a class="govuk-link" href=@routes.BalanceConfirmationController.checkAnotherGuaranteeBalance() id="check-another-guarantee-balance">@messages("balanceConfirmation.link1")</a>
     </p>
 
-    <p class="govuk-body">
-        <a class="govuk-link" href=@routes.BalanceConfirmationController.manageTransitMovements() id="manage-transit-movements">@messages("balanceConfirmation.link2")</a>
-    </p>
+    @referral.map {
+        case NCTS => {
+            <p class="govuk-body">
+                <a class="govuk-link" href=@routes.BalanceConfirmationController.manageTransitMovements() id="manage-transit-movements">@messages("balanceConfirmation.link2")</a>
+            </p>
+        }
+        case GovUK => {}
+    }
 
     @feedback()
 }

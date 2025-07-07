@@ -28,7 +28,7 @@ class BalanceConfirmationViewSpec extends PanelViewBehaviours with FeedbackViewB
 
   private val balance   = nonEmptyString.sample.value
   private val timestamp = arbitrary[Timestamp].sample.value
-  private val referral  = arbitrary[Option[Referral]].sample.value.map(_.toString)
+  private val referral  = arbitrary[Option[Referral]].sample.value
 
   override def view: HtmlFormat.Appendable =
     injector.instanceOf[BalanceConfirmationView].apply(balance, timestamp, referral)(fakeRequest, messages)
@@ -46,7 +46,7 @@ class BalanceConfirmationViewSpec extends PanelViewBehaviours with FeedbackViewB
   behave like pageWithContent(doc, "p", "This is your guarantee limit minus the liability amounts for your open movements.")
 
   "when NCTS referral" - {
-    val view = injector.instanceOf[BalanceConfirmationView].apply(balance, timestamp, Some(NCTS.toString))(fakeRequest, messages)
+    val view = injector.instanceOf[BalanceConfirmationView].apply(balance, timestamp, Some(NCTS))(fakeRequest, messages)
     val doc  = parseView(view)
 
     behave like pageWithLink(
@@ -65,7 +65,7 @@ class BalanceConfirmationViewSpec extends PanelViewBehaviours with FeedbackViewB
   }
 
   "when GovUK or no referral" - {
-    val referral = Gen.oneOf(Some(GovUK.toString), None).sample.value
+    val referral = Gen.oneOf(Some(GovUK), None).sample.value
     val view     = injector.instanceOf[BalanceConfirmationView].apply(balance, timestamp, referral)(fakeRequest, messages)
     val doc      = parseView(view)
 
@@ -74,6 +74,11 @@ class BalanceConfirmationViewSpec extends PanelViewBehaviours with FeedbackViewB
       "check-another-guarantee-balance",
       "Check another guarantee balance",
       controllers.routes.BalanceConfirmationController.checkAnotherGuaranteeBalance().url
+    )
+
+    behave like pageWithoutLink(
+      doc,
+      "manage-transit-movements"
     )
   }
 

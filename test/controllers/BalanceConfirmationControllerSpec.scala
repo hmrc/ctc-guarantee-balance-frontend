@@ -77,7 +77,7 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
                 status(result) mustEqual OK
 
                 contentAsString(result) mustEqual
-                  view(balance, timestamp, Some(referral.toString))(request, messages).toString
+                  view(balance, timestamp, Some(referral))(request, messages).toString
 
                 verify(mockDateTimeService).currentDateTime
             }

@@ -18,6 +18,7 @@ package services
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import models.Referral
+import models.Referral.*
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.mvc.AnyContentAsEmpty
@@ -31,11 +32,15 @@ class ReferralServiceSpec extends SpecBase with ScalaCheckPropertyChecks with Ap
   "getReferralFromSession" - {
 
     "when referral exists" - {
-      "must return Some value" in {
-        forAll(arbitrary[String]) {
-          value =>
-            implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest.withSession(Referral.key -> value)
-            referralService.getReferralFromSession.get mustEqual value
+      "must return Some value" - {
+        "when GovUK" in {
+          implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest.withSession(Referral.key -> "govuk")
+          referralService.getReferralFromSession.get mustEqual GovUK
+        }
+
+        "when NCTS" in {
+          implicit val request: FakeRequest[AnyContentAsEmpty.type] = fakeRequest.withSession(Referral.key -> "ncts")
+          referralService.getReferralFromSession.get mustEqual NCTS
         }
       }
     }

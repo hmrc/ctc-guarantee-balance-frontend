@@ -68,20 +68,6 @@ tryAgain.caption = Guarantee balance
 tryAgain.problems = If your details are correct and you keep having problems,
 tryAgain.problems.link = contact the NCTS helpdesk (opens in a new tab)
 
-guaranteeReferenceNumber.heading = Guarantee reference number
-guaranteeReferenceNumber.title = Guarantee reference number
-guaranteeReferenceNumber.label = What is the guarantee reference number?
-guaranteeReferenceNumber.checkYourAnswersLabel = Guarantee reference number
-guaranteeReferenceNumber.paragraph1 = You can only check the balance for:
-guaranteeReferenceNumber.bullet1 = comprehensive guarantee
-guaranteeReferenceNumber.bullet2 = guarantee waiver
-guaranteeReferenceNumber.bullet3 = individual guarantee with multiple usage
-guaranteeReferenceNumber.paragraph2 = You must make sure this reference is up to date.
-guaranteeReferenceNumber.error.required = Enter the guarantee reference number
-guaranteeReferenceNumber.error.length = The guarantee reference number must be 17 characters or less
-guaranteeReferenceNumber.error.invalid = The guarantee reference number must only include letters a to z without accents and numbers 0 to 9
-guaranteeReferenceNumber.change.hidden = guarantee reference number
-
 guaranteeReferenceNumber.caption = Guarantee balance
 guaranteeReferenceNumber.heading = What is the Guarantee Reference Number (GRN)?
 guaranteeReferenceNumber.title = What is the Guarantee Reference Number (GRN)?
@@ -103,17 +89,6 @@ unsupportedGuaranteeType.checkDetails = You can
 unsupportedGuaranteeType.checkDetails.link = change the reference of the guarantee you are checking
 unsupportedGuaranteeType.checkDetails.postLink = or you can start again.
 
-accessCode.title = Access code
-accessCode.heading = Access code
-accessCode.label = What is the access code?
-accessCode.checkYourAnswersLabel = Access code
-accessCode.error.required = Enter the access code
-accessCode.error.length = The access code must be 4 characters long, like 0000 or X9X9
-accessCode.error.invalidCharacters = The access code must only include letters a to z and numbers 0 to 9
-accessCode.hint = The access code must be 4 characters long, like 0000 or X9X9.
-accessCode.paragraph = The person responsible for your transit movements will have received an email about access codes.
-accessCode.change.hidden = access code
-
 accessCode.caption = Guarantee balance
 accessCode.heading = What is the access code?
 accessCode.title = What is the access code?
@@ -127,19 +102,7 @@ accessCode.change.hidden = access code
 
 checkYourAnswers.title = Check your answers
 checkYourAnswers.heading = Check your answers
-checkYourAnswers.preHeading = Guarantee balance details
-
-checkYourAnswers.title = Check your answers
-checkYourAnswers.heading = Check your answers
 checkYourAnswers.caption = Guarantee balance
-
-balanceConfirmation.title = Your balance
-balanceConfirmation.heading = Your balance
-balanceConfirmation.fromGovUk.p = You can
-balanceConfirmation.fromGovUk.link = check another guarantee balance
-balanceConfirmation.fromNcts.p = You can:
-balanceConfirmation.fromNcts.link1 = check another guarantee balance
-balanceConfirmation.fromNcts.link2 = manage your transit movements
 
 balanceConfirmation.title = Available balance
 balanceConfirmation.heading = Available balance
