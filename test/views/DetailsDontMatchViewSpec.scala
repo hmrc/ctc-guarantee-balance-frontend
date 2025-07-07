@@ -17,10 +17,10 @@
 package views
 
 import play.twirl.api.HtmlFormat
-import views.behaviours.ViewBehaviours
+import views.behaviours.{FeedbackViewBehaviours, ViewBehaviours}
 import views.html.DetailsDontMatchView
 
-class DetailsDontMatchViewSpec extends ViewBehaviours {
+class DetailsDontMatchViewSpec extends FeedbackViewBehaviours {
 
   override def view: HtmlFormat.Appendable =
     injector.instanceOf[DetailsDontMatchView].apply()(fakeRequest, messages)
@@ -39,7 +39,7 @@ class DetailsDontMatchViewSpec extends ViewBehaviours {
     controllers.routes.CheckYourAnswersController.onPageLoad().url
   )
 
-  behave like pageWithPartialContent("p", "If your details are correct,")
+  behave like pageWithContent("p", "If your details are correct, contact the NCTS helpdesk (opens in a new tab).")
 
   behave like pageWithLink(
     "contact",
@@ -47,11 +47,5 @@ class DetailsDontMatchViewSpec extends ViewBehaviours {
     frontendAppConfig.nctsEnquiriesUrl
   )
 
-  behave like pageWithContent("h2", "Before you go")
-
-  behave like pageWithLink(
-    "feedback",
-    "Take a short survey",
-    "http://localhost:9514/feedback/check-transit-guarantee-balance"
-  )
+  behave like pageWithFeedback()
 }

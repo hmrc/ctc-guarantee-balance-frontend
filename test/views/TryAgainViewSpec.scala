@@ -19,10 +19,10 @@ package views
 import models.values.BalanceId
 import org.scalacheck.Arbitrary.arbitrary
 import play.twirl.api.HtmlFormat
-import views.behaviours.ViewBehaviours
+import views.behaviours.FeedbackViewBehaviours
 import views.html.TryAgainView
 
-class TryAgainViewSpec extends ViewBehaviours {
+class TryAgainViewSpec extends FeedbackViewBehaviours {
 
   private val balanceId = arbitrary[Option[BalanceId]].sample.value.map(_.value)
 
@@ -51,11 +51,5 @@ class TryAgainViewSpec extends ViewBehaviours {
     behave like pageWithNoInput(doc)
   }
 
-  behave like pageWithContent("h2", "Before you go")
-
-  behave like pageWithLink(
-    "feedback",
-    "Take a short survey",
-    "http://localhost:9514/feedback/check-transit-guarantee-balance"
-  )
+  behave like pageWithFeedback()
 }

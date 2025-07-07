@@ -149,13 +149,6 @@ balanceConfirmation.link2 = Manage your transit movements
 balanceConfirmation.timestamp.1 = as of
 balanceConfirmation.timestamp.2 = {0} at {1}
 
-detailsDontMatch.title = Your details do not match our records
-detailsDontMatch.heading = Your details do not match our records
-detailsDontMatch.p1 = You must
-detailsDontMatch.p1.a = check your answers and try again
-detailsDontMatch.p2 = If your details are correct, you must
-detailsDontMatch.p2.a = contact the NCTS helpdesk (opens in a new tab)
-
 detailsDontMatch.title = The Guarantee Reference Number (GRN) and access code do not match
 detailsDontMatch.heading = The Guarantee Reference Number (GRN) and access code do not match
 detailsDontMatch.p1 = Check your details and try again
