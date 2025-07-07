@@ -39,7 +39,6 @@ GET        /balance                                 controllers.BalanceConfirmat
 GET        /check-another-guarantee-balance         controllers.BalanceConfirmationController.checkAnotherGuaranteeBalance()
 GET        /manage-transit-movements                controllers.BalanceConfirmationController.manageTransitMovements()
 
-GET        /details-do-not-match                    controllers.DetailsDontMatchController.onPageLoad()
 GET        /grn-access-code-mismatch                controllers.DetailsDontMatchController.onPageLoad()
 
 GET        /guarantee-not-supported                 controllers.UnsupportedGuaranteeTypeController.onPageLoad()
