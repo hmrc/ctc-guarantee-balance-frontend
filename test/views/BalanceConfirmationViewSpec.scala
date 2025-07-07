@@ -16,15 +16,15 @@
 
 package views
 
-import models.Referral._
+import models.Referral.*
 import models.{Referral, Timestamp}
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import play.twirl.api.HtmlFormat
-import views.behaviours.PanelViewBehaviours
+import views.behaviours.{FeedbackViewBehaviours, PanelViewBehaviours}
 import views.html.BalanceConfirmationView
 
-class BalanceConfirmationViewSpec extends PanelViewBehaviours {
+class BalanceConfirmationViewSpec extends PanelViewBehaviours with FeedbackViewBehaviours {
 
   private val balance   = nonEmptyString.sample.value
   private val timestamp = arbitrary[Timestamp].sample.value
@@ -77,11 +77,5 @@ class BalanceConfirmationViewSpec extends PanelViewBehaviours {
     )
   }
 
-  behave like pageWithContent("h2", "Before you go")
-
-  behave like pageWithLink(
-    "feedback",
-    "Take a short survey",
-    "http://localhost:9514/feedback/check-transit-guarantee-balance"
-  )
+  behave like pageWithFeedback()
 }
