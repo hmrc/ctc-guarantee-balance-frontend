@@ -17,7 +17,7 @@
 package views
 
 import play.twirl.api.HtmlFormat
-import views.behaviours.{FeedbackViewBehaviours, ViewBehaviours}
+import views.behaviours.FeedbackViewBehaviours
 import views.html.DetailsDontMatchView
 
 class DetailsDontMatchViewSpec extends FeedbackViewBehaviours {
