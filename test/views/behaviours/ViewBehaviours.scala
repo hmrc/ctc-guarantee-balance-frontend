@@ -23,7 +23,7 @@ import org.scalatest.Assertion
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.HtmlFormat
-import play.twirl.api.TwirlHelperImports._
+import play.twirl.api.TwirlHelperImports.*
 import views.viewBase.ViewSpecAssertions
 
 trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
@@ -135,6 +135,11 @@ trait ViewBehaviours extends SpecBase with ViewSpecAssertions {
     s"must render link with id $id" in {
       val link = getElementById(doc, id)
       assertElementHasLink(link, expectedText, expectedHref)
+    }
+
+  def pageWithoutLink(doc: Document, id: String): Unit =
+    s"must not render link with id $id" in {
+      assertNotRenderedById(doc, id)
     }
 
   def pageWithBackLink(): Unit =
