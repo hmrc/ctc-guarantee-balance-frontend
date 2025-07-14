@@ -48,11 +48,11 @@ class ReferralSpec extends SpecBase {
     "must bind correctly" - {
 
       "when lower case" in {
-        Referral.queryStringBinder.bind(referralKey, Map(referralKey -> Seq("govuk"))).value mustEqual Right(referral)
+        Referral.queryStringBinder.bind(referralKey, Map(referralKey -> Seq("govuk"))).value.value mustEqual referral
       }
 
       "when not lower case" in {
-        Referral.queryStringBinder.bind(referralKey, Map(referralKey -> Seq("gOvUk"))).value mustEqual Right(referral)
+        Referral.queryStringBinder.bind(referralKey, Map(referralKey -> Seq("gOvUk"))).value.value mustEqual referral
       }
     }
 
@@ -84,11 +84,11 @@ class ReferralSpec extends SpecBase {
     "must bind correctly" - {
 
       "when lower case" in {
-        Referral.queryStringBinder.bind(referralKey, Map(referralKey -> Seq("ncts"))).value mustEqual Right(referral)
+        Referral.queryStringBinder.bind(referralKey, Map(referralKey -> Seq("ncts"))).value.value mustEqual referral
       }
 
       "when not lower case" in {
-        Referral.queryStringBinder.bind(referralKey, Map(referralKey -> Seq("nCtS"))).value mustEqual Right(referral)
+        Referral.queryStringBinder.bind(referralKey, Map(referralKey -> Seq("nCtS"))).value.value mustEqual referral
       }
     }
 
@@ -104,7 +104,8 @@ class ReferralSpec extends SpecBase {
       )
     ) {
       str =>
-        Referral.queryStringBinder.bind(referralKey, Map(referralKey -> Seq(str))).value mustEqual Left(s"Invalid Referral Type: ${str.toLowerCase}")
+        Referral.queryStringBinder.bind(referralKey, Map(referralKey -> Seq(str))).value.left.value mustEqual
+          s"Invalid Referral Type: ${str.toLowerCase}"
     }
   }
 
