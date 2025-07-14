@@ -48,16 +48,16 @@ class ReferralSpec extends SpecBase {
     "must bind correctly" - {
 
       "when lower case" in {
-        Referral.queryStringBinder.bind(referralKey, Map(referralKey -> Seq("govuk"))) mustBe Some(Right(referral))
+        Referral.queryStringBinder.bind(referralKey, Map(referralKey -> Seq("govuk"))).value mustEqual Right(referral)
       }
 
       "when not lower case" in {
-        Referral.queryStringBinder.bind(referralKey, Map(referralKey -> Seq("gOvUk"))) mustBe Some(Right(referral))
+        Referral.queryStringBinder.bind(referralKey, Map(referralKey -> Seq("gOvUk"))).value mustEqual Right(referral)
       }
     }
 
     "must unbind correctly" in {
-      Referral.queryStringBinder.unbind(referralKey, referral) mustBe s"$referralKey=govuk"
+      Referral.queryStringBinder.unbind(referralKey, referral) mustEqual s"$referralKey=govuk"
     }
   }
 
@@ -84,16 +84,16 @@ class ReferralSpec extends SpecBase {
     "must bind correctly" - {
 
       "when lower case" in {
-        Referral.queryStringBinder.bind(referralKey, Map(referralKey -> Seq("ncts"))) mustBe Some(Right(referral))
+        Referral.queryStringBinder.bind(referralKey, Map(referralKey -> Seq("ncts"))).value mustEqual Right(referral)
       }
 
       "when not lower case" in {
-        Referral.queryStringBinder.bind(referralKey, Map(referralKey -> Seq("nCtS"))) mustBe Some(Right(referral))
+        Referral.queryStringBinder.bind(referralKey, Map(referralKey -> Seq("nCtS"))).value mustEqual Right(referral)
       }
     }
 
     "must unbind correctly" in {
-      Referral.queryStringBinder.unbind(referralKey, referral) mustBe s"$referralKey=ncts"
+      Referral.queryStringBinder.unbind(referralKey, referral) mustEqual s"$referralKey=ncts"
     }
   }
 
@@ -104,7 +104,7 @@ class ReferralSpec extends SpecBase {
       )
     ) {
       str =>
-        Referral.queryStringBinder.bind(referralKey, Map(referralKey -> Seq(str))) mustBe Some(Left(s"Invalid Referral Type: ${str.toLowerCase}"))
+        Referral.queryStringBinder.bind(referralKey, Map(referralKey -> Seq(str))).value mustEqual Left(s"Invalid Referral Type: ${str.toLowerCase}")
     }
   }
 

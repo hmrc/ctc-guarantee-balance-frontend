@@ -140,7 +140,7 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
 
         val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
         verify(mockSessionRepository).set(userAnswersCaptor.capture())
-        userAnswersCaptor.getValue.data.mustBe(Json.obj())
+        userAnswersCaptor.getValue.data.mustEqual(Json.obj())
       }
     }
 
@@ -159,7 +159,7 @@ class BalanceConfirmationControllerSpec extends SpecBase with MockitoSugar with 
 
         val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
         verify(mockSessionRepository).set(userAnswersCaptor.capture())
-        userAnswersCaptor.getValue.data.mustBe(Json.obj())
+        userAnswersCaptor.getValue.data.mustEqual(Json.obj())
       }
     }
   }

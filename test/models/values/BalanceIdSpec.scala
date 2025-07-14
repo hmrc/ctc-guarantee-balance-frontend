@@ -32,7 +32,7 @@ class BalanceIdSpec extends SpecBase {
       val balanceId      = BalanceId(UUID.fromString(uuid))
       val expectedResult = JsString(uuid)
       val result         = Json.toJson(balanceId)
-      result.mustBe(expectedResult)
+      result.mustEqual(expectedResult)
     }
 
     "must deserialise" - {
@@ -41,7 +41,7 @@ class BalanceIdSpec extends SpecBase {
         val json           = JsString(uuid)
         val result         = json.validate[BalanceId]
         val expectedResult = BalanceId(UUID.fromString(uuid))
-        result.get.mustBe(expectedResult)
+        result.get.mustEqual(expectedResult)
       }
     }
 
@@ -49,7 +49,7 @@ class BalanceIdSpec extends SpecBase {
       "when json in unexpected shape" in {
         val json   = Json.obj("foo" -> "bar")
         val result = json.validate[BalanceId]
-        result.mustBe(a[JsError])
+        result mustBe a[JsError]
       }
     }
   }
@@ -59,21 +59,21 @@ class BalanceIdSpec extends SpecBase {
     "must bind a UUID" in {
       forAll(arbitrary[UUID]) {
         uuid =>
-          BalanceId.pathBinder.bind(balanceIdKey, uuid.toString) mustBe Right(BalanceId(uuid))
+          BalanceId.pathBinder.bind(balanceIdKey, uuid.toString).value mustEqual BalanceId(uuid)
       }
     }
 
     "must fail to bind a non-UUID" in {
       forAll(arbitrary[String]) {
         notAUuid =>
-          BalanceId.pathBinder.bind(balanceIdKey, notAUuid).isLeft mustBe true
+          BalanceId.pathBinder.bind(balanceIdKey, notAUuid).isLeft mustEqual true
       }
     }
 
     "must unbind a UUID" in {
       forAll(arbitrary[UUID]) {
         uuid =>
-          BalanceId.pathBinder.unbind(balanceIdKey, BalanceId(uuid)) mustBe uuid.toString
+          BalanceId.pathBinder.unbind(balanceIdKey, BalanceId(uuid)) mustEqual uuid.toString
       }
     }
   }

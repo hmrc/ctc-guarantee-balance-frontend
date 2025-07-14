@@ -40,16 +40,16 @@ trait ViewSpecAssertions extends ViewSpecGetters {
   }
 
   def assertElementContainsText(element: Element, expectedText: String): Assertion =
-    element.text() mustBe expectedText
+    element.text() mustEqual expectedText
 
   def assertElementIncludesText(element: Element, expectedText: String): Assertion =
     element.text() must include(expectedText)
 
   def assertElementContainsHref(element: Element, expectedHref: String): Assertion =
-    getElementHref(element) mustBe expectedHref
+    getElementHref(element) mustEqual expectedHref
 
   def assertElementContainsId(element: Element, expectedId: String): Assertion =
-    element.id() mustBe expectedId
+    element.id() mustEqual expectedId
 
   def assertElementExists(elements: Elements, condition: Element => Boolean): Assertion =
     assert(elements.toList.exists(condition))

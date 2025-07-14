@@ -39,6 +39,6 @@ class FunctionalErrorSpec extends SpecBase {
 
     val result = json.validate[FunctionalError]
 
-    result.get.mustBe(expectedResult)
+    result.get.mustEqual(expectedResult)
   }
 }

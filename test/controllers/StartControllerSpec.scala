@@ -58,7 +58,7 @@ class StartControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
               val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
               verify(mockSessionRepository).set(uaCaptor.capture)
 
-              uaCaptor.getValue.lastUpdated.isAfter(time) mustBe true // check that new user answers have been created
+              uaCaptor.getValue.lastUpdated.isAfter(time) mustEqual true // check that new user answers have been created
           }
         }
 
@@ -80,7 +80,7 @@ class StartControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
               val uaCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
               verify(mockSessionRepository).set(uaCaptor.capture)
 
-              uaCaptor.getValue.lastUpdated.isAfter(time) mustBe true // check that new user answers have been created
+              uaCaptor.getValue.lastUpdated.isAfter(time) mustEqual true // check that new user answers have been created
           }
         }
       }

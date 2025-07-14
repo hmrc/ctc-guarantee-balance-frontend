@@ -43,7 +43,7 @@ class TestOnlyInputControllerSpec extends ItSpecBase {
           .get()
           .futureValue
 
-      response.status mustBe 200
+      response.status mustEqual 200
     }
   }
 
@@ -62,7 +62,7 @@ class TestOnlyInputControllerSpec extends ItSpecBase {
 
         val data = sessionRepository.get("test-only").futureValue
 
-        data.get.data mustBe Json.parse("""
+        data.get.data mustEqual Json.parse("""
             |{
             |  "testOnlyInput" : "GB000142"
             |}

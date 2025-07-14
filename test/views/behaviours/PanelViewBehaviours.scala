@@ -28,7 +28,7 @@ trait PanelViewBehaviours extends ViewBehaviours {
 
         "must have a body" in {
           val panelBody = getElementByClass(doc, "govuk-panel__body")
-          panelBody.text() mustBe body
+          panelBody.text() mustEqual body
         }
       }
     }

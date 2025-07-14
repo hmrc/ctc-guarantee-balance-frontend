@@ -52,19 +52,19 @@ class SessionRepositorySpec extends ItSpecBase with DefaultPlayMongoRepositorySu
 
         val result = repository.get(internalId1).futureValue
 
-        result.value.id mustBe userAnswers1.id
-        result.value.data mustBe userAnswers1.data
+        result.value.id mustEqual userAnswers1.id
+        result.value.data mustEqual userAnswers1.data
 
         result.value.lastUpdated `equals` userAnswers1.lastUpdated.truncatedTo(
           java.time.temporal.ChronoUnit.MILLIS
-        ) mustBe true
+        ) mustEqual true
       }
 
       "must return None when no match found for internal ID" in {
 
         val result = repository.get(internalId2).futureValue
 
-        result mustBe None
+        result must not be defined
       }
     }
 
@@ -76,13 +76,13 @@ class SessionRepositorySpec extends ItSpecBase with DefaultPlayMongoRepositorySu
 
         val getResult = repository.get(internalId1).futureValue.value
 
-        setResult mustBe true
-        getResult.id mustBe userAnswers1.id
-        getResult.data mustBe userAnswers1.data
+        setResult mustEqual true
+        getResult.id mustEqual userAnswers1.id
+        getResult.data mustEqual userAnswers1.data
 
         getResult.lastUpdated `isAfter` userAnswers1.lastUpdated.truncatedTo(
           java.time.temporal.ChronoUnit.MILLIS
-        ) mustBe true
+        ) mustEqual true
       }
 
       "must create new document when it doesn't already exist" in {
@@ -91,13 +91,13 @@ class SessionRepositorySpec extends ItSpecBase with DefaultPlayMongoRepositorySu
 
         val getResult = repository.get(internalId2).futureValue.value
 
-        setResult mustBe true
-        getResult.id mustBe userAnswers2.id
-        getResult.data mustBe userAnswers2.data
+        setResult mustEqual true
+        getResult.id mustEqual userAnswers2.id
+        getResult.data mustEqual userAnswers2.data
 
         getResult.lastUpdated `isAfter` userAnswers2.lastUpdated.truncatedTo(
           java.time.temporal.ChronoUnit.MILLIS
-        ) mustBe true
+        ) mustEqual true
       }
     }
 

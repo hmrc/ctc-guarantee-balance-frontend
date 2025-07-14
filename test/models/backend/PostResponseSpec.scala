@@ -46,7 +46,7 @@ class PostResponseSpec extends SpecBase {
 
       val result = json.validate[PostBalanceRequestSuccessResponse]
 
-      result.get.mustBe(expectedResult)
+      result.get.mustEqual(expectedResult)
     }
   }
 
@@ -68,7 +68,7 @@ class PostResponseSpec extends SpecBase {
 
       val result = json.validate[PostBalanceRequestPendingResponse]
 
-      result.get.mustBe(expectedResult)
+      result.get.mustEqual(expectedResult)
     }
   }
 
@@ -107,7 +107,7 @@ class PostResponseSpec extends SpecBase {
 
       val result = json.validate[PostBalanceRequestFunctionalErrorResponse]
 
-      result.get.mustBe(expectedResult)
+      result.get.mustEqual(expectedResult)
     }
   }
 
@@ -140,7 +140,7 @@ class PostResponseSpec extends SpecBase {
 
       val result = json.validate[GetBalanceRequestResponse]
 
-      result.get.mustBe(expectedResult)
+      result.get.mustEqual(expectedResult)
     }
   }
 }

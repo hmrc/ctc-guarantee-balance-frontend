@@ -45,8 +45,8 @@ class DataRequiredActionSpec extends SpecBase with EitherValues with AppWithDefa
 
         val result = harness.map(_.left.value)
 
-        status(result) mustBe 303
-        redirectLocation(result).value mustBe routes.SessionExpiredController.onPageLoad().url
+        status(result) mustEqual 303
+        redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
       }
     }
 
@@ -62,8 +62,8 @@ class DataRequiredActionSpec extends SpecBase with EitherValues with AppWithDefa
 
         whenReady(result) {
           result =>
-            result.value.userAnswers mustBe userAnswers
-            result.value.internalId mustBe "id"
+            result.value.userAnswers mustEqual userAnswers
+            result.value.internalId mustEqual "id"
         }
       }
     }

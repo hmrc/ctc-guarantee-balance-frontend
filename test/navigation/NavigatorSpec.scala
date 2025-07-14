@@ -40,7 +40,7 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
           answers =>
             navigator
               .nextPage(GuaranteeReferenceNumberPage, mode, answers)
-              .mustBe(routes.AccessCodeController.onPageLoad(mode))
+              .mustEqual(routes.AccessCodeController.onPageLoad(mode))
         }
       }
 
@@ -50,7 +50,7 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
           answers =>
             navigator
               .nextPage(AccessCodePage, mode, answers)
-              .mustBe(routes.CheckYourAnswersController.onPageLoad())
+              .mustEqual(routes.CheckYourAnswersController.onPageLoad())
         }
       }
 
@@ -62,7 +62,7 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
           answers =>
             navigator
               .nextPage(UnknownPage, mode, answers)
-              .mustBe(routes.StartController.startAgain())
+              .mustEqual(routes.StartController.startAgain())
         }
       }
     }
@@ -77,7 +77,7 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
           answers =>
             navigator
               .nextPage(GuaranteeReferenceNumberPage, mode, answers)
-              .mustBe(routes.CheckYourAnswersController.onPageLoad())
+              .mustEqual(routes.CheckYourAnswersController.onPageLoad())
         }
       }
 
@@ -87,7 +87,7 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
           answers =>
             navigator
               .nextPage(AccessCodePage, mode, answers)
-              .mustBe(routes.CheckYourAnswersController.onPageLoad())
+              .mustEqual(routes.CheckYourAnswersController.onPageLoad())
         }
       }
 
@@ -99,7 +99,7 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
           answers =>
             navigator
               .nextPage(UnknownPage, mode, answers)
-              .mustBe(routes.CheckYourAnswersController.onPageLoad())
+              .mustEqual(routes.CheckYourAnswersController.onPageLoad())
         }
       }
 
