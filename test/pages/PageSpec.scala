@@ -28,7 +28,7 @@ class PageSpec extends SpecBase {
 
         case object TestPage extends Page
 
-        Page.toString(TestPage) mustBe "TestPage"
+        Page.toString(TestPage) mustEqual "TestPage"
       }
     }
   }

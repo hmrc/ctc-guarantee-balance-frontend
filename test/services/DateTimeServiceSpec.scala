@@ -28,7 +28,7 @@ class DateTimeServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
         val instant1 = service.now
         val instant2 = service.now
 
-        instant2.isAfter(instant1).mustBe(true)
+        instant2.isAfter(instant1).mustEqual(true)
       }
     }
 
@@ -37,7 +37,7 @@ class DateTimeServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
         val instant1 = service.currentDateTime
         val instant2 = service.currentDateTime
 
-        instant2.isAfter(instant1).mustBe(true)
+        instant2.isAfter(instant1).mustEqual(true)
       }
     }
   }

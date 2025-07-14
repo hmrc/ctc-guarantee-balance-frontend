@@ -46,7 +46,7 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar with ScalaFutur
 
         whenReady(futureResult) {
           result =>
-            result.userAnswers.isEmpty mustBe true
+            result.userAnswers.isEmpty mustEqual true
         }
       }
     }
@@ -64,7 +64,7 @@ class DataRetrievalActionSpec extends SpecBase with MockitoSugar with ScalaFutur
 
         whenReady(futureResult) {
           result =>
-            result.userAnswers.isDefined mustBe true
+            result.userAnswers.isDefined mustEqual true
         }
       }
     }

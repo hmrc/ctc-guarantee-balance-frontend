@@ -70,7 +70,7 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
         val harness = new Harness(authAction)
         val result  = harness.test()(fakeRequest)
 
-        status(result) mustBe OK
+        status(result) mustEqual OK
       }
 
       "must return exception when internalId is unavailable " in {
@@ -113,7 +113,7 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
               val harness = new Harness(authAction)
               val result  = harness.test()(fakeRequest.withSession(Referral.key -> referral.toString))
 
-              status(result) mustBe SEE_OTHER
+              status(result) mustEqual SEE_OTHER
 
               redirectLocation(result).get mustEqual
                 s"${frontendAppConfig.loginUrl}?continue=${URLEncoder.encode(s"${frontendAppConfig.loginContinueUrl}?referral=$referral", "utf-8")}"
@@ -132,7 +132,7 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
           val harness = new Harness(authAction)
           val result  = harness.test()(fakeRequest)
 
-          status(result) mustBe SEE_OTHER
+          status(result) mustEqual SEE_OTHER
 
           redirectLocation(result).get mustEqual
             s"${frontendAppConfig.loginUrl}?continue=${URLEncoder.encode(frontendAppConfig.loginContinueUrl, "utf-8")}"
@@ -154,7 +154,7 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
         val harness = new Harness(authAction)
         val result  = harness.test()(fakeRequest)
 
-        status(result) mustBe SEE_OTHER
+        status(result) mustEqual SEE_OTHER
 
         redirectLocation(result).get must startWith(frontendAppConfig.loginUrl)
       }
@@ -174,9 +174,9 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
         val harness = new Harness(authAction)
         val result  = harness.test()(fakeRequest)
 
-        status(result) mustBe SEE_OTHER
+        status(result) mustEqual SEE_OTHER
 
-        redirectLocation(result) mustBe Some(routes.UnauthorisedController.onPageLoad().url)
+        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad().url
       }
     }
 
@@ -194,9 +194,9 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
         val harness = new Harness(authAction)
         val result  = harness.test()(fakeRequest)
 
-        status(result) mustBe SEE_OTHER
+        status(result) mustEqual SEE_OTHER
 
-        redirectLocation(result) mustBe Some(routes.UnauthorisedController.onPageLoad().url)
+        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad().url
       }
     }
 
@@ -214,9 +214,9 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
         val harness = new Harness(authAction)
         val result  = harness.test()(fakeRequest)
 
-        status(result) mustBe SEE_OTHER
+        status(result) mustEqual SEE_OTHER
 
-        redirectLocation(result) mustBe Some(routes.UnauthorisedController.onPageLoad().url)
+        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad().url
       }
     }
 
@@ -234,9 +234,9 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
         val harness = new Harness(authAction)
         val result  = harness.test()(fakeRequest)
 
-        status(result) mustBe SEE_OTHER
+        status(result) mustEqual SEE_OTHER
 
-        redirectLocation(result) mustBe Some(routes.UnauthorisedController.onPageLoad().url)
+        redirectLocation(result).value mustEqual routes.UnauthorisedController.onPageLoad().url
       }
     }
   }

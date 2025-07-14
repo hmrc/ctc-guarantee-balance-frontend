@@ -91,7 +91,7 @@ class GuaranteeBalanceConnectorSpec extends ItSpecBase with WireMockServerHandle
         val expectedResponse = BalanceRequestSuccess(BigDecimal(3.14), Some(CurrencyCode("EUR")))
 
         val result = connector.queryPendingBalance(BalanceId(testUuid)).futureValue
-        result mustBe Right(expectedResponse)
+        result.value mustEqual expectedResponse
       }
 
       "must return balance pending response for Ok with no returned response" in {
@@ -118,7 +118,7 @@ class GuaranteeBalanceConnectorSpec extends ItSpecBase with WireMockServerHandle
         )
 
         val result = connector.queryPendingBalance(balanceId).futureValue
-        result mustBe Right(BalanceRequestPending(balanceId))
+        result.value mustEqual BalanceRequestPending(balanceId)
       }
 
       "must return balance pending expired if we get a pending response that's too old" in {
@@ -145,7 +145,7 @@ class GuaranteeBalanceConnectorSpec extends ItSpecBase with WireMockServerHandle
         )
 
         val result = connector.queryPendingBalance(balanceId).futureValue
-        result mustBe Right(BalanceRequestPendingExpired(balanceId))
+        result.value mustEqual BalanceRequestPendingExpired(balanceId)
       }
 
       "must return the HttpResponse when there is an unexpected response" in {
@@ -164,7 +164,7 @@ class GuaranteeBalanceConnectorSpec extends ItSpecBase with WireMockServerHandle
 
             val response = result.left.value
 
-            response.status mustBe errorResponse
+            response.status mustEqual errorResponse
         }
       }
 
@@ -179,7 +179,7 @@ class GuaranteeBalanceConnectorSpec extends ItSpecBase with WireMockServerHandle
 
         val result = connector.queryPendingBalance(balanceId).futureValue
 
-        result mustBe Right(BalanceRequestPendingExpired(balanceId))
+        result.value mustEqual BalanceRequestPendingExpired(balanceId)
       }
 
       "must return balance request not matched for a functional error with error type 12" in {
@@ -207,7 +207,7 @@ class GuaranteeBalanceConnectorSpec extends ItSpecBase with WireMockServerHandle
         )
 
         val result = connector.queryPendingBalance(balanceId).futureValue
-        result mustBe Right(BalanceRequestNotMatched("Foo.Bar(1).Baz"))
+        result.value mustEqual BalanceRequestNotMatched("Foo.Bar(1).Baz")
       }
 
       "must return unsupported guaranteebalance type for a functional error with error type 14" in {
@@ -238,7 +238,7 @@ class GuaranteeBalanceConnectorSpec extends ItSpecBase with WireMockServerHandle
         )
 
         val result = connector.queryPendingBalance(balanceId).futureValue
-        result mustBe Right(BalanceRequestUnsupportedGuaranteeType)
+        result.value mustEqual BalanceRequestUnsupportedGuaranteeType
       }
 
       "must return an functional error response with error type 14 and other Pointer" in {
@@ -267,7 +267,7 @@ class GuaranteeBalanceConnectorSpec extends ItSpecBase with WireMockServerHandle
 
         val result          = connector.queryPendingBalance(balanceId).futureValue
         val functionalError = FunctionalError(InvalidDataErrorType, "GRR(1).GQY(1).Query identifier", None)
-        result mustBe Right(BalanceRequestFunctionalError(NonEmptyList[FunctionalError](functionalError, Nil)))
+        result.value mustEqual BalanceRequestFunctionalError(NonEmptyList[FunctionalError](functionalError, Nil))
       }
     }
 
@@ -291,7 +291,7 @@ class GuaranteeBalanceConnectorSpec extends ItSpecBase with WireMockServerHandle
         val expectedResponse = BalanceRequestSuccess(BigDecimal(3.14), None)
 
         val result = connector.submitBalanceRequest(request, grn.value).futureValue
-        result mustBe Right(expectedResponse)
+        result.value mustEqual expectedResponse
       }
 
       "must return balance success response for Ok with a currency" in {
@@ -313,7 +313,7 @@ class GuaranteeBalanceConnectorSpec extends ItSpecBase with WireMockServerHandle
         val expectedResponse = BalanceRequestSuccess(BigDecimal(3.14), Some(CurrencyCode("GBP")))
 
         val result = connector.submitBalanceRequest(request, grn.value).futureValue
-        result mustBe Right(expectedResponse)
+        result.value mustEqual expectedResponse
       }
 
       "must return rate limit balance type when we have an http response TOO_MANY_REQUESTS" in {
@@ -338,7 +338,7 @@ class GuaranteeBalanceConnectorSpec extends ItSpecBase with WireMockServerHandle
         )
 
         val result = connector.submitBalanceRequest(request, grn.value).futureValue
-        result mustBe Right(BalanceRequestRateLimit)
+        result.value mustEqual BalanceRequestRateLimit
       }
 
       "must return non matched when we have an http response NOT_FOUND" in {
@@ -363,7 +363,7 @@ class GuaranteeBalanceConnectorSpec extends ItSpecBase with WireMockServerHandle
         )
 
         val result = connector.submitBalanceRequest(request, grn.value).futureValue
-        result mustBe Right(BalanceRequestNotMatched(notFoundJson))
+        result.value mustEqual BalanceRequestNotMatched(notFoundJson)
       }
 
       "must return non matched when we have an http response BAD_REQUEST with invalid GRN" in {
@@ -388,7 +388,7 @@ class GuaranteeBalanceConnectorSpec extends ItSpecBase with WireMockServerHandle
         )
 
         val result = connector.submitBalanceRequest(request, grn.value).futureValue
-        result mustBe Right(BalanceRequestNotMatched(badRequestJson))
+        result.value mustEqual BalanceRequestNotMatched(badRequestJson)
       }
 
       "must return BalanceRequestUnsupportedGuaranteeType when we have an http response BAD_REQUEST with invalid guarantee type" in {
@@ -413,7 +413,7 @@ class GuaranteeBalanceConnectorSpec extends ItSpecBase with WireMockServerHandle
         )
 
         val result = connector.submitBalanceRequest(request, grn.value).futureValue
-        result mustBe Right(BalanceRequestUnsupportedGuaranteeType)
+        result.value mustEqual BalanceRequestUnsupportedGuaranteeType
       }
 
       "must return the HttpResponse for any other 4xx" in {
@@ -439,7 +439,7 @@ class GuaranteeBalanceConnectorSpec extends ItSpecBase with WireMockServerHandle
 
             val response = result.left.value
 
-            response.status mustBe errorResponse
+            response.status mustEqual errorResponse
         }
       }
 
@@ -462,7 +462,7 @@ class GuaranteeBalanceConnectorSpec extends ItSpecBase with WireMockServerHandle
 
             val response = result.left.value
 
-            response.status mustBe errorResponse
+            response.status mustEqual errorResponse
         }
       }
     }

@@ -54,7 +54,7 @@ class CheckYourAnswersViewModelSpec extends SpecBase with AppWithDefaultMockFixt
     }
 
     "must have 2 rows" in {
-      result.section.rows.size mustBe 2
+      result.section.rows.size mustEqual 2
     }
 
     Seq(grn, code).zipWithIndex.foreach {
@@ -67,7 +67,7 @@ class CheckYourAnswersViewModelSpec extends SpecBase with AppWithDefaultMockFixt
           }
 
           "must have 1 action" in {
-            row.actions.size mustBe 1
+            row.actions.size mustEqual 1
           }
 
           "must be using CheckMode" in {

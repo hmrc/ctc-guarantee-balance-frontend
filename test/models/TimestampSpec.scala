@@ -27,15 +27,15 @@ class TimestampSpec extends SpecBase {
       "when am" in {
         val dateTime  = LocalDateTime.of(2024, 10, 22, 9, 59, 32)
         val timestamp = Timestamp(dateTime)
-        timestamp.date mustBe "22 October 2024"
-        timestamp.time mustBe "09:59"
+        timestamp.date mustEqual "22 October 2024"
+        timestamp.time mustEqual "09:59"
       }
 
       "when pm" in {
         val dateTime  = LocalDateTime.of(2023, 6, 15, 13, 9, 17)
         val timestamp = Timestamp(dateTime)
-        timestamp.date mustBe "15 June 2023"
-        timestamp.time mustBe "13:09"
+        timestamp.date mustEqual "15 June 2023"
+        timestamp.time mustEqual "13:09"
       }
     }
   }

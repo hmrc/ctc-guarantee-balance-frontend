@@ -38,14 +38,14 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val userAnswers = UserAnswers("eoriNumber", JsObject(Map("foo" -> JsString("bar"))), Instant.now())
 
-        userAnswers.get(TestPage) mustBe Some("bar")
+        userAnswers.get(TestPage).value mustEqual "bar"
       }
 
       "must return None when not defined" in {
 
         val userAnswers = UserAnswers("eoriNumber", Json.obj(), Instant.now())
 
-        userAnswers.get(TestPage) mustBe None
+        userAnswers.get(TestPage) must not be defined
       }
     }
 
@@ -59,7 +59,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val result = userAnswers.set(TestPage, "bar").toOption.value.data
 
-        result mustBe expectedUserAnswers.data
+        result mustEqual expectedUserAnswers.data
       }
     }
 
@@ -73,7 +73,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val result = userAnswers.remove(TestPage).toOption.value.data
 
-        result mustBe expectedUserAnswers.data
+        result mustEqual expectedUserAnswers.data
       }
     }
 
@@ -118,12 +118,12 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           "read correctly" in {
             val result = json.as[UserAnswers]
-            result mustBe userAnswers
+            result mustEqual userAnswers
           }
 
           "write and read correctly" in {
             val result = Json.toJson(userAnswers).as[UserAnswers]
-            result mustBe userAnswers
+            result mustEqual userAnswers
           }
         }
       }
@@ -151,12 +151,12 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           "must read correctly" in {
             val result = json.as[UserAnswers]
-            result mustBe userAnswers
+            result mustEqual userAnswers
           }
 
           "write correctly" in {
             val result = Json.toJson(userAnswers)
-            result mustBe json
+            result mustEqual json
           }
         }
       }

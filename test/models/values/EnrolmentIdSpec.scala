@@ -27,7 +27,7 @@ class EnrolmentIdSpec extends SpecBase {
       val enrolmentId    = EnrolmentId(value)
       val expectedResult = JsString(value)
       val result         = Json.toJson(enrolmentId)
-      result.mustBe(expectedResult)
+      result.mustEqual(expectedResult)
     }
 
     "must deserialise" - {
@@ -36,7 +36,7 @@ class EnrolmentIdSpec extends SpecBase {
         val json           = JsString(value)
         val result         = json.validate[EnrolmentId]
         val expectedResult = EnrolmentId(value)
-        result.get.mustBe(expectedResult)
+        result.get.mustEqual(expectedResult)
       }
     }
 
@@ -44,7 +44,7 @@ class EnrolmentIdSpec extends SpecBase {
       "when json in unexpected shape" in {
         val json   = Json.obj("foo" -> "bar")
         val result = json.validate[EnrolmentId]
-        result.mustBe(a[JsError])
+        result mustBe a[JsError]
       }
     }
   }

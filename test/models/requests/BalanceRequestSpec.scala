@@ -37,7 +37,7 @@ class BalanceRequestSpec extends SpecBase {
 
       val result = Json.toJson(request)
 
-      result.mustBe(expectedResult)
+      result.mustEqual(expectedResult)
     }
   }
 }

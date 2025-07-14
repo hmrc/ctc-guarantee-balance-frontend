@@ -49,7 +49,7 @@ class ReferralActionSpec extends SpecBase with AppWithDefaultMockFixtures {
             val harness = new Harness(referralAction)
             val result  = harness.test()(fakeRequest)
 
-            status(result) mustBe OK
+            status(result) mustEqual OK
             result.map(_.session(fakeRequest).get(Referral.key).get mustEqual referral.toString)
         }
       }
@@ -63,7 +63,7 @@ class ReferralActionSpec extends SpecBase with AppWithDefaultMockFixtures {
         val harness = new Harness(referralAction)
         val result  = harness.test()(fakeRequest)
 
-        status(result) mustBe OK
+        status(result) mustEqual OK
         result.map(_.session(fakeRequest).get(Referral.key) mustNot be(defined))
       }
     }

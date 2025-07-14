@@ -41,7 +41,7 @@ class CheckYourAnswersHelperSpec extends SpecBase {
             val helper = new CheckYourAnswersHelper(answers, mode)
             val result = helper.guaranteeReferenceNumber
 
-            result mustBe Some(
+            result mustEqual Some(
               SummaryListRow(
                 key = Key("Guarantee Reference Number (GRN)".toText),
                 value = Value(answer.toText),
@@ -74,7 +74,7 @@ class CheckYourAnswersHelperSpec extends SpecBase {
         val helper = new CheckYourAnswersHelper(answers, CheckMode)
         val result = helper.accessCode
 
-        result mustBe None
+        result must not be defined
       }
     }
 
@@ -88,7 +88,7 @@ class CheckYourAnswersHelperSpec extends SpecBase {
             val helper = new CheckYourAnswersHelper(answers, mode)
             val result = helper.accessCode
 
-            result mustBe Some(
+            result mustEqual Some(
               SummaryListRow(
                 key = Key("Access code".toText),
                 value = Value("••••".toText),

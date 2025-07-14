@@ -56,7 +56,7 @@ trait InputTextViewBehaviours[T] extends QuestionViewBehaviours[T] with Generato
         val docWithFilledForm = parseView(applyView(form.fill(validValue)))
 
         "include the form's value in the value input" in {
-          docWithFilledForm.getElementById("value").attr("value") mustBe validValue.toString
+          docWithFilledForm.getElementById("value").attr("value") mustEqual validValue.toString
         }
 
         behave like pageWithoutErrorSummary(docWithFilledForm)
