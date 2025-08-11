@@ -16,17 +16,17 @@
 
 package utils
 
-import base.SpecBase
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import controllers.routes
 import forms.Constants.accessCodeLength
 import models.{CheckMode, Mode, UserAnswers}
 import org.scalacheck.Arbitrary.arbitrary
 import pages.{AccessCodePage, GuaranteeReferenceNumberPage}
-import uk.gov.hmrc.govukfrontend.views.Aliases._
-import uk.gov.hmrc.govukfrontend.views.html.components.implicits._
+import uk.gov.hmrc.govukfrontend.views.Aliases.*
+import uk.gov.hmrc.govukfrontend.views.html.components.implicits.*
 import uk.gov.hmrc.govukfrontend.views.html.components.{ActionItem, Actions}
 
-class CheckYourAnswersHelperSpec extends SpecBase {
+class CheckYourAnswersHelperSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   "guaranteeReferenceNumber" - {
 
@@ -41,19 +41,17 @@ class CheckYourAnswersHelperSpec extends SpecBase {
             val helper = new CheckYourAnswersHelper(answers, mode)
             val result = helper.guaranteeReferenceNumber
 
-            result mustEqual Some(
-              SummaryListRow(
-                key = Key("Guarantee Reference Number (GRN)".toText),
-                value = Value(answer.toText),
-                actions = Some(
-                  Actions(
-                    items = List(
-                      ActionItem(
-                        content = "Change".toText,
-                        href = routes.GuaranteeReferenceNumberController.onPageLoad(mode).url,
-                        visuallyHiddenText = Some("Guarantee Reference Number (GRN)"),
-                        attributes = Map("id" -> "change-guarantee-reference-number")
-                      )
+            result.value mustEqual SummaryListRow(
+              key = Key("Guarantee Reference Number (GRN)".toText),
+              value = Value(answer.toText),
+              actions = Some(
+                Actions(
+                  items = List(
+                    ActionItem(
+                      content = "Change".toText,
+                      href = routes.GuaranteeReferenceNumberController.onPageLoad(mode).url,
+                      visuallyHiddenText = Some("Guarantee Reference Number (GRN)"),
+                      attributes = Map("id" -> "change-guarantee-reference-number")
                     )
                   )
                 )
@@ -88,19 +86,17 @@ class CheckYourAnswersHelperSpec extends SpecBase {
             val helper = new CheckYourAnswersHelper(answers, mode)
             val result = helper.accessCode
 
-            result mustEqual Some(
-              SummaryListRow(
-                key = Key("Access code".toText),
-                value = Value("••••".toText),
-                actions = Some(
-                  Actions(
-                    items = List(
-                      ActionItem(
-                        content = "Change".toText,
-                        href = routes.AccessCodeController.onPageLoad(mode).url,
-                        visuallyHiddenText = Some("access code"),
-                        attributes = Map("id" -> "change-access-code")
-                      )
+            result.value mustEqual SummaryListRow(
+              key = Key("Access code".toText),
+              value = Value("••••".toText),
+              actions = Some(
+                Actions(
+                  items = List(
+                    ActionItem(
+                      content = "Change".toText,
+                      href = routes.AccessCodeController.onPageLoad(mode).url,
+                      visuallyHiddenText = Some("access code"),
+                      attributes = Map("id" -> "change-access-code")
                     )
                   )
                 )

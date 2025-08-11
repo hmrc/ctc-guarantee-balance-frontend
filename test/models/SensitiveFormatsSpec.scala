@@ -16,11 +16,10 @@
 
 package models
 
-import base.{AppWithDefaultMockFixtures, SpecBase}
+import base.SpecBase
 import play.api.libs.json.{JsObject, Json}
-import play.api.test.Helpers.running
 
-class SensitiveFormatsSpec extends SpecBase with AppWithDefaultMockFixtures {
+class SensitiveFormatsSpec extends SpecBase {
 
   "JsObject" - {
     val encryptedValue = "WFYrOuMf6WHDjHooyzED80QIGXMTPSHEjc3Kl8jPFRJFtHWV"
@@ -29,53 +28,29 @@ class SensitiveFormatsSpec extends SpecBase with AppWithDefaultMockFixtures {
     "reads" - {
       "when encryption enabled" - {
         "must read an encrypted value" in {
-          val app = applicationBuilder()
-            .configure("encryption.enabled" -> true)
-            .build()
-
-          running(app) {
-            val sensitiveFormats = app.injector.instanceOf[SensitiveFormats]
-            val result           = Json.toJson(encryptedValue).as[JsObject](sensitiveFormats.jsObjectReads)
-            result mustEqual decryptedValue
-          }
+          val sensitiveFormats = new SensitiveFormats(true)
+          val result           = Json.toJson(encryptedValue).as[JsObject](sensitiveFormats.jsObjectReads)
+          result mustEqual decryptedValue
         }
 
         "must read a decrypted value" in {
-          val app = applicationBuilder()
-            .configure("encryption.enabled" -> true)
-            .build()
-
-          running(app) {
-            val sensitiveFormats = app.injector.instanceOf[SensitiveFormats]
-            val result           = Json.toJson(decryptedValue).as[JsObject](sensitiveFormats.jsObjectReads)
-            result mustEqual decryptedValue
-          }
+          val sensitiveFormats = new SensitiveFormats(true)
+          val result           = Json.toJson(decryptedValue).as[JsObject](sensitiveFormats.jsObjectReads)
+          result mustEqual decryptedValue
         }
       }
 
       "when encryption disabled" - {
         "must read an encrypted value" in {
-          val app = applicationBuilder()
-            .configure("encryption.enabled" -> false)
-            .build()
-
-          running(app) {
-            val sensitiveFormats = app.injector.instanceOf[SensitiveFormats]
-            val result           = Json.toJson(encryptedValue).as[JsObject](sensitiveFormats.jsObjectReads)
-            result mustEqual decryptedValue
-          }
+          val sensitiveFormats = new SensitiveFormats(false)
+          val result           = Json.toJson(encryptedValue).as[JsObject](sensitiveFormats.jsObjectReads)
+          result mustEqual decryptedValue
         }
 
         "must read a decrypted value" in {
-          val app = applicationBuilder()
-            .configure("encryption.enabled" -> false)
-            .build()
-
-          running(app) {
-            val sensitiveFormats = app.injector.instanceOf[SensitiveFormats]
-            val result           = Json.toJson(decryptedValue).as[JsObject](sensitiveFormats.jsObjectReads)
-            result mustEqual decryptedValue
-          }
+          val sensitiveFormats = new SensitiveFormats(false)
+          val result           = Json.toJson(decryptedValue).as[JsObject](sensitiveFormats.jsObjectReads)
+          result mustEqual decryptedValue
         }
       }
     }
@@ -83,29 +58,17 @@ class SensitiveFormatsSpec extends SpecBase with AppWithDefaultMockFixtures {
     "writes" - {
       "when encryption enabled" - {
         "must write and encrypt the value" in {
-          val app = applicationBuilder()
-            .configure("encryption.enabled" -> true)
-            .build()
-
-          running(app) {
-            val sensitiveFormats = app.injector.instanceOf[SensitiveFormats]
-            val result           = Json.toJson(decryptedValue)(sensitiveFormats.jsObjectWrites)
-            result must not be decryptedValue
-          }
+          val sensitiveFormats = new SensitiveFormats(true)
+          val result           = Json.toJson(decryptedValue)(sensitiveFormats.jsObjectWrites)
+          result must not be decryptedValue
         }
       }
 
       "encryption disabled" - {
         "must write and not encrypt the value" in {
-          val app = applicationBuilder()
-            .configure("encryption.enabled" -> false)
-            .build()
-
-          running(app) {
-            val sensitiveFormats = app.injector.instanceOf[SensitiveFormats]
-            val result           = Json.toJson(decryptedValue)(sensitiveFormats.jsObjectWrites)
-            result mustEqual decryptedValue
-          }
+          val sensitiveFormats = new SensitiveFormats(false)
+          val result           = Json.toJson(decryptedValue)(sensitiveFormats.jsObjectWrites)
+          result mustEqual decryptedValue
         }
       }
     }

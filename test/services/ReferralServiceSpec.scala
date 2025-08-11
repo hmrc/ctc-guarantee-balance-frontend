@@ -16,7 +16,7 @@
 
 package services
 
-import base.{AppWithDefaultMockFixtures, SpecBase}
+import base.SpecBase
 import models.Referral
 import models.Referral.*
 import org.scalacheck.Arbitrary.arbitrary
@@ -25,7 +25,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.mvc.Results.Ok
 import play.api.test.FakeRequest
 
-class ReferralServiceSpec extends SpecBase with ScalaCheckPropertyChecks with AppWithDefaultMockFixtures {
+class ReferralServiceSpec extends SpecBase with ScalaCheckPropertyChecks {
 
   private val referralService = new ReferralService()
 

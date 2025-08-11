@@ -17,32 +17,36 @@
 package base
 
 import config.FrontendAppConfig
-import controllers.actions._
+import controllers.actions.*
 import models.UserAnswers
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, when}
 import org.scalatest.{BeforeAndAfterEach, TestSuite}
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.{GuiceFakeApplicationFactory, GuiceOneAppPerSuite}
 import play.api.Application
-import play.api.i18n.MessagesApi
-import play.api.inject.bind
+import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.inject.{bind, Injector}
 import play.api.mvc.Call
-import play.api.test.Helpers
 import repositories.SessionRepository
 import services.{AuditService, GuaranteeBalanceService}
-import uk.gov.hmrc.mongo.lock.MongoLockRepository
 
 import scala.concurrent.Future
 
-trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerSuite with GuiceFakeApplicationFactory with MockitoSugar {
-  self: TestSuite =>
+trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerSuite with GuiceFakeApplicationFactory {
+  self: TestSuite & SpecBase =>
+
+  def injector: Injector = app.injector
+
+  def messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
+
+  implicit def messages: Messages = messagesApi.preferred(fakeRequest)
+
+  def frontendAppConfig: FrontendAppConfig = injector.instanceOf[FrontendAppConfig]
 
   override def beforeEach(): Unit = {
     reset(mockSessionRepository)
-    reset(mockMongoLockRepository)
     reset(mockGuaranteeBalanceService)
     reset(mockAuditService)
 
@@ -51,7 +55,6 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
   }
 
   val mockSessionRepository: SessionRepository             = mock[SessionRepository]
-  val mockMongoLockRepository: MongoLockRepository         = mock[MongoLockRepository]
   val mockGuaranteeBalanceService: GuaranteeBalanceService = mock[GuaranteeBalanceService]
   val mockAuditService: AuditService                       = mock[AuditService]
   val mockAppConfig: FrontendAppConfig                     = mock[FrontendAppConfig]
@@ -76,9 +79,7 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach with GuiceOneAppPerS
       .overrides(
         bind[DataRequiredAction].to[DataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
-        bind[MessagesApi].toInstance(Helpers.stubMessagesApi()),
         bind[SessionRepository].toInstance(mockSessionRepository),
-        bind[MongoLockRepository].toInstance(mockMongoLockRepository),
         bind[GuaranteeBalanceService].toInstance(mockGuaranteeBalanceService),
         bind[AuditService].toInstance(mockAuditService),
         bind[Navigator].toInstance(fakeNavigator)

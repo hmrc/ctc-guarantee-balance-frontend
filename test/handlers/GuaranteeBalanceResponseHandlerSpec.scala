@@ -16,7 +16,7 @@
 
 package handlers
 
-import base.{AppWithDefaultMockFixtures, SpecBase}
+import base.SpecBase
 import cats.data.NonEmptyList
 import models.UserAnswers
 import models.backend.*
@@ -25,20 +25,22 @@ import models.requests.DataRequest
 import models.values.{BalanceId, CurrencyCode, ErrorType}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{times, verify}
+import org.mockito.Mockito.{reset, times, verify, when}
+import org.scalatest.BeforeAndAfterEach
 import pages.*
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{AnyContent, Request, Result}
+import play.api.mvc.{AnyContent, Request, Result, Results}
 import play.api.test.Helpers.*
+import repositories.SessionRepository
 import services.AuditService
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, HttpResponse}
 import viewModels.audit.AuditConstants.*
 import viewModels.audit.{SuccessfulBalanceAuditModel, UnsuccessfulBalanceAuditModel}
 
 import java.util.UUID
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class GuaranteeBalanceResponseHandlerSpec extends SpecBase with AppWithDefaultMockFixtures {
+class GuaranteeBalanceResponseHandlerSpec extends SpecBase with BeforeAndAfterEach {
 
   private val expectedUuid    = UUID.fromString("22b9899e-24ee-48e6-a189-97d1f45391c4")
   private val balanceId       = BalanceId(expectedUuid)
@@ -73,14 +75,24 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with AppWithDefaultMo
 
   implicit private val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
 
-  private val mockRequest                      = mock[Request[AnyContent]]
-  implicit private val request: DataRequest[?] = DataRequest(mockRequest, "eoriNumber", baseAnswers)
+  implicit private val request: DataRequest[?] = DataRequest(fakeRequest, "eoriNumber", baseAnswers)
 
-  private lazy val handler: GuaranteeBalanceResponseHandler = app.injector.instanceOf[GuaranteeBalanceResponseHandler]
-  private lazy val auditService: AuditService               = app.injector.instanceOf[AuditService]
+  private lazy val mockSessionRepository: SessionRepository = mock[SessionRepository]
+  private lazy val mockAuditService: AuditService           = mock[AuditService]
+  private lazy val mockErrorHandler: ErrorHandler           = mock[ErrorHandler]
 
-  override protected def applicationBuilder(): GuiceApplicationBuilder =
-    super.applicationBuilder()
+  private lazy val handler: GuaranteeBalanceResponseHandler =
+    new GuaranteeBalanceResponseHandler(mockSessionRepository, mockAuditService, mockErrorHandler)
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockSessionRepository)
+    reset(mockAuditService)
+    reset(mockErrorHandler)
+
+    when(mockSessionRepository.set(any()))
+      .thenReturn(Future.successful(true))
+  }
 
   "GuaranteeBalanceResponseHandlerSpec" - {
 
@@ -100,7 +112,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with AppWithDefaultMo
       redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
       val auditCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
-      verify(auditService, times(1)).audit(auditCaptor.capture())(any(), any(), any())
+      verify(mockAuditService, times(1)).audit(auditCaptor.capture())(any(), any(), any())
       verify(mockSessionRepository, times(1)).set(any())
 
       auditCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION
@@ -115,7 +127,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with AppWithDefaultMo
       redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
       val auditCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
-      verify(auditService, times(1)).audit(auditCaptor.capture())(any(), any(), any())
+      verify(mockAuditService, times(1)).audit(auditCaptor.capture())(any(), any(), any())
       verify(mockSessionRepository, times(1)).set(any())
 
       auditCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION
@@ -130,7 +142,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with AppWithDefaultMo
       redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
       val auditCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
-      verify(auditService, times(1)).audit(auditCaptor.capture())(any(), any(), any())
+      verify(mockAuditService, times(1)).audit(auditCaptor.capture())(any(), any(), any())
       verify(mockSessionRepository, times(1)).set(any())
 
       auditCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION
@@ -145,7 +157,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with AppWithDefaultMo
       redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
       val auditCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
-      verify(auditService, times(1)).audit(auditCaptor.capture())(any(), any(), any())
+      verify(mockAuditService, times(1)).audit(auditCaptor.capture())(any(), any(), any())
       verify(mockSessionRepository, times(1)).set(any())
 
       auditCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION
@@ -160,7 +172,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with AppWithDefaultMo
       redirectLocation(result).value mustEqual controllers.routes.DetailsDontMatchController.onPageLoad().url
       val auditCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
-      verify(auditService, times(1)).audit(auditCaptor.capture())(any(), any(), any())
+      verify(mockAuditService, times(1)).audit(auditCaptor.capture())(any(), any(), any())
       verify(mockSessionRepository, times(1)).set(any())
 
       auditCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION
@@ -187,7 +199,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with AppWithDefaultMo
       verify(mockSessionRepository, times(2)).set(userAnswersCapture.capture())
       userAnswersCapture.getAllValues.get(1).get(BalanceIdPage).get mustEqual balanceId
 
-      verify(auditService, times(0)).audit(any())(any(), any(), any())
+      verify(mockAuditService, times(0)).audit(any())(any(), any(), any())
     }
 
     "must Redirect to the Balance Confirmation Controller if the status is DataReturned " in {
@@ -201,7 +213,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with AppWithDefaultMo
 
       val auditCaptor: ArgumentCaptor[SuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[SuccessfulBalanceAuditModel])
 
-      verify(auditService, times(1)).audit(auditCaptor.capture())(any(), any(), any())
+      verify(mockAuditService, times(1)).audit(auditCaptor.capture())(any(), any(), any())
 
       auditCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_SUBMISSION
       auditCaptor.getValue.status mustEqual OK
@@ -219,16 +231,21 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with AppWithDefaultMo
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value mustEqual controllers.routes.SessionExpiredController.onPageLoad().url
 
-      verify(auditService, times(0)).audit(any())(any(), any(), any())
+      verify(mockAuditService, times(0)).audit(any())(any(), any(), any())
       verify(mockSessionRepository, times(1)).set(any())
 
     }
 
-    "must Redirect show the technical difficulties page if it has a processErrorResponse " in {
+    "must Redirect show the technical difficulties page if it has a processErrorResponse" in {
+      val url = "/technical-difficulties"
+
+      when(mockErrorHandler.onClientError(any(), any(), any()))
+        .thenReturn(Future.successful(Results.SeeOther(url)))
+
       val result: Future[Result] = handler.processResponse(balanceErrorResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.ErrorController.technicalDifficulties().url
+      redirectLocation(result).value mustEqual url
 
       verify(mockSessionRepository, times(1)).set(any())
     }
@@ -241,7 +258,7 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with AppWithDefaultMo
 
       val auditCaptor: ArgumentCaptor[UnsuccessfulBalanceAuditModel] = ArgumentCaptor.forClass(classOf[UnsuccessfulBalanceAuditModel])
 
-      verify(auditService, times(1)).audit(auditCaptor.capture())(any(), any(), any())
+      verify(mockAuditService, times(1)).audit(auditCaptor.capture())(any(), any(), any())
       verify(mockSessionRepository, times(1)).set(any())
 
       auditCaptor.getValue.auditType mustEqual AUDIT_TYPE_GUARANTEE_BALANCE_RATE_LIMIT
@@ -249,11 +266,16 @@ class GuaranteeBalanceResponseHandlerSpec extends SpecBase with AppWithDefaultMo
       auditCaptor.getValue.detail.toString.contains(AUDIT_DEST_RATE_LIMITED) mustEqual true
     }
 
-    "must Redirect show the technical difficulties page if it has a httpResponseError " in {
+    "must Redirect show the technical difficulties page if it has a httpResponseError" in {
+      val url = "/technical-difficulties"
+
+      when(mockErrorHandler.onClientError(any(), any(), any()))
+        .thenReturn(Future.successful(Results.SeeOther(url)))
+
       val result: Future[Result] = handler.processResponse(httpErrorResponse)
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual controllers.routes.ErrorController.technicalDifficulties().url
+      redirectLocation(result).value mustEqual url
 
       verify(mockSessionRepository, times(1)).set(any())
     }
