@@ -16,9 +16,8 @@
 
 package models
 
-import base.{AppWithDefaultMockFixtures, SpecBase}
+import base.SpecBase
 import play.api.libs.json.{JsObject, Json}
-import play.api.test.Helpers.running
 
 class SensitiveFormatsSpec extends SpecBase {
 

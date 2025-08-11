@@ -45,8 +45,8 @@ trait SpecBase
     with Generators
     with EitherValues {
 
-  private val encryptionKey                  = "zjZ7y/v1QTNlBlZJQCOfPygL+6dvuHGiGDF/ePvsZS0="
-  implicit val crypto: Encrypter & Decrypter = SymmetricCryptoFactory.aesGcmCrypto(encryptionKey)
+  private val dummyEncryptionKey             = "zjZ7y/v1QTNlBlZJQCOfPygL+6dvuHGiGDF/ePvsZS0="
+  implicit val crypto: Encrypter & Decrypter = SymmetricCryptoFactory.aesGcmCrypto(dummyEncryptionKey)
 
   val userAnswersId = "id"
 

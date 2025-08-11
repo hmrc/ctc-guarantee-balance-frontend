@@ -18,7 +18,6 @@ package controllers.actions
 
 import base.SpecBase
 import models.Referral
-import org.apache.pekko.stream.testkit.NoMaterializer
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalacheck.Arbitrary.arbitrary
