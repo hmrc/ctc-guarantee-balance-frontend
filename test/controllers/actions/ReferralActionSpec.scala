@@ -16,16 +16,19 @@
 
 package controllers.actions
 
-import base.{AppWithDefaultMockFixtures, SpecBase}
+import base.SpecBase
 import models.Referral
+import org.apache.pekko.stream.testkit.NoMaterializer
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
 import org.scalacheck.Arbitrary.arbitrary
-import play.api.mvc._
-import play.api.test.Helpers._
+import play.api.mvc.*
+import play.api.test.Helpers.*
 import services.ReferralService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ReferralActionSpec extends SpecBase with AppWithDefaultMockFixtures {
+class ReferralActionSpec extends SpecBase {
 
   private class Harness(referralAction: ReferralAction) {
 
@@ -34,8 +37,7 @@ class ReferralActionSpec extends SpecBase with AppWithDefaultMockFixtures {
     }
   }
 
-  implicit val bodyParsers: BodyParsers.Default = injector.instanceOf[BodyParsers.Default]
-  private val referralService                   = app.injector.instanceOf[ReferralService]
+  private val mockReferralService = mock[ReferralService]
 
   "Referral Action" - {
 
@@ -44,13 +46,16 @@ class ReferralActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         forAll(arbitrary[Referral]) {
           referral =>
-            val referralAction = new ReferralAction(Some(referral))(referralService)
+            when(mockReferralService.setReferralInSession(any(), any())(any()))
+              .thenReturn(Results.Ok.withSession(Referral.key -> referral.toString))
+
+            val referralAction = new ReferralAction(Some(referral))(mockReferralService)
 
             val harness = new Harness(referralAction)
             val result  = harness.test()(fakeRequest)
 
             status(result) mustEqual OK
-            result.map(_.session(fakeRequest).get(Referral.key).get mustEqual referral.toString)
+            session(result).get(Referral.key).get mustEqual referral.toString
         }
       }
     }
@@ -58,13 +63,13 @@ class ReferralActionSpec extends SpecBase with AppWithDefaultMockFixtures {
     "when referral not provided" - {
       "must not store referral in session" in {
 
-        val referralAction = new ReferralAction(None)(referralService)
+        val referralAction = new ReferralAction(None)(mockReferralService)
 
         val harness = new Harness(referralAction)
         val result  = harness.test()(fakeRequest)
 
         status(result) mustEqual OK
-        result.map(_.session(fakeRequest).get(Referral.key) mustNot be(defined))
+        session(result).get(Referral.key) must not be defined
       }
     }
   }

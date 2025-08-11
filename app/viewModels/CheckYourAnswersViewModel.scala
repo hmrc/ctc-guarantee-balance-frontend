@@ -26,7 +26,6 @@ case class CheckYourAnswersViewModel(section: Section)
 object CheckYourAnswersViewModel {
 
   class CheckYourAnswersViewModelProvider {
-    val guaranteeReferenceNumber: CheckYourAnswersHelper => Option[SummaryListRow] = _.guaranteeReferenceNumber
 
     def apply(userAnswers: UserAnswers)(implicit messages: Messages): CheckYourAnswersViewModel = {
       val helper = new CheckYourAnswersHelper(userAnswers, CheckMode)
@@ -34,7 +33,7 @@ object CheckYourAnswersViewModel {
       CheckYourAnswersViewModel(
         Section(
           Seq(
-            guaranteeReferenceNumber(helper),
+            helper.guaranteeReferenceNumber,
             helper.accessCode
           ).flatten
         )

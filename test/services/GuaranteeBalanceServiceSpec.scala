@@ -16,7 +16,8 @@
 
 package services
 
-import base.{AppWithDefaultMockFixtures, SpecBase}
+import base.SpecBase
+import config.FrontendAppConfig
 import connectors.GuaranteeBalanceConnector
 import controllers.routes
 import models.UserAnswers
@@ -31,15 +32,19 @@ import pages.{AccessCodePage, GuaranteeReferenceNumberPage}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier}
-import uk.gov.hmrc.mongo.lock.Lock
+import uk.gov.hmrc.mongo.lock.{Lock, MongoLockRepository}
 
 import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.*
 import scala.concurrent.Future
 
-class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtures with BeforeAndAfterEach {
+class GuaranteeBalanceServiceSpec extends SpecBase with BeforeAndAfterEach {
 
   private val mockGuaranteeBalanceConnector = mock[GuaranteeBalanceConnector]
+
+  private val mockMongoLockRepository: MongoLockRepository = mock[MongoLockRepository]
+
+  private val mockFrontendAppConfig = mock[FrontendAppConfig]
 
   implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
 
@@ -54,8 +59,10 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
     .setValue(AccessCodePage, access)
 
   override def beforeEach(): Unit = {
-    reset(mockGuaranteeBalanceConnector)
     super.beforeEach()
+    reset(mockGuaranteeBalanceConnector)
+    reset(mockMongoLockRepository)
+    when(mockFrontendAppConfig.rateLimitDuration).thenReturn(60)
   }
 
   "retrieveBalanceResponse" - {
@@ -69,7 +76,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
         when(mockGuaranteeBalanceConnector.submitBalanceRequest(any(), any())(any()))
           .thenReturn(Future.successful(Right(balance)))
 
-        val service = new GuaranteeBalanceService(mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
+        val service = new GuaranteeBalanceService(mockGuaranteeBalanceConnector, mockMongoLockRepository, mockFrontendAppConfig)
         val result  = service.submitBalanceRequest().futureValue
         result.value mustEqual balance
 
@@ -87,7 +94,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
         val request                              = FakeRequest(POST, routes.CheckYourAnswersController.onSubmit().url)
         implicit val dataRequest: DataRequest[?] = DataRequest(request, userAnswers.id, userAnswers)
 
-        val service = new GuaranteeBalanceService(mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
+        val service = new GuaranteeBalanceService(mockGuaranteeBalanceConnector, mockMongoLockRepository, mockFrontendAppConfig)
         val result  = service.submitBalanceRequest().futureValue
         result.value mustEqual BalanceRequestSessionExpired
       }
@@ -100,7 +107,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
         val expectedLockId = (userAnswers.id + grn.trim.toLowerCase).hashCode.toString
 
         when(mockMongoLockRepository.takeLock(eqTo(expectedLockId), eqTo(userAnswers.id), any())).thenReturn(Future.successful(None))
-        val service = new GuaranteeBalanceService(mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
+        val service = new GuaranteeBalanceService(mockGuaranteeBalanceConnector, mockMongoLockRepository, mockFrontendAppConfig)
         val result  = service.submitBalanceRequest().futureValue
         result.value mustEqual BalanceRequestRateLimit
 
@@ -122,7 +129,7 @@ class GuaranteeBalanceServiceSpec extends SpecBase with AppWithDefaultMockFixtur
             when(mockGuaranteeBalanceConnector.submitBalanceRequest(any(), any())(any()))
               .thenReturn(Future.successful(Right(balance)))
 
-            val service = new GuaranteeBalanceService(mockGuaranteeBalanceConnector, mockMongoLockRepository, frontendAppConfig)
+            val service = new GuaranteeBalanceService(mockGuaranteeBalanceConnector, mockMongoLockRepository, mockFrontendAppConfig)
             val result  = service.submitBalanceRequest().futureValue
             result.value mustEqual BalanceRequestSessionExpired
         }

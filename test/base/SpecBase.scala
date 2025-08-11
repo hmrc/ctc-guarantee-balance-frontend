@@ -16,22 +16,21 @@
 
 package base
 
-import config.FrontendAppConfig
 import generators.Generators
 import models.UserAnswers
-import org.scalatest._
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.apache.pekko.stream.testkit.NoMaterializer
+import org.scalatest.*
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import pages.QuestionPage
-import play.api.i18n.{Messages, MessagesApi}
-import play.api.inject.Injector
 import play.api.libs.json.{Json, Reads, Writes}
-import play.api.mvc.AnyContentAsEmpty
+import play.api.mvc.{AnyContentAsEmpty, BodyParsers}
 import play.api.test.FakeRequest
+import play.api.test.Helpers.stubPlayBodyParsers
+import uk.gov.hmrc.crypto.{Decrypter, Encrypter, SymmetricCryptoFactory}
 
 import java.time.Instant
 
@@ -40,15 +39,14 @@ trait SpecBase
     with Matchers
     with ScalaCheckPropertyChecks
     with OptionValues
-    with GuiceOneAppPerSuite
     with TryValues
     with ScalaFutures
-    with IntegrationPatience
     with MockitoSugar
     with Generators
     with EitherValues {
 
-  val configKey = "config"
+  private val encryptionKey                  = "zjZ7y/v1QTNlBlZJQCOfPygL+6dvuHGiGDF/ePvsZS0="
+  implicit val crypto: Encrypter & Decrypter = SymmetricCryptoFactory.aesGcmCrypto(encryptionKey)
 
   val userAnswersId = "id"
 
@@ -56,13 +54,9 @@ trait SpecBase
 
   def emptyUserAnswers: UserAnswers = UserAnswers(userAnswersId, Json.obj(), Instant.now())
 
-  def injector: Injector                               = app.injector
   def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")
 
-  def messagesApi: MessagesApi    = injector.instanceOf[MessagesApi]
-  implicit def messages: Messages = messagesApi.preferred(fakeRequest)
-
-  def frontendAppConfig: FrontendAppConfig = injector.instanceOf[FrontendAppConfig]
+  implicit val bodyParser: BodyParsers.Default = new BodyParsers.Default(stubPlayBodyParsers(NoMaterializer))
 
   implicit class RichUserAnswers(userAnswers: UserAnswers) {
 

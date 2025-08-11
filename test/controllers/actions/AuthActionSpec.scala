@@ -16,28 +16,28 @@
 
 package controllers.actions
 
-import base.{AppWithDefaultMockFixtures, SpecBase}
+import base.SpecBase
 import com.google.inject.Inject
+import config.FrontendAppConfig
 import controllers.routes
 import models.Referral
+import org.apache.pekko.stream.testkit.NoMaterializer
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalacheck.Arbitrary.arbitrary
-import play.api.mvc._
-import play.api.test.Helpers._
+import org.scalatest.BeforeAndAfterEach
+import play.api.mvc.*
+import play.api.test.Helpers.*
 import services.ReferralService
-import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.http.{HeaderCarrier, UnauthorizedException}
 
-import java.net.URLEncoder
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
-
-  val mockAuthConnector: AuthConnector = mock[AuthConnector]
+class AuthActionSpec extends SpecBase with BeforeAndAfterEach {
 
   class Harness(authAction: IdentifierAction) {
 
@@ -46,8 +46,17 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
     }
   }
 
-  private val bodyParsers     = app.injector.instanceOf[BodyParsers.Default]
-  private val referralService = app.injector.instanceOf[ReferralService]
+  private val mockAuthConnector: AuthConnector = mock[AuthConnector]
+  private val mockReferralService              = mock[ReferralService]
+  private val mockFrontendAppConfig            = mock[FrontendAppConfig]
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+
+    when(mockFrontendAppConfig.loginUrl).thenReturn("http://localhost:9949/auth-login-stub/gg-sign-in")
+
+    when(mockFrontendAppConfig.loginContinueUrl).thenReturn("http://localhost:9462/check-transit-guarantee-balance")
+  }
 
   "Auth Action" - {
 
@@ -58,13 +67,11 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
         when(mockAuthConnector.authorise[Option[String]](any(), any())(any(), any()))
           .thenReturn(Future.successful(Some("internalId")))
 
-        val bodyParsers = app.injector.instanceOf[BodyParsers.Default]
-
         val authAction = new AuthenticatedIdentifierAction(
           mockAuthConnector,
-          frontendAppConfig,
-          bodyParsers,
-          referralService
+          mockFrontendAppConfig,
+          bodyParser,
+          mockReferralService
         )
 
         val harness = new Harness(authAction)
@@ -80,9 +87,9 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val authAction = new AuthenticatedIdentifierAction(
           mockAuthConnector,
-          frontendAppConfig,
-          bodyParsers,
-          referralService
+          mockFrontendAppConfig,
+          bodyParser,
+          mockReferralService
         )
 
         val harness = new Harness(authAction)
@@ -103,11 +110,14 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           forAll(arbitrary[Referral]) {
             referral =>
+              when(mockReferralService.getReferralFromSession(any()))
+                .thenReturn(Some(referral))
+
               val authAction = new AuthenticatedIdentifierAction(
                 new FakeFailingAuthConnector(new MissingBearerToken),
-                frontendAppConfig,
-                bodyParsers,
-                referralService
+                mockFrontendAppConfig,
+                bodyParser,
+                mockReferralService
               )
 
               val harness = new Harness(authAction)
@@ -116,17 +126,19 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
               status(result) mustEqual SEE_OTHER
 
               redirectLocation(result).get mustEqual
-                s"${frontendAppConfig.loginUrl}?continue=${URLEncoder.encode(s"${frontendAppConfig.loginContinueUrl}?referral=$referral", "utf-8")}"
+                s"http://localhost:9949/auth-login-stub/gg-sign-in?continue=http%3A%2F%2Flocalhost%3A9462%2Fcheck-transit-guarantee-balance%3Freferral%3D$referral"
           }
         }
 
         "when session does not have referral value" in {
+          when(mockReferralService.getReferralFromSession(any()))
+            .thenReturn(None)
 
           val authAction = new AuthenticatedIdentifierAction(
             new FakeFailingAuthConnector(new MissingBearerToken),
-            frontendAppConfig,
-            bodyParsers,
-            referralService
+            mockFrontendAppConfig,
+            bodyParser,
+            mockReferralService
           )
 
           val harness = new Harness(authAction)
@@ -135,7 +147,7 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
           status(result) mustEqual SEE_OTHER
 
           redirectLocation(result).get mustEqual
-            s"${frontendAppConfig.loginUrl}?continue=${URLEncoder.encode(frontendAppConfig.loginContinueUrl, "utf-8")}"
+            s"http://localhost:9949/auth-login-stub/gg-sign-in?continue=http%3A%2F%2Flocalhost%3A9462%2Fcheck-transit-guarantee-balance"
         }
       }
     }
@@ -146,9 +158,9 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val authAction = new AuthenticatedIdentifierAction(
           new FakeFailingAuthConnector(new BearerTokenExpired),
-          frontendAppConfig,
-          bodyParsers,
-          referralService
+          mockFrontendAppConfig,
+          bodyParser,
+          mockReferralService
         )
 
         val harness = new Harness(authAction)
@@ -156,7 +168,8 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         status(result) mustEqual SEE_OTHER
 
-        redirectLocation(result).get must startWith(frontendAppConfig.loginUrl)
+        redirectLocation(result).get mustEqual
+          s"http://localhost:9949/auth-login-stub/gg-sign-in?continue=http%3A%2F%2Flocalhost%3A9462%2Fcheck-transit-guarantee-balance"
       }
     }
 
@@ -166,9 +179,9 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val authAction = new AuthenticatedIdentifierAction(
           new FakeFailingAuthConnector(new InsufficientConfidenceLevel),
-          frontendAppConfig,
-          bodyParsers,
-          referralService
+          mockFrontendAppConfig,
+          bodyParser,
+          mockReferralService
         )
 
         val harness = new Harness(authAction)
@@ -186,9 +199,9 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val authAction = new AuthenticatedIdentifierAction(
           new FakeFailingAuthConnector(new UnsupportedAuthProvider),
-          frontendAppConfig,
-          bodyParsers,
-          referralService
+          mockFrontendAppConfig,
+          bodyParser,
+          mockReferralService
         )
 
         val harness = new Harness(authAction)
@@ -206,9 +219,9 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val authAction = new AuthenticatedIdentifierAction(
           new FakeFailingAuthConnector(new UnsupportedAffinityGroup),
-          frontendAppConfig,
-          bodyParsers,
-          referralService
+          mockFrontendAppConfig,
+          bodyParser,
+          mockReferralService
         )
 
         val harness = new Harness(authAction)
@@ -226,9 +239,9 @@ class AuthActionSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val authAction = new AuthenticatedIdentifierAction(
           new FakeFailingAuthConnector(new UnsupportedCredentialRole),
-          frontendAppConfig,
-          bodyParsers,
-          referralService
+          mockFrontendAppConfig,
+          bodyParser,
+          mockReferralService
         )
 
         val harness = new Harness(authAction)

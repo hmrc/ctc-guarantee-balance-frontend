@@ -16,18 +16,22 @@
 
 package viewModels
 
-import base.{AppWithDefaultMockFixtures, SpecBase}
+import base.SpecBase
 import pages.{AccessCodePage, GuaranteeReferenceNumberPage}
+import play.api.i18n.Messages
+import play.api.test.Helpers.stubMessagesApi
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import viewModels.CheckYourAnswersViewModel.CheckYourAnswersViewModelProvider
 
-class CheckYourAnswersViewModelSpec extends SpecBase with AppWithDefaultMockFixtures {
+class CheckYourAnswersViewModelSpec extends SpecBase {
 
-  val viewModelProvider: CheckYourAnswersViewModelProvider = injector.instanceOf[CheckYourAnswersViewModelProvider]
+  implicit private val messages: Messages = stubMessagesApi().preferred(fakeRequest)
+
+  val viewModelProvider: CheckYourAnswersViewModelProvider = new CheckYourAnswersViewModelProvider()
 
   "when user answers are empty" - {
 
-    val result = viewModelProvider(emptyUserAnswers)
+    val result = viewModelProvider.apply(emptyUserAnswers)
 
     "must have no section title" in {
       result.section.sectionTitle mustNot be(defined)

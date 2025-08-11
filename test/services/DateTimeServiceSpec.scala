@@ -16,11 +16,14 @@
 
 package services
 
-import base.{AppWithDefaultMockFixtures, SpecBase}
+import base.SpecBase
 
-class DateTimeServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
+import java.time.Clock
 
-  private val service = app.injector.instanceOf[DateTimeService]
+class DateTimeServiceSpec extends SpecBase {
+
+  private val fakeClock = Clock.systemUTC()
+  private val service   = new DateTimeService(fakeClock)
 
   "DateTimeService" - {
     "now" - {

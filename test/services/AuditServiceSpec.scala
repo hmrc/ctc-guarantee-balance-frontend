@@ -16,7 +16,7 @@
 
 package services
 
-import base.{AppWithDefaultMockFixtures, SpecBase}
+import base.SpecBase
 import config.FrontendAppConfig
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
@@ -31,7 +31,7 @@ import viewModels.audit.SuccessfulBalanceAuditModel
 import java.time.LocalDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuditServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
+class AuditServiceSpec extends SpecBase {
 
   "AuditService" - {
 

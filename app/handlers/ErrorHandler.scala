@@ -16,19 +16,18 @@
 
 package handlers
 
-import javax.inject.{Inject, Singleton}
 import play.api.http.HttpErrorHandler
-import play.api.http.Status._
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.Results._
+import play.api.http.Status.*
+import play.api.mvc.Results.*
 import play.api.mvc.{RequestHeader, Result}
 import play.api.{Logging, PlayException}
 import uk.gov.hmrc.play.bootstrap.frontend.http.ApplicationException
 
+import javax.inject.Singleton
 import scala.concurrent.Future
 
 @Singleton
-class ErrorHandler @Inject() (val messagesApi: MessagesApi) extends HttpErrorHandler with I18nSupport with Logging {
+class ErrorHandler extends HttpErrorHandler with Logging {
 
   override def onClientError(request: RequestHeader, statusCode: Int, message: String = ""): Future[Result] =
     statusCode match {
