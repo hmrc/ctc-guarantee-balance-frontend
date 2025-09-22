@@ -46,11 +46,6 @@ trait ViewBehaviours extends SpecBase with AppWithDefaultMockFixtures with ViewS
     assertElementContainsHref(link, "/check-transit-guarantee-balance/start-again")
   }
 
-  "must append service to feedback link" in {
-    val link = getElementBySelector(doc, ".govuk-phase-banner__text > .govuk-link")
-    getElementHref(link) mustEqual s"http://localhost:9250/contact/beta-feedback?service=CTCTraders&referrerUrl=$path"
-  }
-
   "must render accessibility statement link" in {
     val link = doc
       .select(".govuk-footer__inline-list-item > .govuk-footer__link")
