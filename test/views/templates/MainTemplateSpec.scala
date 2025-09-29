@@ -31,24 +31,6 @@ class MainTemplateSpec extends SpecBase with AppWithDefaultMockFixtures with Vie
 
   private val path = "foo"
 
-  "must point feedback at feedback form" in {
-    implicit lazy val request: FakeRequest[AnyContent] = FakeRequest("GET", path)
-
-    forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
-      (content, title) =>
-        val view = app.injector
-          .instanceOf[MainTemplate]
-          .apply(title, timeoutEnabled = true, showBackLink = true) {
-            Html.apply(content)
-          }
-
-        val doc = Jsoup.parse(view.toString())
-
-        val link = getElementBySelector(doc, ".govuk-phase-banner__text > .govuk-link")
-        getElementHref(link) mustEqual s"http://localhost:9250/contact/beta-feedback?service=CTCTraders&referrerUrl=$path"
-    }
-  }
-
   "must use HMRC 'report technical issue' helper" in {
     implicit lazy val request: FakeRequest[AnyContent] = FakeRequest("GET", path)
 

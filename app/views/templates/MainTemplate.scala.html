@@ -15,25 +15,22 @@
  *@
 
 @import config.FrontendAppConfig
-@import uk.gov.hmrc.hmrcfrontend.views.config.StandardBetaBanner
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.timeoutdialog.TimeoutDialog
 @import resources._
 @import views.html.components.UserResearchBanner
 @import views.utils.ViewUtils._
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcStandardPage
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage._
-@import uk.gov.hmrc.hmrcfrontend.config.ContactFrontendConfig
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.userresearchbanner.{UserResearchBanner => HUserResearchBanner}
 
 @this(
     appConfig: FrontendAppConfig,
     hmrcStandardPage: HmrcStandardPage,
     hmrcTimeoutDialog: HmrcTimeoutDialog,
-    standardBetaBanner: StandardBetaBanner,
     stylesheets: Stylesheets,
     javascripts: Javascripts,
     hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper
-)(implicit cfConfig: ContactFrontendConfig)
+)
 
 @(
     title: String,
@@ -68,7 +65,6 @@
             signOutUrl = Option.when(canSignOut)(appConfig.signOutUrl)
         ),
         banners = Banners(
-            phaseBanner = Some(standardBetaBanner()),
             userResearchBanner = if(appConfig.showUserResearchBanner) Some(HUserResearchBanner(url = appConfig.userResearchUrl)) else None
         ),
         templateOverrides = TemplateOverrides(
