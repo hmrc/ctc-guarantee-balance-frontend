@@ -2,16 +2,16 @@ import sbt.*
 
 object AppDependencies {
 
-  private val mongoVersion = "2.7.0"
+  private val mongoVersion = "2.12.0"
   private val bootstrapVersion = "9.19.0"
 
   val compile: Seq[ModuleID] = Seq(
     play.sbt.PlayImport.ws,
     "uk.gov.hmrc.mongo"          %% "hmrc-mongo-play-30"                      % mongoVersion,
     "uk.gov.hmrc"                %% "bootstrap-frontend-play-30"              % bootstrapVersion,
-    "uk.gov.hmrc"                %% "play-frontend-hmrc-play-30"              % "12.12.0",
+    "uk.gov.hmrc"                %% "play-frontend-hmrc-play-30"              % "12.31.0",
     "org.typelevel"              %% "cats-core"                               % "2.13.0",
-    "uk.gov.hmrc"                %% "crypto-json-play-30"                     % "8.3.0"
+    "uk.gov.hmrc"                %% "crypto-json-play-30"                     % "8.4.0"
   )
 
   val test: Seq[ModuleID] = Seq(
