@@ -17,8 +17,8 @@ Run accessibility tests:
 ### Running manually or for journey tests
 
 <pre>
-sm --start CTC_TRADERS_GUARANTEE_BALANCE_ACCEPTANCE_V2
-sm --stop CTC_GUARANTEE_BALANCE_FRONTEND
+sm2 --start CTC_TRADERS_GUARANTEE_BALANCE_ACCEPTANCE_V2
+sm2 --stop CTC_GUARANTEE_BALANCE_FRONTEND
 sbt run
 </pre>
 
