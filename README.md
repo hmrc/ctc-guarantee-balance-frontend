@@ -11,8 +11,6 @@ Run unit tests:
 <pre>sbt test</pre>  
 Run integration tests:
 <pre>sbt IntegrationTest/test</pre>
-Run accessibility tests:
-<pre>sbt A11y/test</pre>
 
 ### Running manually or for journey tests
 
@@ -26,6 +24,6 @@ In localhost and Staging the following values can be used to trigger a successfu
 * GRN: `22GB1111111111112`
 * Access code: `AB12`
 
-### License
+### License 
 
 This code is open source software licensed under the [Apache 2.0 License]("http://www.apache.org/licenses/LICENSE-2.0.html").
